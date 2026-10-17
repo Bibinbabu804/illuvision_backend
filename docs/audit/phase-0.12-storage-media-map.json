@@ -1,0 +1,235 @@
+{
+  "phase": "0.12",
+  "name": "Storage/Media Map",
+  "generated_at": "2026-09-26T06:45:00+05:30",
+  "purpose": "Map storage and media infrastructure to ensure proper boundary enforcement",
+  "storage_integrations": [
+    {
+      "provider": "Local Filesystem",
+      "purpose": "Storing files in local development/testing environments",
+      "current_caller": [
+        "App\\Services\\MediaHelper",
+        "App\\Services\\UploadService",
+        "App\\Helpers\\StorageHelper"
+      ],
+      "domain_application_caller": "App\\Application\\Media\\UseCases\\*UseCase",
+      "authentication": "None - local file access",
+      "request_format": "PHP filesystem functions (fopen, file_get_contents, etc.)",
+      "response_format": "File paths or URLs",
+      "failure_behavior": [
+        "Throws exceptions for permission denied",
+        "Returns false for failed operations",
+        "May throw IOException subclasses"
+      ],
+      "timeout": "Not applicable - local operation",
+      "retry_behavior": "Configurable at application level",
+      "logging": "Logs file operations via Laravel logger",
+      "queue_behavior": "Can be queued for large file operations",
+      "webhook": "No",
+      "credentials": [],
+      "environment_variables": [
+        "filesystem.default=local",
+        "filesystems.disks.local.root=/path/to/storage"
+      ],
+      "target_adapter": "App\\Infrastructure\\Storage\\LocalAdapter",
+      "adapter_interface": "App\\Domain\\Media\\Contracts\\StorageContractInterface",
+      "operations_supported": [
+        "read($path)",
+        "write($path, $contents)",
+        "update($path, $contents)",
+        "delete($path)",
+        "exists($path)",
+        "lastModified($path)",
+        "size($path)",
+        "mimeType($path)",
+        "url($path)",
+        "temporaryUrl($path, $expiration)",
+        "copy($path, $newPath)",
+        "move($path, $newPath)"
+      ]
+    },
+    {
+      "provider": "Amazon S3",
+      "purpose": "Storing files in scalable cloud storage for production",
+      "current_caller": [
+        "App\\Services\\MediaHelper",
+        "App\\Services\\UploadService"
+      ],
+      "domain_application_caller": "App\\Application\\Media\\UseCases\\*UseCase",
+      "authentication": "AWS access key ID and secret access key",
+      "request_format": "AWS SDK REST API calls",
+      "response_format": "AWS SDK response objects",
+      "failure_behavior": [
+        "Throws Aws\\Exception\\AwsException subclasses",
+        "Network errors, timeout errors, service errors"
+      ],
+      "timeout": "Configurable (default 30 seconds)",
+      "retry_behavior": [
+        "AWS SDK built-in retry mechanism",
+        "Configurable retry modes: standard, adaptive, none",
+        "Maximum attempts and delay parameters"
+      ],
+      "logging": "Logs AWS API calls via Laravel logger and AWS SDK logging",
+      "queue_behavior": "Can be queued for large file operations",
+      "webhook": "No (S3 notifications possible but not used)",
+      "credentials": [
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_DEFAULT_REGION"
+      ],
+      "environment_variables": [
+        "filesystem.default=s3",
+        "filesystems.disks.s3.driver=s3",
+        "filesystems.disks.s3.key=AWS_ACCESS_KEY_ID",
+        "filesystems.disks.s3.secret=AWS_SECRET_ACCESS_KEY",
+        "filesystems.disks.s3.region=AWS_DEFAULT_REGION",
+        "filesystems.disks.s3.bucket=your-bucket-name",
+        "filesystems.disks.s3.endpoint=optional custom endpoint"
+      ],
+      "target_adapter": "App\\Infrastructure\\Storage\\S3Adapter",
+      "adapter_interface": "App\\Domain\\Media\\Contracts\\StorageContractInterface",
+      "operations_supported": [
+        "read($path)",
+        "write($path, $contents)",
+        "update($path, $contents)",
+        "delete($path)",
+        "exists($path)",
+        "lastModified($path)",
+        "size($path)",
+        "mimeType($path)",
+        "url($path)",
+        "temporaryUrl($path, $expiration)",
+        "copy($path, $newPath)",
+        "move($path, $newPath)"
+      ]
+    }
+  ],
+  "media_processing_integrations": [
+    {
+      "provider": "GD (Graphics Draw)",
+      "purpose": "Basic image processing using PHP's built-in GD extension",
+      "current_caller": [
+        "App\\Services\\MediaHelper"
+      ],
+      "domain_application_caller": "App\\Application\\Media\\UseCases\\*UseCase",
+      "authentication": "None - local library usage",
+      "request_format": "GD function calls (imagecreatefromjpeg, imagejpeg, etc.)",
+      "response_format": "Image resource or processed image data",
+      "failure_behavior": [
+        "Returns false on failure",
+        "May throw exceptions for invalid parameters",
+        "gd_info() shows support status"
+      ],
+      "timeout": "Not applicable - local operation",
+      "retry_behavior": "Not applicable - instant operation",
+      "logging": "Logs processing attempts and failures",
+      "queue_behavior": "Can be queued for large images",
+      "webhook": "No",
+      "credentials": [],
+      "environment_variables": [],
+      "target_adapter": "App\\Infrastructure\\ImageProcessing\\GDAdapter",
+      "adapter_interface": "App\\Domain\\Media\\Contracts\\ImageProcessingContractInterface",
+      "operations_supported": [
+        "resize($image, $width, $height)",
+        "crop($image, $x, $y, $width, $height)",
+        "rotate($image, $angle)",
+        "filter($image, $filtertype)",
+        "watermark($image, $watermark_image, $position, $opacity)",
+        "convert($image, $format)",
+        "getDimensions($image)",
+        "exifData($image)"
+      ]
+    },
+    {
+      "provider": "Intervention Image",
+      "purpose": "Advanced image processing using Intervention Image library",
+      "current_caller": [
+        "App\\Services\\MediaHelper"
+      ],
+      "domain_application_caller": "App\\Application\\Media\\UseCases\\*UseCase",
+      "authentication": "None - local library usage",
+      "request_format": "Intervention Image method calls",
+      "response_format": "Image object or processed image data",
+      "failure_behavior": [
+        "Throws Intervention\\Image\\Exception\\NotFoundException",
+        "Throws Intervention\\Image\\Exception\\NotReadableException",
+        "Throws Intervention\\Image\\Exception\\NotWritableException"
+      ],
+      "timeout": "Not applicable - local operation",
+      "retry_behavior": "Not applicable - instant operation",
+      "logging": "Logs processing attempts and failures",
+      "queue_behavior": "Can be queued for large images",
+      "webhook": "No",
+      "credentials": [],
+      "environment_variables": [],
+      "target_adapter": [
+        "App\\Infrastructure\\ImageProcessing\\InterventionAdapter"
+      ],
+      "adapter_interface": "App\\Domain\\Media\\Contracts\\ImageProcessingContractInterface",
+      "operations_supported": [
+        "resize($image, $width, $height, $constraint)",
+        "crop($image, $width, $height, $x, $y)",
+        "rotate($image, $angle)",
+        "flip($image, $direction)",
+        "mask($image, $mask)",
+        "watermark($image, $watermark, $position, $opacity)",
+        "encode($image, $format, $quality)",
+        "encode($image, $string)",
+        "encode($image, $callback)",
+        "encode($image, $closure)",
+        "encode($image, $basename, $path, $prefix)",
+        "encode($image, $basename, $path)",
+        "encode($image, $basename)",
+        "insert($image, $value, $position, $offset)",
+        "insert($image, $value, $position, $offset, $align)",
+        "insert($image, $value, $position, $offset, $align, $offset)",
+        "pixel($image, $x, $y)",
+        "pixelate($image, $size)",
+        "filter($image, $filter)",
+        "blur($image, $amount)",
+        "brightness($image, $level)",
+        "contrast($image, $level)",
+        "colorize($image, $red, $green, $blue, $alpha)",
+        "greyscale($image)",
+        "invert($image)",
+        "merge($image, $image, $percentage)",
+        "hline($image, $x1, $x2, $y, $color, $thickness)",
+        "vline($image, $x, $y1, $y2, $color, $thickness)",
+        "ellipse($image, $cx, $cy, $width, $height, $color)",
+        "rectangle($image, $x1, $y1, $x2, $y2, $color)",
+        "line($image, $x1, $y1, $x2, $y2, $color, $thickness)",
+        "triangle($image, $x1, $y1, $x2, $y2, $x3, $y3, $color)",
+        "polygon($image, $points, $color)",
+        "text($image, $text, $x, $y, $font, $color, $size, $angle)",
+        "text($image, $text, $x, $y, $font, $color, $size)",
+        "text($image, $text, $x, $y, $font, $size)",
+        "text($image, $text, $font, $size)",
+        "text($image, $height, $font, $size)",
+        "text($image, $font, $size)",
+        "text($image, $text)",
+        "circle($image, $cx, $cy, $radius, $color)",
+        "arc($image, $cx, $cy, $radius, $start, $end, $color)",
+        "chord($image, $cx, $cy, $radius, $start, $end, $color)",
+        "textLimit($image, $text, $x, $y, $font, $size, $limit)",
+        "textLimit($image, $text, $x, $y, $font, $size, $limit, $align)",
+        "textLimit($image, $text, $x, $y, $font, $size, $limit, $align, $valign)",
+        "textHeight($image, $font, $size)",
+        "textWidth($image, $font, $size)"
+      ]
+    }
+  ],
+  "summary": {
+    "total_storage_adapters": 2,
+    "total_media_processing_adapters": 2,
+    "adheres_to_boundary": "To be verified - need to check for direct Storage::, Filesystem::, GD::, Image:: calls in domain/application layers",
+    "existing_adapters_reused": true,
+    "recommendations": [
+      "Verify no direct filesystem or media processing calls exist in app/Domain or app/Application",
+      "Ensure all storage operations go through the StorageContractInterface",
+      "Ensure all media processing operations go through the ImageProcessingContractInterface",
+      "Check that adapter implementations correctly handle errors and edge cases",
+      "Verify that configuration properly selects between local and S3 adapters based on environment",
+      "Consider implementing a fallback mechanism (e.g., try S3, fall back to local)"
+    ]
+  }
+}

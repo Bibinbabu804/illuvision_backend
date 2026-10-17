@@ -1,0 +1,35 @@
+{
+  "phase": "0.17",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy code and controller retirement",
+  "artifact": "controller-classification",
+  "summary": "No controller was deleted in Phase 0.17. Every one of the 81 controllers resolves to at least one of the 442 route actions, so there were no dead or duplicate controllers to remove.",
+  "controllers_total": 81,
+  "route_actions": 442,
+  "classification_totals": {
+    "ACTIVE": 81,
+    "ACTIVE_NEEDS_EXTRACTION": 1,
+    "ACTIVE_WRONG_LOCATION": 0,
+    "COMPATIBILITY": 0,
+    "DUPLICATE": 0,
+    "DEAD_VERIFIED": 0,
+    "DEFERRED": 0
+  },
+  "notable": [
+    {
+      "controller": "App\\Http\\Controllers\\BookingController",
+      "classification": "ACTIVE - NEEDS EXTRACTION",
+      "lines": 1414,
+      "reason": "Largest surface in the application; mixes booking creation, reschedule, KPI, conflict detection and media concerns. Splitting changes response envelopes, so it is deferred."
+    },
+    {
+      "controller": "App\\Http\\Controllers\\Api\\* (v2 namespace)",
+      "classification": "ACTIVE",
+      "reason": "19 live routes. Note these are the endpoints that Phase 0.16 recorded as SEC-02 (fully anonymous). They are ACTIVE, therefore out of scope for deletion, and their missing authorization is a P0 debt item, not a retirement candidate."
+    }
+  ],
+  "dead_controller_candidates_found": 0,
+  "duplicate_controllers_found": 0,
+  "note": "Phase 0.13 had already removed the one confirmed-dead controller (Api\\CampaignPricingController). No further controller retirement was available in Phase 0.17."
+}

@@ -1,0 +1,174 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "policy": "Service locators are PROHIBITED in Domain and Http. They remain permitted only in the 5 bootstrapped model-event edges in app/Models/Booking.php, where Laravel resolves observers/listeners after the container is fully built and constructor injection is impossible.",
+ "total_call_sites": 11,
+ "in_Domain": [],
+ "in_Domain_count": 0,
+ "in_Services": [
+  {
+   "file": "app/Services/ManualBookingService.php",
+   "line": 325,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "app(\\App\\Services\\Campaign\\LoyaltyService::class)->debitRedeemedPoints($booking, $rewardPointsRedeemed);"
+  },
+  {
+   "file": "app/Services/ManualBookingService.php",
+   "line": 504,
+   "locator": "app",
+   "target": "App\\Services\\SettingsService",
+   "raw": "$settings = app(\\App\\Services\\SettingsService::class);"
+  },
+  {
+   "file": "app/Services/ManualBookingService.php",
+   "line": 509,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "app(\\App\\Services\\Campaign\\LoyaltyService::class)->creditEarnedPoints($booking);"
+  }
+ ],
+ "in_Services_count": 3,
+ "in_Http": [
+  {
+   "file": "app/Http/Controllers/BookingController.php",
+   "line": 180,
+   "locator": "app",
+   "target": "App\\Services\\BookingPriceCalculator",
+   "raw": "$calculator = app(\\App\\Services\\BookingPriceCalculator::class);"
+  }
+ ],
+ "in_Http_count": 1,
+ "in_Models": [
+  {
+   "file": "app/Models/Booking.php",
+   "line": 46,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "$loyaltyService = app(\\App\\Services\\Campaign\\LoyaltyService::class);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 47,
+   "locator": "app",
+   "target": "App\\Services\\SettingsService",
+   "raw": "$settings = app(\\App\\Services\\SettingsService::class);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 73,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\ReferralTrackingService",
+   "raw": "app(\\App\\Services\\Campaign\\ReferralTrackingService::class)->cancelReferralTracking($booking);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 79,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\ReferralTrackingService",
+   "raw": "app(\\App\\Services\\Campaign\\ReferralTrackingService::class)->refundReferralTracking($booking);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 85,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "$loyaltyService = app(\\App\\Services\\Campaign\\LoyaltyService::class);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 376,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "$loyaltyService = app(\\App\\Services\\Campaign\\LoyaltyService::class);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 377,
+   "locator": "app",
+   "target": "App\\Services\\SettingsService",
+   "raw": "$settingsService = app(\\App\\Services\\SettingsService::class);"
+  }
+ ],
+ "in_Models_count": 7,
+ "all_sites": [
+  {
+   "file": "app/Models/Booking.php",
+   "line": 46,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "$loyaltyService = app(\\App\\Services\\Campaign\\LoyaltyService::class);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 47,
+   "locator": "app",
+   "target": "App\\Services\\SettingsService",
+   "raw": "$settings = app(\\App\\Services\\SettingsService::class);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 73,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\ReferralTrackingService",
+   "raw": "app(\\App\\Services\\Campaign\\ReferralTrackingService::class)->cancelReferralTracking($booking);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 79,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\ReferralTrackingService",
+   "raw": "app(\\App\\Services\\Campaign\\ReferralTrackingService::class)->refundReferralTracking($booking);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 85,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "$loyaltyService = app(\\App\\Services\\Campaign\\LoyaltyService::class);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 376,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "$loyaltyService = app(\\App\\Services\\Campaign\\LoyaltyService::class);"
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "line": 377,
+   "locator": "app",
+   "target": "App\\Services\\SettingsService",
+   "raw": "$settingsService = app(\\App\\Services\\SettingsService::class);"
+  },
+  {
+   "file": "app/Http/Controllers/BookingController.php",
+   "line": 180,
+   "locator": "app",
+   "target": "App\\Services\\BookingPriceCalculator",
+   "raw": "$calculator = app(\\App\\Services\\BookingPriceCalculator::class);"
+  },
+  {
+   "file": "app/Services/ManualBookingService.php",
+   "line": 325,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "app(\\App\\Services\\Campaign\\LoyaltyService::class)->debitRedeemedPoints($booking, $rewardPointsRedeemed);"
+  },
+  {
+   "file": "app/Services/ManualBookingService.php",
+   "line": 504,
+   "locator": "app",
+   "target": "App\\Services\\SettingsService",
+   "raw": "$settings = app(\\App\\Services\\SettingsService::class);"
+  },
+  {
+   "file": "app/Services/ManualBookingService.php",
+   "line": 509,
+   "locator": "app",
+   "target": "App\\Services\\Campaign\\LoyaltyService",
+   "raw": "app(\\App\\Services\\Campaign\\LoyaltyService::class)->creditEarnedPoints($booking);"
+  }
+ ],
+ "enforcement_gap": "app/Services/ManualBookingService.php and app/Http/Controllers/BookingController.php contain 4 locator call sites. These are NOT covered by ArchitectureRuleTest. Tracked as P2 debt."
+}

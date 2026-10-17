@@ -1,0 +1,728 @@
+{
+  "artifact": "18-event-notification-analysis",
+  "generated": "2026-09-26",
+  "classification": "CURRENT_FACT for the entire inventory section (every line re-verified from source on the measurement date). RECOMMENDATION for every proposed Creative event, recipient rule and queue decision. OPEN_DECISION wherever the required semantics are not determinable from evidence.",
+  "status": "READ-ONLY AUDIT. No code, migration, route, test, config, mail template or view was created, modified or deleted. The subject — the Creative Marketplace bounded context — does not exist: 0 classes, 0 routes, 0 tables, 0 migrations, 0 tests. Every event, notification and queue design below is a proposal for a later, separately authorised task.",
+  "method": "Directory listing of app/Support/Events/Notifications, app/Mail and app/Support/Events; full read of NotificationEventSubscriber.php and NotificationService.php; read of NotificationConfig.php; grep for dispatch sites, ShouldQueue, afterCommit, ShouldBeUnique, listener classes and notificationKey() call sites; read of the notification_logs migration and the mail contract/adapter.",
+  "scope": "How this application dispatches notifications today, what the Creative domain would need, and which parts of the existing machinery are reusable.",
+
+  "classification_legend": {
+    "CURRENT_FACT": "Verified from source code on the measurement date, with file:line.",
+    "ARCHITECTURE_DOCUMENT": "Stated in AGENTS.md or docs/architecture/ARCHITECTURE_RULES.md.",
+    "INFERENCE": "Reasonably inferred from the implementation or from relationships between facts.",
+    "RECOMMENDATION": "Proposed target design. Not implemented.",
+    "OPEN_DECISION": "Cannot be determined from available evidence. What is missing is stated explicitly."
+  },
+
+  "current_event_infrastructure": {
+    "classification": "CURRENT_FACT",
+    "counts": {
+      "event_classes": 33,
+      "event_classes_location": "app/Support/Events/Notifications/",
+      "event_subscriber_classes": 1,
+      "event_subscriber_location": "app/Support/Events/NotificationEventSubscriber.php",
+      "listener_classes": 0,
+      "listener_note": "There is no app/Listeners directory and no class anywhere in app/ implementing Illuminate\\Contracts\\Events\\Listener. NotificationEventSubscriber is the ONLY consumer of all 33 events, registered in app/Providers/EventServiceProvider.php:25 and wired with 33 $events->listen() calls (app/Support/Events/NotificationEventSubscriber.php:90-122).",
+      "mailable_classes": 28,
+      "mailables_implementing_shouldqueue": 28,
+      "mailables_not_implementing_shouldqueue": 0,
+      "notification_service_loc": 243,
+      "notification_keys_defined": 35,
+      "notification_key_class_mappings": 33,
+      "pseudo_keys_without_an_event_class": ["contact_enquiry_auto_reply", "screen_provider_enquiry_auto_reply"],
+      "notification_log_table": "notification_logs",
+      "queue_connection_default": "database (.env.example:54 QUEUE_CONNECTION=database); phpunit.xml:29 overrides to sync",
+      "mail_driver_default": "log (.env.example:66 MAIL_MAILER=log); phpunit.xml:27 overrides to array"
+    },
+
+    "event_classes": [
+      "BookingApproved", "BookingCancelled", "BookingCreated", "BookingRejected",
+      "CommissionGenerated",
+      "ContactEnquiryAssigned", "ContactEnquiryClosed", "ContactEnquirySubmitted",
+      "MediaApproved", "MediaRejected", "MediaUploaded",
+      "PartnerApproved", "PartnerCreated", "PartnerRejected",
+      "PaymentFailed", "PaymentReceived", "PaymentRefunded",
+      "ProductEnquirySubmitted", "ProfileUpdated",
+      "ReferralUsed",
+      "RewardsBonusAwarded", "RewardsEarned", "RewardsExpiringSoon", "RewardsRedeemed",
+      "ScreenProviderApproved", "ScreenProviderCreated", "ScreenProviderEnquirySubmitted", "ScreenProviderLeadAssigned", "ScreenProviderLeadClosed", "ScreenProviderLeadConverted", "ScreenProviderPortalInvitation", "ScreenProviderRejected",
+      "UserRegistered"
+    ],
+    "event_class_conventions": {
+      "classification": "CURRENT_FACT",
+      "traits": "Every one of the 33 uses exactly: Illuminate\\Foundation\\Events\\Dispatchable, Illuminate\\Broadcasting\\InteractsWithSockets, Illuminate\\Foundation\\Queue\\SerializesModels.",
+      "traits_absent": "NONE uses ShouldHandleEventsAfterCommit, ShouldQueue, ShouldBeUnique or ShouldBeUniqueUntilProcessing. Verified: grep -rn 'afterCommit|ShouldHandleEventsAfterCommit|ShouldBeUnique|ShouldBeQueued|WithoutOverlapping' over app/ returns 0 matches.",
+      "payload_shape": "Public typed constructor properties holding Eloquent models (e.g. BookingCreated::$booking, PaymentReceived::$payment + $payment::$booking, MediaUploaded::$booking + $booking::$mediaItems, ScreenProviderApproved::$screenProvider + $setupToken). No value objects, no scalars-as-identity, no immutable DTOs, no event id, no occurred-at timestamp, no actor, no correlation id.",
+      "notificationKey": "Every one of the 33 declares public function notificationKey(): string. **It is never called.** The only occurrences of the identifier in app/ are the 33 definitions themselves — the subscriber hardcodes the key string as a literal at every call site (e.g. NotificationEventSubscriber.php:130 passes the literal 'booking_created'). Dead API surface, recorded, not fixed.",
+      "creative_consequence": "A Creative event cannot rely on any of the existing events' infrastructure. There is no event envelope, no idempotency token, no causation chain, and no after-commit behaviour to inherit. SerializesModels means an event CAN be queued, but nothing queues one."
+    },
+
+    "the_33_mailables": {
+      "classification": "CURRENT_FACT",
+      "classes": [
+        "BookingApprovedMail", "BookingCancelledMail", "BookingCreatedMail", "BookingRejectedMail",
+        "CommissionGeneratedMail",
+        "ContactEnquiryAutoReplyMail", "ContactEnquirySubmittedMail",
+        "MediaApprovedMail", "MediaRejectedMail",
+        "PartnerApprovedMail", "PartnerCreatedMail", "PartnerRejectedMail",
+        "PasswordResetMail",
+        "PaymentFailedMail", "PaymentReceivedMail", "PaymentRefundedMail",
+        "ProductEnquirySubmittedMail",
+        "ReferralUsedMail",
+        "RewardsBonusAwardedMail", "RewardsEarnedMail", "RewardsExpiringSoonMail", "RewardsRedeemedMail",
+        "ScreenProviderApprovedMail", "ScreenProviderEnquiryAutoReplyMail", "ScreenProviderEnquirySubmittedMail", "ScreenProviderPortalInvitationMail", "ScreenProviderRejectedMail",
+        "UserRegisteredMail"
+      ],
+      "reuse_observation": "Several keys deliberately reuse another key's Mailable: handleMediaUploaded sends BookingCreatedMail (NotificationEventSubscriber.php:162), handleProfileUpdated sends UserRegisteredMail (:260), handleContactEnquiryAssigned/Closed send ContactEnquirySubmittedMail (:283, :290), handleScreenProviderLeadAssigned/Converted/Closed send ScreenProviderEnquirySubmittedMail (:306, :313, :320), handleScreenProviderCreated sends ScreenProviderApprovedMail (:327). The marketing content is generic by design; only the notification_key differs. This is a legitimate, low-cost pattern Creative can follow for low-stakes informational mail.",
+      "counter_observation": "It is NOT a pattern for money or for contractual state. A reused Mailable means a single template serves two different business facts, and the recipient set is chosen in the subscriber rather than in the template. For a payment-received, earning-accrued or payout-processed notification — where the message IS the record a party relies on — the recommendation is a dedicated Mailable per fact."
+    },
+
+    "notification_service": {
+      "classification": "CURRENT_FACT",
+      "location": "app/Services/NotificationService.php",
+      "signature": "send(string $eventKey, array $recipients, string $mailableClass, array $data = []): void",
+      "recipients_shape": "['admin' => bool, 'user' => User|null, 'partner' => Partner|array|null]. There is NO 'creator' branch.",
+      "step_by_step_mechanics": [
+        "1. $config = NotificationConfig::forEvent($eventKey) (:68). Reads the settings table (group 'notifications', key '{eventKey}_config') with a 12h-cached SettingsService. If !enabled, return immediately (:70-74).",
+        "2. Read the global email toggle, isEmailEnabled() (:77).",
+        "3. Resolve admin recipients from the configured admin_emails list ONLY — the users table is deliberately NOT queried (:83-104, and the docblock at :37-40 says 'operations teams have full control'). Falls back to the support email.",
+        "4. Resolve the user recipient from $recipients['user']->email / ->name / ->id, gated on $config['send_to_user'] (:107-115).",
+        "5. Resolve the partner recipient from $recipients['partner'], accepting either a Partner model or a plain ['email','name'] array, gated on $config['send_to_partner'] (:118-130). user_id is recorded as NULL for partners and admins.",
+        "6. If no recipients resolved, return (:132-136).",
+        "7. Deduplicate RECIPIENTS by lowercased email address using a local array (:143-152). This is per-send address dedup, NOT event dedup.",
+        "8. If the email channel is on AND isMailConfigured(), loop the recipients and for each: sendEmail(), then logNotification(...'sent'...) (:155-179).",
+        "9. The in-app channel is a stub: a @todo comment and a debug log. It NEVER writes a row (:182-186). The notification_logs channel column documents 'in_app' as a value, but nothing produces it."
+      ],
+      "how_delivery_actually_happens": {
+        "classification": "CURRENT_FACT",
+        "mechanism": "NotificationService::sendEmail() (:192-205) instantiates the Mailable class, then branches: if ($mailable instanceof ShouldQueue) it calls MailContractInterface::queue(); otherwise send().",
+        "in_practice": "Because all 28 Mailables implement ShouldQueue, **queue() is always taken**. LaravelMailAdapter::queue() (app/Infrastructure/Notifications/LaravelMailAdapter.php) calls Mail::to($email, $name)->queue($mailable). So the transport is QUEUED, never synchronous Mail::to()->send().",
+        "what_is_still_synchronous": "The settings read, the recipient resolution, the address dedup, the Mailable construction, and the notification_logs INSERT all run on the REQUEST THREAD, inside the try/catch at :157-177. Only the SMTP hand-off is deferred. With QUEUE_CONNECTION=database this is one INSERT into jobs per recipient per event, on the request.",
+        "is_mail_configured_gate": "isMailConfigured() (:236-242) returns false when config('mail.default') is 'log' or 'array'. In that case the entire send block is skipped — so no email AND **no notification_logs row at all**. In the test environment (phpunit.xml:27 MAIL_MAILER=array) Creative notification tests must account for the fact that the current machinery records nothing and sends nothing."
+      },
+      "failure_handling": {
+        "classification": "CURRENT_FACT",
+        "behaviour": "try/catch (\\Throwable) around each recipient's send at :167-177. On failure it writes Log::error() and a notification_logs row with status='failed' and failed_reason set, then CONTINUES to the next recipient.",
+        "consequence": "INFERENCE: a Creative notification failure is invisible to the caller. A client whose 'your proposal was accepted' email bounced receives HTTP 201 and no signal. Worse, logNotification() is itself wrapped in try/catch (:217-230) so a logging failure is also swallowed. There is no queue retry for the send itself (the Mailable is queued, so a delivery failure surfaces in failed_jobs, not in the request) and there is no alerting path.",
+        "creative_consequence": "RECOMMENDATION: Creative must not treat a successful dispatch as evidence of delivery, and must not treat notification failure as a business failure. A creator who never learns their payout was sent is a support incident, not an exception."
+      },
+      "notification_logs_table": {
+        "classification": "CURRENT_FACT",
+        "migration": "database/migrations/2026_06_22_000001_create_notification_logs_table.php",
+        "columns": {
+          "event": "string — the notification key, e.g. 'booking_created'",
+          "recipient_type": "string — the migration comment says \"'admin', 'user', 'partner'\"",
+          "recipient_email": "string nullable",
+          "recipient_id": "unsignedBigInteger nullable — populated ONLY for the 'user' branch (NotificationService.php:113); null for admin and partner",
+          "channel": "string — comment says 'email', 'in_app', 'sms'",
+          "status": "string — comment says 'sent', 'failed', 'queued', 'skipped'",
+          "failed_reason": "text nullable",
+          "sent_at": "timestamp nullable — set to now() only when status === 'sent'"
+        },
+        "indexes": ["event", "status", "recipient_type", "sent_at"],
+        "observed_vocabulary_gap": "The migration comment lists four status values but ONLY 'sent' and 'failed' are ever written (NotificationService.php:164, :173). 'queued' and 'skipped' are documented and unreachable.",
+        "recipient_type_gap": "The migration comment lists admin/user/partner. There is no 'creator'. Since recipient_type is a plain varchar with no constraint, adding 'creator' requires no migration — but it does require a code change in NotificationService, which is shared code."
+      }
+    },
+
+    "deduplication": {
+      "classification": "CURRENT_FACT",
+      "where": "NotificationEventSubscriber::$processed — a protected static array (line 71), written by deduplicate(string $eventClass, int|string $entityId) at :78-86.",
+      "mechanism": "Key = eventClass . ':' . entityId. If the key is present, the handler returns early and NOTHING is sent — the event is swallowed silently, with no log row and no metric.",
+      "durability": "PROCESS-LOCAL AND NON-DURABLE. It is a static property on a class instance resolved from the container for the lifetime of one PHP process. It is not shared between requests, not shared between queue workers, not persisted, and lost on every process end. Under QUEUE_CONNECTION=database each worker is a fresh process, so the array starts empty every time.",
+      "key_quality_problem": "The key is the EVENT CLASS plus the ENTITY ID only. It carries no event-instance discriminator, so a legitimate second occurrence of the same event type on the same entity is suppressed for the rest of the process. Worked example: handleRewardsExpiringSoon keys on '{userId}:{expiryDate}' (:382) — correct. But handlePaymentReceived keys on the BOOKING id (:185) even though the event carries a PAYMENT — so a second, genuinely distinct payment attempt on the same booking is silently dropped. handleMediaUploaded keys on the booking id (:160) for a whole ARRAY of media items, so a second upload batch in one request is dropped.",
+      "creative_consequence": "RECOMMENDATION: a Creative build must not rely on this mechanism. It is not a correctness control. A Creative dedup must be a database-backed claim (a unique constraint on a natural key, or a dedicated dedup/claim row written inside the dispatching transaction) so it survives a retry, a worker restart and a concurrent request."
+    },
+
+    "dispatch_timing": {
+      "classification": "CURRENT_FACT",
+      "question": "Are events dispatched inside or after the transaction?",
+      "answer": "BOTH. The codebase is internally inconsistent, and this is the single most important finding in this section.",
+      "inside_the_transaction": [
+        { "site": "app/Services/ManualBookingService.php:642", "event": "PaymentReceived", "evidence": "The DB::transaction closure opens at :579 and the event dispatch is its second-to-last statement before `return $payment->fresh(['booking']);` at :645. It is unambiguously INSIDE." },
+        { "site": "app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php:327", "event": "BookingCreated", "evidence": "Inside the closure opened at :71. The class docblock at :48-50 states this explicitly: 'BookingCreated is still dispatched at the end of the transaction, not after commit. That is pre-existing behaviour and is intentionally not \"fixed\" here.'"}
+      ],
+      "after_the_transaction": [
+        { "site": "app/Http/Controllers/PaymentController.php:95", "event": "PaymentReceived", "evidence": "The use case returns from PaymentService::verifyAndConfirmPayment() (its DB::transaction at :103 has committed and released), and only then is the event dispatched." },
+        { "site": "app/Http/Controllers/PaymentController.php:105, :147", "events": ["PaymentFailed", "PaymentRefunded"] },
+        { "site": "app/Http/Controllers/BookingController.php:144", "event": "MediaUploaded", "note": "uploadMedia has no transaction at all" },
+        { "site": "app/Http/Controllers/BookingController.php:350, :385", "events": "BookingApproved, BookingRejected" },
+        { "site": "app/Http/Controllers/BookingController.php:1066, :1086, :1164", "events": "PaymentReceived, BookingCreated" },
+        { "site": "app/Http/Controllers/BookingController.php:1239, :1279", "events": "MediaApproved, MediaRejected" },
+        { "site": "app/Services/Campaign/ReferralTrackingService.php:150", "event": "ReferralUsed", "note": "createReferralTracking manages no transaction of its own; the caller wraps it" },
+        { "site": "app/Http/Controllers/ReferralAnalyticsController.php:84, :112", "event": "CommissionGenerated" },
+        { "site": "app/Services/PartnerService.php:62, :86", "events": "PartnerApproved, PartnerRejected" },
+        { "site": "app/Services/ScreenProviderService.php:123-125, :189, :248, :260, :290, :294", "events": "6 ScreenProvider* dispatches" }
+      ],
+      "no_transaction_at_all": [
+        "app/Http/Controllers/AdminScreenProviderEnquiryController.php:80, :85, :103, :121, :125, :197",
+        "app/Http/Controllers/ContactEnquiryController.php:28",
+        "app/Http/Controllers/PartnerApprovalController.php:104",
+        "app/Http/Controllers/ProductEnquiryController.php:25",
+        "app/Http/Controllers/ScreenProviderEnquiryController.php:28",
+        "app/Http/Controllers/AdminContactEnquiryController.php:72, :90, :108",
+        "app/Observers/AssetObserver.php:18"
+      ],
+      "note_on_screenproviderservice": "The six ScreenProvider dispatches at :123-125, :248, :260, :290-294 are inside DB::transaction closures opened at :37, :146, :219, :271 and :344. This is the most concentrated instance of in-transaction dispatch in the repository: an approved provider triggers three notifications (Created, Approved, PortalInvitation) inside one transaction.",
+      "consequence": {
+        "classification": "INFERENCE",
+        "statement": "A dispatch inside a transaction notifies parties about a write that may still roll back. For the current notification set this is a cosmetic embarrassment — a spurious 'booking created' or 'payment received' email. For a Creative flow it is a correctness problem: a client could be told their project was created and their proposal accepted, and then the transaction fails. A creator could be told an earning was approved, or a payout was processed, and then the transaction rolls back. Money-related notifications are exactly the ones that must never precede the commit.",
+        "recommendation": "RECOMMENDATION: every Creative event is dispatched AFTER commit, from the application-layer use case, not from inside the aggregate mutation. This requires no framework feature: simply return from the transaction closure and dispatch after it, as PaymentController.php:95 already does. ShouldHandleEventsAfterCommit exists and is not used anywhere, but the codebase already contains the correct pattern by example, so there is nothing to invent."
+      }
+    },
+
+    "listeners": {
+      "classification": "CURRENT_FACT",
+      "statement": "There are ZERO listener classes. NotificationEventSubscriber is the only consumer of all 33 events, and it is registered explicitly in app/Providers/EventServiceProvider.php:25 with 33 hand-written $events->listen() registrations at NotificationEventSubscriber.php:90-122.",
+      "consequence": "The subscriber has grown to 385 lines and 33 handler methods, and every new event requires editing it in three places (the event class, the subscriber imports, the subscriber's subscribe() map). There is no auto-discovery, no per-domain subscriber, and no interface discovery.",
+      "creative_consequence": "RECOMMENDATION: Creative must NOT add 13+ handlers to NotificationEventSubscriber. Adding Creative events to the shared subscriber would take it past 400 lines and would couple the Creative domain's notification behaviour to the advertising domain's edits. If Creative subscribers are added, they should be separate classes — and whether they are registered via the same EventServiceProvider or via a Creative-registered provider is a namespace decision (see open decisions)."
+    }
+  },
+
+  "creative_domain_events_required": {
+    "derivation_note": "RECOMMENDATION, derived from the business lifecycle in artifact 07 (steps 1-18) and the aggregate set in artifact 06. No event below is assumed; each is derived from a step where a party other than the actor needs to know that something happened. Artifact 06 lists 13 domain events; this artifact enumerates 17, because it separates lifecycle events that matter to a party from notification-only acknowledgements, and it adds the two funding and payout transitions that artifact 06 collapsed.",
+    "common_conventions_recommended": {
+      "dispatch_timing": "AFTER COMMIT, always. Never inside the transaction closure.",
+      "payload_style": "RECOMMENDATION: carry identifiers and immutable primitives, NOT Eloquent models. A post-commit event holding a model re-reads current state, so a consumer can act on values that have moved since the event. The existing 33 events all hold models, which is exactly why they must be dispatched after commit; carrying ids is strictly safer and makes the event queueable without SerializesModels surprises.",
+      "required_envelope_fields": "RECOMMENDATION: eventId (uuid), occurredAt (timestamp), actorUserId, correlationId (ties every event from one request together). NONE of these exists on any of the current 33 events — this is a new convention and it is the cheapest possible insurance against a notification that describes a superseded state.",
+      "idempotency_requirement": "Every consumer of a money-bearing or state-transitioning event must be idempotent. The only durable mechanism available in this repository today is a database unique constraint. Recommendation: each consumer claims a (eventId, consumerName) row, or writes its own effect under a natural unique key, in the same transaction as the state change it performs.",
+      "retry_behaviour": "RECOMMENDATION: because nothing is currently queued but Mailables, a Creative consumer that is a notification is already retry-safe by virtue of the Mailable being queued. A Creative consumer that performs a STATE CHANGE must not be implemented as an in-request subscriber handler at all, because the current dispatcher has no retry, no backoff and no dead-letter handling. If such a consumer is needed, it must be a queued listener, which requires OD-TC-18 to be answered."
+    },
+    "events": [
+      {
+        "name": "CreativeCreatorRegistered",
+        "producer": "Creator onboarding use case (admin/finance approves an application)",
+        "payload_recommended": "creatorId, creatorPublicId, applicantUserId, status, occurredAt, actorUserId",
+        "consumers": ["admin notification: new creator application", "creator notification: application received (mirrors ScreenProviderEnquirySubmitted -> ScreenProviderEnquirySubmittedMail + ScreenProviderEnquiryAutoReplyMail at NotificationEventSubscriber.php:293-300)"],
+        "sync_or_async": "Dispatch after commit. Notification is then queued via the Mailable.",
+        "retry": "Handled by the queued Mailable; the notification_logs row records sent/failed.",
+        "idempotency": "The notification is naturally once-per-application because registration is once-per-creator (UNIQUE creators.user_id per artifact 09). No dedup mechanism needed beyond that constraint.",
+        "transactional_timing": "RECOMMENDATION after commit. NOTE: the existing analogue ScreenProviderService dispatches Created/Approved/PortalInvitation INSIDE its transactions at :123-125, :248, :260, :290-294. Do not copy that.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-EN-01"
+      },
+      {
+        "name": "CreativeCreatorApproved",
+        "producer": "Creator approval use case",
+        "payload_recommended": "creatorId, setupToken (or invitationId), approvedAt, actorUserId",
+        "consumers": ["creator notification with the password-setup URL — the exact mechanism is `password_setup_tokens` rows created by ScreenProviderService::inviteToPortal and PartnerService, with the URL assembled in the subscriber at NotificationEventSubscriber.php:333-336"],
+        "sync_or_async": "After commit, then queued Mailable.",
+        "retry": "Queued Mailable.",
+        "idempotency": "A creator may be re-invited; the current analogue includes the setup token in the dedup key (NotificationEventSubscriber.php:351: '{providerId}:{setupToken}'), which is the CORRECT key shape and should be copied. A key of just the creator id would suppress a legitimate re-invitation.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-EN-01 (is creator onboarding self-service, invite-only or admin-created?)"
+      },
+      {
+        "name": "CreativeServicePublished",
+        "producer": "CreativeService use case",
+        "payload_recommended": "creatorServiceId, creatorId, publicId, categorySlugs, publishedAt",
+        "consumers": ["Optional: admin digest", "Optional: interested-creators notification — ONLY IF a follow/alert model exists, which is currently OPEN"],
+        "sync_or_async": "After commit.",
+        "retry": "n/a if no consumer.",
+        "idempotency": "Publication is a state transition guarded by a status check under a row lock (artifact 16), so the event fires once.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "note": "There is NO existing precedent for this event. Artifact 06 correctly notes the closest shape is ScreenProviderCreated. Whether publishing a service should notify anyone at all is undetermined — if creators browse briefs rather than being pushed to services, this event has no consumer and should arguably not exist."
+      },
+      {
+        "name": "CreativeBriefCreated",
+        "producer": "Brief creation use case",
+        "payload_recommended": "briefId, briefPublicId, clientUserId, title, categorySlugs, budgetRange (if published), closesAt, occurredAt",
+        "consumers": ["OPEN: if a brief is an open opportunity, eligible creators must be notified — but that is a FAN-OUT over a creator population, which the current notification machinery cannot express (it resolves at most one user, one partner, and a static admin list)"],
+        "sync_or_async": "RECOMMENDATION: after commit, and the fan-out (if any) MUST be a queued job, never a synchronous loop.",
+        "retry": "OPEN — depends on OD-TC-18 (is a worker guaranteed?). Without a worker there is no fan-out and no retry.",
+        "idempotency": "A fan-out to N creators must be claim-protected per (briefId, creatorId) or a retry re-notifies everyone.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-EN-02 (is a brief an open opportunity creators browse, or is it always addressed to specific creators? This determines whether there is a fan-out at all.)"
+      },
+      {
+        "name": "CreativeProposalSubmitted",
+        "producer": "Proposal submission use case",
+        "payload_recommended": "proposalId, proposalPublicId, briefId, creatorId, quotedAmount, quotedCurrency, timeline, occurredAt",
+        "consumers": ["brief owner (client) notification: new proposal received", "admin: none"],
+        "sync_or_async": "After commit, then queued Mailable.",
+        "retry": "Queued Mailable.",
+        "idempotency": "Guarded by the proposal status transition plus the OPEN DECISION on UNIQUE(brief_id, creator_id) (artifact 09). A creator double-submitting must either be rejected by the constraint or superseded, not double-notified.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-01"
+      },
+      {
+        "name": "CreativeProposalWithdrawn",
+        "producer": "Proposal withdrawal use case",
+        "payload_recommended": "proposalId, briefId, creatorId, withdrawnAt, reason",
+        "consumers": ["brief owner: proposal withdrawn"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "Status-guarded transition; fires once.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION"
+      },
+      {
+        "name": "CreativeProposalAccepted",
+        "producer": "Proposal acceptance use case",
+        "payload_recommended": "proposalId, briefId, projectId, projectPublicId, creatorId, clientUserId, agreedAmount, agreedCurrency, platformRate, creatorNet, deliveryDueDate, includedRevisionRounds, occurredAt",
+        "consumers": ["accepted creator", "OPEN: sibling creators whose proposals were auto-declined (only if exclusivity is confirmed — OD-TC-01)"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "RECOMMENDATION: the acceptance is exactly-once by UNIQUE creative_projects.proposal_id (artifact 09), and the sibling auto-decline must happen in the SAME transaction so the notification fan-out is derived from committed state.",
+        "transactional_timing": "After commit. This is the highest-stakes notification in the whole lifecycle: the accepted amount in this message is the amount the creator is now bound to, and the current Marketing-style Mailable reuse pattern is explicitly NOT acceptable here.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-01, OD-TC-02, OD-TC-12 (tax/third-party costs change the agreed amount)"
+      },
+      {
+        "name": "CreativeProposalDeclined",
+        "producer": "Proposal decline use case (client, or automatic on award)",
+        "payload_recommended": "proposalId, briefId, creatorId, reason, declinedAt, automatic (bool)",
+        "consumers": ["declined creator"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "Status-guarded.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "note": "The `automatic` flag matters: an auto-decline caused by a competitor's acceptance is a materially different message from a considered rejection, and a creator who cannot tell the difference will treat the marketplace as arbitrary."
+      },
+      {
+        "name": "CreativeProjectCreated",
+        "producer": "Proposal acceptance use case (same transaction as CreativeProposalAccepted)",
+        "payload_recommended": "projectId, projectPublicId, briefId, proposalId, creatorId, clientUserId, status, fundingState",
+        "consumers": ["both parties: project workspace opened", "admin/finance: none unless an audit digest is required"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "UNIQUE creative_projects.proposal_id guarantees the event fires once.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-03 (funding before or after project creation determines the status value in the payload)"
+      },
+      {
+        "name": "CreativeFundingConfirmed",
+        "producer": "Funding confirmation use case, after the gateway signature check has succeeded and the funding row has been committed",
+        "payload_recommended": "fundingId, fundingPublicId, projectId, gatewayOrderId (masked), amount, currency, confirmedAt, milestone (nullable)",
+        "consumers": ["client receipt notification", "creator: project funded notification", "admin/finance: none"],
+        "sync_or_async": "RECOMMENDATION: after commit, and strictly AFTER the network call — the gateway interaction must never happen inside a transaction (ARCHITECTURE_RULES.md Rule 4).",
+        "retry": "OPEN. If OD-TC-07 is answered with a gateway webhook, the webhook is a second, independent path to this same state change and its idempotency contract must be designed from scratch — this repository has zero webhooks and no contract to copy.",
+        "idempotency": "MANDATORY. UNIQUE creative_fundings.gateway_order_id plus a status-guarded transition under a row lock (artifact 16). Because verification today is entirely client-initiated (POST /api/payments/razorpay/verify, routes/api.php:303), a captured (order, payment, signature) triple is replayable, so the status guard is the only defence.",
+        "transactional_timing": "After commit, and after the gateway call.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-04 (escrow/milestone), OD-TC-07 (webhook in scope?)"
+      },
+      {
+        "name": "CreativeRevisionRequested",
+        "producer": "Revision request use case (client)",
+        "payload_recommended": "revisionId, projectId, round, deliveryId (nullable), requestedByUserId, changeSummary, isBeyondIncludedAllowance, occurredAt",
+        "consumers": ["creator: revision requested"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "Round allocation is serialised by the project row lock and hard-bounded by UNIQUE (project_id, round) (artifact 09, artifact 16).",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-05 (round allowance and whether exceeding it is chargeable). The `isBeyondIncludedAllowance` flag must be computed by a pure domain service from the frozen AgreedTerms, never by the controller, and the charge itself is an OPEN DECISION that must not be invented."
+      },
+      {
+        "name": "CreativeRevisionSubmitted",
+        "producer": "Revision submission use case (creator)",
+        "payload_recommended": "revisionId, projectId, round, submittedAt, fileCount",
+        "consumers": ["client: revision ready for review", "OPEN: admin auto-review, if any"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "Status-guarded.",
+        "transactional_timing": "After commit. Files are attached before the transaction, never inside it.",
+        "classification": "RECOMMENDATION",
+        "note": "Mirrors the existing MediaUploaded event (NotificationEventSubscriber.php:157-163) in shape, but that handler reuses BookingCreatedMail and keys its dedup on the booking id for a whole array of items — neither is acceptable for a per-revision notification."
+      },
+      {
+        "name": "CreativeDeliverySubmitted",
+        "producer": "Delivery submission use case (creator)",
+        "payload_recommended": "deliveryId, projectId, sequence, fileCount, manifestSummary, submittedAt",
+        "consumers": ["client: delivery ready for review", "admin/finance: none"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "UNIQUE (project_id, sequence) on creative_deliveries (artifact 09).",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION"
+      },
+      {
+        "name": "CreativeDeliveryAccepted",
+        "producer": "Delivery acceptance use case (client)",
+        "payload_recommended": "deliveryId, projectId, sequence, acceptedAt, acceptedByUserId, earningId (nullable), earningAmount (nullable)",
+        "consumers": ["creator: delivery accepted", "creator: earning accrued — ONLY if OD-TC-08 resolves to 'accrue on delivery acceptance'", "admin/finance: payout pipeline trigger"],
+        "sync_or_async": "After commit.",
+        "retry": "OPEN for the payout pipeline — see the queue recommendation below.",
+        "idempotency": "MANDATORY and double-guarded: the delivery status guard AND UNIQUE (project_id, earning_type) on creator_earnings (artifact 09). Acceptance and accrual must be ONE transaction (artifact 16) so the notification never describes an earning that does not exist.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-08, OD-TC-09, OD-TC-13 (currency)"
+      },
+      {
+        "name": "CreativeReviewSubmitted",
+        "producer": "Review submission use case (client)",
+        "payload_recommended": "reviewId, projectId, creatorId, reviewerUserId, rating, submittedAt",
+        "consumers": ["creator: new review received", "creator: aggregate rating changed (if public profiles show it)"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "UNIQUE (project_id, reviewer_user_id) (artifact 09). There is no state machine for a review, so this constraint is the ONLY protection and it is sufficient.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-10, OD-TC-11 (does a rating affect money? If yes, the review can never be edited and the notification is a financial disclosure, not a courtesy.)"
+      },
+      {
+        "name": "CreativeEarningAccrued",
+        "producer": "Earning accrual — inside the transaction that triggers it (delivery acceptance, project completion, or dispute-window expiry)",
+        "payload_recommended": "earningId, projectId, creatorId, earningType, grossAmount, platformCommission, creatorNet, currency, commissionRateSnapshot, accruedAt",
+        "consumers": ["creator: earning accrued notification", "admin/finance: earning ledger"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable for the notification. The accrual itself is a transaction, not a job.",
+        "idempotency": "UNIQUE (project_id, earning_type) (artifact 09) — the hard guarantee against double accrual.",
+        "transactional_timing": "After commit. CRITICAL: an 'earning accrued' message must never precede the commit that creates the earning. This is exactly the ManualBookingService.php:642 failure mode (a PaymentReceived notification dispatched inside a transaction) and it is worse here, because the amount is the creator's payable balance.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-08 (trigger), OD-TC-09 (commission basis), OD-TC-12 (tax/third-party costs), OD-TC-13 (currency), OD-TC-14 (rate source)"
+      },
+      {
+        "name": "CreativeEarningDisputed",
+        "producer": "Dispute/hold action — finance or the client, depending on the unresolved dispute model",
+        "payload_recommended": "earningId, projectId, creatorId, disputedAt, reason, holdApplied",
+        "consumers": ["creator: earning on hold", "admin/finance: dispute queue"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "Status-guarded transition on the earning.",
+        "transactional_timing": "After commit.",
+        "classification": "OPEN DECISION",
+        "open_decision": "OD-TC-17 — **Whether a dispute mechanism exists at all is undetermined.** No document describes one, no precedent exists in the repository, and this event is listed to make the gap visible rather than to propose a design."
+      },
+      {
+        "name": "CreativePayoutRequested",
+        "producer": "Payout request use case (creator)",
+        "payload_recommended": "payoutId, payoutPublicId, creatorId, amount, currency, earningCount, requestedAt, requestedByUserId",
+        "consumers": ["creator: payout requested confirmation", "admin/finance: payout approval queue notification"],
+        "sync_or_async": "After commit.",
+        "retry": "Queued Mailable.",
+        "idempotency": "UNIQUE creator_payout_items.earning_id (artifact 09) is the hard guarantee that one earning is never claimed by two payouts; the notification must be derived from the committed payout, not from the request intent.",
+        "transactional_timing": "After commit.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-15 (is a payout a gateway disbursement or a recorded manual transfer?), OD-TC-16 (cadence, threshold, settlement period)"
+      },
+      {
+        "name": "CreativePayoutProcessed",
+        "producer": "Payout processing use case (finance/admin, after approval and after any external disbursement)",
+        "payload_recommended": "payoutId, creatorId, amount, currency, status, referenceNumber, processedAt, processedByUserId",
+        "consumers": ["creator: payout paid — the single most consequential notification in the system", "admin/finance: audit"],
+        "sync_or_async": "After commit, and after any gateway call, which must be outside the transaction and outside every lock (ARCHITECTURE_RULES.md Rule 4).",
+        "retry": "OPEN — a retried payout processing must be idempotent-RETURN (mirroring CommissionService::markAsPaid at :66-68, which is the correct existing precedent), never a re-disbursement.",
+        "idempotency": "MANDATORY. Status-guarded transition under a row lock, plus separation of duties: requested_by != approved_by (artifact 09 records this as the single most important internal-control requirement in the Creative financial design).",
+        "transactional_timing": "After commit, after disbursement.",
+        "classification": "RECOMMENDATION",
+        "open_decision": "OD-TC-15, OD-TC-16"
+      }
+    ]
+  },
+
+  "notification_channel_reuse": {
+    "classification": "RECOMMENDATION + CURRENT_FACT",
+    "recommendation": "EXTEND the existing notification path; do NOT build a second one. A parallel Creative notification system would duplicate the settings resolution, the recipient dedup, the notification_logs write and the transport, and would immediately diverge.",
+    "reuse_existing_mail_classes": {
+      "verdict": "RECOMMENDATION: reuse the GENERIC marketing Mailable pattern for informational messages only; write dedicated Mailables for anything money-bearing or contractual.",
+      "generic_reuse_is_acceptable_for": ["new creator application received (admin)", "brief published to the marketplace", "proposal submitted/declined (informational)"],
+      "generic_reuse_is_NOT_acceptable_for": ["proposal accepted (carries the agreed amount and terms)", "funding confirmed (a receipt)", "earning accrued / earning on hold (a financial disclosure)", "payout requested / payout processed (a financial disclosure)", "delivery accepted if it accrues an earning", "review submitted if a rating affects money (OD-TC-11)"],
+      "why": "The existing reuse (handleMediaUploaded sending BookingCreatedMail, NotificationEventSubscriber.php:162) works because the content is a courtesy message with no facts the recipient can rely on. A reused template for a money event means the amount, the currency, the commission and the reference all render through a layout that was written for something else, and a change to that layout silently changes a financial disclosure. AGENTS.md section 10 makes financial records high risk; a notification that states a financial fact should be treated as a rendering of that fact, not as marketing copy."
+    },
+    "new_mailables_required": {
+      "count_recommended": "17 (one per business fact above, minus CreativeEarningDisputed which is blocked by OD-TC-17).",
+      "must_never_be_null_or_blank": "Every money Mailable must render the amount, the currency and a reference. A money notification that fails to render its amount is worse than no notification, because the recipient will act on an assumption.",
+      "templates": "RECOMMENDATION: each new Mailable gets its own blade view under the existing mail view namespace. The current 28 Mailables' views were not audited for template reuse in this artifact."
+    },
+    "notification_service_reuse": {
+      "verdict": "WRAP, then extend minimally. Do NOT call NotificationService::send() directly from Creative code with a hardcoded key.",
+      "why": {
+        "classification": "INFERENCE",
+        "reasons": [
+          "It has no 'creator' recipient branch (:107-115 handles 'user', :118-130 handles 'partner'). A creator IS a user, so a Creative notification could smuggle a creator through the 'user' branch — but then notification_logs.recipient_type says 'user' and a creator's notification history is indistinguishable from a client's. That is a reporting and audit defect, and for a payout-bearing party it is the wrong record to keep.",
+          "The dedup in the subscriber is not durable (see 'deduplication'), so it cannot be relied on.",
+          "It swallows send failures (:167-177), so a Creative caller cannot know whether to surface a warning."
+        ]
+      },
+      "required_changes_to_shared_code": {
+        "change_1": "Add a 'creator' recipient branch to NotificationService::send(), writing recipient_type = 'creator' and recipient_id = creators.id. This is a change to SHARED code that the advertising path depends on.",
+        "change_2": "The recipient shape is hardcoded to ['admin','user','partner'] in every one of the 33 handlers, so a creative-facing contract must translate a Creative subject into that shape, or the signature must widen. Widening the signature touches 33 call sites.",
+        "classification": "ARCHITECTURE_DOCUMENT + INFERENCE",
+        "authority_note": "AGENTS.md section 19 forbids opportunistic refactoring of shared infrastructure during an unrelated build, and section 20 requires a documented decision rather than a guess. Artifact 05 records the same conclusion. **This change requires explicit architect authorisation and its own regression run; it is not implied by this audit.**"
+      },
+      "creative_facing_contract_recommended": {
+        "classification": "RECOMMENDATION",
+        "shape_documentation_only": "A Creative-facing notification contract such as: notify(string $eventKey, array $parties, string $mailableClass, array $data) where a party is an explicit (type, id, email, name) tuple rather than a User/Partner model, and the contract is responsible for (a) resolving the Creative subject to an address, (b) delegating transport to MailContractInterface, and (c) writing the notification_logs row with a Creative recipient_type. It never imports App\\Services\\NotificationService; it imports MailContractInterface, which is the actual transport port and is already a clean seam.",
+        "benefit": "Creative never depends on the advertising notification vocabulary, so a change to the booking notification set cannot break a payout notification.",
+        "cost_honest_statement": "This duplicates ~80 lines of settings resolution and logging. The alternative — extending NotificationService — couples Creative to shared code and requires the authorised change above. NEITHER option is free, and choosing between them is an architect decision (see open decisions)."
+      }
+    },
+    "notification_config_changes_required": {
+      "classification": "CURRENT_FACT + RECOMMENDATION",
+      "the_trap": "A Creative event key must appear in **all THREE** lists in app/Support/Configs/NotificationConfig.php or it silently misbehaves:",
+      "the_three_lists": [
+        "availableEvents() at :51-88 — 35 keys. A key absent here is not selectable in the settings UI.",
+        "eventLabels() at :92-140 — 35 keys. A key absent here has no human label.",
+        "eventDefaults() at :145+ — a per-key default (enabled / send_to_admin / send_to_user / send_to_partner / channel_email / channel_in_app). A key absent here falls back to defaultConfig() (:131-139), whose defaults are enabled=true, all three send_to_X = false, channel_email = true."
+      ],
+      "silent_failure_mode": "INFERENCE: a key present in availableEvents and eventLabels but missing from eventDefaults therefore resolves to enabled-with-no-recipients, and NotificationService::send() returns at :132-136 having logged a debug line and written NO notification_logs row. The notification appears to work, the log table is empty, and nothing surfaces the gap. This is a HIGH omission risk for 17 new keys.",
+      "recommended_creative_keys": "creative_creator_registered, creative_creator_approved, creative_service_published, creative_brief_created, creative_proposal_submitted, creative_proposal_withdrawn, creative_proposal_accepted, creative_proposal_declined, creative_project_created, creative_funding_confirmed, creative_revision_requested, creative_revision_submitted, creative_delivery_submitted, creative_delivery_accepted, creative_review_submitted, creative_earning_accrued, creative_earning_disputed (BLOCKED), creative_payout_requested, creative_payout_processed",
+      "classification_of_keys": "RECOMMENDATION. A distinct `creative_` prefix (rather than reusing the bare-word style of the existing 35) prevents a Creative key colliding with a future advertising key, and makes a grep for Creative notification behaviour possible.",
+      "additional_required_gap": "The default config shape has no `send_to_creator` flag. Adding one is a change to the shared config object AND to the shared service. See 'required_changes_to_shared_code'.",
+      "verification_requirement": "RECOMMENDATION: a Creative contract test asserting that every event key used by a Creative subscriber exists in all three lists, and that each of the 17 has an explicit default. This test does not exist today and its absence is how the omission risk would survive review."
+    }
+  },
+
+  "recipients": {
+    "classification": "CURRENT_FACT for the current state, RECOMMENDATION for the Creative model",
+    "current_roles_in_the_system": {
+      "seeded_role_slugs": ["super-admin", "admin", "manager", "staff", "screen_provider"],
+      "seeder_location": "database/seeders/RolesAndPermissionsSeeder.php:16-36",
+      "roles_used_in_code_but_not_seeded": ["partner", "client", "user"],
+      "role_storage": "users.role is a free-form VARCHAR with no foreign key to roles and no enum. Artifact 08 records that it was an ENUM and was converted to VARCHAR by a raw ALTER in migration 2026_07_10_000002. There is also no 'creator' role today, and no way to express 'this user is both an advertiser and a creator'.",
+      "permission_sections_seeded": "dashboard, bookings, screens, calendar, pricing, partners, screen_providers, products, clients, payments, reports, contacts, settings, user_management, notifications, blogs, testimonials, faqs, and others (RolesAndPermissionsSeeder.php:37+). NO creative section exists.",
+      "vocabulary_hardcoding": "ARTIFACT 05 records that App\\Http\\Resources\\RoleResource::getAllPermissionKeys() and App\\Http\\Controllers\\Api\\PermissionController both hardcode the permission vocabulary, and that tests/Feature/Security/Sec03PermissionVocabularyTest.php asserts every permission used on a route exists in the seeded vocabulary. INFERENCE: adding Creative routes before extending the seeder AND both hardcoded lists will turn the suite red. This is a known, documented trip-wire, not a new discovery."
+    },
+    "current_recipient_resolution": {
+      "classification": "CURRENT_FACT",
+      "admin": "Resolved from a configured admin_emails list, NOT from the users table (NotificationService::docblock :37-40). So 'admin' is an email distribution list, not a role query. Creative cannot assume any specific admin receives a Creative notification.",
+      "user": "Exactly one User model. $recipients['user']->email / ->name / ->id. notification_logs.recipient_id is populated only here.",
+      "partner": "One Partner model OR a plain ['email','name'] array. notification_logs.recipient_id is always null for partners and admins, so there is no durable link from a notification to the partner entity.",
+      "creator": "DOES NOT EXIST. There is no 'creator' branch and no 'creator' recipient_type. A Creative notification has no expressible recipient class in the current machinery."
+    },
+    "recommended_creative_recipients": {
+      "classification": "RECOMMENDATION",
+      "note": "This is derived from the business lifecycle in artifact 07. Each row states who needs to know and why. Role-to-permission mapping is a separate decision (OD-EN-03).",
+      "matrix": [
+        { "event": "CreativeCreatorRegistered", "creator": "n/a (self)", "client": "n/a", "admin/ops": "YES — approval queue", "finance": "no" },
+        { "event": "CreativeCreatorApproved", "creator": "YES — portal invitation", "client": "no", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeServicePublished", "creator": "self confirmation", "client": "OPEN (OD-EN-04)", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeBriefCreated", "creator": "OPEN — depends on OD-EN-02 (fan-out vs address)", "client": "self confirmation", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeProposalSubmitted", "creator": "self confirmation", "client": "YES — brief owner", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeProposalWithdrawn", "creator": "self", "client": "YES", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeProposalAccepted", "creator": "YES — contract terms", "client": "self", "admin/ops": "YES — visibility", "finance": "YES — a payable obligation now exists" },
+        { "event": "CreativeProposalDeclined", "creator": "YES", "client": "self", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeProjectCreated", "creator": "YES", "client": "YES", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeFundingConfirmed", "creator": "YES — project funded", "client": "YES — receipt", "admin/ops": "no", "finance": "YES — ledger" },
+        { "event": "CreativeRevisionRequested", "creator": "YES", "client": "self", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeRevisionSubmitted", "creator": "self", "client": "YES", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeDeliverySubmitted", "creator": "self", "client": "YES", "admin/ops": "no", "finance": "no" },
+        { "event": "CreativeDeliveryAccepted", "creator": "YES", "client": "self", "admin/ops": "no", "finance": "YES if it accrues an earning" },
+        { "event": "CreativeReviewSubmitted", "creator": "YES", "client": "self", "admin/ops": "no", "finance": "no (unless OD-TC-11 says otherwise)" },
+        { "event": "CreativeEarningAccrued", "creator": "YES — balance changed", "client": "no", "admin/ops": "no", "finance": "YES — ledger" },
+        { "event": "CreativeEarningDisputed", "creator": "YES — hold", "client": "OPEN", "admin/ops": "YES — dispute queue", "finance": "YES" },
+        { "event": "CreativePayoutRequested", "creator": "self", "client": "no", "admin/ops": "YES — approval queue", "finance": "YES" },
+        { "event": "CreativePayoutProcessed", "creator": "YES — money moved", "client": "no", "admin/ops": "no", "finance": "YES" }
+      ],
+      "structural_observation": "INFERENCE: the matrix has a shape the current machinery cannot express in two places. (a) Finance needs Creative notifications and there is no finance recipient branch — 'admin' is an email list, not a role, and the seeded permission vocabulary has no finance-creative concept. (b) The brief fan-out, if OD-EN-02 resolves to 'open opportunity', is a many-recipient send and NotificationService::send() resolves at most one user, one partner and an admin list. Both gaps are architectural, not configuration."
+    }
+  },
+
+  "queue_and_jobs_recommendation": {
+    "classification": "RECOMMENDATION + OPEN DECISION",
+    "current_state": {
+      "classification": "CURRENT_FACT",
+      "app_Support_Jobs_exists": false,
+      "app_Jobs_exists": false,
+      "job_classes_in_app": 0,
+      "verified_by": "find app -type d -name Jobs -> no results; grep -rn 'ShouldBeUnique|ShouldBeQueued|WithoutOverlapping' app/ -> 0 matches",
+      "only_queued_units": "The 28 Mailables in app/Mail, all implementing ShouldQueue.",
+      "queue_infrastructure_that_does_exist": "config/queue.php with a default connection; .env.example:54 QUEUE_CONNECTION=database; jobs, job_batches and failed_jobs tables exist (all three confirmed in artifact 08). So the queue PLUMBING exists and is unused; the queue WORKER may or may not be running in any given environment.",
+      "consequence": "A Mailable queued to the database connection is only delivered if a worker is consuming the jobs table. Because the whole application depends on this for every email, a worker must exist in production today. INFERENCE: a worker process is therefore already an operational prerequisite, and introducing Creative jobs does not add a NEW deployment requirement. That is an important and favourable finding — but it is an inference from the mail dependency, not a verified environment fact."
+    },
+    "the_decision": {
+      "statement": "Creating app/Support/Jobs for Creative jobs is A DECISION, not a mechanical step. The approved target architecture in AGENTS.md section 4 lists app/Support/Jobs/ as part of the target tree, and records in its 'Current reality' note that app/Support/Jobs DOES NOT EXIST. The target tree is the only place the repository names that path. Every alternative (app/Jobs, app/Domain/Creative/Jobs, app/Application/Creative/Jobs) is equally unestablished.",
+      "classification": "ARCHITECTURE_DOCUMENT + OPEN DECISION",
+      "requires": "An architect decision under AGENTS.md section 20. Recorded as OD-EN-06."
+    },
+    "recommendation": {
+      "classification": "RECOMMENDATION",
+      "principle": "DO NOT make any Creative CORRECTNESS control depend on a queued job. Queue for THROTTLED WORK only. This is the safe design under uncertainty about workers, and it is the honest recommendation because OD-TC-18 (is a worker guaranteed?) is unresolved.",
+      "queue_these": [
+        "Brief fan-out to eligible creators, if OD-EN-02 resolves to an open-opportunity model and the recipient count is unbounded.",
+        "Notification of a large population (e.g. a service published to all creators who follow that craft).",
+        "File-content scanning, if OD-ST-07 says it is in scope and it gates visibility.",
+        "Thumbnail/preview generation for delivery files, if it is slow enough to affect a response time.",
+        "Earnings computation across a period, if OD-TC-16 resolves to a settlement-period model rather than immediate accrual."
+      ],
+      "do_NOT_queue_these": [
+        "Earning accrual — it must be in the same transaction as the triggering business event (artifact 16). A queued accrual introduces a window in which a delivery is accepted and no earning exists, and the accrual is the one thing that must not be lost or duplicated.",
+        "Proposal acceptance, project creation, funding confirmation, payout request, payout processing — all state transitions that are exactly-once by design. A job would trade a database-constrained race for an unconstrained retry.",
+        "Separation-of-duties enforcement on payout approval — that is a synchronous authorization check, not background work.",
+        "Anything that must happen before an HTTP response is contractually correct."
+      ],
+      "job_uniqueness_if_jobs_are_created": "RECOMMENDATION: any Creative job that performs a state change or a fan-out MUST use WithoutOverlapping (or an equivalent named lock) and MUST be claim-idempotent. Neither trait is used anywhere in the current codebase, so this is a new pattern and it is untested infrastructure. If a job cannot be made idempotent, it should not be a job."
+    }
+  },
+
+  "existing_gaps_not_fixed_by_this_audit": {
+    "classification": "CURRENT_FACT",
+    "disposition": "RECORDED ONLY. Per the task's safety rules and AGENTS.md sections 18 and 19, none of the following is fixed here. Each would require its own authorisation, and the financial ones would require the full financial regression suite listed in AGENTS.md section 10.",
+    "gaps": [
+      {
+        "id": "GAP-01",
+        "gap": "No durable dedup. NotificationEventSubscriber::$processed is a process-local static array; a retry, a second request or a queue worker re-sends.",
+        "severity_if_left": "MEDIUM for marketing mail, HIGH for a money notification. A retried payout-processed request re-emails a payout notice.",
+        "creative_impact": "A Creative build must not rely on it. A database-backed claim is required."
+      },
+      {
+        "id": "GAP-02",
+        "gap": "The notification recipient vocabulary excludes any creator-like party. recipient_type is admin/user/partner; there is no finance recipient either.",
+        "severity_if_left": "MEDIUM. A Creative build must either extend shared code (needs authorisation) or wrap the transport port.",
+        "creative_impact": "See 'required_changes_to_shared_code'. This is the change most likely to be underestimated."
+      },
+      {
+        "id": "GAP-03",
+        "gap": "Events are dispatched both inside and after transactions, inconsistently. ManualBookingService.php:642 and CreateCampaignBookingUseCase.php:327 are inside; PaymentController.php:95 is after.",
+        "severity_if_left": "LOW today (a spurious courtesy email), HIGH for a Creative money event, where the message would assert a financial fact that the rollback erased.",
+        "creative_impact": "Creative must dispatch after commit. The correct pattern already exists in the codebase, so nothing needs to be built."
+      },
+      {
+        "id": "GAP-04",
+        "gap": "No after-commit mechanism is used. Zero occurrences of ShouldHandleEventsAfterCommit and zero DB::afterCommit() callbacks.",
+        "severity_if_left": "Not itself a defect; it is the reason GAP-03 exists. Recorded so the choice is explicit rather than accidental.",
+        "creative_impact": "Creative can use either explicit post-transaction dispatch (recommended, matches PaymentController.php:95) or ShouldHandleEventsAfterCommit (a new pattern here). Recommendation: explicit, because it is verifiable by reading the call site."
+      },
+      {
+        "id": "GAP-05",
+        "gap": "No listener classes exist. One 385-line subscriber handles all 33 events with 33 hand-written registrations.",
+        "severity_if_left": "LOW functionally, HIGH for maintainability. Adding 17 Creative handlers would take it past 400 lines and couple Creative to advertising edits.",
+        "creative_impact": "Creative needs its own subscriber class(es). Whether they are registered in the existing EventServiceProvider or a Creative provider is a namespace decision (OD-EN-06)."
+      },
+      {
+        "id": "GAP-06",
+        "gap": "notificationKey() is declared on all 33 event classes and called by nothing. The subscriber hardcodes the key as a string literal at all 33 call sites.",
+        "severity_if_left": "LOW. Dead code with a real maintenance trap: a renamed key in the event class has no effect because nothing reads it.",
+        "creative_impact": "Creative events should either use notificationKey() and have the subscriber read it, or omit the method entirely. Do not add a third convention."
+      },
+      {
+        "id": "GAP-07",
+        "gap": "Notification send failures are swallowed (NotificationService.php167-177) and log-write failures are swallowed too (:217-230). Nothing alerts.",
+        "severity_if_left": "MEDIUM. A creator who never receives a payout notice is a support and reputational incident with no detection mechanism.",
+        "creative_impact": "Creative needs a detection path for failed money notifications. This is a NEW requirement, not a reuse."
+      },
+      {
+        "id": "GAP-08",
+        "gap": "The in-app channel is a stub (:182-186) and never writes a notification_logs row, although the column documents 'in_app' as a value.",
+        "severity_if_left": "LOW. But it means a 'silent' notification channel does not exist — if Creative needs in-app notifications, that is a new build.",
+        "creative_impact": "OPEN: whether Creative needs any in-app channel. Email-only is the current capability."
+      },
+      {
+        "id": "GAP-09",
+        "gap": "The notification_logs status vocabulary documents four values ('sent','failed','queued','skipped') and writes two. recipient_id is populated only for the 'user' branch, so admin and partner notifications have no durable entity link.",
+        "severity_if_left": "LOW. A reporting gap, not a functional one.",
+        "creative_impact": "A Creative money notification must record a durable recipient id, or the audit trail for 'who was told about this payout' is incomplete."
+      },
+      {
+        "id": "GAP-10",
+        "gap": "The settings key omission trap: a notification key missing from NotificationConfig::eventDefaults() resolves to enabled-with-no-recipients and silently writes no log row.",
+        "severity_if_left": "HIGH for a 17-key addition. This is the most likely way a Creative notification set ships half-working.",
+        "creative_impact": "Mandatory: a Creative contract test asserting all three lists. The test does not exist and is not written by this audit."
+      },
+      {
+        "id": "GAP-11",
+        "gap": "In the test environment (phpunit.xml:27 MAIL_MAILER=array) NotificationService::isMailConfigured() returns false, so NO mail is sent and NO notification_logs row is written. Notification behaviour is therefore completely untested by the current suite.",
+        "severity_if_left": "MEDIUM. It means a Creative notification test must either assert on the Mailable dispatch directly or drive the config — it cannot assert on notification_logs rows without changing the mailer.",
+        "creative_impact": "Creative notification tests must be designed with this in mind from the start."
+      },
+      {
+        "id": "GAP-12",
+        "gap": "No permission vocabulary exists for Creative, and two places hardcode the vocabulary (RoleResource::getAllPermissionKeys(), Api\\PermissionController) while Sec03PermissionVocabularyTest enforces route permissions against the seeded set.",
+        "severity_if_left": "HIGH as a trip-wire: adding Creative routes without extending the seeder AND both hardcoded lists turns the suite red.",
+        "creative_impact": "Prerequisite work for any Creative route, and it is a change to shared code requiring authorisation. Recorded in artifact 05; restated because it gates every notification that depends on a permission-gated actor."
+      }
+    ]
+  },
+
+  "discrepancies_vs_existing_artifacts": {
+    "classification": "CURRENT_FACT",
+    "policy": "CURRENT SOURCE CODE WINS over any existing docs/audit artifact.",
+    "findings": [
+      {
+        "artifact": "docs/audit/creative-marketplace/01-current-backend-inventory.json",
+        "key": "counts.event_classes",
+        "artifact_claim": "34 event classes.",
+        "source_truth": "**33** classes in app/Support/Events/Notifications/. Verified by directory listing and by a script. The figure 34 is most likely the 34 event-classes-plus-one miscount, or a count taken before ProfileUpdated or one of the Rewards* classes was added. The related figure that IS 34+ is the notification KEY count: availableEvents() and eventLabels() each contain 35 keys, of which 33 map 1:1 to an event class and 2 ('contact_enquiry_auto_reply', 'screen_provider_enquiry_auto_reply') are pseudo-keys handled inside an existing class's handler (NotificationEventSubscriber.php:276 and :299).",
+        "resolution": "**The artifact's 34 does not match source. Source wins.** Recorded, not corrected in place (AGENTS.md section 21)."
+      },
+      {
+        "artifact": "Task brief baseline",
+        "key": "event class count",
+        "brief_claim": "'33 event classes in app/Support/Events/Notifications plus NotificationEventSubscriber in app/Support/Events'.",
+        "source_truth": "Confirmed exactly. 33 classes, one subscriber, 33 listen() registrations, 0 listener classes.",
+        "resolution": "Agrees."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Notifications].current_implementation",
+        "artifact_claim": "'Dedup is a per-process static array in the subscriber.'",
+        "source_truth": "Confirmed. NotificationEventSubscriber.php:71, :78-86. This audit adds three findings the artifact does not state: (a) the key is event-class + entity-id with no instance discriminator, so handlePaymentReceived (:185) keys on the BOOKING id for a PAYMENT event and handleMediaUploaded (:160) keys a whole array of items on the booking id; (b) suppressed duplicates leave NO log row and NO metric; (c) under QUEUE_CONNECTION=database each worker is a fresh process, so the array is empty at worker start.",
+        "resolution": "Agrees, and is materially strengthened."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Notifications].risk",
+        "artifact_claim": "'NotificationService swallows mail failures (try/catch at :167), so a failed send never surfaces. The subscriber dedup is not durable, so a retried request re-sends.'",
+        "source_truth": "Both confirmed exactly at the cited lines. This audit adds that logNotification() is itself wrapped in try/catch at :217-230, and that in the test environment the whole send block is skipped so nothing is recorded at all.",
+        "resolution": "Agrees, extended."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Notifications].required_changes",
+        "artifact_claim": "'Add creative event keys to all THREE lists in NotificationConfig (availableEvents, eventLabels, eventDefaults) — a key missing from any one silently falls back to enabled-but-delivered-to-nobody.'",
+        "source_truth": "Confirmed and made precise. The three lists are availableEvents() at :51-88, eventLabels() at :92-140 and eventDefaults() at :145+, each with 35 keys today. The fallback is defaultConfig() at :131-139 (enabled=true, all send_to_*=false, channel_email=true), and NotificationService::send() then returns at :132-136 having written no log row.",
+        "resolution": "Agrees. This artifact adds the recommendation to prefix Creative keys with `creative_` and to add a contract test for the three-list invariant."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/06-creative-domain-boundary-map.json",
+        "key": "domain_events (13 events) and domain_event_note",
+        "artifact_claim": "13 domain events, with the note that no existing event implements ShouldHandleEventsAfterCommit and the current pattern dispatches inside the transaction (ManualBookingService:642), and 'Creative should not inherit that'.",
+        "source_truth": "Confirmed. ManualBookingService.php:642 is inside the closure opened at :579. This audit finds the codebase is INCONSISTENT rather than uniformly inside-transaction: PaymentController.php:95 dispatches the same PaymentReceived event AFTER the transaction has committed. So the correct pattern is not hypothetical — it already exists in the repository.",
+        "resolution": "Agrees, and the recommendation is made cheaper: no framework feature is needed."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/06-creative-domain-boundary-map.json",
+        "key": "domain_event_note — 'all 13 events should be emitted AFTER the transaction commits'",
+        "artifact_claim": "13 events.",
+        "source_truth": "This artifact enumerates 17, adding CreativeFundingConfirmed, CreativeEarningDisputed, CreativePayoutRequested and CreativePayoutProcessed as distinct events, and CreativeProjectCreated which artifact 06 also lists. The difference is a granularity choice, not a conflict: artifact 06 lists one event per aggregate transition, while this artifact separates the funding and payout transitions because each has a distinct recipient set and a distinct retry/idempotency profile. No event in this artifact contradicts an event in artifact 06.",
+        "resolution": "Complementary, not conflicting. The union is 17; a future design task should pick one canonical list."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/08-creative-database-current-schema-map.json",
+        "key": "tables[notification_logs].comments",
+        "artifact_claim": "'status: DB comment lists sent, failed, queued, skipped — but ONLY sent and failed are ever written'; 'recipient_type: admin, user, partner — NO creator'.",
+        "source_truth": "Both confirmed by reading the migration (database/migrations/2026_06_22_000001_create_notification_logs_table.php:18, :14) and NotificationService (:164, :173 write the two values; :113 is the only place recipient_id is populated).",
+        "resolution": "Agrees exactly."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Queues and background work].required_changes",
+        "artifact_claim": "'Create app/Jobs (which does not exist) or a Creative-local job namespace. Note this is the first job infrastructure in the repository.'",
+        "source_truth": "Confirmed that no job class and no Jobs directory exists. This audit adds a material mitigating fact: config/queue.php plus the jobs / job_batches / failed_jobs tables already exist, QUEUE_CONNECTION=database is the shipped default, and all 28 Mailables are queued — so a worker process is ALREADY an operational prerequisite for the existing email path. INFERENCE: introducing Creative jobs therefore adds no new deployment requirement. It also sharpens the decision: AGENTS.md section 4's target tree names app/Support/Jobs specifically, and its own 'Current reality' note records that it does not exist.",
+        "resolution": "Agrees, and the 'new deployment requirement' risk the artifact flags is smaller than stated."
+      }
+    ]
+  },
+
+  "open_decisions": [
+    { "id": "OD-EN-01", "question": "Is creator onboarding open self-service, invite-only, or admin-created?", "why_it_matters": "Determines the event set (application vs invitation), whether a password_setup_tokens row is created, and whether the 'admin' email list is an adequate recipient for a creator approval queue.", "what_is_missing": "A product decision. The closest precedent (screen_provider) uses password_setup_tokens plus an admin-approved enquiry, but nothing states whether Creative should follow it." },
+    { "id": "OD-EN-02", "question": "Is a brief an open opportunity that creators browse, or is it always addressed to specific creators?", "why_it_matters": "Determines whether CreativeBriefCreated has a fan-out consumer at all, and therefore whether a queued job is required for notifications. This is the same question as artifact 09 OD-DB-02.", "what_is_missing": "A product decision. Nothing in this repository describes the brief model." },
+    { "id": "OD-EN-03", "question": "Which role receives finance-side Creative notifications, and does a 'finance' recipient branch need to exist?", "why_it_matters": "The current recipient vocabulary is admin (an email list) / user / partner. There is no finance recipient and no seeded finance-creative permission. An earning accrual and a payout processed must reach someone accountable.", "what_is_missing": "An organizational decision plus an authorised change to shared notification and permission code. AGENTS.md section 19 forbids making it opportunistically during a Creative build." },
+    { "id": "OD-EN-04", "question": "Do creators need to be notified when a service matching their craft is published, and is there a follow/alert/saved-search model?", "why_it_matters": "Determines whether CreativeServicePublished has any consumer, and whether a subscription table is needed.", "what_is_missing": "A product decision. No notification-preference or follow model exists anywhere in the repository." },
+    { "id": "OD-EN-05", "question": "Does Creative need an in-app notification channel, or is email sufficient?", "why_it_matters": "The in-app channel is a stub (NotificationService.php:182-186). If Creative needs it, that is a new build, and a creator's earnings are arguably something they should see in-product rather than only by email.", "what_is_missing": "A product decision. Only email is a currently delivered channel." },
+    { "id": "OD-EN-06", "question": "Where do Creative events, subscribers and (if any) jobs live, and how are they registered?", "why_it_matters": "app/Support/Jobs does not exist although AGENTS.md section 4 names it in the target tree. Adding 17 events, at least one subscriber, and possibly jobs, is a namespace and provider-registration decision. Adding Creative handlers to the existing 385-line NotificationEventSubscriber is rejected by this artifact, but the alternative location is undecided.", "what_is_missing": "An architect decision under AGENTS.md section 20. Related to OD-TC-17." },
+    { "id": "OD-EN-07", "question": "Is NotificationService::send() extended with a 'creator' branch and a 'send_to_creator' config flag, or does Creative build its own contract over MailContractInterface?", "why_it_matters": "This is the single largest change to shared code the Creative notification build implies. The first option touches shared code that the advertising path depends on and needs authorisation plus a regression run; the second duplicates ~80 lines but decouples Creative completely.", "what_is_missing": "An architect decision. Recorded here and in 'required_changes_to_shared_code'; it is not made by this audit." },
+    { "id": "OD-EN-08", "question": "What is the retry and alerting policy for a FAILED money notification (funding receipt, earning accrued, payout processed)?", "why_it_matters": "NotificationService swallows failures and nothing alerts. A creator who does not learn their payout was sent is a real-world harm, and for a payment-bearing relationship it may have a legal dimension.", "what_is_missing": "An operations and product decision. No alerting mechanism exists in the repository." },
+    { "id": "OD-EN-09", "question": "Is a queue worker guaranteed in every environment, including local development and CI?", "why_it_matters": "It determines whether any Creative control may be asynchronous. This audit's recommendation deliberately assumes NO guarantee: correctness stays synchronous and database-constrained, and only throttled work is queued.", "what_is_missing": "An environment/operations fact, not derivable from source. Same underlying question as OD-TC-18." },
+    { "id": "OD-EN-10", "question": "Does a Creative notification need to record a durable recipient entity id, and does notification_logs need a new recipient_type value?", "why_it_matters": "recipient_id is populated only for the 'user' branch. For a payout notification the audit trail of 'who was told, about which creator record' matters, and 'user' would conflate the client with the creator.", "what_is_missing": "A design decision, dependent on OD-EN-07. The column is a plain varchar with no constraint, so no migration is required for a new type value — but the code change is shared." }
+  ],
+
+  "what_this_artifact_does_not_cover": [
+    "Schema design — artifact 09.",
+    "Business flow steps — artifact 07.",
+    "Aggregate boundaries and ownership — artifact 06.",
+    "Storage and file access — artifact 17.",
+    "Concurrency and transaction boundaries — artifact 16; only the event-timing implications are touched here.",
+    "The security risk register — artifact 19; only the notification-timing and disclosure implications are touched here.",
+    "Blade view and mail layout quality. The 28 existing Mailable views were not read.",
+    "Any fix. Nothing in this repository was modified by this audit."
+  ]
+}

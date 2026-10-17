@@ -1,0 +1,476 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "note": "Plan section 11/12: a service doing Eloquent directly must be EXTRACTED, never merely renamed. These are candidates only; no extraction was performed in Phase 0.20.",
+ "already_extracted": [
+  {
+   "capability": "Asset",
+   "contract": "App\\Repositories\\Asset\\AssetRepositoryInterface",
+   "implementation": "App\\Repositories\\Asset\\AssetRepository",
+   "bound_in": "app/Providers/AppServiceProvider.php"
+  },
+  {
+   "capability": "Booking",
+   "contract": "App\\Repositories\\Booking\\BookingRepositoryInterface",
+   "implementation": "App\\Repositories\\Booking\\BookingRepository",
+   "bound_in": "app/Providers/AppServiceProvider.php"
+  }
+ ],
+ "candidate_count": 33,
+ "candidates": [
+  {
+   "class": "App\\Services\\AssetImportService",
+   "file": "app/Services/AssetImportService.php",
+   "lines": 566,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\BookingCapacityService",
+   "file": "app/Services/BookingCapacityService.php",
+   "lines": 603,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Booking\\BookingAnalyticsService",
+   "file": "app/Services/Booking/BookingAnalyticsService.php",
+   "lines": 176,
+   "current_capability": "Booking",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Booking",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\CampaignPricingService",
+   "file": "app/Services/CampaignPricingService.php",
+   "lines": 226,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\BudgetRecommendationService",
+   "file": "app/Services/Campaign/BudgetRecommendationService.php",
+   "lines": 1446,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\ClientAnalyticsService",
+   "file": "app/Services/Campaign/ClientAnalyticsService.php",
+   "lines": 199,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\ClientService",
+   "file": "app/Services/Campaign/ClientService.php",
+   "lines": 334,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\ExchangeRateService",
+   "file": "app/Services/Campaign/ExchangeRateService.php",
+   "lines": 318,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\LoyaltyService",
+   "file": "app/Services/Campaign/LoyaltyService.php",
+   "lines": 356,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\RecommendationService",
+   "file": "app/Services/Campaign/RecommendationService.php",
+   "lines": 38,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\ReferralService",
+   "file": "app/Services/Campaign/ReferralService.php",
+   "lines": 175,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\ReferralTrackingService",
+   "file": "app/Services/Campaign/ReferralTrackingService.php",
+   "lines": 213,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Campaign\\ScreenAnalyticsService",
+   "file": "app/Services/Campaign/ScreenAnalyticsService.php",
+   "lines": 349,
+   "current_capability": "Campaign",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Campaign",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\CommissionService",
+   "file": "app/Services/CommissionService.php",
+   "lines": 246,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\FinanceService",
+   "file": "app/Services/FinanceService.php",
+   "lines": 187,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\InventoryService",
+   "file": "app/Services/InventoryService.php",
+   "lines": 246,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\ManualBookingService",
+   "file": "app/Services/ManualBookingService.php",
+   "lines": 648,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\PartnerService",
+   "file": "app/Services/PartnerService.php",
+   "lines": 324,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\PaymentService",
+   "file": "app/Services/PaymentService.php",
+   "lines": 222,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Payment\\PaymentAnalyticsService",
+   "file": "app/Services/Payment/PaymentAnalyticsService.php",
+   "lines": 248,
+   "current_capability": "Payment",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "Payment",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\PricingEngine",
+   "file": "app/Services/PricingEngine.php",
+   "lines": 87,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\PricingRuleEngine",
+   "file": "app/Services/PricingRuleEngine.php",
+   "lines": 507,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\PricingService",
+   "file": "app/Services/PricingService.php",
+   "lines": 210,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Pricing\\DailyPricingCalculator",
+   "file": "app/Services/Pricing/DailyPricingCalculator.php",
+   "lines": 129,
+   "current_capability": "Pricing",
+   "indicators": [
+    "direct_Eloquent_query"
+   ],
+   "recommended_repository": "Pricing",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Pricing\\ScreenPricingResolver",
+   "file": "app/Services/Pricing/ScreenPricingResolver.php",
+   "lines": 79,
+   "current_capability": "Pricing",
+   "indicators": [
+    "direct_Eloquent_query"
+   ],
+   "recommended_repository": "Pricing",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\ProfileService",
+   "file": "app/Services/ProfileService.php",
+   "lines": 260,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\RefundService",
+   "file": "app/Services/RefundService.php",
+   "lines": 165,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\RevenueDistributionService",
+   "file": "app/Services/RevenueDistributionService.php",
+   "lines": 344,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\RevenueSplitResolverService",
+   "file": "app/Services/RevenueSplitResolverService.php",
+   "lines": 246,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\ScreenDeletionService",
+   "file": "app/Services/ScreenDeletionService.php",
+   "lines": 234,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\ScreenProviderService",
+   "file": "app/Services/ScreenProviderService.php",
+   "lines": 480,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\SettlementService",
+   "file": "app/Services/SettlementService.php",
+   "lines": 353,
+   "current_capability": null,
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  },
+  {
+   "class": "App\\Services\\Settlement\\RevenueAnalyticsService",
+   "file": "app/Services/Settlement/RevenueAnalyticsService.php",
+   "lines": 296,
+   "current_capability": "Settlement",
+   "indicators": [
+    "direct_Eloquent_query",
+    "schema_or_raw_DB"
+   ],
+   "recommended_repository": "UNASSIGNED",
+   "priority": "P2",
+   "status": "CANDIDATE - NOT EXTRACTED IN PHASE 0.20",
+   "extraction_protocol": "Plan section 12, 7 steps: (1) define the contract in Repositories/<Capability>/, (2) bind it, (3) inject it, (4) port queries, (5) test, (6) delete the old path, (7) update docs. Renaming a service to *Repository without this is FORBIDDEN."
+  }
+ ]
+}

@@ -1,0 +1,5524 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "source": "/tmp/p020/inventory.json (pre-migration runtime-aware inventory) + /tmp/p020/live_inventory.json (post-migration filesystem truth)",
+ "production_class_count_before": 336,
+ "production_class_count_after": 336,
+ "route_names": 377,
+ "route_controller_actions": 382,
+ "scheduled_tasks": 4,
+ "artisan_commands": 133,
+ "container_bindings_scanned": 0,
+ "runtime_model_policy_resolutions": 0,
+ "moved_in_phase_0_20": 64,
+ "classes": [
+  {
+   "class": "App\\Application\\Booking\\Exceptions\\BookingCreationException",
+   "kind": "class",
+   "namespace": "App\\Application\\Booking\\Exceptions",
+   "layer": "Application",
+   "capability": "Exceptions",
+   "file": "app/Application/Booking/Exceptions/BookingCreationException.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "RuntimeException"
+   ]
+  },
+  {
+   "class": "App\\Application\\Booking\\Queries\\CheckBookingAvailabilityQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Booking\\Queries",
+   "layer": "Application",
+   "capability": "Booking",
+   "file": "app/Application/Booking/Queries/CheckBookingAvailabilityQuery.php",
+   "lines": 113,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Screen",
+    "App\\Services\\BookingCapacityService",
+    "App\\Services\\InventoryService",
+    "Carbon\\Carbon"
+   ]
+  },
+  {
+   "class": "App\\Application\\Booking\\UseCases\\CreateCampaignBookingUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Booking\\UseCases",
+   "layer": "Application",
+   "capability": "Booking",
+   "file": "app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php",
+   "lines": 333,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Booking\\Exceptions\\BookingCreationException",
+    "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingActivity",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\PricingDurationRule",
+    "App\\Models\\Screen",
+    "App\\Models\\User",
+    "App\\Services\\BookingCapacityService",
+    "App\\Services\\CampaignPricingService",
+    "App\\Services\\Campaign\\LoyaltyService",
+    "App\\Services\\InventoryService",
+    "App\\Services\\RevenueSplitResolverService",
+    "App\\Support\\Events\\Notifications\\BookingCreated",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Application\\Booking\\UseCases\\RescheduleBookingUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Booking\\UseCases",
+   "layer": "Application",
+   "capability": "Booking",
+   "file": "app/Application/Booking/UseCases/RescheduleBookingUseCase.php",
+   "lines": 178,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Booking\\Exceptions\\BookingCreationException",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingActivity",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Screen",
+    "App\\Models\\User",
+    "App\\Services\\BookingCapacityService",
+    "App\\Services\\InventoryService",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Financial\\UseCases",
+   "layer": "Application",
+   "capability": null,
+   "file": "app/Application/Financial/UseCases/DistributeBookingRevenueUseCase.php",
+   "lines": 50,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Services\\RevenueDistributionService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Financial\\UseCases",
+   "layer": "Application",
+   "capability": null,
+   "file": "app/Application/Financial/UseCases/GenerateProviderSettlementUseCase.php",
+   "lines": 64,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "App\\Services\\SettlementService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Financial\\UseCases",
+   "layer": "Application",
+   "capability": null,
+   "file": "app/Application/Financial/UseCases/RecordReferralAttributionUseCase.php",
+   "lines": 67,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\ReferralCode",
+    "App\\Services\\Campaign\\ReferralService",
+    "App\\Services\\Campaign\\ReferralTrackingService",
+    "App\\Support\\Events\\Notifications\\CommissionGenerated",
+    "App\\Support\\Events\\Notifications\\ReferralUsed"
+   ]
+  },
+  {
+   "class": "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Payment\\UseCases",
+   "layer": "Application",
+   "capability": "Payment",
+   "file": "app/Application/Payment/UseCases/CreateOfflinePaymentUseCase.php",
+   "lines": 57,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "App\\Models\\User",
+    "App\\Services\\ManualBookingService",
+    "App\\Support\\Events\\Notifications\\PaymentReceived"
+   ]
+  },
+  {
+   "class": "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Payment\\UseCases",
+   "layer": "Application",
+   "capability": "Payment",
+   "file": "app/Application/Payment/UseCases/CreatePaymentOrderUseCase.php",
+   "lines": 70,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+    "App\\Domain\\Payment\\Support\\Money",
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "App\\Services\\PaymentService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Payment\\UseCases\\GetPaymentStatusUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Payment\\UseCases",
+   "layer": "Application",
+   "capability": "Payment",
+   "file": "app/Application/Payment/UseCases/GetPaymentStatusUseCase.php",
+   "lines": 43,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Payment"
+   ]
+  },
+  {
+   "class": "App\\Application\\Payment\\UseCases\\PaymentStatusProjector",
+   "kind": "class",
+   "namespace": "App\\Application\\Payment\\UseCases",
+   "layer": "Application",
+   "capability": "Payment",
+   "file": "app/Application/Payment/UseCases/PaymentStatusProjector.php",
+   "lines": 67,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Payment"
+   ]
+  },
+  {
+   "class": "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Payment\\UseCases",
+   "layer": "Application",
+   "capability": "Payment",
+   "file": "app/Application/Payment/UseCases/RefundPaymentUseCase.php",
+   "lines": 72,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Payment",
+    "App\\Models\\Refund",
+    "App\\Services\\PaymentService",
+    "App\\Services\\RefundService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Payment\\UseCases",
+   "layer": "Application",
+   "capability": "Payment",
+   "file": "app/Application/Payment/UseCases/VerifyPaymentUseCase.php",
+   "lines": 53,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Payment",
+    "App\\Services\\PaymentService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+   "kind": "class",
+   "namespace": "App\\Application\\Pricing\\Adapters",
+   "layer": "Application",
+   "capability": "Pricing",
+   "file": "app/Application/Pricing/Adapters/LegacyPricingEngineAdapter.php",
+   "lines": 30,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\PricingEngine"
+   ]
+  },
+  {
+   "class": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+   "kind": "class",
+   "namespace": "App\\Application\\Pricing\\UseCases",
+   "layer": "Application",
+   "capability": "Pricing",
+   "file": "app/Application/Pricing/UseCases/CalculateCampaignPriceUseCase.php",
+   "lines": 29,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "kind": "interface",
+   "namespace": "App\\Application\\Reporting\\Contracts",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Contracts/ReportQuery.php",
+   "lines": 18,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Application\\Reporting\\Exports\\Contracts\\ReportExporter",
+   "kind": "interface",
+   "namespace": "App\\Application\\Reporting\\Exports\\Contracts",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Exports/Contracts/ReportExporter.php",
+   "lines": 15,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Application\\Reporting\\Exports\\CsvReportExporter",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Exports",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Exports/CsvReportExporter.php",
+   "lines": 183,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Exports\\Contracts\\ReportExporter",
+    "App\\Support\\DurationFormatter"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\BookingReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/BookingReportQuery.php",
+   "lines": 34,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Services\\Booking\\BookingAnalyticsService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\CampaignReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/CampaignReportQuery.php",
+   "lines": 79,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\DurationLabelFormatter",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Services\\Booking\\BookingAnalyticsService",
+    "App\\Services\\Campaign\\ScreenAnalyticsService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\CategoryReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/CategoryReportQuery.php",
+   "lines": 135,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Models\\Booking",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\CityReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/CityReportQuery.php",
+   "lines": 51,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Services\\Campaign\\ScreenAnalyticsService",
+    "App\\Services\\Settlement\\RevenueAnalyticsService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\OverviewQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/OverviewQuery.php",
+   "lines": 87,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\GrowthRate",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Services\\Booking\\BookingAnalyticsService",
+    "App\\Services\\Campaign\\ScreenAnalyticsService",
+    "App\\Services\\Settlement\\RevenueAnalyticsService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\ReferralReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/ReferralReportQuery.php",
+   "lines": 108,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\RevenueReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/RevenueReportQuery.php",
+   "lines": 38,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Services\\Settlement\\RevenueAnalyticsService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\RewardReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/RewardReportQuery.php",
+   "lines": 125,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Models\\Booking",
+    "App\\Models\\RewardAccount",
+    "App\\Models\\RewardTransaction",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\ScreenProviderReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/ScreenProviderReportQuery.php",
+   "lines": 156,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Models\\Booking",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Queries\\ScreenReportQuery",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Queries",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Queries/ScreenReportQuery.php",
+   "lines": 37,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Support\\ReportPeriod",
+    "App\\Services\\Campaign\\ScreenAnalyticsService"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\ReportQueryRegistry",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/ReportQueryRegistry.php",
+   "lines": 106,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Contracts\\ReportQuery",
+    "App\\Application\\Reporting\\Queries\\BookingReportQuery",
+    "App\\Application\\Reporting\\Queries\\CampaignReportQuery",
+    "App\\Application\\Reporting\\Queries\\CategoryReportQuery",
+    "App\\Application\\Reporting\\Queries\\CityReportQuery",
+    "App\\Application\\Reporting\\Queries\\OverviewQuery",
+    "App\\Application\\Reporting\\Queries\\ReferralReportQuery",
+    "App\\Application\\Reporting\\Queries\\RevenueReportQuery",
+    "App\\Application\\Reporting\\Queries\\RewardReportQuery",
+    "App\\Application\\Reporting\\Queries\\ScreenProviderReportQuery",
+    "App\\Application\\Reporting\\Queries\\ScreenReportQuery",
+    "InvalidArgumentException"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Support\\DurationLabelFormatter",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Support",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Support/DurationLabelFormatter.php",
+   "lines": 23,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Support\\DurationFormatter"
+   ]
+  },
+  {
+   "class": "App\\Application\\Reporting\\Support\\GrowthRate",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Support",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Support/GrowthRate.php",
+   "lines": 37,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "kind": "class",
+   "namespace": "App\\Application\\Reporting\\Support",
+   "layer": "Application",
+   "capability": "Reporting",
+   "file": "app/Application/Reporting/Support/ReportPeriod.php",
+   "lines": 30,
+   "moved_in_0_20": false,
+   "imports": [
+    "Carbon\\Carbon"
+   ]
+  },
+  {
+   "class": "App\\Console\\Commands\\ExpirePendingBookings",
+   "kind": "class",
+   "namespace": "App\\Console\\Commands",
+   "layer": "Console",
+   "capability": null,
+   "file": "app/Console/Commands/ExpirePendingBookings.php",
+   "lines": 98,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingActivity",
+    "Carbon\\Carbon",
+    "Illuminate\\Console\\Command",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Facades\\Log"
+   ]
+  },
+  {
+   "class": "App\\Console\\Commands\\ExpireRewardPoints",
+   "kind": "class",
+   "namespace": "App\\Console\\Commands",
+   "layer": "Console",
+   "capability": null,
+   "file": "app/Console/Commands/ExpireRewardPoints.php",
+   "lines": 129,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\RewardAccount",
+    "App\\Models\\RewardTransaction",
+    "App\\Services\\SettingsService",
+    "App\\Support\\Events\\Notifications\\RewardsExpiringSoon",
+    "Illuminate\\Console\\Command",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Console\\Commands\\SyncExchangeRates",
+   "kind": "class",
+   "namespace": "App\\Console\\Commands",
+   "layer": "Console",
+   "capability": null,
+   "file": "app/Console/Commands/SyncExchangeRates.php",
+   "lines": 43,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\Campaign\\ExchangeRateService",
+    "Illuminate\\Console\\Command"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Asset\\Events\\AssetCreated",
+   "kind": "class",
+   "namespace": "App\\Domain\\Asset\\Events",
+   "layer": "Domain",
+   "capability": "Events",
+   "file": "app/Domain/Asset/Events/AssetCreated.php",
+   "lines": 18,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Screen",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Availability\\Exceptions\\FleetCapacityExceededException",
+   "kind": "class",
+   "namespace": "App\\Domain\\Availability\\Exceptions",
+   "layer": "Domain",
+   "capability": "Exceptions",
+   "file": "app/Domain/Availability/Exceptions/FleetCapacityExceededException.php",
+   "lines": 19,
+   "moved_in_0_20": true,
+   "imports": [
+    "Exception",
+    "Illuminate\\Http\\JsonResponse"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Booking\\Enums\\BookingStatus",
+   "kind": "enum",
+   "namespace": "App\\Domain\\Booking\\Enums",
+   "layer": "Domain",
+   "capability": "Booking",
+   "file": "app/Domain/Booking/Enums/BookingStatus.php",
+   "lines": 40,
+   "moved_in_0_20": true,
+   "imports": []
+  },
+  {
+   "class": "App\\Domain\\Booking\\Exceptions\\InvalidBookingStateException",
+   "kind": "class",
+   "namespace": "App\\Domain\\Booking\\Exceptions",
+   "layer": "Domain",
+   "capability": "Exceptions",
+   "file": "app/Domain/Booking/Exceptions/InvalidBookingStateException.php",
+   "lines": 19,
+   "moved_in_0_20": true,
+   "imports": [
+    "Exception",
+    "Illuminate\\Http\\JsonResponse"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+   "kind": "interface",
+   "namespace": "App\\Domain\\Financial\\Contracts",
+   "layer": "Domain",
+   "capability": null,
+   "file": "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php",
+   "lines": 67,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\PartnerCommission"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+   "kind": "interface",
+   "namespace": "App\\Domain\\Financial\\Contracts",
+   "layer": "Domain",
+   "capability": null,
+   "file": "app/Domain/Financial/Contracts/SettlementRepositoryInterface.php",
+   "lines": 52,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\BookingScreen",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Financial\\Support\\RevenueAllocation",
+   "kind": "class",
+   "namespace": "App\\Domain\\Financial\\Support",
+   "layer": "Domain",
+   "capability": null,
+   "file": "app/Domain/Financial/Support/RevenueAllocation.php",
+   "lines": 90,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+   "kind": "interface",
+   "namespace": "App\\Domain\\Payment\\Contracts",
+   "layer": "Domain",
+   "capability": "Payment",
+   "file": "app/Domain/Payment/Contracts/PaymentGatewayInterface.php",
+   "lines": 49,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+   "kind": "interface",
+   "namespace": "App\\Domain\\Payment\\Contracts",
+   "layer": "Domain",
+   "capability": "Payment",
+   "file": "app/Domain/Payment/Contracts/PaymentRepositoryInterface.php",
+   "lines": 72,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "Illuminate\\Database\\Eloquent\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Payment\\PaymentStatus",
+   "kind": "class",
+   "namespace": "App\\Domain\\Payment",
+   "layer": "Domain",
+   "capability": "Payment",
+   "file": "app/Domain/Payment/PaymentStatus.php",
+   "lines": 57,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Payment"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Payment\\Support\\Money",
+   "kind": "class",
+   "namespace": "App\\Domain\\Payment\\Support",
+   "layer": "Domain",
+   "capability": "Payment",
+   "file": "app/Domain/Payment/Support/Money.php",
+   "lines": 86,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "kind": "class",
+   "namespace": "App\\Domain\\Pricing",
+   "layer": "Domain",
+   "capability": "Pricing",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "lines": 328,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+    "App\\Models\\ReferralCode",
+    "App\\Models\\RewardAccount",
+    "App\\Models\\Screen",
+    "App\\Services\\Campaign\\LoyaltyService",
+    "App\\Services\\PricingRuleEngine",
+    "App\\Services\\Pricing\\DailyPricingCalculator",
+    "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+    "App\\Services\\Pricing\\ReferralPricingCalculator",
+    "App\\Services\\Pricing\\ScreenPricingResolver",
+    "App\\Services\\SettingsService",
+    "Carbon\\Carbon"
+   ]
+  },
+  {
+   "class": "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+   "kind": "interface",
+   "namespace": "App\\Domain\\Pricing\\Contracts",
+   "layer": "Domain",
+   "capability": "Pricing",
+   "file": "app/Domain/Pricing/Contracts/PricingEngineInterface.php",
+   "lines": 54,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+   "kind": "enum",
+   "namespace": "App\\Domain\\Pricing\\Enums",
+   "layer": "Domain",
+   "capability": "Pricing",
+   "file": "app/Domain/Pricing/Enums/PricingUnit.php",
+   "lines": 22,
+   "moved_in_0_20": true,
+   "imports": []
+  },
+  {
+   "class": "App\\Domain\\Pricing\\Exceptions\\PricingException",
+   "kind": "class",
+   "namespace": "App\\Domain\\Pricing\\Exceptions",
+   "layer": "Domain",
+   "capability": "Exceptions",
+   "file": "app/Domain/Pricing/Exceptions/PricingException.php",
+   "lines": 14,
+   "moved_in_0_20": true,
+   "imports": [
+    "Exception"
+   ]
+  },
+  {
+   "class": "App\\Enums\\AssetType",
+   "kind": "enum",
+   "namespace": "App\\Enums",
+   "layer": "Enums",
+   "capability": null,
+   "file": "app/Enums/AssetType.php",
+   "lines": 33,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Helpers\\MediaHelper",
+   "kind": "class",
+   "namespace": "App\\Helpers",
+   "layer": "Helpers",
+   "capability": null,
+   "file": "app/Helpers/MediaHelper.php",
+   "lines": 152,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Infrastructure\\Media\\Contracts\\ImageProcessingContractInterface",
+    "App\\Infrastructure\\Media\\GdImageProcessor",
+    "Illuminate\\Http\\UploadedFile",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AchievementController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AchievementController.php",
+   "lines": 67,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Achievement",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdminContactEnquiryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdminContactEnquiryController.php",
+   "lines": 127,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ContactEnquiry",
+    "App\\Models\\User",
+    "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned",
+    "App\\Support\\Events\\Notifications\\ContactEnquiryClosed",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdminManualBookingController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdminManualBookingController.php",
+   "lines": 282,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+    "App\\Models\\Booking",
+    "App\\Services\\ManualBookingService",
+    "App\\Services\\MediaService",
+    "App\\Support\\Configs\\BookingConfig",
+    "App\\Support\\Events\\Notifications\\BookingApproved",
+    "App\\Support\\Events\\Notifications\\BookingCreated",
+    "App\\Support\\Events\\Notifications\\MediaUploaded",
+    "App\\Support\\Events\\Notifications\\PaymentReceived",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Validator"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdminPaymentController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdminPaymentController.php",
+   "lines": 396,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+    "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+    "App\\Models\\Payment",
+    "App\\Models\\PaymentLog",
+    "App\\Models\\Refund",
+    "App\\Services\\Campaign\\ReferralTrackingService",
+    "App\\Services\\PaymentService",
+    "App\\Services\\Payment\\PaymentAnalyticsService",
+    "App\\Services\\RefundService",
+    "App\\Support\\Events\\Notifications\\PaymentRefunded",
+    "Carbon\\Carbon",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdminProductController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdminProductController.php",
+   "lines": 84,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Product",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdminProductEnquiryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdminProductEnquiryController.php",
+   "lines": 59,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ProductEnquiry",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdminScreenProviderController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdminScreenProviderController.php",
+   "lines": 362,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenProvider",
+    "App\\Models\\ScreenProviderSettlement",
+    "App\\Services\\RevenueDistributionService",
+    "App\\Services\\ScreenDeletionService",
+    "App\\Services\\ScreenProviderService",
+    "App\\Services\\SettlementService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdminScreenProviderEnquiryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdminScreenProviderEnquiryController.php",
+   "lines": 205,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ScreenProviderEnquiry",
+    "App\\Models\\User",
+    "App\\Services\\ScreenProviderService",
+    "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned",
+    "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed",
+    "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdminSettlementController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdminSettlementController.php",
+   "lines": 239,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+    "App\\Models\\ScreenProvider",
+    "App\\Models\\ScreenProviderSettlement",
+    "App\\Services\\SettlementService",
+    "Carbon\\Carbon",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AdvertisementCategoryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AdvertisementCategoryController.php",
+   "lines": 135,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\AdvertisementCategory",
+    "App\\Models\\Booking",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str",
+    "Illuminate\\Validation\\Rule"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AnnouncementController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AnnouncementController.php",
+   "lines": 68,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Announcement",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\AdminCurrencyController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/AdminCurrencyController.php",
+   "lines": 82,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Services\\Campaign\\CurrencyService",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\AdminRewardsController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/AdminRewardsController.php",
+   "lines": 128,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Models\\RewardAccount",
+    "App\\Models\\RewardTransaction",
+    "App\\Models\\User",
+    "App\\Services\\Campaign\\LoyaltyService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\AdminUserController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/AdminUserController.php",
+   "lines": 197,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Resources\\AdminUserResource",
+    "App\\Models\\ActivityLog",
+    "App\\Models\\Role",
+    "App\\Models\\User",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Hash",
+    "Illuminate\\Support\\Facades\\Validator",
+    "Illuminate\\Validation\\Rule",
+    "Illuminate\\Validation\\ValidationException"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\AssetController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/AssetController.php",
+   "lines": 84,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Requests\\CreateAssetRequest",
+    "App\\Http\\Requests\\UpdateAssetRequest",
+    "App\\Http\\Resources\\AssetResource",
+    "App\\Services\\AssetService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Http\\Resources\\Json\\AnonymousResourceCollection"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\AvailabilityEngineController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/AvailabilityEngineController.php",
+   "lines": 43,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Services\\BookingCapacityService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\BookingEngineController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/BookingEngineController.php",
+   "lines": 139,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Screen",
+    "App\\Services\\BookingWorkflowService",
+    "App\\Services\\ConflictDetectionService",
+    "App\\Services\\InventoryService",
+    "App\\Services\\PricingEngine",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\BudgetRecommendationController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/BudgetRecommendationController.php",
+   "lines": 198,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Models\\City",
+    "App\\Models\\State",
+    "App\\Services\\Campaign\\BudgetRecommendationService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Log"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\ClientController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/ClientController.php",
+   "lines": 116,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Services\\Campaign\\ClientAnalyticsService",
+    "App\\Services\\Campaign\\ClientService",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\CoverageController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/CoverageController.php",
+   "lines": 41,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Resources\\AssetResource",
+    "App\\Services\\Campaign\\CoverageService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\CurrencyController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/CurrencyController.php",
+   "lines": 132,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Services\\Campaign\\CurrencyService",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\FinanceController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/FinanceController.php",
+   "lines": 111,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Services\\FinanceService",
+    "Exception",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\PermissionController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/PermissionController.php",
+   "lines": 159,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Middleware\\PermissionMiddleware",
+    "App\\Models\\ActivityLog",
+    "App\\Models\\Role",
+    "App\\Models\\RolePermission",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Validator"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\PricingEngineController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/PricingEngineController.php",
+   "lines": 33,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+    "App\\Http\\Controllers\\Controller",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\ProfileController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/ProfileController.php",
+   "lines": 263,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Models\\RewardAccount",
+    "App\\Models\\RewardTransaction",
+    "App\\Services\\ProfileService",
+    "App\\Services\\SettingsService",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\RecommendationEngineController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/RecommendationEngineController.php",
+   "lines": 30,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Resources\\AssetResource",
+    "App\\Services\\Campaign\\RecommendationService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\RoleController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/RoleController.php",
+   "lines": 192,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Middleware\\PermissionMiddleware",
+    "App\\Http\\Requests\\RoleRequest",
+    "App\\Http\\Resources\\RoleResource",
+    "App\\Models\\ActivityLog",
+    "App\\Models\\Role",
+    "App\\Models\\RolePermission",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Api\\SettingsController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Api",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Api/SettingsController.php",
+   "lines": 357,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Requests\\SettingsRequest",
+    "App\\Http\\Resources\\SettingsResource",
+    "App\\Models\\Setting",
+    "App\\Services\\SettingsService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AssetImportController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AssetImportController.php",
+   "lines": 130,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\AssetImportService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Symfony\\Component\\HttpFoundation\\StreamedResponse"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AuthController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AuthController.php",
+   "lines": 113,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Resources\\UserResource",
+    "App\\Models\\User",
+    "App\\Support\\Events\\Notifications\\ProfileUpdated",
+    "App\\Support\\Events\\Notifications\\UserRegistered",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Hash",
+    "Illuminate\\Validation\\ValidationException"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Auth\\ForgotPasswordController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Auth",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Auth/ForgotPasswordController.php",
+   "lines": 60,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+    "App\\Mail\\PasswordResetMail",
+    "App\\Models\\User",
+    "Carbon\\Carbon",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Auth\\GoogleAuthController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Auth",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Auth/GoogleAuthController.php",
+   "lines": 81,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Resources\\UserResource",
+    "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+    "App\\Models\\User",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Hash",
+    "Illuminate\\Support\\Str",
+    "Illuminate\\Validation\\ValidationException"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Auth\\ResetPasswordController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers\\Auth",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Auth/ResetPasswordController.php",
+   "lines": 77,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Controllers\\Controller",
+    "App\\Http\\Resources\\UserResource",
+    "App\\Models\\User",
+    "Carbon\\Carbon",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Facades\\Hash",
+    "Illuminate\\Validation\\ValidationException"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\AuthorController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/AuthorController.php",
+   "lines": 147,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Hash",
+    "Illuminate\\Support\\Facades\\Storage"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\BlogController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/BlogController.php",
+   "lines": 301,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Blog",
+    "App\\Models\\BlogTag",
+    "App\\Models\\Category",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\BlogTagController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/BlogTagController.php",
+   "lines": 47,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\BlogTag",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\BookingController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/BookingController.php",
+   "lines": 1415,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Booking\\Exceptions\\BookingCreationException",
+    "App\\Application\\Booking\\Queries\\CheckBookingAvailabilityQuery",
+    "App\\Application\\Booking\\UseCases\\CreateCampaignBookingUseCase",
+    "App\\Application\\Booking\\UseCases\\RescheduleBookingUseCase",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingActivity",
+    "App\\Models\\BookingMedia",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Payment",
+    "App\\Models\\Screen",
+    "App\\Services\\BookingCapacityService",
+    "App\\Services\\CampaignPricingService",
+    "App\\Services\\InventoryService",
+    "App\\Services\\MediaService",
+    "App\\Services\\RevenueSplitResolverService",
+    "App\\Support\\Configs\\BookingConfig",
+    "App\\Support\\Events\\Notifications\\BookingApproved",
+    "App\\Support\\Events\\Notifications\\BookingCreated",
+    "App\\Support\\Events\\Notifications\\BookingRejected",
+    "App\\Support\\Events\\Notifications\\MediaApproved",
+    "App\\Support\\Events\\Notifications\\MediaRejected",
+    "App\\Support\\Events\\Notifications\\MediaUploaded",
+    "App\\Support\\Events\\Notifications\\PaymentReceived",
+    "Carbon\\Carbon",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Auth",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Validation\\Rule"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\CategoryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/CategoryController.php",
+   "lines": 43,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Category",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ContactEnquiryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ContactEnquiryController.php",
+   "lines": 46,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ContactEnquiry",
+    "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\Controller",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/Controller.php",
+   "lines": 70,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Contracts\\Pagination\\LengthAwarePaginator",
+    "Illuminate\\Http\\JsonResponse"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\DashBoardController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/DashBoardController.php",
+   "lines": 473,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\ContactEnquiry",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenProvider",
+    "App\\Models\\ScreenProviderSettlement",
+    "App\\Services\\Booking\\BookingAnalyticsService",
+    "App\\Services\\Campaign\\ScreenAnalyticsService",
+    "App\\Services\\Settlement\\RevenueAnalyticsService",
+    "Carbon\\Carbon",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\EnquiryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/EnquiryController.php",
+   "lines": 61,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ContactEnquiry",
+    "App\\Models\\Enquiry",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\FaqController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/FaqController.php",
+   "lines": 69,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Faq",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\FileController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/FileController.php",
+   "lines": 52,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\GalleryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/GalleryController.php",
+   "lines": 83,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Gallery",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Storage"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\JobApplicationController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/JobApplicationController.php",
+   "lines": 71,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\JobApplication",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Storage"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\JobCategoryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/JobCategoryController.php",
+   "lines": 41,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\JobCategory",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\JobPostController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/JobPostController.php",
+   "lines": 73,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\JobPost",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\PartnerApplicationController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/PartnerApplicationController.php",
+   "lines": 125,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "App\\Services\\PartnerService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\PartnerApprovalController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/PartnerApprovalController.php",
+   "lines": 109,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "App\\Services\\PartnerService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Validation\\Rule"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\PartnerBookingController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/PartnerBookingController.php",
+   "lines": 340,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Partner",
+    "App\\Models\\User",
+    "App\\Services\\ManualBookingService",
+    "App\\Services\\MediaService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\PartnerClientController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/PartnerClientController.php",
+   "lines": 190,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Partner",
+    "App\\Models\\User",
+    "App\\Services\\ManualBookingService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Validation\\Rule"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\PartnerController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/PartnerController.php",
+   "lines": 333,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "App\\Models\\PartnerCommission",
+    "App\\Models\\ReferralCode",
+    "App\\Models\\ReferralUsage",
+    "App\\Services\\Campaign\\ReferralService",
+    "App\\Services\\PartnerService",
+    "App\\Support\\Events\\Notifications\\PartnerCreated",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\PartnerPortalController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/PartnerPortalController.php",
+   "lines": 264,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "App\\Services\\PartnerService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\PaymentController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/PaymentController.php",
+   "lines": 158,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+    "App\\Application\\Payment\\UseCases\\GetPaymentStatusUseCase",
+    "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+    "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+    "App\\Models\\Booking",
+    "App\\Support\\Events\\Notifications\\PaymentFailed",
+    "App\\Support\\Events\\Notifications\\PaymentReceived",
+    "App\\Support\\Events\\Notifications\\PaymentRefunded",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\PricingPlanController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/PricingPlanController.php",
+   "lines": 136,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Requests\\PricingPlanRequest",
+    "App\\Http\\Resources\\PricingPlanResource",
+    "App\\Models\\PricingPlan",
+    "App\\Services\\BookingPriceCalculator",
+    "App\\Services\\PricingService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ProductController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ProductController.php",
+   "lines": 28,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Product",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ProductEnquiryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ProductEnquiryController.php",
+   "lines": 34,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Product",
+    "App\\Models\\ProductEnquiry",
+    "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\QrCodeController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/QrCodeController.php",
+   "lines": 291,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\QrCode",
+    "App\\Models\\QrCodeScan",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ReferralAnalyticsController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ReferralAnalyticsController.php",
+   "lines": 164,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "App\\Models\\PartnerCommission",
+    "App\\Models\\ReferralCode",
+    "App\\Models\\ReferralUsage",
+    "App\\Services\\Campaign\\ReferralService",
+    "App\\Services\\CommissionService",
+    "App\\Support\\Events\\Notifications\\CommissionGenerated",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ReferralCodeController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ReferralCodeController.php",
+   "lines": 140,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "App\\Models\\ReferralCode",
+    "App\\Models\\ReferralUsage",
+    "App\\Services\\Campaign\\ReferralService",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ReportController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ReportController.php",
+   "lines": 256,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\Exports\\Contracts\\ReportExporter",
+    "App\\Application\\Reporting\\ReportQueryRegistry",
+    "Carbon\\Carbon",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ScreenCategoryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ScreenCategoryController.php",
+   "lines": 96,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ScreenCategory",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ScreenController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ScreenController.php",
+   "lines": 1066,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Http\\Resources\\AssetResource",
+    "App\\Http\\Resources\\MapAssetResource",
+    "App\\Models\\ActivityLog",
+    "App\\Models\\City",
+    "App\\Models\\Country",
+    "App\\Models\\PricingDurationRule",
+    "App\\Models\\PricingPlan",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenDurationSplitOverride",
+    "App\\Models\\State",
+    "App\\Services\\AssetService",
+    "App\\Services\\ScreenDeletionService",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Facades\\Storage",
+    "Illuminate\\Support\\Str",
+    "PhpOffice\\PhpSpreadsheet\\Spreadsheet",
+    "PhpOffice\\PhpSpreadsheet\\Style\\Alignment",
+    "PhpOffice\\PhpSpreadsheet\\Style\\Border",
+    "PhpOffice\\PhpSpreadsheet\\Style\\Fill",
+    "PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx",
+    "PhpOffice\\PhpWord\\IOFactory as WordIOFactory",
+    "PhpOffice\\PhpWord\\PhpWord"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ScreenProviderEnquiryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ScreenProviderEnquiryController.php",
+   "lines": 45,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ScreenProviderEnquiry",
+    "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/ScreenProviderPortalController.php",
+   "lines": 849,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenProvider",
+    "App\\Models\\ScreenProviderSettlement",
+    "App\\Services\\RevenueDistributionService",
+    "App\\Services\\ScreenProviderService",
+    "App\\Services\\SettlementService",
+    "Illuminate\\Http\\JsonResponse",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\SuccessStoryController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/SuccessStoryController.php",
+   "lines": 80,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\SuccessStory",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\Log",
+    "Illuminate\\Support\\Facades\\Storage"
+   ]
+  },
+  {
+   "class": "App\\Http\\Controllers\\TestimonialController",
+   "kind": "class",
+   "namespace": "App\\Http\\Controllers",
+   "layer": "Http",
+   "capability": "Controllers",
+   "file": "app/Http/Controllers/TestimonialController.php",
+   "lines": 64,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Testimonial",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Middleware\\PermissionMiddleware",
+   "kind": "class",
+   "namespace": "App\\Http\\Middleware",
+   "layer": "Http",
+   "capability": null,
+   "file": "app/Http/Middleware/PermissionMiddleware.php",
+   "lines": 54,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "App\\Support\\Authorization\\RolePermissionChecker",
+    "Closure",
+    "Illuminate\\Http\\Request"
+   ]
+  },
+  {
+   "class": "App\\Http\\Requests\\CreateAssetRequest",
+   "kind": "class",
+   "namespace": "App\\Http\\Requests",
+   "layer": "Http",
+   "capability": "Requests",
+   "file": "app/Http/Requests/CreateAssetRequest.php",
+   "lines": 46,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Pricing\\Enums\\PricingUnit",
+    "App\\Enums\\AssetType",
+    "Illuminate\\Foundation\\Http\\FormRequest",
+    "Illuminate\\Validation\\Rules\\Enum"
+   ]
+  },
+  {
+   "class": "App\\Http\\Requests\\PricingPlanRequest",
+   "kind": "class",
+   "namespace": "App\\Http\\Requests",
+   "layer": "Http",
+   "capability": "Requests",
+   "file": "app/Http/Requests/PricingPlanRequest.php",
+   "lines": 181,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Foundation\\Http\\FormRequest"
+   ]
+  },
+  {
+   "class": "App\\Http\\Requests\\RoleRequest",
+   "kind": "class",
+   "namespace": "App\\Http\\Requests",
+   "layer": "Http",
+   "capability": "Requests",
+   "file": "app/Http/Requests/RoleRequest.php",
+   "lines": 26,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Foundation\\Http\\FormRequest"
+   ]
+  },
+  {
+   "class": "App\\Http\\Requests\\SettingsRequest",
+   "kind": "class",
+   "namespace": "App\\Http\\Requests",
+   "layer": "Http",
+   "capability": "Requests",
+   "file": "app/Http/Requests/SettingsRequest.php",
+   "lines": 129,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Foundation\\Http\\FormRequest"
+   ]
+  },
+  {
+   "class": "App\\Http\\Requests\\UpdateAssetRequest",
+   "kind": "class",
+   "namespace": "App\\Http\\Requests",
+   "layer": "Http",
+   "capability": "Requests",
+   "file": "app/Http/Requests/UpdateAssetRequest.php",
+   "lines": 46,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Pricing\\Enums\\PricingUnit",
+    "App\\Enums\\AssetType",
+    "Illuminate\\Foundation\\Http\\FormRequest",
+    "Illuminate\\Validation\\Rules\\Enum"
+   ]
+  },
+  {
+   "class": "App\\Http\\Resources\\AdminUserResource",
+   "kind": "class",
+   "namespace": "App\\Http\\Resources",
+   "layer": "Http",
+   "capability": "Resources",
+   "file": "app/Http/Resources/AdminUserResource.php",
+   "lines": 30,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Role",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Http\\Resources\\Json\\JsonResource"
+   ]
+  },
+  {
+   "class": "App\\Http\\Resources\\AssetResource",
+   "kind": "class",
+   "namespace": "App\\Http\\Resources",
+   "layer": "Http",
+   "capability": "Resources",
+   "file": "app/Http/Resources/AssetResource.php",
+   "lines": 81,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Http\\Resources\\Json\\JsonResource"
+   ]
+  },
+  {
+   "class": "App\\Http\\Resources\\MapAssetResource",
+   "kind": "class",
+   "namespace": "App\\Http\\Resources",
+   "layer": "Http",
+   "capability": "Resources",
+   "file": "app/Http/Resources/MapAssetResource.php",
+   "lines": 83,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Http\\Resources\\Json\\JsonResource"
+   ]
+  },
+  {
+   "class": "App\\Http\\Resources\\PricingPlanResource",
+   "kind": "class",
+   "namespace": "App\\Http\\Resources",
+   "layer": "Http",
+   "capability": "Resources",
+   "file": "app/Http/Resources/PricingPlanResource.php",
+   "lines": 96,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Http\\Resources\\Json\\JsonResource"
+   ]
+  },
+  {
+   "class": "App\\Http\\Resources\\RoleResource",
+   "kind": "class",
+   "namespace": "App\\Http\\Resources",
+   "layer": "Http",
+   "capability": "Resources",
+   "file": "app/Http/Resources/RoleResource.php",
+   "lines": 69,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Http\\Resources\\Json\\JsonResource"
+   ]
+  },
+  {
+   "class": "App\\Http\\Resources\\SettingsResource",
+   "kind": "class",
+   "namespace": "App\\Http\\Resources",
+   "layer": "Http",
+   "capability": "Resources",
+   "file": "app/Http/Resources/SettingsResource.php",
+   "lines": 107,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Http\\Resources\\Json\\JsonResource"
+   ]
+  },
+  {
+   "class": "App\\Http\\Resources\\UserResource",
+   "kind": "class",
+   "namespace": "App\\Http\\Resources",
+   "layer": "Http",
+   "capability": "Resources",
+   "file": "app/Http/Resources/UserResource.php",
+   "lines": 36,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Role",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Http\\Resources\\Json\\JsonResource"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+   "kind": "interface",
+   "namespace": "App\\Infrastructure\\Auth\\Contracts",
+   "layer": "Infrastructure",
+   "capability": null,
+   "file": "app/Infrastructure/Auth/Contracts/GoogleIdentityProviderInterface.php",
+   "lines": 20,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Infrastructure\\Auth\\GoogleOAuthAdapter",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\Auth",
+   "layer": "Infrastructure",
+   "capability": null,
+   "file": "app/Infrastructure/Auth/GoogleOAuthAdapter.php",
+   "lines": 36,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+    "Illuminate\\Support\\Facades\\Http",
+    "Illuminate\\Support\\Facades\\Log"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+   "kind": "interface",
+   "namespace": "App\\Infrastructure\\ExchangeRates\\Contracts",
+   "layer": "Infrastructure",
+   "capability": "ExchangeRates",
+   "file": "app/Infrastructure/ExchangeRates/Contracts/ExchangeRateApiClientInterface.php",
+   "lines": 20,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\ExchangeRates",
+   "layer": "Infrastructure",
+   "capability": "ExchangeRates",
+   "file": "app/Infrastructure/ExchangeRates/ExchangeRateApiClient.php",
+   "lines": 37,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+    "Illuminate\\Support\\Facades\\Http",
+    "Illuminate\\Support\\Facades\\Log"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Financial\\Persistence\\EloquentPartnerCommissionRepository",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\Financial\\Persistence",
+   "layer": "Infrastructure",
+   "capability": "Persistence",
+   "file": "app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+    "App\\Models\\PartnerCommission"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\Financial\\Persistence",
+   "layer": "Infrastructure",
+   "capability": "Persistence",
+   "file": "app/Infrastructure/Financial/Persistence/EloquentSettlementRepository.php",
+   "lines": 68,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Screen",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Media\\Contracts\\ImageProcessingContractInterface",
+   "kind": "interface",
+   "namespace": "App\\Infrastructure\\Media\\Contracts",
+   "layer": "Infrastructure",
+   "capability": "Media",
+   "file": "app/Infrastructure/Media/Contracts/ImageProcessingContractInterface.php",
+   "lines": 30,
+   "moved_in_0_20": false,
+   "imports": []
+  },
+  {
+   "class": "App\\Infrastructure\\Media\\GdImageProcessor",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\Media",
+   "layer": "Infrastructure",
+   "capability": "Media",
+   "file": "app/Infrastructure/Media/GdImageProcessor.php",
+   "lines": 49,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Infrastructure\\Media\\Contracts\\ImageProcessingContractInterface",
+    "GdImage"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+   "kind": "interface",
+   "namespace": "App\\Infrastructure\\Notifications\\Contracts",
+   "layer": "Infrastructure",
+   "capability": "Notifications",
+   "file": "app/Infrastructure/Notifications/Contracts/MailContractInterface.php",
+   "lines": 30,
+   "moved_in_0_20": true,
+   "imports": [
+    "Illuminate\\Mail\\Mailable"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Notifications\\LaravelMailAdapter",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\Notifications",
+   "layer": "Infrastructure",
+   "capability": "Notifications",
+   "file": "app/Infrastructure/Notifications/LaravelMailAdapter.php",
+   "lines": 31,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Support\\Facades\\Mail"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Payments\\Persistence\\EloquentPaymentRepository",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\Payments\\Persistence",
+   "layer": "Infrastructure",
+   "capability": "Persistence",
+   "file": "app/Infrastructure/Payments/Persistence/EloquentPaymentRepository.php",
+   "lines": 63,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "Illuminate\\Database\\Eloquent\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\Payments\\Razorpay",
+   "layer": "Infrastructure",
+   "capability": "Payments",
+   "file": "app/Infrastructure/Payments/Razorpay/RazorpayPaymentGateway.php",
+   "lines": 88,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+    "Illuminate\\Support\\Facades\\Config",
+    "Razorpay\\Api\\Api"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+   "kind": "interface",
+   "namespace": "App\\Infrastructure\\Storage\\Contracts",
+   "layer": "Infrastructure",
+   "capability": "Storage",
+   "file": "app/Infrastructure/Storage/Contracts/StorageContractInterface.php",
+   "lines": 56,
+   "moved_in_0_20": true,
+   "imports": [
+    "Illuminate\\Http\\UploadedFile"
+   ]
+  },
+  {
+   "class": "App\\Infrastructure\\Storage\\LaravelStorageAdapter",
+   "kind": "class",
+   "namespace": "App\\Infrastructure\\Storage",
+   "layer": "Infrastructure",
+   "capability": "Storage",
+   "file": "app/Infrastructure/Storage/LaravelStorageAdapter.php",
+   "lines": 69,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+    "Illuminate\\Http\\UploadedFile",
+    "Illuminate\\Support\\Facades\\Storage"
+   ]
+  },
+  {
+   "class": "App\\Mail\\BookingApprovedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/BookingApprovedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\BookingCancelledMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/BookingCancelledMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\BookingCreatedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/BookingCreatedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\BookingRejectedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/BookingRejectedMail.php",
+   "lines": 46,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\CommissionGeneratedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/CommissionGeneratedMail.php",
+   "lines": 39,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\PartnerCommission",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ContactEnquiryAutoReplyMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ContactEnquiryAutoReplyMail.php",
+   "lines": 38,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ContactEnquiry",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ContactEnquirySubmittedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ContactEnquirySubmittedMail.php",
+   "lines": 38,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ContactEnquiry",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\MediaApprovedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/MediaApprovedMail.php",
+   "lines": 42,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingMedia",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\MediaRejectedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/MediaRejectedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingMedia",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\PartnerApprovedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/PartnerApprovedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\PartnerCreatedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/PartnerCreatedMail.php",
+   "lines": 39,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\PartnerRejectedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/PartnerRejectedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\PasswordResetMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/PasswordResetMail.php",
+   "lines": 52,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\PaymentFailedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/PaymentFailedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Payment",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\PaymentReceivedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/PaymentReceivedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Payment",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\PaymentRefundedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/PaymentRefundedMail.php",
+   "lines": 46,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Payment",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ProductEnquirySubmittedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ProductEnquirySubmittedMail.php",
+   "lines": 41,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ProductEnquiry",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ReferralUsedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ReferralUsedMail.php",
+   "lines": 42,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\ReferralCode",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\RewardsBonusAwardedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/RewardsBonusAwardedMail.php",
+   "lines": 47,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\RewardsEarnedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/RewardsEarnedMail.php",
+   "lines": 48,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\User",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\RewardsExpiringSoonMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/RewardsExpiringSoonMail.php",
+   "lines": 47,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\RewardsRedeemedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/RewardsRedeemedMail.php",
+   "lines": 48,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\User",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ScreenProviderApprovedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ScreenProviderApprovedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ScreenProvider",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ScreenProviderEnquiryAutoReplyMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ScreenProviderEnquiryAutoReplyMail.php",
+   "lines": 38,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ScreenProviderEnquiry",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ScreenProviderEnquirySubmittedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ScreenProviderEnquirySubmittedMail.php",
+   "lines": 38,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ScreenProviderEnquiry",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ScreenProviderPortalInvitationMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ScreenProviderPortalInvitationMail.php",
+   "lines": 47,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ScreenProvider",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\ScreenProviderRejectedMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/ScreenProviderRejectedMail.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ScreenProvider",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Mail\\UserRegisteredMail",
+   "kind": "class",
+   "namespace": "App\\Mail",
+   "layer": "Mail",
+   "capability": null,
+   "file": "app/Mail/UserRegisteredMail.php",
+   "lines": 39,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Bus\\Queueable",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Mail\\Mailable",
+    "Illuminate\\Mail\\Mailables\\Content",
+    "Illuminate\\Mail\\Mailables\\Envelope",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Models\\Achievement",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Achievement.php",
+   "lines": 24,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\ActivityLog",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ActivityLog.php",
+   "lines": 47,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\AdvertisementCategory",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/AdvertisementCategory.php",
+   "lines": 28,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\Announcement",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Announcement.php",
+   "lines": 20,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Blog",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Blog.php",
+   "lines": 72,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\BlogDescription",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/BlogDescription.php",
+   "lines": 22,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\BlogTag",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/BlogTag.php",
+   "lines": 20,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\Booking",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Booking.php",
+   "lines": 424,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\BookingActivity",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/BookingActivity.php",
+   "lines": 36,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\BookingMedia",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/BookingMedia.php",
+   "lines": 86,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\BookingPricingBreakdown",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/BookingPricingBreakdown.php",
+   "lines": 58,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\BookingScreen",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/BookingScreen.php",
+   "lines": 78,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\Category",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Category.php",
+   "lines": 15,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\City",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/City.php",
+   "lines": 37,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\ContactEnquiry",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ContactEnquiry.php",
+   "lines": 38,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\Country",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Country.php",
+   "lines": 35,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\CoverageCity",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/CoverageCity.php",
+   "lines": 41,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\CurrencyRate",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/CurrencyRate.php",
+   "lines": 33,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Enquiry",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Enquiry.php",
+   "lines": 19,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Faq",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Faq.php",
+   "lines": 24,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Gallery",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Gallery.php",
+   "lines": 15,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\JobApplication",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/JobApplication.php",
+   "lines": 22,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\JobCategory",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/JobCategory.php",
+   "lines": 19,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\JobPost",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/JobPost.php",
+   "lines": 37,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\MobileAssetCoverageCity",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/MobileAssetCoverageCity.php",
+   "lines": 27,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\MobileAssetCoverageState",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/MobileAssetCoverageState.php",
+   "lines": 27,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\NotificationLog",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/NotificationLog.php",
+   "lines": 48,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Partner",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Partner.php",
+   "lines": 97,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\PartnerCommission",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PartnerCommission.php",
+   "lines": 80,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Payment",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Payment.php",
+   "lines": 149,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\PaymentLog",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PaymentLog.php",
+   "lines": 59,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\PricingDiscountRule",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PricingDiscountRule.php",
+   "lines": 36,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\PricingDurationRule",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PricingDurationRule.php",
+   "lines": 45,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\PricingPeakRule",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PricingPeakRule.php",
+   "lines": 35,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\PricingPlan",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PricingPlan.php",
+   "lines": 61,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\PricingPlanDuration",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PricingPlanDuration.php",
+   "lines": 35,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\PricingScreenRule",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PricingScreenRule.php",
+   "lines": 38,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\PricingWeekendRule",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/PricingWeekendRule.php",
+   "lines": 33,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\Product",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Product.php",
+   "lines": 41,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\ProductEnquiry",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ProductEnquiry.php",
+   "lines": 29,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\QrCode",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/QrCode.php",
+   "lines": 29,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\QrCodeScan",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/QrCodeScan.php",
+   "lines": 29,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\ReferralCode",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ReferralCode.php",
+   "lines": 65,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\ReferralUsage",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ReferralUsage.php",
+   "lines": 81,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Refund",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Refund.php",
+   "lines": 59,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\RewardAccount",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/RewardAccount.php",
+   "lines": 37,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\RewardRedemption",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/RewardRedemption.php",
+   "lines": 34,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\RewardTransaction",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/RewardTransaction.php",
+   "lines": 57,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Role",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Role.php",
+   "lines": 22,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\RolePermission",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/RolePermission.php",
+   "lines": 21,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\Screen",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Screen.php",
+   "lines": 267,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Pricing\\Enums\\PricingUnit",
+    "App\\Enums\\AssetType",
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany",
+    "Illuminate\\Database\\Eloquent\\SoftDeletes",
+    "Illuminate\\Support\\Facades\\Storage"
+   ]
+  },
+  {
+   "class": "App\\Models\\ScreenCategory",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ScreenCategory.php",
+   "lines": 37,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Models\\ScreenDurationSplitOverride",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ScreenDurationSplitOverride.php",
+   "lines": 51,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\ScreenProvider",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ScreenProvider.php",
+   "lines": 134,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\ScreenProviderActivity",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ScreenProviderActivity.php",
+   "lines": 38,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\ScreenProviderEnquiry",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ScreenProviderEnquiry.php",
+   "lines": 50,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo"
+   ]
+  },
+  {
+   "class": "App\\Models\\ScreenProviderSettlement",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/ScreenProviderSettlement.php",
+   "lines": 132,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\Setting",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Setting.php",
+   "lines": 50,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\State",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/State.php",
+   "lines": 33,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model",
+    "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany"
+   ]
+  },
+  {
+   "class": "App\\Models\\SuccessStory",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/SuccessStory.php",
+   "lines": 18,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\Testimonial",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/Testimonial.php",
+   "lines": 17,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Database\\Eloquent\\Model"
+   ]
+  },
+  {
+   "class": "App\\Models\\User",
+   "kind": "class",
+   "namespace": "App\\Models",
+   "layer": "Models",
+   "capability": null,
+   "file": "app/Models/User.php",
+   "lines": 105,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Support\\Authorization\\RolePermissionChecker",
+    "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasMany",
+    "Illuminate\\Database\\Eloquent\\Relations\\HasOne",
+    "Illuminate\\Foundation\\Auth\\User as Authenticatable",
+    "Illuminate\\Notifications\\Notifiable",
+    "Laravel\\Sanctum\\HasApiTokens"
+   ]
+  },
+  {
+   "class": "App\\Observers\\AssetObserver",
+   "kind": "class",
+   "namespace": "App\\Observers",
+   "layer": "Observers",
+   "capability": null,
+   "file": "app/Observers/AssetObserver.php",
+   "lines": 21,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Screen"
+   ]
+  },
+  {
+   "class": "App\\Providers\\AppServiceProvider",
+   "kind": "class",
+   "namespace": "App\\Providers",
+   "layer": "Providers",
+   "capability": null,
+   "file": "app/Providers/AppServiceProvider.php",
+   "lines": 136,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\SettingsService",
+    "App\\Support\\Configs\\BookingConfig",
+    "App\\Support\\Configs\\ConfigFactory",
+    "App\\Support\\Configs\\MediaConfig",
+    "App\\Support\\Configs\\NotificationConfig",
+    "App\\Support\\Configs\\PricingConfig",
+    "App\\Support\\Configs\\ReferralConfig",
+    "Illuminate\\Cache\\RateLimiting\\Limit",
+    "Illuminate\\Http\\Request",
+    "Illuminate\\Support\\Facades\\RateLimiter",
+    "Illuminate\\Support\\ServiceProvider"
+   ]
+  },
+  {
+   "class": "App\\Providers\\EventServiceProvider",
+   "kind": "class",
+   "namespace": "App\\Providers",
+   "layer": "Providers",
+   "capability": null,
+   "file": "app/Providers/EventServiceProvider.php",
+   "lines": 36,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Support\\Events\\NotificationEventSubscriber",
+    "Illuminate\\Foundation\\Support\\Providers\\EventServiceProvider as ServiceProvider"
+   ]
+  },
+  {
+   "class": "App\\Repositories\\Asset\\AssetRepository",
+   "kind": "class",
+   "namespace": "App\\Repositories\\Asset",
+   "layer": "Repositories",
+   "capability": "Asset",
+   "file": "app/Repositories/Asset/AssetRepository.php",
+   "lines": 223,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Screen",
+    "App\\Repositories\\Asset\\AssetRepositoryInterface",
+    "Illuminate\\Contracts\\Pagination\\LengthAwarePaginator",
+    "Illuminate\\Database\\Eloquent\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Repositories\\Asset\\AssetRepositoryInterface",
+   "kind": "interface",
+   "namespace": "App\\Repositories\\Asset",
+   "layer": "Repositories",
+   "capability": "Asset",
+   "file": "app/Repositories/Asset/AssetRepositoryInterface.php",
+   "lines": 22,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Screen",
+    "Illuminate\\Contracts\\Pagination\\LengthAwarePaginator",
+    "Illuminate\\Database\\Eloquent\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Repositories\\Booking\\BookingRepository",
+   "kind": "class",
+   "namespace": "App\\Repositories\\Booking",
+   "layer": "Repositories",
+   "capability": "Booking",
+   "file": "app/Repositories/Booking/BookingRepository.php",
+   "lines": 65,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Repositories\\Booking\\BookingRepositoryInterface",
+    "Illuminate\\Contracts\\Pagination\\LengthAwarePaginator"
+   ]
+  },
+  {
+   "class": "App\\Repositories\\Booking\\BookingRepositoryInterface",
+   "kind": "interface",
+   "namespace": "App\\Repositories\\Booking",
+   "layer": "Repositories",
+   "capability": "Booking",
+   "file": "app/Repositories/Booking/BookingRepositoryInterface.php",
+   "lines": 17,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Contracts\\Pagination\\LengthAwarePaginator"
+   ]
+  },
+  {
+   "class": "App\\Services\\AssetImportService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/AssetImportService.php",
+   "lines": 566,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\City",
+    "App\\Models\\Country",
+    "App\\Models\\PricingPlan",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenCategory",
+    "App\\Models\\ScreenProvider",
+    "App\\Models\\State",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Facades\\Log",
+    "Illuminate\\Support\\Str",
+    "PhpOffice\\PhpSpreadsheet\\IOFactory"
+   ]
+  },
+  {
+   "class": "App\\Services\\AssetService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/AssetService.php",
+   "lines": 89,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Screen",
+    "App\\Repositories\\Asset\\AssetRepositoryInterface",
+    "App\\Services\\Campaign\\AssetDiscoveryFilterService",
+    "App\\Services\\Campaign\\CoverageService",
+    "Illuminate\\Contracts\\Pagination\\LengthAwarePaginator",
+    "Illuminate\\Database\\Eloquent\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Services\\BookingCapacityService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/BookingCapacityService.php",
+   "lines": 603,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Screen",
+    "App\\Support\\BookingEligibilityResult",
+    "App\\Support\\Configs\\BookingConfig",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\BookingPriceCalculator",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/BookingPriceCalculator.php",
+   "lines": 44,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\PricingPlan"
+   ]
+  },
+  {
+   "class": "App\\Services\\BookingWorkflowService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/BookingWorkflowService.php",
+   "lines": 63,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Booking\\Enums\\BookingStatus",
+    "App\\Domain\\Booking\\Exceptions\\InvalidBookingStateException",
+    "App\\Models\\Booking"
+   ]
+  },
+  {
+   "class": "App\\Services\\Booking\\BookingAnalyticsService",
+   "kind": "class",
+   "namespace": "App\\Services\\Booking",
+   "layer": "Services",
+   "capability": "Booking",
+   "file": "app/Services/Booking/BookingAnalyticsService.php",
+   "lines": 176,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\CampaignPricingService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/CampaignPricingService.php",
+   "lines": 226,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingPricingBreakdown",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\AssetDiscoveryFilterService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/AssetDiscoveryFilterService.php",
+   "lines": 33,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Repositories\\Asset\\AssetRepositoryInterface",
+    "Illuminate\\Contracts\\Pagination\\LengthAwarePaginator",
+    "Illuminate\\Database\\Eloquent\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\BudgetRecommendationService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/BudgetRecommendationService.php",
+   "lines": 1446,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Enums\\AssetType",
+    "App\\Models\\City",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenCategory",
+    "App\\Models\\State",
+    "App\\Services\\CampaignPricingService",
+    "App\\Services\\InventoryService",
+    "App\\Services\\Pricing\\ScreenPricingResolver",
+    "Carbon\\Carbon",
+    "Illuminate\\Database\\Eloquent\\Collection",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Facades\\Log"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\ClientAnalyticsService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/ClientAnalyticsService.php",
+   "lines": 199,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\ReferralUsage",
+    "App\\Models\\User",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\ClientService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/ClientService.php",
+   "lines": 334,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "App\\Models\\ReferralUsage",
+    "App\\Models\\User",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\CountryDetectionService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/CountryDetectionService.php",
+   "lines": 65,
+   "moved_in_0_20": true,
+   "imports": [
+    "Illuminate\\Support\\Facades\\Http",
+    "Illuminate\\Support\\Facades\\Log"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\CoverageService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/CoverageService.php",
+   "lines": 23,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Repositories\\Asset\\AssetRepositoryInterface",
+    "Illuminate\\Support\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\CurrencyService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/CurrencyService.php",
+   "lines": 125,
+   "moved_in_0_20": true,
+   "imports": [
+    "Illuminate\\Support\\Facades\\Cache"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\ExchangeRateService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/ExchangeRateService.php",
+   "lines": 318,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+    "App\\Models\\CurrencyRate",
+    "Illuminate\\Support\\Facades\\Cache",
+    "Illuminate\\Support\\Facades\\Log"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\LoyaltyService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/LoyaltyService.php",
+   "lines": 356,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\RewardAccount",
+    "App\\Models\\RewardRedemption",
+    "App\\Models\\RewardTransaction",
+    "App\\Models\\User",
+    "App\\Services\\SettingsService",
+    "App\\Support\\Events\\Notifications\\RewardsBonusAwarded",
+    "App\\Support\\Events\\Notifications\\RewardsEarned",
+    "App\\Support\\Events\\Notifications\\RewardsRedeemed",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\RecommendationService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/RecommendationService.php",
+   "lines": 38,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Screen",
+    "Illuminate\\Database\\Eloquent\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\ReferralService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/ReferralService.php",
+   "lines": 175,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\PartnerCommission",
+    "App\\Models\\ReferralCode",
+    "App\\Models\\ReferralUsage"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\ReferralTrackingService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/ReferralTrackingService.php",
+   "lines": 213,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+    "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+    "App\\Models\\Booking",
+    "App\\Models\\PartnerCommission",
+    "App\\Models\\ReferralCode",
+    "App\\Models\\ReferralUsage",
+    "App\\Services\\Campaign\\ReferralService",
+    "App\\Support\\Events\\Notifications\\ReferralUsed"
+   ]
+  },
+  {
+   "class": "App\\Services\\Campaign\\ScreenAnalyticsService",
+   "kind": "class",
+   "namespace": "App\\Services\\Campaign",
+   "layer": "Services",
+   "capability": "Campaign",
+   "file": "app/Services/Campaign/ScreenAnalyticsService.php",
+   "lines": 349,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Screen",
+    "App\\Support\\Configs\\BookingConfig",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\CommissionService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/CommissionService.php",
+   "lines": 246,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+    "App\\Models\\PartnerCommission",
+    "App\\Models\\ReferralUsage",
+    "App\\Support\\Events\\Notifications\\CommissionGenerated",
+    "Illuminate\\Support\\Facades\\DB",
+    "InvalidArgumentException"
+   ]
+  },
+  {
+   "class": "App\\Services\\ConflictDetectionService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/ConflictDetectionService.php",
+   "lines": 25,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Availability\\Exceptions\\FleetCapacityExceededException"
+   ]
+  },
+  {
+   "class": "App\\Services\\FinanceService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/FinanceService.php",
+   "lines": 187,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ActivityLog",
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "App\\Models\\Refund",
+    "App\\Models\\ScreenProviderSettlement",
+    "App\\Services\\Settlement\\RevenueAnalyticsService",
+    "Exception",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\FirstBookingDiscountService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/FirstBookingDiscountService.php",
+   "lines": 151,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\User"
+   ]
+  },
+  {
+   "class": "App\\Services\\InventoryService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/InventoryService.php",
+   "lines": 246,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Enums\\AssetType",
+    "App\\Models\\Screen",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\ManualBookingService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/ManualBookingService.php",
+   "lines": 648,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+    "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+    "App\\Domain\\Pricing\\Exceptions\\PricingException",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingActivity",
+    "App\\Models\\BookingMedia",
+    "App\\Models\\BookingPricingBreakdown",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Payment",
+    "App\\Models\\Screen",
+    "App\\Models\\User",
+    "App\\Support\\Events\\Notifications\\PaymentReceived",
+    "Carbon\\Carbon",
+    "Illuminate\\Http\\UploadedFile",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Facades\\Hash",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Services\\MediaService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/MediaService.php",
+   "lines": 94,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+    "App\\Support\\Configs\\BookingConfig",
+    "App\\Support\\Configs\\MediaConfig",
+    "Illuminate\\Http\\UploadedFile",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Services\\NotificationService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/NotificationService.php",
+   "lines": 244,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+    "App\\Models\\NotificationLog",
+    "App\\Support\\Configs\\NotificationConfig",
+    "Illuminate\\Contracts\\Queue\\ShouldQueue",
+    "Illuminate\\Support\\Facades\\Log"
+   ]
+  },
+  {
+   "class": "App\\Services\\PartnerService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/PartnerService.php",
+   "lines": 324,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Partner",
+    "App\\Models\\ReferralCode",
+    "App\\Models\\User",
+    "App\\Support\\Events\\Notifications\\PartnerApproved",
+    "App\\Support\\Events\\Notifications\\PartnerRejected",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Facades\\Hash",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Services\\PaymentService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/PaymentService.php",
+   "lines": 222,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+    "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+    "App\\Domain\\Payment\\Support\\Money",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingPricingBreakdown",
+    "App\\Models\\Payment",
+    "App\\Services\\Campaign\\ReferralTrackingService",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Services\\Payment\\PaymentAnalyticsService",
+   "kind": "class",
+   "namespace": "App\\Services\\Payment",
+   "layer": "Services",
+   "capability": "Payment",
+   "file": "app/Services/Payment/PaymentAnalyticsService.php",
+   "lines": 248,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\PartnerCommission",
+    "App\\Models\\Payment",
+    "App\\Models\\ReferralUsage",
+    "App\\Models\\Refund",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\PricingEngine",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/PricingEngine.php",
+   "lines": 87,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Screen",
+    "Carbon\\Carbon"
+   ]
+  },
+  {
+   "class": "App\\Services\\PricingRuleEngine",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/PricingRuleEngine.php",
+   "lines": 507,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\PricingDurationRule",
+    "App\\Models\\PricingPeakRule",
+    "App\\Models\\PricingPlan",
+    "App\\Models\\PricingScreenRule",
+    "App\\Models\\PricingWeekendRule",
+    "App\\Services\\Pricing\\DailyPricingCalculator",
+    "Carbon\\Carbon"
+   ]
+  },
+  {
+   "class": "App\\Services\\PricingService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/PricingService.php",
+   "lines": 210,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\PricingPlan",
+    "App\\Services\\Campaign\\ExchangeRateService",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\Pricing\\DailyPricingCalculator",
+   "kind": "class",
+   "namespace": "App\\Services\\Pricing",
+   "layer": "Services",
+   "capability": "Pricing",
+   "file": "app/Services/Pricing/DailyPricingCalculator.php",
+   "lines": 129,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\PricingPlan",
+    "App\\Models\\PricingPlanDuration",
+    "Carbon\\Carbon"
+   ]
+  },
+  {
+   "class": "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+   "kind": "class",
+   "namespace": "App\\Services\\Pricing",
+   "layer": "Services",
+   "capability": "Pricing",
+   "file": "app/Services/Pricing/FirstBookingDiscountPricingCalculator.php",
+   "lines": 30,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\User",
+    "App\\Services\\FirstBookingDiscountService"
+   ]
+  },
+  {
+   "class": "App\\Services\\Pricing\\ReferralPricingCalculator",
+   "kind": "class",
+   "namespace": "App\\Services\\Pricing",
+   "layer": "Services",
+   "capability": "Pricing",
+   "file": "app/Services/Pricing/ReferralPricingCalculator.php",
+   "lines": 37,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ReferralCode"
+   ]
+  },
+  {
+   "class": "App\\Services\\Pricing\\ScreenPricingResolver",
+   "kind": "class",
+   "namespace": "App\\Services\\Pricing",
+   "layer": "Services",
+   "capability": "Pricing",
+   "file": "app/Services/Pricing/ScreenPricingResolver.php",
+   "lines": 79,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Pricing\\Exceptions\\PricingException",
+    "App\\Models\\PricingPlan",
+    "App\\Models\\Screen",
+    "Illuminate\\Support\\Collection"
+   ]
+  },
+  {
+   "class": "App\\Services\\ProfileService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/ProfileService.php",
+   "lines": 260,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+    "App\\Models\\Booking",
+    "App\\Models\\User",
+    "App\\Services\\Campaign\\ClientAnalyticsService",
+    "App\\Services\\Campaign\\ClientService",
+    "Illuminate\\Http\\UploadedFile"
+   ]
+  },
+  {
+   "class": "App\\Services\\RefundService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/RefundService.php",
+   "lines": 165,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+    "App\\Domain\\Payment\\Support\\Money",
+    "App\\Models\\Payment",
+    "App\\Models\\PaymentLog",
+    "App\\Models\\Refund",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\ReportService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/ReportService.php",
+   "lines": 107,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Application\\Reporting\\ReportQueryRegistry"
+   ]
+  },
+  {
+   "class": "App\\Services\\RevenueDistributionService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/RevenueDistributionService.php",
+   "lines": 344,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Financial\\Support\\RevenueAllocation",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenProviderActivity",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\RevenueSplitResolverService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/RevenueSplitResolverService.php",
+   "lines": 246,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingPricingBreakdown",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\PricingDurationRule",
+    "App\\Models\\PricingPlan",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenDurationSplitOverride",
+    "DomainException",
+    "InvalidArgumentException"
+   ]
+  },
+  {
+   "class": "App\\Services\\ScreenDeletionService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/ScreenDeletionService.php",
+   "lines": 234,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ActivityLog",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenProvider",
+    "App\\Models\\ScreenProviderActivity",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\ScreenProviderService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/ScreenProviderService.php",
+   "lines": 480,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\ActivityLog",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenProvider",
+    "App\\Models\\ScreenProviderActivity",
+    "App\\Models\\ScreenProviderEnquiry",
+    "App\\Models\\User",
+    "App\\Support\\Events\\Notifications\\ScreenProviderApproved",
+    "App\\Support\\Events\\Notifications\\ScreenProviderCreated",
+    "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation",
+    "App\\Support\\Events\\Notifications\\ScreenProviderRejected",
+    "App\\Support\\Exceptions\\UserConflictException",
+    "Illuminate\\Support\\Facades\\DB",
+    "Illuminate\\Support\\Str"
+   ]
+  },
+  {
+   "class": "App\\Services\\SettingsService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/SettingsService.php",
+   "lines": 334,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Setting",
+    "Illuminate\\Support\\Facades\\Cache"
+   ]
+  },
+  {
+   "class": "App\\Services\\SettlementService",
+   "kind": "class",
+   "namespace": "App\\Services",
+   "layer": "Services",
+   "capability": null,
+   "file": "app/Services/SettlementService.php",
+   "lines": 353,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+    "App\\Models\\Booking",
+    "App\\Models\\BookingScreen",
+    "App\\Models\\Screen",
+    "App\\Models\\ScreenProvider",
+    "App\\Models\\ScreenProviderActivity",
+    "App\\Models\\ScreenProviderSettlement",
+    "App\\Models\\User",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Services\\Settlement\\RevenueAnalyticsService",
+   "kind": "class",
+   "namespace": "App\\Services\\Settlement",
+   "layer": "Services",
+   "capability": "Settlement",
+   "file": "app/Services/Settlement/RevenueAnalyticsService.php",
+   "lines": 296,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "Carbon\\Carbon",
+    "Illuminate\\Support\\Facades\\DB"
+   ]
+  },
+  {
+   "class": "App\\Support\\Authorization\\RolePermissionChecker",
+   "kind": "class",
+   "namespace": "App\\Support\\Authorization",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/Authorization/RolePermissionChecker.php",
+   "lines": 89,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Models\\Role",
+    "App\\Models\\User",
+    "Illuminate\\Support\\Facades\\Cache"
+   ]
+  },
+  {
+   "class": "App\\Support\\BookingEligibilityResult",
+   "kind": "class",
+   "namespace": "App\\Support",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/BookingEligibilityResult.php",
+   "lines": 177,
+   "moved_in_0_20": false,
+   "imports": [
+    "Illuminate\\Contracts\\Support\\Arrayable",
+    "JsonSerializable"
+   ]
+  },
+  {
+   "class": "App\\Support\\Configs\\BookingConfig",
+   "kind": "class",
+   "namespace": "App\\Support\\Configs",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/Configs/BookingConfig.php",
+   "lines": 189,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\SettingsService"
+   ]
+  },
+  {
+   "class": "App\\Support\\Configs\\ConfigFactory",
+   "kind": "class",
+   "namespace": "App\\Support\\Configs",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/Configs/ConfigFactory.php",
+   "lines": 79,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\SettingsService"
+   ]
+  },
+  {
+   "class": "App\\Support\\Configs\\MediaConfig",
+   "kind": "class",
+   "namespace": "App\\Support\\Configs",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/Configs/MediaConfig.php",
+   "lines": 122,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\SettingsService"
+   ]
+  },
+  {
+   "class": "App\\Support\\Configs\\NotificationConfig",
+   "kind": "class",
+   "namespace": "App\\Support\\Configs",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/Configs/NotificationConfig.php",
+   "lines": 258,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\SettingsService"
+   ]
+  },
+  {
+   "class": "App\\Support\\Configs\\PricingConfig",
+   "kind": "class",
+   "namespace": "App\\Support\\Configs",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/Configs/PricingConfig.php",
+   "lines": 70,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\SettingsService"
+   ]
+  },
+  {
+   "class": "App\\Support\\Configs\\ReferralConfig",
+   "kind": "class",
+   "namespace": "App\\Support\\Configs",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/Configs/ReferralConfig.php",
+   "lines": 70,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Services\\SettingsService"
+   ]
+  },
+  {
+   "class": "App\\Support\\DurationFormatter",
+   "kind": "class",
+   "namespace": "App\\Support",
+   "layer": "Support",
+   "capability": null,
+   "file": "app/Support/DurationFormatter.php",
+   "lines": 94,
+   "moved_in_0_20": false,
+   "imports": [
+    "Carbon\\Carbon"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\NotificationEventSubscriber",
+   "kind": "class",
+   "namespace": "App\\Support\\Events",
+   "layer": "Support",
+   "capability": "Events",
+   "file": "app/Support/Events/NotificationEventSubscriber.php",
+   "lines": 386,
+   "moved_in_0_20": false,
+   "imports": [
+    "App\\Mail\\BookingApprovedMail",
+    "App\\Mail\\BookingCancelledMail",
+    "App\\Mail\\BookingCreatedMail",
+    "App\\Mail\\BookingRejectedMail",
+    "App\\Mail\\CommissionGeneratedMail",
+    "App\\Mail\\ContactEnquiryAutoReplyMail",
+    "App\\Mail\\ContactEnquirySubmittedMail",
+    "App\\Mail\\MediaApprovedMail",
+    "App\\Mail\\MediaRejectedMail",
+    "App\\Mail\\PartnerApprovedMail",
+    "App\\Mail\\PartnerCreatedMail",
+    "App\\Mail\\PartnerRejectedMail",
+    "App\\Mail\\PaymentFailedMail",
+    "App\\Mail\\PaymentReceivedMail",
+    "App\\Mail\\PaymentRefundedMail",
+    "App\\Mail\\ProductEnquirySubmittedMail",
+    "App\\Mail\\ReferralUsedMail",
+    "App\\Mail\\RewardsBonusAwardedMail",
+    "App\\Mail\\RewardsEarnedMail",
+    "App\\Mail\\RewardsExpiringSoonMail",
+    "App\\Mail\\RewardsRedeemedMail",
+    "App\\Mail\\ScreenProviderApprovedMail",
+    "App\\Mail\\ScreenProviderEnquiryAutoReplyMail",
+    "App\\Mail\\ScreenProviderEnquirySubmittedMail",
+    "App\\Mail\\ScreenProviderPortalInvitationMail",
+    "App\\Mail\\ScreenProviderRejectedMail",
+    "App\\Mail\\UserRegisteredMail",
+    "App\\Services\\NotificationService",
+    "App\\Support\\Events\\Notifications\\BookingApproved",
+    "App\\Support\\Events\\Notifications\\BookingCancelled",
+    "App\\Support\\Events\\Notifications\\BookingCreated",
+    "App\\Support\\Events\\Notifications\\BookingRejected",
+    "App\\Support\\Events\\Notifications\\CommissionGenerated",
+    "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned",
+    "App\\Support\\Events\\Notifications\\ContactEnquiryClosed",
+    "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted",
+    "App\\Support\\Events\\Notifications\\MediaApproved",
+    "App\\Support\\Events\\Notifications\\MediaRejected",
+    "App\\Support\\Events\\Notifications\\MediaUploaded",
+    "App\\Support\\Events\\Notifications\\PartnerApproved",
+    "App\\Support\\Events\\Notifications\\PartnerCreated",
+    "App\\Support\\Events\\Notifications\\PartnerRejected",
+    "App\\Support\\Events\\Notifications\\PaymentFailed",
+    "App\\Support\\Events\\Notifications\\PaymentReceived",
+    "App\\Support\\Events\\Notifications\\PaymentRefunded",
+    "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted",
+    "App\\Support\\Events\\Notifications\\ProfileUpdated",
+    "App\\Support\\Events\\Notifications\\ReferralUsed",
+    "App\\Support\\Events\\Notifications\\RewardsBonusAwarded",
+    "App\\Support\\Events\\Notifications\\RewardsEarned",
+    "App\\Support\\Events\\Notifications\\RewardsExpiringSoon",
+    "App\\Support\\Events\\Notifications\\RewardsRedeemed",
+    "App\\Support\\Events\\Notifications\\ScreenProviderApproved",
+    "App\\Support\\Events\\Notifications\\ScreenProviderCreated",
+    "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted",
+    "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned",
+    "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed",
+    "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted",
+    "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation",
+    "App\\Support\\Events\\Notifications\\ScreenProviderRejected",
+    "App\\Support\\Events\\Notifications\\UserRegistered",
+    "Illuminate\\Events\\Dispatcher"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\BookingApproved",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/BookingApproved.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\BookingCancelled",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/BookingCancelled.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\BookingCreated",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/BookingCreated.php",
+   "lines": 29,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\BookingRejected",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/BookingRejected.php",
+   "lines": 29,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/CommissionGenerated.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\PartnerCommission",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ContactEnquiryAssigned.php",
+   "lines": 30,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ContactEnquiry",
+    "App\\Models\\User",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ContactEnquiryClosed",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ContactEnquiryClosed.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ContactEnquiry",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ContactEnquirySubmitted.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ContactEnquiry",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\MediaApproved",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/MediaApproved.php",
+   "lines": 29,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingMedia",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\MediaRejected",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/MediaRejected.php",
+   "lines": 31,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingMedia",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\MediaUploaded",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/MediaUploaded.php",
+   "lines": 29,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\BookingMedia",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\PartnerApproved",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/PartnerApproved.php",
+   "lines": 28,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Partner",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\PartnerCreated",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/PartnerCreated.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Partner",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\PartnerRejected",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/PartnerRejected.php",
+   "lines": 28,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Partner",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\PaymentFailed",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/PaymentFailed.php",
+   "lines": 29,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\PaymentReceived",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/PaymentReceived.php",
+   "lines": 29,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\PaymentRefunded",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/PaymentRefunded.php",
+   "lines": 31,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\Payment",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ProductEnquirySubmitted.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ProductEnquiry",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ProfileUpdated",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ProfileUpdated.php",
+   "lines": 28,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ReferralUsed",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ReferralUsed.php",
+   "lines": 32,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\ReferralCode",
+    "App\\Models\\ReferralUsage",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\RewardsBonusAwarded",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/RewardsBonusAwarded.php",
+   "lines": 30,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\RewardsEarned",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/RewardsEarned.php",
+   "lines": 31,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\User",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\RewardsExpiringSoon",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/RewardsExpiringSoon.php",
+   "lines": 31,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\RewardAccount",
+    "App\\Models\\User",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\RewardsRedeemed",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/RewardsRedeemed.php",
+   "lines": 31,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\Booking",
+    "App\\Models\\User",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ScreenProviderApproved",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ScreenProviderApproved.php",
+   "lines": 28,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ScreenProvider",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ScreenProviderCreated",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ScreenProviderCreated.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ScreenProvider",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ScreenProviderEnquirySubmitted.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ScreenProviderEnquiry",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ScreenProviderLeadAssigned.php",
+   "lines": 29,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ScreenProviderEnquiry",
+    "App\\Models\\User",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ScreenProviderLeadClosed.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ScreenProviderEnquiry",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ScreenProviderLeadConverted.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ScreenProviderEnquiry",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ScreenProviderPortalInvitation.php",
+   "lines": 28,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ScreenProvider",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\ScreenProviderRejected",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/ScreenProviderRejected.php",
+   "lines": 28,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\ScreenProvider",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Events\\Notifications\\UserRegistered",
+   "kind": "class",
+   "namespace": "App\\Support\\Events\\Notifications",
+   "layer": "Support",
+   "capability": "Notifications",
+   "file": "app/Support/Events/Notifications/UserRegistered.php",
+   "lines": 26,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\User",
+    "Illuminate\\Broadcasting\\InteractsWithSockets",
+    "Illuminate\\Foundation\\Events\\Dispatchable",
+    "Illuminate\\Queue\\SerializesModels"
+   ]
+  },
+  {
+   "class": "App\\Support\\Exceptions\\UserConflictException",
+   "kind": "class",
+   "namespace": "App\\Support\\Exceptions",
+   "layer": "Support",
+   "capability": "Exceptions",
+   "file": "app/Support/Exceptions/UserConflictException.php",
+   "lines": 23,
+   "moved_in_0_20": true,
+   "imports": [
+    "App\\Models\\User",
+    "Exception"
+   ]
+  }
+ ]
+}

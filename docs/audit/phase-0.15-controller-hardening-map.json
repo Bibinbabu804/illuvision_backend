@@ -1,0 +1,48 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "controller-hardening-map",
+  "controller_count": 81,
+  "largest": {
+    "file": "app/Http/Controllers/BookingController.php",
+    "lines": 1414
+  },
+  "hardening_applied": [
+    {
+      "type": "booking creation + reschedule extracted to use cases",
+      "risk": "behaviour-neutral",
+      "verified_by": "tests/Feature/Golden/*"
+    },
+    {
+      "type": "authorization delegated to RolePermissionChecker",
+      "risk": "none - algorithm extracted verbatim",
+      "verified_by": "tests/Feature/AuthorizationHardeningTest.php"
+    },
+    {
+      "type": "http_status moved out of Application via BookingCreationException",
+      "risk": "none"
+    }
+  ],
+  "controller_level_authz_inventory": {
+    "middleware_enforced": true,
+    "finding": "Middleware coverage is the ONLY authorization gate for most routes. See phase-0.16-authorization-audit.json for three route groups that are authenticated-but-unpermissioned and one that is fully anonymous.",
+    "controller_internal_checks": "Inconsistent: some actions re-check ownership, most rely solely on middleware."
+  },
+  "candidates": [
+    {
+      "file": "BookingController",
+      "action": "split",
+      "category": "C",
+      "reason": "1414 lines with booking creation, reschedule, KPI, conflict and media concerns; splitting changes response envelopes."
+    },
+    {
+      "file": "BookingController",
+      "line": 180,
+      "action": "inject BookingCapacityService",
+      "category": "B"
+    }
+  ],
+  "not_done": "No controller was split or renamed in Phase 0.15."
+}

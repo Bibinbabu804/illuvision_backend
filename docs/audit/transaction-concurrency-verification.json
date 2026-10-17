@@ -1,0 +1,41 @@
+{
+  "phase": "0.3",
+  "name": "Transaction & Concurrency Verification",
+  "generated_at": "2026-09-25T21:50:00+05:30",
+  "verifications": [
+    {
+      "verification_id": "VERIF-CONC-001",
+      "target": "Booking Lock Verification (Section 3.1)",
+      "path": "BookingController@storeCampaign -> DB::transaction -> InventoryService::lockScreensForBooking",
+      "findings": {
+        "is_method_executed": true,
+        "execution_line": "app/Http/Controllers/BookingController.php:101",
+        "sql_generated": "SELECT * FROM screens WHERE id IN (?) ORDER BY id ASC FOR UPDATE",
+        "rows_locked": "Exact rows in screens table corresponding to target screen_ids, sorted by id ascending to prevent deadlocks",
+        "timing_of_lock": "Acquired at the beginning of the transaction BEFORE any availability, capacity, or duration reads",
+        "rows_not_locked": "Does NOT lock booking_screens or bookings rows",
+        "concurrency_protection": "Because any concurrent booking for the same asset(s) executes lockScreensForBooking within its transaction, the second transaction blocks at MySQL level until the first commits. After the first commits, the second observes the committed booking_screens records and rejects the overbooking if capacity is full."
+      }
+    },
+    {
+      "verification_id": "VERIF-CONC-002",
+      "target": "Payment Locking Verification (Section 3.2)",
+      "path": "PaymentService@verifyAndConfirmPayment -> DB::transaction -> Payment::where('razorpay_order_id', ...)->firstOrFail()",
+      "findings": {
+        "is_pessimistic_lock": false,
+        "sql_generated": "SELECT * FROM payments WHERE razorpay_order_id = ? LIMIT 1",
+        "has_lock_for_update": false,
+        "concurrency_risk": "Two concurrent verification webhook requests for the same order could simultaneously read payment_status='pending' before either commits. A race condition is currently possible unless MySQL unique key or external gateway deduplication prevents it."
+      }
+    },
+    {
+      "verification_id": "VERIF-CONC-003",
+      "target": "Atomic Transaction Rollback Verification",
+      "mechanism": "DB::transaction() automatic rollback on unhandled Exception/Throwable",
+      "findings": {
+        "verified_by_test": "GoldenConcurrencyVerificationTest::test_transaction_rollback_reverts_partial_mutations",
+        "result": "Injected failures revert all preceding INSERT / UPDATE operations, preserving zero database pollution."
+      }
+    }
+  ]
+}

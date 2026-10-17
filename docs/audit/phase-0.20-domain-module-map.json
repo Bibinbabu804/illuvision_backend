@@ -1,0 +1,115 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "module": "Domain",
+ "note": "Creative is a bounded domain inside Project 01, subdivided into 9 subdomains per the plan. It is NOT a separate application and NOT a Project 03 CMS.",
+ "capabilities": [
+  {
+   "capability": "Campaign",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Media",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Asset",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Provider",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Partner",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Pricing",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 3,
+   "classes": [
+    "App\\Domain\\Pricing\\CampaignPricingEngine",
+    "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+    "App\\Domain\\Pricing\\Enums\\PricingUnit"
+   ]
+  },
+  {
+   "capability": "Availability",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Booking",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 1,
+   "classes": [
+    "App\\Domain\\Booking\\Enums\\BookingStatus"
+   ]
+  },
+  {
+   "capability": "Payment",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 4,
+   "classes": [
+    "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+    "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+    "App\\Domain\\Payment\\PaymentStatus",
+    "App\\Domain\\Payment\\Support\\Money"
+   ]
+  },
+  {
+   "capability": "Settlement",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Reporting",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Creative",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 0,
+   "classes": [],
+   "subdomains": {
+    "Creator": true,
+    "Service": true,
+    "Brief": true,
+    "Proposal": true,
+    "Project": true,
+    "Revision": true,
+    "Delivery": true,
+    "Review": true,
+    "Earnings": true
+   },
+   "subdomain_note": "all 9 created and intentionally empty - Creative is a declared but not-yet-implemented bounded domain (Project 02/03 scope)"
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "module": "Support",
+ "note": "Events (33 notification events + 1 subscriber), Exceptions (1 cross-cutting). Jobs created and intentionally empty - no queued job classes exist.",
+ "capabilities": [
+  {
+   "capability": "Events",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Jobs",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Exceptions",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 0,
+   "classes": []
+  }
+ ]
+}

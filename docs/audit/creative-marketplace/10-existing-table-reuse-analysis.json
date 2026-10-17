@@ -1,0 +1,2301 @@
+{
+  "artifact": "10-existing-table-reuse-analysis",
+  "generated": "2026-09-26",
+  "classification": "CURRENT_FACT for every current_purpose / current_owner entry, verified by reading the 112 migrations, the 62 models, the seeders and the services. RECOMMENDATION for every verdict, creative_use, required_change and risk entry. OPEN_DECISION where noted.",
+  "status": "PROPOSAL ONLY. No migration was written. No table was created, altered or dropped. This artifact exists to stop the Creative implementation from duplicating infrastructure that already exists.",
+  "purpose": "The table-level reuse decision record required by section 11 of the Creative Marketplace audit. It answers, for every one of the 73 tables in the current database: what is it for, who owns it, what Creative would use it for, whether Creative should reuse / extend / pattern after / avoid it, why, what change would be required, and what the risk is.",
+  "method": [
+    "Read all 112 migrations in database/migrations to establish the real table set, columns, keys and constraints.",
+    "Read all 62 Eloquent models to establish ownership and relationships.",
+    "Read the seeders to establish which role and permission values actually exist.",
+    "Cross-checked against 08-creative-database-current-schema-map.json; every verdict here is at least as strict as the verdict recorded there.",
+    "Group index: the Creative blueprint is in 09-creative-database-target-schema-blueprint.json. This artifact covers only what already exists."
+  ],
+  "classification_legend": {
+    "CURRENT_FACT": "Verified from source code (migrations, models, seeders, services).",
+    "ARCHITECTURE_DOCUMENT": "Defined by docs/architecture/ARCHITECTURE_RULES.md or root AGENTS.md.",
+    "INFERENCE": "Reasonably inferred from the implementation or from relationships between tables.",
+    "RECOMMENDATION": "Recommended target design. Not implemented. No migration was written.",
+    "OPEN_DECISION": "Cannot be determined from available evidence; requires a product or architecture decision."
+  },
+  "verdict_legend": {
+    "DIRECT_REUSE": "Creative reads/writes this table with no schema change.",
+    "EXTEND": "Creative reuses the table but must add rows (role, permission, setting group, recipient type). Adding COLUMNS to shared tables is only proposed where explicitly stated.",
+    "EXTEND_BY_REFERENCE": "Creative must reference this table from a new Creative table. No column is added to the shared table.",
+    "PATTERN_ONLY": "Creative must build its own table. The existing table is read only as a structural/idiomatic template.",
+    "DO_NOT_USE": "Creative must neither read nor write this table, and must not extend it."
+  },
+  "baseline": {
+    "classification": "CURRENT_FACT",
+    "measurement_date": "2026-09-26",
+    "migrations": 112,
+    "distinct_tables": 73,
+    "foreign_key_definitions": 96,
+    "foreign_key_definitions_note": "94 via ->constrained(...) plus 2 legacy ->foreign(...) across the 112 migrations. The earlier figure of 91 in this artifact was an undercount; the AGENTS.md figure of 94 is the ->constrained() count alone. Three FK-like columns are NOT constrained: bookings.screen_category_id, booking_screens.screen_category_id, booking_screens.screen_provider_id, asset_coverage_cities.state_id (4 columns).",
+    "explicit_foreign_key_constraints_superseded": 91,
+    "models": 62,
+    "creative_tables_existing": 0,
+    "creative_migrations_existing": 0,
+    "statement": "Every table below is a pre-existing Project 01 table. None of them is a Creative table."
+  },
+  "how_to_read": {
+    "DIRECT_REUSE": "Safe to depend on directly. No Creative schema work.",
+    "EXTEND": "Creative adds ROWS to an existing shared table (a role, a permission, a setting group, a recipient type). Adding COLUMNS to a shared table is never proposed here except where the required_change text says so explicitly - and it does not.",
+    "EXTEND_BY_REFERENCE": "A new Creative table references the existing table by FK. The existing table is unchanged.",
+    "PATTERN_ONLY": "Creative builds its own table. The existing table is read as a structural template only. This is the most common verdict for the advertising and financial tables, and it is deliberate: the SHAPE is reusable, the TABLE is not.",
+    "DO_NOT_USE": "Creative must not read, write or extend the table. Most of these are marketing content or advertising inventory."
+  },
+  "reuse_matrix": [
+    {
+      "existing_table": "users",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Identity, authentication, single free-text role column, partner-owned client accounts"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Identity)",
+        "eloquent_model": "App\\Models\\User",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "The new creative_creators table anchors on users.id as the single identity. Creative never stores a second user record, a second password, or a second token."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "EXTEND_BY_REFERENCE",
+        "meaning": "Creative must reference this table from a new Creative table. No column is added to the shared table."
+      },
+      "why": "AGENTS.md forbids a second user/authentication system, and a Creative user IS a Marketplace user. users has no FK to roles, no version column and no soft delete.",
+      "required_change": "No change to users. A new creative_creators.user_id -> users.id FK is added by the Creative migration only.",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "A user who is both an advertiser and a creator is not expressible through users.role alone. If Creative needs the dual role, it must be derived from the presence of a creative_creators row, not from a new users column."
+      }
+    },
+    {
+      "existing_table": "roles",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Role catalogue (slug + name + description)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Authorization)",
+        "eloquent_model": "App\\Models\\Role",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Add one 'creator' role row. Possibly one 'reviewer' role row if Creative review is separated from administration."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "EXTEND",
+        "meaning": "Creative reuses the table but must add rows (role, permission, setting group, recipient type). Adding COLUMNS to shared tables is only proposed where explicitly stated."
+      },
+      "why": "RolePermissionChecker resolves permissions by role slug only, so Creative permissions cannot work without a role row.",
+      "required_change": "INSERT a role row (slug 'creator'). No schema change; roles already has unique name and unique slug. CRITICAL COUPLING, verified 2026-09-26: RolePermissionChecker::permissionsForRole() resolves a SINGLE slug from the users.role column, so one user holds exactly one role. Setting users.role='creator' to grant creative.* permissions REMOVES every other permission that user had. For a user who is both advertiser and creator, a 'creator' role row alone is therefore insufficient and actively destructive. OD-DB-08 / OD-AUTH-01 is BLOCKING and must be answered before any role row is added. Options: (a) also grant creative.* to the existing buyer role, (b) derive creator capability from the existence of a creators row and keep creator permissions out of role_permissions, or (c) a role-join model, which is a platform authorization change requiring its own authorisation. Do not choose silently.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Adding a role is additive. The risk is not the insert but the temptation to add a second permission-resolution path."
+      }
+    },
+    {
+      "existing_table": "role_permissions",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Role-to-permission grants, unique(role_id, permission), 'granted' flag"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Authorization)",
+        "eloquent_model": "App\\Models\\RolePermission",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Add creative.* permission rows for the creator role (e.g. creative.services.manage, creative.proposals.submit, creative.projects.view_own, creative.earnings.view_own)."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "EXTEND",
+        "meaning": "Creative reuses the table but must add rows (role, permission, setting group, recipient type). Adding COLUMNS to shared tables is only proposed where explicitly stated."
+      },
+      "why": "This is the only permission store. Reusing it avoids a parallel authorization model.",
+      "required_change": "INSERT rows only. Existing permissions and the 70 seeded permissions are untouched. CRITICAL COUPLING, verified 2026-09-26: RolePermissionChecker::permissionsForRole() resolves a SINGLE slug from the users.role column, so one user holds exactly one role. Setting users.role='creator' to grant creative.* permissions REMOVES every other permission that user had. For a user who is both advertiser and creator, a 'creator' role row alone is therefore insufficient and actively destructive. OD-DB-08 / OD-AUTH-01 is BLOCKING and must be answered before any role row is added. Options: (a) also grant creative.* to the existing buyer role, (b) derive creator capability from the existence of a creators row and keep creator permissions out of role_permissions, or (c) a role-join model, which is a platform authorization change requiring its own authorisation. Do not choose silently.",
+      "risk": {
+        "level": "LOW",
+        "statement": "A new permission namespace changes no existing decision, because RolePermissionChecker matches on exact permission strings."
+      }
+    },
+    {
+      "existing_table": "personal_access_tokens",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Sanctum API tokens (polymorphic tokenable, never expire: config/sanctum.php expiration is null)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Authentication)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative API authentication continues to use the existing Sanctum tokens issued to the same users."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "The token is polymorphic on tokenable, so a creator is tokenable with no schema change.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Tokens never expire, which is a pre-existing platform decision, not a Creative concern. Recorded, not changed."
+      }
+    },
+    {
+      "existing_table": "password_reset_tokens",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Laravel password reset tokens"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Authentication)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Unchanged. Creator login and password reset are the existing platform flow."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Platform-owned table; not Creative domain data.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "No Creative interaction."
+      }
+    },
+    {
+      "existing_table": "password_setup_tokens",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Invitation / password-setup tokens used for partner and screen-provider portal invitations (raw DB::table access in PartnerService, ScreenProviderService, ScreenProviderPortalController)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Onboarding)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Reuse as the creator-invitation mechanism, exactly as ScreenProviderService::inviteToPortal does, if Creative uses an invite-first onboarding flow."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "It is the only existing invitation-token mechanism, and reusing it avoids a second invitation system.",
+      "required_change": "None if reused. If Creative needs extra token metadata, a new Creative-side table is preferred over altering this shared table.",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "It is accessed with raw DB::table() and has no model, no timestamps and no explicit expiry semantics beyond application logic. Extending its responsibilities is riskier than reusing it as-is."
+      }
+    },
+    {
+      "existing_table": "sessions",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Laravel database session driver"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Platform)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Unchanged."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Platform-owned.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "No Creative interaction."
+      }
+    },
+    {
+      "existing_table": "screens",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "AD INVENTORY: a purchasable advertising slot or mobile fleet, with revenue split percentages"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Asset)",
+        "eloquent_model": "App\\Models\\Screen",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend screens. 'Asset' in this repository means advertising inventory, not a creative work file."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Every column is media-inventory specific (orientation, asset_type, pricing_unit, booking_status, coverage). None of it describes a portfolio, brief, revision or delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Terminology collision. A junior developer reading 'Asset' in this repository will reach for screens or booking_media. Both are wrong targets."
+      }
+    },
+    {
+      "existing_table": "screen_categories",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Advertising screen taxonomy"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Asset)",
+        "eloquent_model": "App\\Models\\ScreenCategory",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative needs its own creative_service_categories taxonomy. Use screen_categories only as a naming/ordering pattern."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "Categories here classify purchasable media by screen attributes, not by creative service type.",
+      "required_change": "New table in the Creative migration set.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Reusing this taxonomy for creative services would corrupt advertising filtering and reporting."
+      }
+    },
+    {
+      "existing_table": "screen_providers",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Media-owning provider profile with a status lifecycle, approval actors and an illuvision/provider revenue split"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Provider)",
+        "eloquent_model": "App\\Models\\ScreenProvider",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "This is the closest structural precedent for creative_creators (user anchor + profile + status lifecycle + approval actors + split). Copy the SHAPE. Do not reuse the table and do not copy illuvision_percentage / screen_provider_percentage, which are provider-specific."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the only existing 'counterparty with an approval lifecycle anchored to a user' table in the schema.",
+      "required_change": "New creative_creators table. Its split columns, if any, are Creative commission terms and require an [OPEN DECISION].",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Copying the shape also copies two overlapping status semantics (status on the entity, owner_type on screens). Creative must have exactly one status column."
+      }
+    },
+    {
+      "existing_table": "screen_provider_enquiries",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Provider onboarding applications (status new | converted | closed, assigned_to, approved_by)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Provider)",
+        "eloquent_model": "App\\Models\\ScreenProviderEnquiry",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "The equivalent of a Creative creator application / onboarding queue. Build a Creative-side equivalent rather than writing provider rows."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is an existing application-inbox pattern with an assignment actor; Creative creator approval would otherwise reinvent it.",
+      "required_change": "New Creative application table if creator onboarding is approve-then-activate. [OPEN DECISION] whether Creative needs an application queue at all.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Mixing Creative applicants into the provider enquiry table would corrupt provider pipeline reporting."
+      }
+    },
+    {
+      "existing_table": "screen_provider_activities",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Provider timeline events"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Provider)",
+        "eloquent_model": "App\\Models\\ScreenProviderActivity",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not create a creative_activities table. Use the generic activity_logs table instead."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "A per-entity timeline duplicates a generic audit table that already exists.",
+      "required_change": "None. activity_logs is reused.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Creating a Creative-specific timeline table would be duplicate infrastructure."
+      }
+    },
+    {
+      "existing_table": "screen_provider_settlements",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Provider settlement periods: period, reference number, generated/approved/paid, three actor FKs"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Financial)",
+        "eloquent_model": "App\\Models\\ScreenProviderSettlement",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "STRUCTURAL template for a Creative creator_payouts table. Copy the lifecycle columns. Do not reuse the table: it is screen-provider and period based, and it has no currency column."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the only existing payout-period object in the system, so its shape is the honest precedent for a creator payout.",
+      "required_change": "New Creative payout table. Currency and amount columns are NEW and require [OPEN DECISION] on currency support.",
+      "risk": {
+        "level": "HIGH",
+        "statement": "The absence of a currency column on the existing settlement table means copying the shape would silently reproduce a single-currency assumption that Creative has not yet been cleared for."
+      }
+    },
+    {
+      "existing_table": "screen_duration_split_overrides",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Per-screen/plan/duration revenue split override with a unique constraint and an is_active flag"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Financial)",
+        "eloquent_model": "App\\Models\\ScreenDurationSplitOverride",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Pattern for Creative per-category commission overrides. Do not reuse the table: its key columns are screen_id, plan_id and duration."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It demonstrates the unique-constraint + is_active override idiom that Creative commission overrides would need.",
+      "required_change": "New Creative table if per-category commission overrides are approved. [OPEN DECISION].",
+      "risk": {
+        "level": "LOW",
+        "statement": "Reuse would require nullable screen/plan FKs that make no sense for Creative."
+      }
+    },
+    {
+      "existing_table": "asset_coverage_cities",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Asset-to-city coverage (fixed + mobile)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Asset)",
+        "eloquent_model": "App\\Models\\CoverageCity",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Not a Creative concern."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Geographic media coverage has no meaning for a creative brief, project or delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "No Creative interaction."
+      }
+    },
+    {
+      "existing_table": "mobile_asset_coverage_states",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Mobile asset to state coverage"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Asset)",
+        "eloquent_model": "App\\Models\\MobileAssetCoverageState",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Not a Creative concern."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Media coverage concept.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "No Creative interaction."
+      }
+    },
+    {
+      "existing_table": "mobile_asset_coverage_cities",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Mobile asset to city coverage"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Asset)",
+        "eloquent_model": "App\\Models\\MobileAssetCoverageCity",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Not a Creative concern."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Media coverage concept.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "No Creative interaction."
+      }
+    },
+    {
+      "existing_table": "screen_types",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Orphan table: id + timestamps only, no model, no references"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "none",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not use, and do not extend."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "It is an orphan with no owning domain and no consumer.",
+      "required_change": "None. Recorded as pre-existing debt, not a Creative target.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Only risk is a developer 'fixing' an unrelated orphan while working in migrations."
+      }
+    },
+    {
+      "existing_table": "bookings",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Campaign aggregate root: the advertising booking, with status lifecycle, totals and ownership"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Booking)",
+        "eloquent_model": "App\\Models\\Booking",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not use bookings as a Creative data store. Use it only as the pattern for a state machine, an immutable financial snapshot and an ownership model."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "A Creative project is not an advertising campaign. Forcing Creative projects into bookings would corrupt every booking report, availability calculation and revenue split.",
+      "required_change": "None on bookings. New creative_projects table.",
+      "risk": {
+        "level": "HIGH",
+        "statement": "This is the single most dangerous reuse in the whole audit: bookings is referenced by pricing, availability, settlement, reporting and 20+ routes. Any Creative row written here changes advertising behaviour."
+      }
+    },
+    {
+      "existing_table": "booking_screens",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Campaign line items, one row per screen per booking, carrying gross + both revenue shares + BOTH split percentages"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Booking / Financial)",
+        "eloquent_model": "App\\Models\\BookingScreen",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "THE definitive template for a Creative financial snapshot line (e.g. a creative_project_finance_line). Copy the 'store the resolved percentages alongside the amounts' rule."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "Storing the resolved split percentages next to the amounts is what makes the split auditable without recomputation. That is exactly the property Creative money needs.",
+      "required_change": "New Creative table. The rule to copy: persist amount, both shares and both percentages at write time.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Reusing booking_screens itself is impossible: its FKs are booking_id and screen_id."
+      }
+    },
+    {
+      "existing_table": "booking_media",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Client-uploaded campaign creative files with an admin review workflow (review_status, reviewed_by, reviewed_at, rejection_reason) and file columns (file_path, file_type, file_size, mime_type, original_name, sort_order)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Booking)",
+        "eloquent_model": "App\\Models\\BookingMedia",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not use the table. Use it as the pattern for (a) the file column set and (b) a moderation review_status lifecycle."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the only existing 'client uploads files against a commercial object' precedent in the codebase, so it is the honest reference for Creative file metadata and for a review status.",
+      "required_change": "New Creative file record table (one row per file, bound to a Creative entity). No change to booking_media.",
+      "risk": {
+        "level": "HIGH",
+        "statement": "booking_media has no owner column beyond the booking, no visibility column and no signed-URL story. Copying it unchanged would reproduce an access-control gap for client and creator files."
+      }
+    },
+    {
+      "existing_table": "booking_activities",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Booking timeline events"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Booking)",
+        "eloquent_model": "App\\Models\\BookingActivity",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not create a Creative equivalent. Use activity_logs."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "Generic audit table already exists.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Duplicate infrastructure."
+      }
+    },
+    {
+      "existing_table": "booking_pricing_breakdowns",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "IMMUTABLE per-screen-per-day financial snapshot produced by the pricing engine"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Pricing / Financial)",
+        "eloquent_model": "App\\Models\\BookingPricingBreakdown",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Canonical immutable financial record in this schema and therefore the model for every Creative financial snapshot (accepted proposal amount, revision overage, earning accrual)."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the table that makes historical financial truth verifiable. Creative money history must have the same property.",
+      "required_change": "New Creative snapshot table with the same immutability discipline. No change to booking_pricing_breakdowns.",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Immutability is a discipline, not a constraint. Nothing in the schema prevents an UPDATE; Creative needs it enforced deliberately (application layer, no update paths)."
+      }
+    },
+    {
+      "existing_table": "advertisement_categories",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Ad category taxonomy"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Campaign)",
+        "eloquent_model": "App\\Models\\AdvertisementCategory",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not reuse for creative service categories."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Classifies advertisements, not services offered for sale.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Semantic mismatch."
+      }
+    },
+    {
+      "existing_table": "pricing_plans",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Advertising pricing plan master (media time)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Pricing)",
+        "eloquent_model": "App\\Models\\PricingPlan",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative pricing must not reuse this table or this engine. Creative quotes are per-project, server-derived and not media-time derived."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Every rule here prices advertising media time; prices advertising media time by duration, peak, weekend and screen-count rules.",
+      "required_change": "None. Creative quote derivation is new logic inside the Creative domain (see artifact 09 creative_proposals).",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Creative amounts must be server-derived. A client-supplied amount, or a media pricing rule applied to a creative project, is a price-manipulation defect."
+      }
+    },
+    {
+      "existing_table": "pricing_plan_durations",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Duration price tiers for the legacy engine"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Pricing)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative pricing must not reuse this table or this engine. Creative quotes are per-project, server-derived and not media-time derived."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Every rule here prices advertising media time; duration tiers are an advertising-media concept.",
+      "required_change": "None. Creative quote derivation is new logic inside the Creative domain (see artifact 09 creative_proposals).",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Creative amounts must be server-derived. A client-supplied amount, or a media pricing rule applied to a creative project, is a price-manipulation defect."
+      }
+    },
+    {
+      "existing_table": "pricing_discount_rules",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Duration-based discounts, recorded as LEGACY and not wired into the active engine"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Pricing)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative pricing must not reuse this table or this engine. Creative quotes are per-project, server-derived and not media-time derived."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Every rule here prices advertising media time; legacy and unwired.",
+      "required_change": "None. Creative quote derivation is new logic inside the Creative domain (see artifact 09 creative_proposals).",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Creative amounts must be server-derived. A client-supplied amount, or a media pricing rule applied to a creative project, is a price-manipulation defect."
+      }
+    },
+    {
+      "existing_table": "pricing_screen_rules",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Volume / screen-count discounts"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Pricing)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative pricing must not reuse this table or this engine. Creative quotes are per-project, server-derived and not media-time derived."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Every rule here prices advertising media time; volume discounts on screen count.",
+      "required_change": "None. Creative quote derivation is new logic inside the Creative domain (see artifact 09 creative_proposals).",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Creative amounts must be server-derived. A client-supplied amount, or a media pricing rule applied to a creative project, is a price-manipulation defect."
+      }
+    },
+    {
+      "existing_table": "pricing_duration_rules",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Duration discounts used by the active engine"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Pricing)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative pricing must not reuse this table or this engine. Creative quotes are per-project, server-derived and not media-time derived."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Every rule here prices advertising media time; active advertising engine.",
+      "required_change": "None. Creative quote derivation is new logic inside the Creative domain (see artifact 09 creative_proposals).",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Creative amounts must be server-derived. A client-supplied amount, or a media pricing rule applied to a creative project, is a price-manipulation defect."
+      }
+    },
+    {
+      "existing_table": "pricing_peak_rules",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Peak-time multipliers (day + time window)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Pricing)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative pricing must not reuse this table or this engine. Creative quotes are per-project, server-derived and not media-time derived."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Every rule here prices advertising media time; peak time is a media scheduling concept.",
+      "required_change": "None. Creative quote derivation is new logic inside the Creative domain (see artifact 09 creative_proposals).",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Creative amounts must be server-derived. A client-supplied amount, or a media pricing rule applied to a creative project, is a price-manipulation defect."
+      }
+    },
+    {
+      "existing_table": "pricing_weekend_rules",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Weekend multipliers"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Pricing)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative pricing must not reuse this table or this engine. Creative quotes are per-project, server-derived and not media-time derived."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Every rule here prices advertising media time; weekend scheduling concept.",
+      "required_change": "None. Creative quote derivation is new logic inside the Creative domain (see artifact 09 creative_proposals).",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Creative amounts must be server-derived. A client-supplied amount, or a media pricing rule applied to a creative project, is a price-manipulation defect."
+      }
+    },
+    {
+      "existing_table": "currency_rates",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "FX rates (base/quote, rate, effective date)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Currency)",
+        "eloquent_model": "App\\Models\\CurrencyRate",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "If Creative ever holds a non-INR amount, it reads currency_rates through the existing exchange-rate infrastructure. Creative must not implement its own FX."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "It is the only FX store, and AGENTS.md forbids a second exchange-rate implementation.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Whether Creative is single-currency at launch is an [OPEN DECISION]."
+      }
+    },
+    {
+      "existing_table": "payments",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Payment records for Razorpay and offline direct payments; payments.booking_id is NOT NULL ON DELETE CASCADE"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Payment)",
+        "eloquent_model": "App\\Models\\Payment",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not reuse the table. payments cannot hold a Creative funding row (NOT NULL booking_id + CASCADE) and App\\Services\\PaymentService::verifyAndConfirmPayment couples confirmation to a booking status transition. Use a new creative_fundings table and keep the EXISTING gateway contract for the gateway call."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "The gateway abstraction (App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface) is genuinely shared; the payment RECORD is advertising-specific.",
+      "required_change": "New creative_fundings + creative_fundings_log tables. Reuse PaymentGatewayInterface unchanged. No change to payments.",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Making booking_id nullable to fit Creative would alter an existing financial table and every booking payment query. This is the clearest example of 'reuse the contract, not the record'."
+      }
+    },
+    {
+      "existing_table": "payment_logs",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Append-only payment event log"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Payment)",
+        "eloquent_model": "App\\Models\\PaymentLog",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Template for a new creative_fundings_log table (append-only status/event trail)."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the existing precedent for an append-only financial event log.",
+      "required_change": "New Creative log table.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Low risk; the discipline to copy is append-only."
+      }
+    },
+    {
+      "existing_table": "refunds",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Refund ledger rows against a payment"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Payment)",
+        "eloquent_model": "App\\Models\\Refund",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Template for a new creative_refunds table mirroring the same shape."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "Creative needs a refund path (cancelled project, over-limit revision) and must not write into the advertising refund ledger.",
+      "required_change": "New Creative refunds table.",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Refund eligibility rules for Creative are an [OPEN DECISION] and must not be copied from advertising behaviour by assumption."
+      }
+    },
+    {
+      "existing_table": "partners",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Affiliate partner organisations with commercial terms"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Partner)",
+        "eloquent_model": "App\\Models\\Partner",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not reuse. A creator is an individual supplier of creative work; a partner is an affiliate organisation with referral and commission terms."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "Different counterparty semantics. Overloading partners would make every affiliate report wrong.",
+      "required_change": "None.",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "The temptation to model a creator as a partner 'because we already have one' would corrupt partner commission and referral attribution."
+      }
+    },
+    {
+      "existing_table": "referral_codes",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Partner referral codes with discount and commission terms"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Partner)",
+        "eloquent_model": "App\\Models\\ReferralCode",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Not a Creative concern at launch."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Referral attribution is a booking acquisition mechanism.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "If Creative referral terms are ever wanted, that is a new product decision, not a reuse."
+      }
+    },
+    {
+      "existing_table": "referral_usages",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Per-booking referral attribution with a duplicated profit commission snapshot"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Partner)",
+        "eloquent_model": "App\\Models\\ReferralUsage",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Note the deliberate duplication of the profit snapshot across two tables for auditability. Copy that redundancy principle for Creative commission snapshots."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the existing example of intentionally duplicating a financial fact so it can be audited without recomputation.",
+      "required_change": "None on referral_usages.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Pattern value only."
+      }
+    },
+    {
+      "existing_table": "partner_commissions",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Commission payable to an affiliate partner, with an approve / paid / cancel lifecycle and pessimistic locking (PartnerCommissionRepositoryInterface::findOrFailForUpdate, implemented at app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php:31)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Partner / Financial)",
+        "eloquent_model": "App\\Models\\PartnerCommission",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "This is the closest existing model for a creator earnings record: pending -> approved -> paid, plus cancel, plus row locking around state change. Copy the LIFECYCLE AND THE LOCKING. The columns are affiliate-specific (partner_id, booking/referral attribution)."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the only commission object in the system and the financial lock now implemented by EloquentPartnerCommissionRepository::findOrFailForUpdate and called from CommissionService.",
+      "required_change": "New Creative earnings table + Creative commission service with the same lock discipline.",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Copying the columns without copying the lock discipline would allow double payment under concurrency. The locking, not the table, is the reusable asset."
+      }
+    },
+    {
+      "existing_table": "reward_accounts",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Loyalty points balance per user (integer points)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Loyalty)",
+        "eloquent_model": "App\\Models\\RewardAccount",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Do not reuse. Points are non-cash loyalty, tied to bookings, and stored as integers. Creator earnings are money and must be decimal with currency."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Different asset class. A points balance cannot be reused as a monetary ledger.",
+      "required_change": "None. Creative needs a decimal money ledger.",
+      "risk": {
+        "level": "HIGH",
+        "statement": "Reusing an integer points ledger for money would introduce a precision defect into a financial record."
+      }
+    },
+    {
+      "existing_table": "reward_transactions",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Append-only points ledger per reward account, with lifetime counters"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Loyalty)",
+        "eloquent_model": "App\\Models\\RewardTransaction",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "SHAPE ONLY: account + append-only transaction + lifetime counters is exactly the shape a creator earnings ledger needs, with decimal(12,2) and a currency column instead of integer points."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the only existing per-party financial ledger in the schema.",
+      "required_change": "New Creative earnings + earnings_entries tables.",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "The integer-points representation must not survive into the Creative money ledger."
+      }
+    },
+    {
+      "existing_table": "reward_redemptions",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Points-to-booking redemption"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "advertising (Loyalty)",
+        "eloquent_model": "App\\Models\\RewardRedemption",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Not a Creative concern."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Redemption of loyalty points.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "No Creative interaction."
+      }
+    },
+    {
+      "existing_table": "settings",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Key/value settings grouped by group name"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Configuration)",
+        "eloquent_model": "App\\Models\\Setting",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Add a 'creative' settings group (e.g. creative.revision_limit, creative.dispute_window_days, creative.payout_minimum). Do not add a settings column."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "EXTEND",
+        "meaning": "Creative reuses the table but must add rows (role, permission, setting group, recipient type). Adding COLUMNS to shared tables is only proposed where explicitly stated."
+      },
+      "why": "SettingsService already resolves grouped key/value settings; duplicating configuration stores is forbidden.",
+      "required_change": "INSERT rows in the creative group only. NOTE: naming a key presupposes the rule it configures. creative.revision_limit, creative.dispute_window_days and creative.payout_minimum may only be added AFTER the corresponding rules are approved; today all three rules are OPEN_DECISION (OD-SM-08 revision limit, OD-SM-09/10 accrual trigger and dispute window, OD-SM-16 payout minimum and cadence), so no key may be created yet. Recorded in artifact 15 and 24.",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Anything that is a financial rule (for example a commission percentage) does NOT belong in settings; it belongs in a versioned Creative commission table so historical earnings remain reproducible. Equally, a settings key must not be added for a rule that has not been decided."
+      }
+    },
+    {
+      "existing_table": "activity_logs",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Generic admin audit log (actor, action, subject, metadata)"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Audit)",
+        "eloquent_model": "App\\Models\\ActivityLog",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative writes its audit trail here: state transitions, approvals, file access grants, earnings changes."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "It is the existing generic audit mechanism. Creative-specific timeline tables would duplicate it.",
+      "required_change": "None. Possibly add a creative.* action namespace only.",
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Verify it can express a polymorphic Creative subject before relying on it; if not, a Creative-scoped audit table is required. Flagged for confirmation."
+      }
+    },
+    {
+      "existing_table": "notification_logs",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Notification dispatch log with a recipient_type discriminator"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Notifications)",
+        "eloquent_model": "App\\Models\\NotificationLog",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Add a 'creator' recipient_type value. No new notification log table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "EXTEND",
+        "meaning": "Creative reuses the table but must add rows (role, permission, setting group, recipient type). Adding COLUMNS to shared tables is only proposed where explicitly stated."
+      },
+      "why": "It is the existing dispatch record; a parallel log would fragment notification history.",
+      "required_change": "Widen the recipient_type value set (an application/enum-level change, not a new table).",
+      "risk": {
+        "level": "LOW",
+        "statement": "Current recipient roles exclude creator, so notification recipient resolution must be extended, not duplicated."
+      }
+    },
+    {
+      "existing_table": "countries",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "ISO country reference"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Geography)",
+        "eloquent_model": "App\\Models\\Country",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Reuse for creator address / KYC country if Creative captures an address."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Shared reference data.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "Conditional on whether Creative captures addresses. [OPEN DECISION]."
+      }
+    },
+    {
+      "existing_table": "states",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "State reference"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Geography)",
+        "eloquent_model": "App\\Models\\State",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Reuse for the same reason as countries."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Shared reference data.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "Conditional on address capture. [OPEN DECISION]."
+      }
+    },
+    {
+      "existing_table": "cities",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "City reference"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Geography)",
+        "eloquent_model": "App\\Models\\City",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Reuse for the same reason as countries."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Shared reference data.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "Conditional on address capture. [OPEN DECISION]."
+      }
+    },
+    {
+      "existing_table": "qr_codes",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "QR codes with a generated slug and a public short URL"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\QrCode",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Pattern for Creative public identifiers and public portfolio/share links (a unique public slug, not an auto-increment id)."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the only existing public-identifier pattern in the schema.",
+      "required_change": "None on qr_codes.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Creative public-id strategy remains an [OPEN DECISION] (uuid vs public slug vs both)."
+      }
+    },
+    {
+      "existing_table": "qr_code_scans",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "QR scan events"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\QrCodeScan",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Not a Creative concern."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Marketing analytics.",
+      "required_change": "None.",
+      "risk": {
+        "level": "NONE",
+        "statement": "No Creative interaction."
+      }
+    },
+    {
+      "existing_table": "blogs",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Blog posts with SEO"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Blog",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Marketing content. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "blog_descriptions",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Blog content blocks"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\BlogDescription",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Rich content blocks. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "categories",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Blog categories"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Category",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Blog taxonomy, not creative service taxonomy. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "blog_tags",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Blog tags"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\BlogTag",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Editorial tagging. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "blog_tag_relations",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Blog-to-tag pivot with a unique composite"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Pattern for a unique-composite pivot (e.g. creative_service_category_map)."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY",
+        "meaning": "Creative must build its own table. The existing table is read only as a structural/idiomatic template."
+      },
+      "why": "It is the existing unique-composite pivot idiom in this schema.",
+      "required_change": "None on blog_tag_relations; new Creative pivot if Creative services are multi-tagged.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Pattern only; no direct reuse."
+      }
+    },
+    {
+      "existing_table": "testimonials",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Public marketing testimonials with a rating column, no author binding and no soft delete"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Testimonial",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative client reviews of creator work MUST NOT reuse testimonials. Build a Creative review table bound to a project, an author and a state machine."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "It is public marketing content with a rating and no binding to a transaction, a project or an author identity.",
+      "required_change": "None. New Creative reviews table.",
+      "risk": {
+        "level": "HIGH",
+        "statement": "testimonials.rating is the most dangerous name collision in the schema. Reusing it for Creative reviews would let a public marketing surface carry commercial review data with no ownership, no soft delete and no audit trail."
+      }
+    },
+    {
+      "existing_table": "galleries",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Marketing gallery"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Gallery",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Marketing showcase. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "success_stories",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Marketing case studies"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\SuccessStory",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Marketing content. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "faqs",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Marketing / site FAQs"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Faq",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Public site content. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "achievements",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Marketing achievements"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Achievement",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Marketing content. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "announcements",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Marketing announcements"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Announcement",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Site-wide announcements. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "enquiries",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Generic web contact form"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Enquiry",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Contact capture. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "contact_enquiries",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Contact leads"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\ContactEnquiry",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Contact capture with assignment workflow. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "products",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Marketing product catalogue"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\Product",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "A marketing catalogue entry is not a purchasable service offering with a rate. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "product_enquiries",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Product leads"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\ProductEnquiry",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Lead capture. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "job_categories",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Careers categories"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\JobCategory",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Recruiting. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "job_posts",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Careers listings"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\JobPost",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Recruiting. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "job_applications",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Job applications"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Marketing)",
+        "eloquent_model": "App\\Models\\JobApplication",
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not read, write or extend this table."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE",
+        "meaning": "Creative must neither read nor write this table, and must not extend it."
+      },
+      "why": "Recruiting. None of it expresses a purchasable creative service, a portfolio item, a brief, a proposal or a delivery.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "Marketing tables are also the tables most likely to be publicly editable; binding Creative commercial objects to them would be a defect."
+      }
+    },
+    {
+      "existing_table": "cache",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Laravel cache store"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Platform)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Unchanged. Creative jobs and queued notifications use the existing queue infrastructure; Creative does not introduce a second queue system."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Platform-owned infrastructure.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "app/Support/Jobs does not exist yet. If Creative needs queued jobs, creating that directory is a documented decision (see artifact 24), not a new queue system."
+      }
+    },
+    {
+      "existing_table": "cache_locks",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Laravel atomic cache locks"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Platform)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Unchanged. Creative jobs and queued notifications use the existing queue infrastructure; Creative does not introduce a second queue system."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Platform-owned infrastructure.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "app/Support/Jobs does not exist yet. If Creative needs queued jobs, creating that directory is a documented decision (see artifact 24), not a new queue system."
+      }
+    },
+    {
+      "existing_table": "jobs",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Queue jobs table"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Platform)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Unchanged. Creative jobs and queued notifications use the existing queue infrastructure; Creative does not introduce a second queue system."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Platform-owned infrastructure.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "app/Support/Jobs does not exist yet. If Creative needs queued jobs, creating that directory is a documented decision (see artifact 24), not a new queue system."
+      }
+    },
+    {
+      "existing_table": "job_batches",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Queue job batches"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Platform)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Unchanged. Creative jobs and queued notifications use the existing queue infrastructure; Creative does not introduce a second queue system."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Platform-owned infrastructure.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "app/Support/Jobs does not exist yet. If Creative needs queued jobs, creating that directory is a documented decision (see artifact 24), not a new queue system."
+      }
+    },
+    {
+      "existing_table": "failed_jobs",
+      "current_purpose": {
+        "classification": "CURRENT_FACT",
+        "statement": "Failed queue jobs"
+      },
+      "current_owner": {
+        "classification": "CURRENT_FACT",
+        "domain_owner": "shared (Platform)",
+        "eloquent_model": null,
+        "owned_by": "Project 01 Advertising Marketplace (single modular monolith, single database)"
+      },
+      "creative_use": {
+        "classification": "RECOMMENDATION",
+        "statement": "Unchanged. Creative jobs and queued notifications use the existing queue infrastructure; Creative does not introduce a second queue system."
+      },
+      "verdict": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE",
+        "meaning": "Creative reads/writes this table with no schema change."
+      },
+      "why": "Platform-owned infrastructure.",
+      "required_change": "None.",
+      "risk": {
+        "level": "LOW",
+        "statement": "app/Support/Jobs does not exist yet. If Creative needs queued jobs, creating that directory is a documented decision (see artifact 24), not a new queue system."
+      }
+    }
+  ],
+  "summary_counts": {
+    "classification": "RECOMMENDATION derived from the matrix above",
+    "tables_assessed": 73,
+    "by_verdict": {
+      "EXTEND_BY_REFERENCE": 1,
+      "EXTEND": 4,
+      "DIRECT_REUSE": 14,
+      "DO_NOT_USE": 34,
+      "PATTERN_ONLY": 20
+    },
+    "note": "Every table in the database is assessed. There is no unclassified table."
+  },
+  "tables_creative_must_not_duplicate": {
+    "classification": "RECOMMENDATION",
+    "statement": "The following infrastructure already exists. Creating a second instance of any of it during Creative implementation is a duplicate-infrastructure defect, not a design choice.",
+    "items": [
+      {
+        "existing": "users + personal_access_tokens + password_reset_tokens + password_setup_tokens",
+        "do_not_create": "a creative_users / creator_accounts / creator_auth table",
+        "instead": "anchor creative_creators.user_id on users.id"
+      },
+      {
+        "existing": "roles + role_permissions + RolePermissionChecker + PermissionMiddleware",
+        "do_not_create": "a creative_roles / creative_permissions / creative authorization resolver",
+        "instead": "add a creator role row and creative.* permission rows (both blocked by OD-DB-08 until the single-slug role model is resolved)"
+      },
+      {
+        "existing": "currency_rates + ExchangeRateService + CurrencyService",
+        "do_not_create": "a creative currency or FX table or a second rate fetch",
+        "instead": "read currency_rates through the existing exchange-rate infrastructure"
+      },
+      {
+        "existing": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface + RazorpayPaymentGateway",
+        "do_not_create": "a creative payment gateway interface or a second Razorpay client",
+        "instead": "reuse the existing gateway contract; only the payment RECORD is Creative-specific"
+      },
+      {
+        "existing": "config/filesystems.php disks + MediaService + MediaHelper + ImageProcessingContractInterface",
+        "do_not_create": "a creative storage disk, a creative upload pipeline or a second image processor",
+        "instead": "reuse the disks and the image-processing contract; Creative needs a file RECORD and an ACCESS RULE, not new infrastructure"
+      },
+      {
+        "existing": "activity_logs",
+        "do_not_create": "creative_activity_logs or a per-entity Creative timeline table",
+        "instead": "write Creative transitions to activity_logs"
+      },
+      {
+        "existing": "notification_logs + app/Mail + NotificationService",
+        "do_not_create": "a creative notification log or a second mail dispatch path",
+        "instead": "extend recipient_type and add Creative Mailables"
+      },
+      {
+        "existing": "countries / states / cities",
+        "do_not_create": "creative_countries etc.",
+        "instead": "reference the shared reference tables"
+      },
+      {
+        "existing": "cache / cache_locks / jobs / failed_jobs / sessions",
+        "do_not_create": "a Creative cache, queue, lock or session store",
+        "instead": "use the platform infrastructure"
+      },
+      {
+        "existing": "settings",
+        "do_not_create": "a creative_settings table",
+        "instead": "add a creative group of key/value settings (financial rules excluded)"
+      }
+    ]
+  },
+  "tables_creative_must_extend": {
+    "classification": "RECOMMENDATION",
+    "statement": "Only six existing tables receive Creative additions, and every addition is rows, not columns. Two of the six (roles, role_permissions) are blocked by OD-DB-08 - see blocking_caveat.",
+    "items": [
+      {
+        "table": "users",
+        "addition": "NONE (reference only)"
+      },
+      {
+        "table": "roles",
+        "addition": "one 'creator' role row - CONDITIONAL on OD-DB-08; see blocking_caveat"
+      },
+      {
+        "table": "role_permissions",
+        "addition": "creative.* permission grants - CONDITIONAL on OD-DB-08; see blocking_caveat"
+      },
+      {
+        "table": "settings",
+        "addition": "creative.* setting rows (no financial rules)"
+      },
+      {
+        "table": "notification_logs",
+        "addition": "'creator' recipient_type value"
+      },
+      {
+        "table": "currency_rates",
+        "addition": "NONE (read only)"
+      }
+    ],
+    "blocking_caveat": "RolePermissionChecker::permissionsForRole() resolves a SINGLE slug from the users.role column, so one user holds exactly one role. Setting users.role='creator' strips every other permission that user had, so a 'creator' role row alone is insufficient - and actively destructive - for a user who is both advertiser and creator. OD-DB-08 / OD-AUTH-01 is BLOCKING and must be answered before any of the roles or role_permissions rows below are inserted."
+  },
+  "highest_risk_reuse_decisions": [
+    {
+      "rank": 1,
+      "table": "bookings",
+      "risk": "A Creative project written into bookings would change advertising pricing, availability, settlement, revenue splits and 20+ routes. This is the single highest-consequence misuse available in this schema.",
+      "control": "creative_projects is a separate table with no FK to bookings; any future 'attach a creative project to a campaign' feature must be an explicit, separately authorised cross-domain decision."
+    },
+    {
+      "rank": 2,
+      "table": "testimonials",
+      "risk": "Reusing the public marketing rating surface for commercial Creative reviews would place review data with no author binding, no ownership, no soft delete and public edit paths.",
+      "control": "Creative reviews are a new table bound to project + author + state."
+    },
+    {
+      "rank": 3,
+      "table": "payments",
+      "risk": "Relaxing payments.booking_id (NOT NULL, CASCADE) to accommodate Creative funding would alter an existing financial table and every booking payment query.",
+      "control": "creative_fundings references the gateway contract, not the payments table."
+    },
+    {
+      "rank": 4,
+      "table": "booking_media",
+      "risk": "Copying its file columns without adding visibility, ownership and an access check reproduces a file-access gap for client and creator files.",
+      "control": "Creative file records carry owner, visibility and an authorization check at read time."
+    },
+    {
+      "rank": 5,
+      "table": "screens",
+      "risk": "Terminology collision: 'Asset' in this repository means advertising inventory. A developer looking for Creative assets will find screens and booking_media first.",
+      "control": "Creative names its own aggregate 'CreativeFile' and never uses the word Asset for it."
+    },
+    {
+      "rank": 6,
+      "table": "partner_commissions",
+      "risk": "Copying the commission columns without the lockForUpdate discipline of PartnerCommissionRepositoryInterface::findOrFailForUpdate would allow double payment under concurrency.",
+      "control": "The Creative earnings service applies the same pessimistic lock before any state change."
+    },
+    {
+      "rank": 7,
+      "table": "reward_accounts / reward_transactions",
+      "risk": "Integer points representation leaking into a money ledger would introduce a precision defect into a financial record.",
+      "control": "Creative money is decimal(12,2) plus an explicit currency column."
+    }
+  ],
+  "new_tables_required_summary": {
+    "classification": "RECOMMENDATION",
+    "statement": "Creative requires new tables because NO existing table can hold its aggregates. The authoritative design is in 09-creative-database-target-schema-blueprint.json; this artifact only records why reuse is not sufficient.",
+    "reason": "No existing table has (a) a creator identity, (b) a purchasable creative service with a rate, (c) a brief, (d) a proposal with a server-derived quote, (e) a project with revision and delivery lifecycle, (f) a client review bound to a transaction, or (g) a creator money ledger and payout period. The closest tables in the schema (partners, screen_providers, bookings, products) each fail on ownership semantics or on financial representation.",
+    "count_note": "The exact table count, names, columns, indexes and the migration order are in artifact 09. They are not duplicated here, and no migration exists."
+  },
+  "open_decisions": [
+    {
+      "id": "10-OD-01",
+      "question": "Can one user be both an advertiser and a creator?",
+      "impact_on_schema": "If yes, Creative must NOT express the creator role in users.role; it must be derived from the existence of a creative_creators row.",
+      "missing_information": "Product decision. No source evidence either way. The current users.role free-text column cannot express a dual role."
+    },
+    {
+      "id": "10-OD-02",
+      "question": "Is Creative single-currency (INR) at launch?",
+      "impact_on_schema": "Determines whether every Creative money table needs a currency column and whether currency_rates is read at all.",
+      "missing_information": "Product decision. Note that the existing screen_provider_settlements table has NO currency column, so copying its shape would silently assume single currency."
+    },
+    {
+      "id": "10-OD-03",
+      "question": "Does Creative need a commission percentage, and is it per service, per category, or global?",
+      "impact_on_schema": "If yes it needs a versioned Creative commission table so historical earnings stay reproducible. It must NOT live in settings.",
+      "missing_information": "Product decision on the commercial model. The existing illuvision_percentage / screen_provider_percentage defaults are provider-specific and must not be inherited."
+    },
+    {
+      "id": "10-OD-04",
+      "question": "Are creator KYC / payout details stored in this database?",
+      "impact_on_schema": "If yes, a Creative payout-details record with its own retention and access rules is required. It must not be added to users.",
+      "missing_information": "Product and compliance decision. No existing KYC table exists in the schema (password_setup_tokens is an invitation token, not KYC)."
+    },
+    {
+      "id": "10-OD-05",
+      "question": "Does Creative reuse the activity_logs table for its audit trail?",
+      "impact_on_schema": "Determines whether a Creative-scoped audit table is needed.",
+      "missing_information": "Confirmation that activity_logs can express a Creative subject polymorphically. Flagged for verification before the audit-trail phase."
+    },
+    {
+      "id": "10-OD-06",
+      "question": "Are Creative briefs targeted to a chosen creator/service or posted as an open opportunity?",
+      "impact_on_schema": "Determines whether a junction table and a proposal-uniqueness constraint are required.",
+      "missing_information": "Product decision. It also determines whether 'one open proposal per creator' can be a database constraint or only an application rule."
+    },
+    {
+      "id": "10-OD-07",
+      "question": "Are Creative files private by default and delivered by signed URL, or public?",
+      "impact_on_schema": "Determines the visibility column semantics on the Creative file record and whether the existing public disk may be used at all.",
+      "missing_information": "Security decision. The current platform has no signed-URL mechanism, so 'private' is new work regardless of the answer."
+    }
+  ],
+  "discrepancies_vs_existing_artifacts": [
+    {
+      "topic": "artifacts 01/08 state 74 tables and 94 foreign keys (AGENTS.md baseline); measured 73 distinct tables and 96 foreign-key definitions (94 ->constrained() + 2 legacy ->foreign())",
+      "resolution": "Source wins. The earlier figure is a documentation drift, not a schema difference. Recorded in AGENTS.md as a measured baseline."
+    },
+    {
+      "topic": "Phase 0.20 documentation claims app/Domain/Creative and app/Services/Creative were CREATED (empty)",
+      "resolution": "False. Those directories do not exist and no empty directories exist under app/. This artifact's premise (0 Creative tables) is verified independently."
+    }
+  ],
+  "safety_statement": {
+    "classification": "CURRENT_FACT",
+    "statement": "No production code, migration, model, route, test or configuration file was modified while producing this artifact. The only file created is this document. No Creative table exists in the database and none was specified for creation outside this proposal."
+  }
+}

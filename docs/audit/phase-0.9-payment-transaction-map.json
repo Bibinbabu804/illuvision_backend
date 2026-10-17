@@ -1,0 +1,173 @@
+{
+  "phase": "0.9",
+  "name": "Payment Transaction Map",
+  "generated_at": "2026-09-26T00:12:00+05:30",
+  "principle": "Phase 0.9 is behaviour-preserving. NO transaction boundary was added, removed, widened or narrowed. Every entry below describes the pre-existing boundary as it exists after the extraction.",
+  "transactions": [
+    {
+      "id": "PAY-TXN-01",
+      "name": "Gateway order creation",
+      "entry_point": "POST /api/payments/razorpay/create-order",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+      "legacy_owner": "App\\Services\\PaymentService::createOrder()",
+      "transaction": false,
+      "external_call_inside_transaction": false,
+      "sequence": [
+        "1. findPendingForBooking(booking) — plain SELECT, no lock",
+        "2. if a pending payment exists -> return it unchanged (is_existing = true)",
+        "3. otherwise PaymentGatewayInterface::createOrder() — external network call",
+        "4. PaymentRepositoryInterface::create() — INSERT"
+      ],
+      "pessimistic_locks": [],
+      "concurrency_profile": "Application-scoped, non-transactional. The pending-payment check and the insert are NOT atomic, so two concurrent create-order calls for the same booking can both pass step 1 and both insert. This is the pre-existing idempotency gap.",
+      "behaviour_changed_in_phase_0_9": false,
+      "note": "Step 2 IS the de facto order-reuse mechanism, but it is not a real idempotency guarantee because it is not transactional. No new idempotency system was introduced — that would change externally observable behaviour."
+    },
+    {
+      "id": "PAY-TXN-02",
+      "name": "Payment signature verification and booking promotion",
+      "entry_point": "POST /api/payments/razorpay/verify",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+      "legacy_owner": "App\\Services\\PaymentService::verifyPaymentSignature()",
+      "transaction": true,
+      "boundary": "DB::transaction(...)",
+      "external_call_inside_transaction": true,
+      "external_call": "PaymentGatewayInterface::verifySignature() (local HMAC — no network I/O)",
+      "sequence": [
+        "1. findOrFailByGatewayOrderId(order_id)",
+        "2. gateway verifySignature(order_id, payment_id, signature) — LOCAL, no network",
+        "3. if invalid: update payment -> failed; update booking -> payment_failed; THROW (rolling back the writes)",
+        "4. if payment already paid: THROW 'Payment already processed'",
+        "5. if valid and unpaid: payment -> paid, paid_at set",
+        "6. ReferralTrackingService::createReferralTracking() (referral usage + partner commission)",
+        "7. booking -> pending_approval",
+        "8. dispatch PaymentReceived event",
+        "9. commit"
+      ],
+      "pessimistic_locks": [],
+      "concurrency_profile": "No row lock is taken on the payment row. Two concurrent verify calls for the same order can both observe an unpaid payment and both proceed to step 5. The pre-existing duplicate guard (step 4) is a read-then-write check, not a serialisation mechanism.",
+      "rollback_behaviour": {
+        "signature_failure": "Payment and booking status updates are made and then an exception is thrown INSIDE the transaction, so the whole thing rolls back and the payment remains in its pre-verify state. This is a known, pre-existing oddity. Preserved verbatim.",
+        "duplicate_paid": "Transaction rolls back; no writes had been made."
+      },
+      "behaviour_changed_in_phase_0_9": false,
+      "note": "verifySignature is a local cryptographic comparison, so keeping it inside the transaction carries no network-timeout risk. This is the one place where the in-transaction external call is genuinely benign."
+    },
+    {
+      "id": "PAY-TXN-03",
+      "name": "Recorded refund (LIVE path)",
+      "entry_point": "POST /api/admin/payments/{id}/refund",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "legacy_owner": "App\\Services\\RefundService::initiateRefund()",
+      "transaction": true,
+      "boundary": "DB::transaction(...)",
+      "external_call_inside_transaction": true,
+      "external_call": "PaymentGatewayInterface::refund() — REAL NETWORK I/O to Razorpay",
+      "sequence": [
+        "1. gateway refund(payment_id, toPaise(amount), notes)",
+        "2. Refund::create(...) with razorpay_refund_id and metadata.razorpay_response",
+        "3. payment -> refunded | partially_refunded (per Money::isFullRefund)",
+        "4. payment.refund_status -> processed, razorpay_refund_id set",
+        "5. booking -> refunded ONLY when the refund is full",
+        "6. PaymentLog::create(...)",
+        "7. commit"
+      ],
+      "pessimistic_locks": [],
+      "concurrency_profile": "ARCHITECTURE RULE 4 VIOLATION (pre-existing). A real external network call is made while holding an open DB transaction. The row stays locked for the full duration of the gateway round-trip, and a gateway hang holds the transaction open for the same duration.",
+      "behaviour_changed_in_phase_0_9": false,
+      "why_not_fixed": "Moving the gateway call outside the transaction would change the failure semantics: currently a gateway failure rolls back cleanly and no refund row is written, and the gateway has NOT been debited. Moving the call out would risk a debited gateway with no local record on a subsequent DB failure. That is a redesign of financial failure semantics and is explicitly out of scope for an extraction phase.",
+      "enforced_by_test": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_refund_failure_rolls_back_partial_refund_rows"
+    },
+    {
+      "id": "PAY-TXN-04",
+      "name": "Legacy gateway-only refund (DEAD PATH)",
+      "entry_point": "NONE — PaymentController::refund() has no route",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "legacy_owner": "App\\Services\\PaymentService::refund()",
+      "transaction": true,
+      "boundary": "DB::transaction(...)",
+      "external_call_inside_transaction": true,
+      "sequence": [
+        "1. gateway refund(payment_id, toPaise(amount) or null, notes)",
+        "2. payment -> refunded | partially_refunded, refund_status -> processed",
+        "3. booking -> refunded when full",
+        "4. commit",
+        "NOTE: no Refund row, no PaymentLog"
+      ],
+      "pessimistic_locks": [],
+      "concurrency_profile": "Unreachable via HTTP.",
+      "behaviour_changed_in_phase_0_9": false,
+      "preserved_because": "Deleting dead code is an observable change if any future route is wired to it, and the two refund paths diverge materially (refunds row + PaymentLog vs neither). Preserved for review in a dedicated cleanup phase."
+    },
+    {
+      "id": "PAY-TXN-05",
+      "name": "Offline / direct payment recording",
+      "entry_point": "POST /api/admin/manual-bookings/{booking}/payment",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+      "legacy_owner": "App\\Services\\ManualBookingService::recordOfflinePayment()",
+      "transaction": true,
+      "boundary": "DB::transaction(...)",
+      "external_call_inside_transaction": false,
+      "sequence": [
+        "1. payment_mode validation (bank_transfer|cash|upi|manual)",
+        "2. Payment::create(...) with payment_mode, offline reference, verification_status = awaiting_verification",
+        "3. referral attribution when a referral code is attached",
+        "4. booking -> pending_approval (only if currently payment_pending)",
+        "5. BookingActivity::create('payment_completed')",
+        "6. dispatch PaymentReceived",
+        "7. commit"
+      ],
+      "pessimistic_locks": [],
+      "concurrency_profile": "No lock. Concurrent offline recordings for the same booking will each insert a payment row.",
+      "behaviour_changed_in_phase_0_9": false,
+      "note": "The SIBLING path App\\Http\\Controllers\\BookingController::markManualPayment() is a separate, divergent implementation and is NOT routed through this use case."
+    },
+    {
+      "id": "PAY-TXN-06",
+      "name": "Admin payment approval with referral attribution",
+      "entry_point": "POST /api/admin/payments/{id}/approve",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "legacy_owner": "inline in AdminPaymentController::approvePayment()",
+      "transaction": true,
+      "boundary": "DB::transaction(...) in the controller",
+      "external_call_inside_transaction": false,
+      "sequence": [
+        "1. payment -> completed, verification_status = verified, verified_by/verified_at set",
+        "2. booking -> pending_approval",
+        "3. if booking->referralCode: RecordReferralAttributionUseCase::execute()",
+        "4. PaymentLog::create(...)",
+        "5. commit"
+      ],
+      "pessimistic_locks": [
+        {
+          "table": "partner_commissions",
+          "via": "PartnerCommissionRepositoryInterface::findOrFailForUpdate()",
+          "purpose": "Duplicate-commission guard on referral attribution",
+          "preserved": true
+        }
+      ],
+      "concurrency_profile": "The commission row lock is preserved verbatim through the repository move.",
+      "behaviour_changed_in_phase_0_9": false,
+      "note": "Only the service-locator call was replaced with constructor injection. The controller's own transaction boundary is unchanged."
+    }
+  ],
+  "rollback_verification": {
+    "enforced_by_tests": [
+      "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_refund_failure_rolls_back_partial_refund_rows",
+      "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_payment_transaction_rollback_is_observable",
+      "Tests\\Feature\\Golden\\GoldenConcurrencyVerificationTest::test_transaction_rollback_reverts_partial_mutations"
+    ]
+  },
+  "pessimistic_lock_inventory": {
+    "note": "Only these three lock sites exist in the Payment/Financial subsystem. Payment and settlement paths contain NO pessimistic locks, before and after this phase.",
+    "sites": [
+      "App\\Services\\CommissionService — 3 sites, via PartnerCommissionRepositoryInterface",
+      "App\\Services\\InventoryService — screen availability",
+      "App\\Services\\ExpirePendingBookings — expiry sweep"
+    ],
+    "explicitly_not_a_lock": [
+      "Payment::firstOrFail() — plain SELECT, no FOR UPDATE",
+      "findPendingForBooking() — plain SELECT, no FOR UPDATE"
+    ]
+  }
+}

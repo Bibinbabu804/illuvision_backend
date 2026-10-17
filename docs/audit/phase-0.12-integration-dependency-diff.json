@@ -1,0 +1,235 @@
+{
+  "phase": "0.12",
+  "name": "Integration Dependency Diff",
+  "generated_at": "2026-09-26T06:55:00+05:30",
+  "purpose": "Record current integration dependencies and identify where boundary improvements are needed",
+  "summary": {
+    "total_integrations_analyzed": 7,
+    "integrations_with_proper_boundary": "To be determined",
+    "integrations_needing_attention": "To be determined",
+    "direct_external_calls_in_domain_application": "To be verified",
+    "note": "This analysis identifies integration points to inform the enforcement of integration boundaries"
+  },
+  "current_integration_points": [
+    {
+      "integration": "Razorpay Payment Gateway",
+      "locations": [
+        {
+          "location": "App\\Services\\PaymentService",
+          "layer": "application_service",
+          "call_type": "direct_service_usage",
+          "details": "Uses PaymentGatewayInterface which is correctly implemented by RazorpayPaymentGateway adapter",
+          "boundary_status": "CORRECT",
+          "evidence": "PaymentService depends on PaymentGatewayInterface, not Razorpay\\Api\\Api directly"
+        },
+        {
+          "location": "App\\Services\\RefundService",
+          "layer": "application_service",
+          "call_type": "direct_service_usage",
+          "details": "Uses PaymentGatewayInterface for refund processing",
+          "boundary_status": "CORRECT",
+          "evidence": "RefundService depends on PaymentGatewayInterface"
+        }
+      ],
+      "potential_violations": "Need to verify no direct Razorpay\\Api\\Api usage remains"
+    },
+    {
+      "integration": "Google OAuth",
+      "locations": [
+        {
+          "location": "App\\Http\\Controllers\\Api\\AuthController",
+          "layer": "http_controller",
+          "call_type": "direct_service_usage",
+          "details": "Uses GoogleAuthService which should depend on GoogleIdentityProviderInterface",
+          "boundary_status": "LIKELY_CORRECT",
+          "needs_verification": "Check if GoogleAuthService depends on interface or concrete implementation"
+        },
+        {
+          "location": "App\\Services\\GoogleAuthService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use Google\\Client instead of depending on interface",
+          "boundary_status": "TO_BE_VERIFIED"
+        }
+      ],
+      "potential_violations": "Direct Google\\Client usage in application layer"
+    },
+    {
+      "integration": "Exchange Rate API",
+      "locations": [
+        {
+          "location": "App\\Services\\ExchangeRateService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use HTTP client or Guzzle instead of depending on ExchangeRateApiClientInterface",
+          "boundary_status": "TO_BE_VERIFIED"
+        }
+      ],
+      "potential_violations": "Direct HTTP client usage in application layer"
+    },
+    {
+      "integration": "Mail Service",
+      "locations": [
+        {
+          "location": "App\\Services\\MailService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use Mail:: facade instead of depending on MailContractInterface",
+          "boundary_status": "TO_BE_VERIFIED"
+        },
+        {
+          "location": "App\\Services\\NotificationService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use Mail:: facade for sending notifications",
+          "boundary_status": "TO_BE_VERIFIED"
+        },
+        {
+          "location": "App\\Services\\ReferralService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use Mail:: facade for referral emails",
+          "boundary_status": "TO_BE_VERIFIED"
+        },
+        {
+          "location": "App\\Services\\PaymentService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use Mail:: facade for payment emails",
+          "boundary_status": "TO_BE_VERIFIED"
+        }
+      ],
+      "potential_violations": "Direct Mail:: facade usage in application layer"
+    },
+    {
+      "integration": "Storage Service",
+      "locations": [
+        {
+          "location": "App\\Services\\MediaHelper",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use Storage:: facade instead of depending on StorageContractInterface",
+          "boundary_status": "TO_BE_VERIFIED"
+        },
+        {
+          "location": "App\\Services\\UploadService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use Storage:: facade for file uploads",
+          "boundary_status": "TO_BE_VERIFIED"
+        },
+        {
+          "location": "App\\Services\\PartnerService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use Storage:: facade for partner logo uploads",
+          "boundary_status": "TO_BE_VERIFIED"
+        }
+      ],
+      "potential_violations": "Direct Storage:: facade usage in application layer"
+    },
+    {
+      "integration": "Image Processing",
+      "locations": [
+        {
+          "location": "App\\Services\\MediaHelper",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use GD or Intervention Image functions instead of depending on ImageProcessingContractInterface",
+          "boundary_status": "TO_BE_VERIFIED"
+        }
+      ],
+      "potential_violations": "Direct image processing library usage in application layer"
+    },
+    {
+      "integration": "SMS Service",
+      "locations": [
+        {
+          "location": "App\\Services\\NotificationService",
+          "layer": "application_service",
+          "call_type": "potential_violation",
+          "details": "May directly use SMS gateway APIs instead of depending on SmsContractInterface",
+          "boundary_status": "TO_BE_VERIFIED"
+        }
+      ],
+      "potential_violations": "Direct SMS gateway usage in application layer"
+    }
+  ],
+  "potential_improvements": [
+    {
+      "from": "App\\Services\\GoogleAuthService",
+      "to": "App\\Domain\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+      "type": "application_to_interface",
+      "status": "TO_BE_VERIFIED",
+      "improvement": "Ensure GoogleAuthService depends on GoogleIdentityProviderInterface, not concrete Google\\Client",
+      "rationale": "Follows dependency inversion principle, makes auth service testable"
+    },
+    {
+      "from": "App\\Services\\ExchangeRateService",
+      "to": "App\\Domain\\Financial\\Contracts\\ExchangeRateApiClientInterface",
+      "type": "application_to_interface",
+      "status": "TO_BE_VERIFIED",
+      "improvement": "Ensure ExchangeRateService depends on ExchangeRateApiClientInterface, not concrete HTTP client",
+      "rationale": "Allows exchanging exchange rate providers without changing service"
+    },
+    {
+      "from": "App\\Services\\MailService",
+      "to": "App\\Domain\\Notification\\Contracts\\MailContractInterface",
+      "type": "application_to_interface",
+      "status": "TO_BE_VERIFIED",
+      "improvement": "Ensure MailService depends on MailContractInterface, not Mail:: facade",
+      "rationale": "Allows exchanging mail providers (Mailgun, SendGrid, SES) without changing service"
+    },
+    {
+      "from": "App\\Services\\NotificationService",
+      "to": "App\\Domain\\Notification\\Contracts\\NotificationServiceInterface",
+      "type": "application_to_interface",
+      "status": "TO_BE_VERIFIED",
+      "improvement": "Ensure NotificationService depends on notification contracts, not concrete implementations",
+      "rationale": "Separates notification orchestration from channel-specific implementations"
+    },
+    {
+      "from": "App\\Services\\MediaHelper",
+      "to": [
+        "App\\Domain\\Media\\Contracts\\StorageContractInterface",
+        "App\\Domain\\Media\\Contracts\\ImageProcessingContractInterface"
+      ],
+      "type": "application_to_interfaces",
+      "status": "TO_BE_VERIFIED",
+      "improvement": "Ensure MediaHelper depends on storage and image processing contracts, not concrete implementations",
+      "rationale": "Allows exchanging storage providers (local/S3) and image processing libraries (GD/Intervention) without changing helper"
+    },
+    {
+      "from": "App\\Services\\UploadService",
+      "to": "App\\Domain\\Media\\Contracts\\StorageContractInterface",
+      "type": "application_to_interface",
+      "status": "TO_BE_VERIFIED",
+      "improvement": "Ensure UploadService depends on StorageContractInterface, not Storage:: facade",
+      "rationale": "Follows storage boundary pattern"
+    },
+    {
+      "from": "App\\Services\\PartnerService",
+      "to": "App\\Domain\\Media\\Contracts\\StorageContractInterface",
+      "type": "application_to_interface",
+      "status": "TO_BE_VERIFIED",
+      "improvement": "Ensure PartnerService depends on StorageContractInterface for logo uploads",
+      "rationale": "Consistent storage boundary application"
+    },
+    {
+      "from": "App\\Services\\NotificationService",
+      "to": "App\\Domain\\Notification\\Contracts\\SmsContractInterface",
+      "type": "application_to_interface",
+      "status": "TO_BE_VERIFIED",
+      "improvement": "Ensure NotificationService depends on SmsContractInterface for SMS sending",
+      "rationale": "Completes notification channel abstraction"
+    }
+  ],
+  "accepted_violations": [],
+  "verification_required": [
+    "Check app/Domain and app/Application layers for any direct external service calls",
+    "Verify all external service usage goes through appropriate adapter interfaces",
+    "Check that adapter implementations correctly implement their interfaces",
+    "Verify that adapter implementations are properly registered in the service container",
+    "Ensure no framework-specific code leaks into domain layer"
+  ]
+}

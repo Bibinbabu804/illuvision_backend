@@ -1,0 +1,51 @@
+{
+  "phases": "0.17 + 0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy retirement and modular monolith migration",
+  "artifact": "dependency-conformance",
+  "executable_authority": "tests/Unit/Architecture/ArchitectureRuleTest.php - 14 tests, 17 assertions, PASS",
+  "rules": [
+    {
+      "rule": "Rule 2 - Domain must not import Services",
+      "state": "RED (7 imports pinned to CampaignPricingEngine)",
+      "delta": "none"
+    },
+    {
+      "rule": "Rule 2 - Domain must not import Console / Infrastructure / Application",
+      "state": "GREEN",
+      "delta": "none"
+    },
+    {
+      "rule": "Rule 11 - Domain must not import Http",
+      "state": "GREEN (0)",
+      "delta": "none"
+    },
+    {
+      "rule": "Rule 11 - no service locators in Domain / Application",
+      "state": "GREEN (0 / 0)",
+      "delta": "none"
+    },
+    {
+      "rule": "Rule 12 - service-locator debt does not grow",
+      "state": "RED (8 classes pinned)",
+      "delta": "none"
+    },
+    {
+      "rule": "Domain uses no Illuminate facade",
+      "state": "GREEN",
+      "delta": "none"
+    }
+  ],
+  "newly_discovered_gap": {
+    "rule": "Domain -> Models",
+    "state": "NOT ENFORCED",
+    "detail": "App\\Models is absent from the Domain forbidden-import list in ArchitectureRuleTest, yet 5 Domain files import it: SettlementRepositoryInterface, PartnerCommissionRepositoryInterface, PaymentRepositoryInterface, PaymentStatus, CampaignPricingEngine.",
+    "severity": "MEDIUM architecture debt",
+    "action_taken": "None beyond documentation. The test was not weakened and no rule was removed. Adding the check with a 5-class allowlist is recommended so the debt becomes visible and cannot grow.",
+    "note": "This debt was not captured in the Phase 0.15 debt register and is new information from Phases 0.17-0.18."
+  },
+  "illegal_edges_introduced": 0,
+  "cycles_introduced": 0,
+  "conclusion": "Phases 0.17-0.18 introduced zero illegal dependencies and zero cycles while surfacing one previously unrecorded enforcement gap."
+}

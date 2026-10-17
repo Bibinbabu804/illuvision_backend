@@ -1,0 +1,448 @@
+core-backend :: app/ directory tree (after Phase 0.20)
+captured: 2026-09-26
+production PHP classes/interfaces/traits/enums: 336
+target directories created by Phase 0.20: all of them, including intentionally empty ones
+
+app/
+  Application/
+    Booking/
+      Exceptions/
+        BookingCreationException.php  [1 decl]
+      Queries/
+        CheckBookingAvailabilityQuery.php  [1 decl]
+      UseCases/
+        CreateCampaignBookingUseCase.php  [1 decl]
+        RescheduleBookingUseCase.php  [1 decl]
+    Financial/
+      UseCases/
+        DistributeBookingRevenueUseCase.php  [1 decl]
+        GenerateProviderSettlementUseCase.php  [1 decl]
+        RecordReferralAttributionUseCase.php  [1 decl]
+    Payment/
+      UseCases/
+        CreateOfflinePaymentUseCase.php  [1 decl]
+        CreatePaymentOrderUseCase.php  [1 decl]
+        GetPaymentStatusUseCase.php  [1 decl]
+        PaymentStatusProjector.php  [1 decl]
+        RefundPaymentUseCase.php  [1 decl]
+        VerifyPaymentUseCase.php  [1 decl]
+    Pricing/
+      Adapters/
+        LegacyPricingEngineAdapter.php  [1 decl]
+      UseCases/
+        CalculateCampaignPriceUseCase.php  [1 decl]
+    Reporting/
+      ReportQueryRegistry.php  [1 decl]
+      Contracts/
+        ReportQuery.php  [1 decl]
+      Exports/
+        CsvReportExporter.php  [1 decl]
+        Contracts/
+          ReportExporter.php  [1 decl]
+      Queries/
+        BookingReportQuery.php  [1 decl]
+        CampaignReportQuery.php  [1 decl]
+        CategoryReportQuery.php  [1 decl]
+        CityReportQuery.php  [1 decl]
+        OverviewQuery.php  [1 decl]
+        ReferralReportQuery.php  [1 decl]
+        RevenueReportQuery.php  [1 decl]
+        RewardReportQuery.php  [1 decl]
+        ScreenProviderReportQuery.php  [1 decl]
+        ScreenReportQuery.php  [1 decl]
+      Support/
+        DurationLabelFormatter.php  [1 decl]
+        GrowthRate.php  [1 decl]
+        ReportPeriod.php  [1 decl]
+  Console/
+    Commands/
+      ExpirePendingBookings.php  [1 decl]
+      ExpireRewardPoints.php  [1 decl]
+      SyncExchangeRates.php  [1 decl]
+  Domain/
+    Asset/
+      Events/
+        AssetCreated.php  [1 decl]
+    Availability/
+      Exceptions/
+        FleetCapacityExceededException.php  [1 decl]
+    Booking/
+      Enums/
+        BookingStatus.php  [1 decl]
+      Exceptions/
+        InvalidBookingStateException.php  [1 decl]
+    Campaign/
+    Creative/
+      Brief/
+      Creator/
+      Delivery/
+      Earnings/
+      Project/
+      Proposal/
+      Review/
+      Revision/
+      Service/
+    Financial/
+      Contracts/
+        PartnerCommissionRepositoryInterface.php  [1 decl]
+        SettlementRepositoryInterface.php  [1 decl]
+      Support/
+        RevenueAllocation.php  [1 decl]
+    Media/
+    Partner/
+    Payment/
+      PaymentStatus.php  [1 decl]
+      Contracts/
+        PaymentGatewayInterface.php  [1 decl]
+        PaymentRepositoryInterface.php  [1 decl]
+      Support/
+        Money.php  [1 decl]
+    Pricing/
+      CampaignPricingEngine.php  [1 decl]
+      Contracts/
+        PricingEngineInterface.php  [1 decl]
+      Enums/
+        PricingUnit.php  [1 decl]
+      Exceptions/
+        PricingException.php  [1 decl]
+    Provider/
+    Reporting/
+    Settlement/
+  Enums/
+    AssetType.php  [1 decl]
+  Helpers/
+    MediaHelper.php  [1 decl]
+  Http/
+    Controllers/
+      AchievementController.php  [1 decl]
+      AdminContactEnquiryController.php  [1 decl]
+      AdminManualBookingController.php  [1 decl]
+      AdminPaymentController.php  [1 decl]
+      AdminProductController.php  [1 decl]
+      AdminProductEnquiryController.php  [1 decl]
+      AdminScreenProviderController.php  [1 decl]
+      AdminScreenProviderEnquiryController.php  [1 decl]
+      AdminSettlementController.php  [1 decl]
+      AdvertisementCategoryController.php  [1 decl]
+      AnnouncementController.php  [1 decl]
+      AssetImportController.php  [1 decl]
+      AuthController.php  [1 decl]
+      AuthorController.php  [1 decl]
+      BlogController.php  [1 decl]
+      BlogTagController.php  [1 decl]
+      BookingController.php  [1 decl]
+      CategoryController.php  [1 decl]
+      ContactEnquiryController.php  [1 decl]
+      Controller.php  [1 decl]
+      DashBoardController.php  [1 decl]
+      EnquiryController.php  [1 decl]
+      FaqController.php  [1 decl]
+      FileController.php  [1 decl]
+      GalleryController.php  [1 decl]
+      JobApplicationController.php  [1 decl]
+      JobCategoryController.php  [1 decl]
+      JobPostController.php  [1 decl]
+      PartnerApplicationController.php  [1 decl]
+      PartnerApprovalController.php  [1 decl]
+      PartnerBookingController.php  [1 decl]
+      PartnerClientController.php  [1 decl]
+      PartnerController.php  [1 decl]
+      PartnerPortalController.php  [1 decl]
+      PaymentController.php  [1 decl]
+      PricingPlanController.php  [1 decl]
+      ProductController.php  [1 decl]
+      ProductEnquiryController.php  [1 decl]
+      QrCodeController.php  [1 decl]
+      ReferralAnalyticsController.php  [1 decl]
+      ReferralCodeController.php  [1 decl]
+      ReportController.php  [1 decl]
+      ScreenCategoryController.php  [1 decl]
+      ScreenController.php  [1 decl]
+      ScreenProviderEnquiryController.php  [1 decl]
+      ScreenProviderPortalController.php  [1 decl]
+      SuccessStoryController.php  [1 decl]
+      TestimonialController.php  [1 decl]
+      Api/
+        AdminCurrencyController.php  [1 decl]
+        AdminRewardsController.php  [1 decl]
+        AdminUserController.php  [1 decl]
+        AssetController.php  [1 decl]
+        AvailabilityEngineController.php  [1 decl]
+        BookingEngineController.php  [1 decl]
+        BudgetRecommendationController.php  [1 decl]
+        ClientController.php  [1 decl]
+        CoverageController.php  [1 decl]
+        CurrencyController.php  [1 decl]
+        FinanceController.php  [1 decl]
+        PermissionController.php  [1 decl]
+        PricingEngineController.php  [1 decl]
+        ProfileController.php  [1 decl]
+        RecommendationEngineController.php  [1 decl]
+        RoleController.php  [1 decl]
+        SettingsController.php  [1 decl]
+      Auth/
+        ForgotPasswordController.php  [1 decl]
+        GoogleAuthController.php  [1 decl]
+        ResetPasswordController.php  [1 decl]
+    Middleware/
+      PermissionMiddleware.php  [1 decl]
+    Requests/
+      CreateAssetRequest.php  [1 decl]
+      PricingPlanRequest.php  [1 decl]
+      RoleRequest.php  [1 decl]
+      SettingsRequest.php  [1 decl]
+      UpdateAssetRequest.php  [1 decl]
+    Resources/
+      AdminUserResource.php  [1 decl]
+      AssetResource.php  [1 decl]
+      MapAssetResource.php  [1 decl]
+      PricingPlanResource.php  [1 decl]
+      RoleResource.php  [1 decl]
+      SettingsResource.php  [1 decl]
+      UserResource.php  [1 decl]
+  Infrastructure/
+    Auth/
+      GoogleOAuthAdapter.php  [1 decl]
+      Contracts/
+        GoogleIdentityProviderInterface.php  [1 decl]
+    ExchangeRates/
+      ExchangeRateApiClient.php  [1 decl]
+      Contracts/
+        ExchangeRateApiClientInterface.php  [1 decl]
+    ExternalServices/
+    Financial/
+      Persistence/
+        EloquentPartnerCommissionRepository.php  [1 decl]
+        EloquentSettlementRepository.php  [1 decl]
+    Media/
+      GdImageProcessor.php  [1 decl]
+      Contracts/
+        ImageProcessingContractInterface.php  [1 decl]
+    Notifications/
+      LaravelMailAdapter.php  [1 decl]
+      Contracts/
+        MailContractInterface.php  [1 decl]
+    Payments/
+      Persistence/
+        EloquentPaymentRepository.php  [1 decl]
+      Razorpay/
+        RazorpayPaymentGateway.php  [1 decl]
+    Persistence/
+    Storage/
+      LaravelStorageAdapter.php  [1 decl]
+      Contracts/
+        StorageContractInterface.php  [1 decl]
+  Mail/
+    BookingApprovedMail.php  [1 decl]
+    BookingCancelledMail.php  [1 decl]
+    BookingCreatedMail.php  [1 decl]
+    BookingRejectedMail.php  [1 decl]
+    CommissionGeneratedMail.php  [1 decl]
+    ContactEnquiryAutoReplyMail.php  [1 decl]
+    ContactEnquirySubmittedMail.php  [1 decl]
+    MediaApprovedMail.php  [1 decl]
+    MediaRejectedMail.php  [1 decl]
+    PartnerApprovedMail.php  [1 decl]
+    PartnerCreatedMail.php  [1 decl]
+    PartnerRejectedMail.php  [1 decl]
+    PasswordResetMail.php  [1 decl]
+    PaymentFailedMail.php  [1 decl]
+    PaymentReceivedMail.php  [1 decl]
+    PaymentRefundedMail.php  [1 decl]
+    ProductEnquirySubmittedMail.php  [1 decl]
+    ReferralUsedMail.php  [1 decl]
+    RewardsBonusAwardedMail.php  [1 decl]
+    RewardsEarnedMail.php  [1 decl]
+    RewardsExpiringSoonMail.php  [1 decl]
+    RewardsRedeemedMail.php  [1 decl]
+    ScreenProviderApprovedMail.php  [1 decl]
+    ScreenProviderEnquiryAutoReplyMail.php  [1 decl]
+    ScreenProviderEnquirySubmittedMail.php  [1 decl]
+    ScreenProviderPortalInvitationMail.php  [1 decl]
+    ScreenProviderRejectedMail.php  [1 decl]
+    UserRegisteredMail.php  [1 decl]
+  Models/
+    Achievement.php  [1 decl]
+    ActivityLog.php  [1 decl]
+    AdvertisementCategory.php  [1 decl]
+    Announcement.php  [1 decl]
+    Blog.php  [1 decl]
+    BlogDescription.php  [1 decl]
+    BlogTag.php  [1 decl]
+    Booking.php  [1 decl]
+    BookingActivity.php  [1 decl]
+    BookingMedia.php  [1 decl]
+    BookingPricingBreakdown.php  [1 decl]
+    BookingScreen.php  [1 decl]
+    Category.php  [1 decl]
+    City.php  [1 decl]
+    ContactEnquiry.php  [1 decl]
+    Country.php  [1 decl]
+    CoverageCity.php  [1 decl]
+    CurrencyRate.php  [1 decl]
+    Enquiry.php  [1 decl]
+    Faq.php  [1 decl]
+    Gallery.php  [1 decl]
+    JobApplication.php  [1 decl]
+    JobCategory.php  [1 decl]
+    JobPost.php  [1 decl]
+    MobileAssetCoverageCity.php  [1 decl]
+    MobileAssetCoverageState.php  [1 decl]
+    NotificationLog.php  [1 decl]
+    Partner.php  [1 decl]
+    PartnerCommission.php  [1 decl]
+    Payment.php  [1 decl]
+    PaymentLog.php  [1 decl]
+    PricingDiscountRule.php  [1 decl]
+    PricingDurationRule.php  [1 decl]
+    PricingPeakRule.php  [1 decl]
+    PricingPlan.php  [1 decl]
+    PricingPlanDuration.php  [1 decl]
+    PricingScreenRule.php  [1 decl]
+    PricingWeekendRule.php  [1 decl]
+    Product.php  [1 decl]
+    ProductEnquiry.php  [1 decl]
+    QrCode.php  [1 decl]
+    QrCodeScan.php  [1 decl]
+    ReferralCode.php  [1 decl]
+    ReferralUsage.php  [1 decl]
+    Refund.php  [1 decl]
+    RewardAccount.php  [1 decl]
+    RewardRedemption.php  [1 decl]
+    RewardTransaction.php  [1 decl]
+    Role.php  [1 decl]
+    RolePermission.php  [1 decl]
+    Screen.php  [1 decl]
+    ScreenCategory.php  [1 decl]
+    ScreenDurationSplitOverride.php  [1 decl]
+    ScreenProvider.php  [1 decl]
+    ScreenProviderActivity.php  [1 decl]
+    ScreenProviderEnquiry.php  [1 decl]
+    ScreenProviderSettlement.php  [1 decl]
+    Setting.php  [1 decl]
+    State.php  [1 decl]
+    SuccessStory.php  [1 decl]
+    Testimonial.php  [1 decl]
+    User.php  [1 decl]
+  Observers/
+    AssetObserver.php  [1 decl]
+  Providers/
+    AppServiceProvider.php  [1 decl]
+    EventServiceProvider.php  [1 decl]
+  Repositories/
+    Asset/
+      AssetRepository.php  [1 decl]
+      AssetRepositoryInterface.php  [1 decl]
+    Booking/
+      BookingRepository.php  [1 decl]
+      BookingRepositoryInterface.php  [1 decl]
+    Campaign/
+    Creative/
+    Payment/
+    Pricing/
+  Services/
+    AssetImportService.php  [1 decl]
+    AssetService.php  [1 decl]
+    BookingCapacityService.php  [1 decl]
+    BookingPriceCalculator.php  [1 decl]
+    BookingWorkflowService.php  [1 decl]
+    CampaignPricingService.php  [1 decl]
+    CommissionService.php  [1 decl]
+    ConflictDetectionService.php  [1 decl]
+    FinanceService.php  [1 decl]
+    FirstBookingDiscountService.php  [1 decl]
+    InventoryService.php  [1 decl]
+    ManualBookingService.php  [1 decl]
+    MediaService.php  [1 decl]
+    NotificationService.php  [1 decl]
+    PartnerService.php  [1 decl]
+    PaymentService.php  [1 decl]
+    PricingEngine.php  [1 decl]
+    PricingRuleEngine.php  [1 decl]
+    PricingService.php  [1 decl]
+    ProfileService.php  [1 decl]
+    RefundService.php  [1 decl]
+    ReportService.php  [1 decl]
+    RevenueDistributionService.php  [1 decl]
+    RevenueSplitResolverService.php  [1 decl]
+    ScreenDeletionService.php  [1 decl]
+    ScreenProviderService.php  [1 decl]
+    SettingsService.php  [1 decl]
+    SettlementService.php  [1 decl]
+    Booking/
+      BookingAnalyticsService.php  [1 decl]
+    Campaign/
+      AssetDiscoveryFilterService.php  [1 decl]
+      BudgetRecommendationService.php  [1 decl]
+      ClientAnalyticsService.php  [1 decl]
+      ClientService.php  [1 decl]
+      CountryDetectionService.php  [1 decl]
+      CoverageService.php  [1 decl]
+      CurrencyService.php  [1 decl]
+      ExchangeRateService.php  [1 decl]
+      LoyaltyService.php  [1 decl]
+      RecommendationService.php  [1 decl]
+      ReferralService.php  [1 decl]
+      ReferralTrackingService.php  [1 decl]
+      ScreenAnalyticsService.php  [1 decl]
+    Creative/
+    Payment/
+      PaymentAnalyticsService.php  [1 decl]
+    Pricing/
+      DailyPricingCalculator.php  [1 decl]
+      FirstBookingDiscountPricingCalculator.php  [1 decl]
+      ReferralPricingCalculator.php  [1 decl]
+      ScreenPricingResolver.php  [1 decl]
+    Settlement/
+      RevenueAnalyticsService.php  [1 decl]
+  Support/
+    BookingEligibilityResult.php  [1 decl]
+    DurationFormatter.php  [1 decl]
+    Authorization/
+      RolePermissionChecker.php  [1 decl]
+    Configs/
+      BookingConfig.php  [1 decl]
+      ConfigFactory.php  [1 decl]
+      MediaConfig.php  [1 decl]
+      NotificationConfig.php  [1 decl]
+      PricingConfig.php  [1 decl]
+      ReferralConfig.php  [1 decl]
+    Events/
+      NotificationEventSubscriber.php  [1 decl]
+      Notifications/
+        BookingApproved.php  [1 decl]
+        BookingCancelled.php  [1 decl]
+        BookingCreated.php  [1 decl]
+        BookingRejected.php  [1 decl]
+        CommissionGenerated.php  [1 decl]
+        ContactEnquiryAssigned.php  [1 decl]
+        ContactEnquiryClosed.php  [1 decl]
+        ContactEnquirySubmitted.php  [1 decl]
+        MediaApproved.php  [1 decl]
+        MediaRejected.php  [1 decl]
+        MediaUploaded.php  [1 decl]
+        PartnerApproved.php  [1 decl]
+        PartnerCreated.php  [1 decl]
+        PartnerRejected.php  [1 decl]
+        PaymentFailed.php  [1 decl]
+        PaymentReceived.php  [1 decl]
+        PaymentRefunded.php  [1 decl]
+        ProductEnquirySubmitted.php  [1 decl]
+        ProfileUpdated.php  [1 decl]
+        ReferralUsed.php  [1 decl]
+        RewardsBonusAwarded.php  [1 decl]
+        RewardsEarned.php  [1 decl]
+        RewardsExpiringSoon.php  [1 decl]
+        RewardsRedeemed.php  [1 decl]
+        ScreenProviderApproved.php  [1 decl]
+        ScreenProviderCreated.php  [1 decl]
+        ScreenProviderEnquirySubmitted.php  [1 decl]
+        ScreenProviderLeadAssigned.php  [1 decl]
+        ScreenProviderLeadClosed.php  [1 decl]
+        ScreenProviderLeadConverted.php  [1 decl]
+        ScreenProviderPortalInvitation.php  [1 decl]
+        ScreenProviderRejected.php  [1 decl]
+        UserRegistered.php  [1 decl]
+    Exceptions/
+      UserConflictException.php  [1 decl]
+    Jobs/

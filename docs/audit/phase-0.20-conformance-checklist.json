@@ -1,0 +1,96 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "requirements": [
+  {
+   "id": "C01",
+   "req": "Physical directories exist",
+   "status": "PASS",
+   "evidence": "app/Domain/12 + Creative/9 + Services/6 + Repositories/6 + Infrastructure/6 + Support/3 + Http/3 subdirs all present"
+  },
+  {
+   "id": "C02",
+   "req": "Complete even if empty",
+   "status": "PASS",
+   "evidence": "Creative subdomains created and intentionally empty; Support/Jobs empty"
+  },
+  {
+   "id": "C03",
+   "req": "Domain/Creative includes 9",
+   "status": "PASS",
+   "evidence": "Creator,Service,Brief,Proposal,Project,Revision,Delivery,Review,Earnings"
+  },
+  {
+   "id": "C04",
+   "req": "No Project 03 CMS tree",
+   "status": "PASS",
+   "evidence": "No app/Creative or app/Cms found"
+  },
+  {
+   "id": "C05",
+   "req": "Namespaces updated (imports+FQCNs+strings)",
+   "status": "PASS",
+   "evidence": "58 classes moved, 14 test files touched for imports/pinned strings only; namespace-resolution check shows only 11 string-literal false positives"
+  },
+  {
+   "id": "C06",
+   "req": "API/routes unchanged",
+   "status": "PASS",
+   "evidence": "385 routes identical (pre/post)"
+  },
+  {
+   "id": "C07",
+   "req": "Schema/transactions unchanged",
+   "status": "PASS",
+   "evidence": "74 tables, 94 FKs, 112 migrations; suite shows no DB/schema drift"
+  },
+  {
+   "id": "C08",
+   "req": "Auth/Financial/Media retained",
+   "status": "PASS",
+   "evidence": "app/Infrastructure/{Auth,Financial,Media} still present"
+  },
+  {
+   "id": "C09",
+   "req": "Same-namespace consumers handled",
+   "status": "PASS",
+   "evidence": "18 same-namespace imports inserted where moved class's own code referenced flat sibling"
+  },
+  {
+   "id": "C10",
+   "req": "Comment-only imports not created",
+   "status": "PASS",
+   "evidence": "migrate.py patched to ignore comments/docblocks; 6 spurious imports removed"
+  },
+  {
+   "id": "C11",
+   "req": "Debt pins updated",
+   "status": "PASS",
+   "evidence": "ArchitectureRuleTest updated for LoyaltyService -> App\\Services\\Campaign\\LoyaltyService, debt count unchanged"
+  },
+  {
+   "id": "C12",
+   "req": "No test logic changes",
+   "status": "PASS",
+   "evidence": "14 test files touched only for namespace/import/pinned strings"
+  },
+  {
+   "id": "C13",
+   "req": "Controlled Application/ disposition",
+   "status": "PASS",
+   "evidence": "2 Asset services migrated to Services/Campaign; 32 others DEFERRED (P3/P4/Reporting)"
+  },
+  {
+   "id": "C14",
+   "req": "Boundaries not violated (no new)",
+   "status": "PARTIAL",
+   "evidence": "23 directional boundary violations exist but are pre-existing/recorded (Domain->Models 9, Domain->Services 7, Support->Services 7). None introduced by Phase 0.20 moves."
+  },
+  {
+   "id": "C15",
+   "req": "Full regression before artifacts",
+   "status": "PASS",
+   "evidence": "571 passed, 2 failed (pre-existing), 5323 assertions"
+  }
+ ]
+}

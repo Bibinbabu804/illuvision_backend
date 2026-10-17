@@ -1,0 +1,73 @@
+{
+  "phase": "0.3",
+  "name": "Golden Availability Cases",
+  "generated_at": "2026-09-25T21:50:00+05:30",
+  "canonical_authority": "App\\Services\\BookingCapacityService",
+  "secondary_authority": "App\\Services\\ConflictDetectionService",
+  "dimensions": [
+    "Dimension 1: Daily Booking Quotas across calendar days (max_ads_per_day)",
+    "Dimension 2: Physical / Time-Interval collisions on Fixed Screens (intraday / minute / hourly windows)",
+    "Dimension 3: Mobile Fleet Line Sweep intraday concurrent capacity"
+  ],
+  "scenarios": [
+    {
+      "case_id": "CASE-AVAIL-001",
+      "title": "Unbooked fixed screen is eligible",
+      "input": {
+        "screen_id": "fixedScreenIlluvision",
+        "start": "2026-10-05 09:00:00",
+        "end": "2026-10-07 21:00:00"
+      },
+      "expected_result": {
+        "eligible": true,
+        "available": true,
+        "conflicts": []
+      }
+    },
+    {
+      "case_id": "CASE-AVAIL-002",
+      "title": "Overlapping intraday interval collision rejected",
+      "input": {
+        "screen_id": "fixedScreenIlluvision",
+        "existing_booking": "10:00 - 14:00 on 2026-10-10 (status: approved)",
+        "requested_booking": "12:00 - 16:00 on 2026-10-10"
+      },
+      "expected_result": {
+        "eligible": false,
+        "available": false,
+        "conflict_type": "time_interval_conflict",
+        "error_code": "ASSET_TIME_CONFLICT"
+      },
+      "rule": "Fixed screen cannot double-book overlapping intraday hours"
+    },
+    {
+      "case_id": "CASE-AVAIL-003",
+      "title": "Cancelled / Expired booking capacity release",
+      "input": {
+        "screen_id": "fixedScreenIlluvision",
+        "existing_booking": "Cancelled on 2026-10-15 (status: cancelled)",
+        "requested_booking": "Same window on 2026-10-15"
+      },
+      "expected_result": {
+        "eligible": true,
+        "available": true
+      },
+      "rule": "Only active/approved/running/pending bookings consume capacity"
+    },
+    {
+      "case_id": "CASE-AVAIL-004",
+      "title": "Mobile fleet capacity threshold",
+      "input": {
+        "screen_id": "mobileFleetScreen (fleet_size: 10)",
+        "requested_quantity": 11
+      },
+      "expected_result": {
+        "eligible": false,
+        "available": false,
+        "error_code": "FLEET_CAPACITY_EXCEEDED",
+        "error_message": "Asset 'Golden City Mobile Vans' has only 10 units available, but 11 requested."
+      },
+      "rule": "Requested fleet units must be <= available_units from InventoryService::getAvailableFleet line sweep"
+    }
+  ]
+}

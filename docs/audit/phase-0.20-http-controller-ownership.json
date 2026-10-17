@@ -1,0 +1,1060 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "purpose": "Plan section 15 ownership assignment per controller, and the recorded decision on why Admin/Partner/Provider subdirectories were NOT created.",
+ "directory_decisions": [
+  {
+   "proposed_dir": "Controllers/Admin",
+   "exists": false,
+   "created": false,
+   "controller_count": 8,
+   "decision": "NOT CREATED",
+   "reason": "Every route is registered under the /api prefix. The admin/partner/provider split is a controller NAMING convention, not a route or filesystem boundary. Creating these directories would be name-based reorganisation and would churn 30+ classes to improve a conformance percentage, which plan section 15 and section 45 both forbid."
+  },
+  {
+   "proposed_dir": "Controllers/Partner",
+   "exists": false,
+   "created": false,
+   "controller_count": 6,
+   "decision": "NOT CREATED",
+   "reason": "Same as Admin - no distinct route prefix."
+  },
+  {
+   "proposed_dir": "Controllers/Provider",
+   "exists": false,
+   "created": false,
+   "controller_count": 2,
+   "decision": "NOT CREATED",
+   "reason": "Same as Admin - no distinct route prefix."
+  },
+  {
+   "proposed_dir": "Controllers/Api",
+   "exists": true,
+   "created": false,
+   "controller_count": 17,
+   "decision": "PRE-EXISTING, RETAINED",
+   "reason": "Reflects a real, distinct /api/v2 route group."
+  },
+  {
+   "proposed_dir": "Controllers/Auth",
+   "exists": true,
+   "created": false,
+   "controller_count": 0,
+   "decision": "PRE-EXISTING, RETAINED",
+   "reason": "Reflects a real authentication flow boundary."
+  }
+ ],
+ "totals": {
+  "controllers_with_routes": 64,
+  "total_routes": 385,
+  "api": 17,
+  "auth": 0,
+  "admin_named": 8,
+  "partner_named": 6,
+  "provider_named": 2,
+  "web_other": 31
+ },
+ "per_controller": {
+  "App\\Http\\Controllers\\AchievementController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdminContactEnquiryController": {
+   "routes": 6,
+   "url_prefixes": {
+    "api": 6
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "PUT": 1,
+    "POST": 3
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:contacts.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:contacts.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdminManualBookingController": {
+   "routes": 7,
+   "url_prefixes": {
+    "api": 7
+   },
+   "methods": {
+    "POST": 5,
+    "GET|HEAD": 2
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:bookings.approve",
+    "App\\Http\\Middleware\\PermissionMiddleware:bookings.create",
+    "App\\Http\\Middleware\\PermissionMiddleware:bookings.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdminPaymentController": {
+   "routes": 9,
+   "url_prefixes": {
+    "api": 9
+   },
+   "methods": {
+    "GET|HEAD": 6,
+    "POST": 3
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:payments.approve",
+    "App\\Http\\Middleware\\PermissionMiddleware:payments.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdminProductController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:products.create",
+    "App\\Http\\Middleware\\PermissionMiddleware:products.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:products.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:products.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdminProductEnquiryController": {
+   "routes": 4,
+   "url_prefixes": {
+    "api": 4
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:products.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:products.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:products.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdminScreenProviderController": {
+   "routes": 15,
+   "url_prefixes": {
+    "api": 15
+   },
+   "methods": {
+    "GET|HEAD": 9,
+    "POST": 4,
+    "PUT": 2
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_providers.create",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_providers.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_providers.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdminScreenProviderEnquiryController": {
+   "routes": 8,
+   "url_prefixes": {
+    "api": 8
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "PUT": 1,
+    "POST": 5
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_providers.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_providers.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdminSettlementController": {
+   "routes": 7,
+   "url_prefixes": {
+    "api": 7
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 4,
+    "PUT": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:settlements.approve",
+    "App\\Http\\Middleware\\PermissionMiddleware:settlements.pay",
+    "App\\Http\\Middleware\\PermissionMiddleware:settlements.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AdvertisementCategoryController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AnnouncementController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\AdminCurrencyController": {
+   "routes": 2,
+   "url_prefixes": {
+    "api": 2
+   },
+   "methods": {
+    "GET|HEAD": 1,
+    "POST": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "admin",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\AdminRewardsController": {
+   "routes": 3,
+   "url_prefixes": {
+    "api": 3
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:rewards.adjust",
+    "App\\Http\\Middleware\\PermissionMiddleware:rewards.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\AdminUserController": {
+   "routes": 7,
+   "url_prefixes": {
+    "api": 7
+   },
+   "methods": {
+    "GET|HEAD": 3,
+    "POST": 3,
+    "PUT": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:user_management.create",
+    "App\\Http\\Middleware\\PermissionMiddleware:user_management.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:user_management.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\AssetController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\AvailabilityEngineController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "POST": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\BookingEngineController": {
+   "routes": 4,
+   "url_prefixes": {
+    "api": 4
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 2
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\BudgetRecommendationController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "POST": 1
+   },
+   "middleware": [
+    "Illuminate\\Routing\\Middleware\\ThrottleRequests:recommendations",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\ClientController": {
+   "routes": 8,
+   "url_prefixes": {
+    "api": 8
+   },
+   "methods": {
+    "GET|HEAD": 8
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:clients.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\CoverageController": {
+   "routes": 2,
+   "url_prefixes": {
+    "api": 2
+   },
+   "methods": {
+    "POST": 1,
+    "GET|HEAD": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\CurrencyController": {
+   "routes": 4,
+   "url_prefixes": {
+    "api": 4
+   },
+   "methods": {
+    "GET|HEAD": 3,
+    "POST": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\FinanceController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 4,
+    "POST": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\PermissionController": {
+   "routes": 3,
+   "url_prefixes": {
+    "api": 3
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "PUT": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\PricingEngineController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "POST": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\ProfileController": {
+   "routes": 8,
+   "url_prefixes": {
+    "api": 8
+   },
+   "methods": {
+    "GET|HEAD": 7,
+    "POST": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\RecommendationEngineController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "GET|HEAD": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\RoleController": {
+   "routes": 6,
+   "url_prefixes": {
+    "api": 6
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 2,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\Api\\SettingsController": {
+   "routes": 19,
+   "url_prefixes": {
+    "api": 19
+   },
+   "methods": {
+    "GET|HEAD": 10,
+    "POST": 1,
+    "PUT": 8
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:settings.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:settings.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AssetImportController": {
+   "routes": 3,
+   "url_prefixes": {
+    "api": 3
+   },
+   "methods": {
+    "POST": 2,
+    "GET|HEAD": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AuthController": {
+   "routes": 6,
+   "url_prefixes": {
+    "api": 6
+   },
+   "methods": {
+    "POST": 5,
+    "GET|HEAD": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\AuthorController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\BlogController": {
+   "routes": 9,
+   "url_prefixes": {
+    "api": 9
+   },
+   "methods": {
+    "GET|HEAD": 6,
+    "POST": 2,
+    "PUT": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\BlogTagController": {
+   "routes": 4,
+   "url_prefixes": {
+    "api": 4
+   },
+   "methods": {
+    "GET|HEAD": 1,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\BookingController": {
+   "routes": 31,
+   "url_prefixes": {
+    "api": 31
+   },
+   "methods": {
+    "GET|HEAD": 9,
+    "POST": 18,
+    "PUT|PATCH": 1,
+    "DELETE": 2,
+    "PUT": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:bookings.approve",
+    "App\\Http\\Middleware\\PermissionMiddleware:bookings.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:bookings.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:bookings.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\CategoryController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ContactEnquiryController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "POST": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\DashBoardController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "GET|HEAD": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:dashboard.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\EnquiryController": {
+   "routes": 4,
+   "url_prefixes": {
+    "api": 4
+   },
+   "methods": {
+    "POST": 1,
+    "GET|HEAD": 2,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:contacts.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:contacts.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\FaqController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:faqs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\FileController": {
+   "routes": 2,
+   "url_prefixes": {
+    "api": 2
+   },
+   "methods": {
+    "POST": 2
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\GalleryController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\JobApplicationController": {
+   "routes": 4,
+   "url_prefixes": {
+    "api": 4
+   },
+   "methods": {
+    "POST": 1,
+    "GET|HEAD": 2,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:jobs.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:jobs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\JobCategoryController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "GET|HEAD": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\JobPostController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:jobs.create",
+    "App\\Http\\Middleware\\PermissionMiddleware:jobs.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:jobs.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:jobs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\PartnerApplicationController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 4,
+    "POST": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\PartnerApprovalController": {
+   "routes": 4,
+   "url_prefixes": {
+    "api": 4
+   },
+   "methods": {
+    "POST": 4
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\PartnerBookingController": {
+   "routes": 6,
+   "url_prefixes": {
+    "api": 6
+   },
+   "methods": {
+    "POST": 3,
+    "GET|HEAD": 2,
+    "DELETE": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\PartnerClientController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 3,
+    "POST": 1,
+    "PUT": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\PartnerController": {
+   "routes": 12,
+   "url_prefixes": {
+    "api": 12
+   },
+   "methods": {
+    "GET|HEAD": 7,
+    "POST": 2,
+    "PUT": 1,
+    "DELETE": 1,
+    "PATCH": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\PartnerPortalController": {
+   "routes": 8,
+   "url_prefixes": {
+    "api": 8
+   },
+   "methods": {
+    "GET|HEAD": 6,
+    "PUT": 1,
+    "POST": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\PaymentController": {
+   "routes": 3,
+   "url_prefixes": {
+    "api": 3
+   },
+   "methods": {
+    "GET|HEAD": 1,
+    "POST": 2
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\PricingPlanController": {
+   "routes": 7,
+   "url_prefixes": {
+    "api": 7
+   },
+   "methods": {
+    "GET|HEAD": 3,
+    "POST": 2,
+    "PUT": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:pricing.create",
+    "App\\Http\\Middleware\\PermissionMiddleware:pricing.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:pricing.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:pricing.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ProductController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "GET|HEAD": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ProductEnquiryController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "POST": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\QrCodeController": {
+   "routes": 7,
+   "url_prefixes": {
+    "api": 6,
+    "qr": 1
+   },
+   "methods": {
+    "GET|HEAD": 4,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:screens.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api",
+    "web"
+   ]
+  },
+  "App\\Http\\Controllers\\ReferralAnalyticsController": {
+   "routes": 9,
+   "url_prefixes": {
+    "api": 9
+   },
+   "methods": {
+    "GET|HEAD": 6,
+    "POST": 3
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ReferralCodeController": {
+   "routes": 6,
+   "url_prefixes": {
+    "api": 6
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 2,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ReportController": {
+   "routes": 11,
+   "url_prefixes": {
+    "api": 11
+   },
+   "methods": {
+    "GET|HEAD": 11
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:reports.export",
+    "App\\Http\\Middleware\\PermissionMiddleware:reports.view",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_providers.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ScreenCategoryController": {
+   "routes": 3,
+   "url_prefixes": {
+    "api": 3
+   },
+   "methods": {
+    "POST": 2,
+    "GET|HEAD": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ScreenController": {
+   "routes": 18,
+   "url_prefixes": {
+    "api": 18
+   },
+   "methods": {
+    "GET|HEAD": 9,
+    "POST": 7,
+    "PUT": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:screens.create",
+    "App\\Http\\Middleware\\PermissionMiddleware:screens.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:screens.edit",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ScreenProviderEnquiryController": {
+   "routes": 1,
+   "url_prefixes": {
+    "api": 1
+   },
+   "methods": {
+    "POST": 1
+   },
+   "middleware": [
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\ScreenProviderPortalController": {
+   "routes": 14,
+   "url_prefixes": {
+    "api": 14
+   },
+   "methods": {
+    "GET|HEAD": 9,
+    "POST": 3,
+    "PUT": 2
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_provider.campaigns",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_provider.dashboard",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_provider.profile",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_provider.revenue",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_provider.screens",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_provider.settlements",
+    "App\\Http\\Middleware\\PermissionMiddleware:screen_provider.support",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\SuccessStoryController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT|PATCH": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:blogs.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  },
+  "App\\Http\\Controllers\\TestimonialController": {
+   "routes": 5,
+   "url_prefixes": {
+    "api": 5
+   },
+   "methods": {
+    "GET|HEAD": 2,
+    "POST": 1,
+    "PUT": 1,
+    "DELETE": 1
+   },
+   "middleware": [
+    "App\\Http\\Middleware\\PermissionMiddleware:testimonials.create",
+    "App\\Http\\Middleware\\PermissionMiddleware:testimonials.delete",
+    "App\\Http\\Middleware\\PermissionMiddleware:testimonials.edit",
+    "App\\Http\\Middleware\\PermissionMiddleware:testimonials.view",
+    "Illuminate\\Auth\\Middleware\\Authenticate:sanctum",
+    "api"
+   ]
+  }
+ },
+ "ownership_rule": "A controller is owned by the capability whose Services/Domain code it delegates to. `*_portal` suffixed controllers (PartnerPortal, ScreenProviderPortal) are delivery adapters over Partner/Provider domain rules and are intentionally thin."
+}

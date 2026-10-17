@@ -1,0 +1,169 @@
+{
+  "phase": "0.11-0.12",
+  "name": "Boundary Map",
+  "generated_at": "2026-09-26T05:55:00+05:30",
+  "purpose": "Show the architectural boundaries after both reporting and integration extractions",
+  "layers": {
+    "HTTP_Layer": {
+      "components": [
+        "App\\Http\\Controllers\\ReportController",
+        "App\\Http\\Controllers\\DashBoardController",
+        "App\\Http\\Controllers\\PartnerPortalController",
+        "App\\Http\\Controllers\\Api\\*Controllers",
+        "App\\Http\\Controllers\\*OtherControllers"
+      ],
+      "responsibility": "Handle HTTP requests, authentication, input validation, and response formatting",
+      "depends_on": ["Application_Layer"],
+      "dependencies": {
+        "ReportController": ["App\\Application\\Reporting\\*Query"],
+        "DashBoardController": ["App\\Application\\Booking\\*Query", "App\\Application\\Screen\\*Query", "App\\Application\\Revenue\\*Query"],
+        "PartnerPortalController": ["App\\Application\\Partner\\*Query"]
+      }
+    },
+    "Application_Layer": {
+      "components": [
+        "app/Application/Reporting/*",
+        "app/Application/Booking/*",
+        "app/Application/Screen/*",
+        "app/Application/Revenue/*",
+        "app/Application/Payment/*",
+        "app/Application/Financial/*",
+        "app/Application/Partner/*",
+        "app/Application/Integration/*"
+      ],
+      "responsibility": "Contain application use cases and queries that orchestrate domain services",
+      "depends_on": ["Domain_Layer", "Contract_Layer"],
+      "dependencies": {
+        "Reporting Queries": ["App\\Domain\\Reporting\\*"],
+        "Booking Queries": ["App\\Domain\\Booking\\*"],
+        "Screen Queries": ["App\\Domain\\Screen\\*"],
+        "Revenue Queries": ["App\\Domain\\Financial\\*"],
+        "Payment Use Cases": ["App\\Domain\\Payment\\*"],
+        "Financial Use Cases": ["App\\Domain\\Financial\\*"],
+        "Integration Adapters": ["App\\Domain\\Integration\\*Contracts"]
+      }
+    },
+    "Domain_Layer": {
+      "components": [
+        "app/Domain/Booking",
+        "app/Domain/Screen",
+        "app/Domain/Payment",
+        "app/Domain/Financial",
+        "app/Domain/Reporting",
+        "app/Domain/Partner",
+        "app/Domain/Integration",
+        "app/Domain/Loyalty"
+      ],
+      "responsibility": "Contain pure business logic and rules, framework-free",
+      "depends_on": [],
+      "dependencies": {
+        "All Domains": ["None (framework-free)"]
+      }
+    },
+    "Contract_Layer": {
+      "components": [
+        "app/Domain/*/Contracts/*Interfaces.php",
+        "app/Domain/*/Contracts/*Repositories.php"
+      ],
+      "responsibility": "Define interfaces that application layer depends on",
+      "depends_on": ["Domain_Layer"],
+      "dependencies": {
+        "All Contract Interfaces": ["App\\Domain\\*"]
+      }
+    },
+    "Infrastructure_Layer": {
+      "components": [
+        "app/Infrastructure/*",
+        "app/Infrastructure/*/*",
+        "app/Infrastructure/*/*/*"
+      ],
+      "responsibility": "Implement contracts and handle external concerns",
+      "depends_on": ["Contract_Layer"],
+      "dependencies": {
+        "Eloquent Repositories": ["App\\Domain\\*\\Contracts\\*RepositoryInterface"],
+        "External Service Adapters": ["App\\Domain\\Integration\\*Contracts\\*AdapterInterface"],
+        "File System Adapters": ["App\\Domain\\Integration\\*StorageContracts"],
+        "Mail Adapters": ["App\\Domain\\Integration\\*MailContracts"],
+        "HTTP Clients": ["App\\Domain\\Integration\\*HttpContracts"]
+      }
+    }
+  },
+  "boundary_rules": [
+    {
+      "rule": "HTTP Layer → Application Layer",
+      "description": "Controllers must only call application layer (use cases/queries), never domain or infrastructure directly",
+      "status": "ENFORCED"
+    },
+    {
+      "rule": "Application Layer → Domain Layer",
+      "description": "Application layer depends on domain contracts (interfaces), never concrete implementations",
+      "status": "ENFORCED"
+    },
+    {
+      "rule": "Application Layer → Infrastructure Layer",
+      "description": "Application layer MUST NOT depend on infrastructure directly",
+      "status": "ENFORCED"
+    },
+    {
+      "rule": "Domain Layer → Infrastructure Layer",
+      "description": "Domain layer MUST NOT depend on infrastructure (no framework imports)",
+      "status": "ENFORCED",
+      "verification": "Static analysis shows zero framework imports in app/Domain"
+    },
+    {
+      "rule": "Domain Layer → HTTP Layer",
+      "description": "Domain layer MUST NOT depend on HTTP layer",
+      "status": "ENFORCED",
+      "verification": "No HTTP-related classes or facades in app/Domain"
+    },
+    {
+      "rule": "Reporting Layer Direction",
+      "description": "Reporting queries read from canonical domain models, never mutate transactional state",
+      "status": "TO BE VERIFIED",
+      "verification_method": "Check that reporting queries only contain read operations (SELECT, SUM, COUNT, etc.)"
+    },
+    {
+      "rule": "Integration Boundary",
+      "description": "External service calls must go through infrastructure adapters",
+      "status": "TO BE VERIFIED_FOR_INTEGRATION",
+      "verification_method": "Check that no direct HTTP::, Mail::, Storage:: calls exist in app/Domain or app/Application"
+    }
+  ],
+  "data_flow": {
+    "Transactional_Flow": [
+      "HTTP Layer (Controller)",
+      "↓",
+      "Application Layer (Use Case)",
+      "↓",
+      "Domain Layer (Services/Entities)",
+      "↓",
+      "Infrastructure Layer (Repositories)",
+      "↓",
+      "Database"
+    ],
+    "Reporting_Flow": [
+      "HTTP Layer (Controller)",
+      "↓",
+      "Application Layer (Query)",
+      "↓",
+      "Domain Layer (Read Models/Projections)",
+      "↓",
+      "Infrastructure Layer (Read Repositories)",
+      "↓",
+      "Database"
+    ],
+    "Integration_Flow": [
+      "HTTP Layer (Controller)",
+      "↓",
+      "Application Layer (Use Case)",
+      "↓",
+      "Domain Layer (Service)",
+      "↓",
+      "Contract Layer (Integration Interface)",
+      "↓",
+      "Infrastructure Layer (Adapter)",
+      "↓",
+      "External Service"
+    ]
+  }
+}

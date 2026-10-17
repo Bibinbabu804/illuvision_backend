@@ -1,0 +1,157 @@
+{
+  "phase": "0.10",
+  "name": "Financial Dependency Diff",
+  "generated_at": "2026-09-26T00:44:00+05:30",
+  "purpose": "Record every dependency-edge change introduced by the Financial boundary extraction, together with the edges that were deliberately NOT created.",
+  "summary": {
+    "edges_added": 12,
+    "edges_removed": 2,
+    "files_created": 8,
+    "files_modified": 8,
+    "files_deleted": 0,
+    "net_dependency_direction": "HTTP -> Application -> Services -> Domain <- Infrastructure"
+  },
+  "edges_added": [
+    {
+      "from": "App\\Services\\RevenueDistributionService",
+      "to": "App\\Domain\\Financial\\Support\\RevenueAllocation",
+      "type": "domain_support",
+      "rationale": "Replaces three inline arithmetic blocks with one audited helper."
+    },
+    {
+      "from": "App\\Services\\SettlementService",
+      "to": "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+      "type": "domain_contract",
+      "rationale": "The eligibility aggregate read moves behind a persistence boundary."
+    },
+    {
+      "from": "App\\Services\\CommissionService",
+      "to": "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+      "type": "domain_contract",
+      "rationale": "Three commission reads, including the lockForUpdate ones, move behind a contract."
+    },
+    {
+      "from": "App\\Services\\ReferralTrackingService",
+      "to": "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+      "type": "domain_contract",
+      "rationale": "The duplicate-commission guard read moves behind a contract; lockForUpdate preserved."
+    },
+    {
+      "from": "App\\Services\\ReferralTrackingService",
+      "to": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "type": "application_use_case",
+      "rationale": "The revenue backfill re-enters distribution through the application boundary instead of calling the service directly."
+    },
+    {
+      "from": "App\\Http\\Controllers\\BookingController",
+      "to": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "type": "application_use_case",
+      "rationale": "Revenue distribution enters through the application boundary."
+    },
+    {
+      "from": "App\\Http\\Controllers\\AdminSettlementController",
+      "to": "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+      "type": "application_use_case",
+      "rationale": "Settlement generation enters through the application boundary."
+    },
+    {
+      "from": "App\\Providers\\AppServiceProvider",
+      "to": "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+      "type": "container_binding",
+      "rationale": "Binds to EloquentSettlementRepository."
+    },
+    {
+      "from": "App\\Providers\\AppServiceProvider",
+      "to": "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+      "type": "container_binding",
+      "rationale": "Binds to EloquentPartnerCommissionRepository."
+    },
+    {
+      "from": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "to": "App\\Services\\ReferralTrackingService",
+      "type": "transitional_legacy_facade",
+      "rationale": "Accepted transitional edge. See unresolved_violations."
+    },
+    {
+      "from": "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+      "to": "App\\Services\\SettlementService",
+      "type": "transitional_legacy_facade",
+      "rationale": "Accepted transitional edge. See unresolved_violations."
+    },
+    {
+      "from": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "to": "App\\Services\\RevenueDistributionService",
+      "type": "transitional_legacy_facade",
+      "rationale": "Accepted transitional edge. See unresolved_violations."
+    }
+  ],
+  "edges_removed": [
+    {
+      "from": "App\\Http\\Controllers\\AdminSettlementController::store()",
+      "to": "App\\Services\\SettlementService (generation path)",
+      "type": "controller_to_service",
+      "replacement": "GenerateProviderSettlementUseCase",
+      "status": "ELIMINATED",
+      "note": "The approve / mark-paid / cancel controller methods still depend on SettlementService by design — that is the lifecycle state machine."
+    },
+    {
+      "from": "App\\Http\\Controllers\\AdminPaymentController::approvePayment()",
+      "to": "App\\Services\\ReferralTrackingService (via app() service locator)",
+      "type": "service_locator",
+      "replacement": "Constructor-injected RecordReferralAttributionUseCase",
+      "status": "ELIMINATED"
+    }
+  ],
+  "service_locators_removed": [
+    {
+      "location": "App\\Http\\Controllers\\AdminPaymentController::approvePayment()",
+      "was": "app(\\App\\Services\\ReferralTrackingService::class)->createReferralTracking(...)",
+      "now": "$this->recordReferralAttribution->execute(...)"
+    },
+    {
+      "location": "App\\Services\\ManualBookingService::recordOfflinePayment()",
+      "was": "app(\\App\\Services\\ReferralTrackingService::class)->createReferralTracking(...)",
+      "now": "$this->recordReferralAttribution->execute(...)"
+    }
+  ],
+  "unresolved_violations": [
+    {
+      "edge": "App\\Application\\Financial\\UseCases\\* -> App\\Services\\*",
+      "type": "application_depends_on_legacy_service_layer",
+      "severity": "accepted_transitional",
+      "rationale": "The use cases are thin dispatchers over the existing services, which remain the behaviour owners. The alternative — moving all logic into the use cases now — would put ~1000 lines of settlement, commission and referral logic through a rewrite in an extraction phase, with a high risk of silent behaviour change. The dependency is documented on each use case class so the eventual migration is mechanical.",
+      "planned_resolution": "A later phase moves each service body behind its use case, at which point these edges disappear."
+    },
+    {
+      "edge": "App\\Services\\PaymentService -> App\\Services\\ReferralTrackingService -> Domain\\Financial",
+      "type": "payment_depends_on_financial",
+      "severity": "accepted_legitimate",
+      "rationale": "Referral attribution and partner commission creation are genuinely part of the payment-success transition. Severing the edge would change transaction semantics. Documented in ADR-P09-03."
+    },
+    {
+      "edge": "App\\Services\\ReferralTrackingService -> App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "type": "service_depends_on_application_layer",
+      "severity": "accepted_documented",
+      "rationale": "This is an inverted dependency (a service depending on the application layer). It exists only because the revenue backfill is reused in three places. The clean fix is for the backfill to take a callback or for the callers to invoke distribution themselves; both change control flow. Recorded in ADR-P10-04 rather than restructured here."
+    }
+  ],
+  "edges_deliberately_not_created": [
+    {
+      "edge": "App\\Domain\\Financial -> App\\Models or Illuminate",
+      "reason": "The domain layer stays framework-free. RevenueAllocation has no framework import."
+    },
+    {
+      "edge": "App\\Http\\Controllers -> App\\Domain",
+      "reason": "Controllers must not bypass the application layer."
+    },
+    {
+      "edge": "App\\Application -> App\\Infrastructure",
+      "reason": "Only the contracts are injected; adapters are resolved by the container."
+    }
+  ],
+  "verification": {
+    "domain_layer_framework_free": "confirmed by GoldenFinancialBoundaryTest::test_container_resolves_every_financial_boundary_collaborator and static inspection of RevenueAllocation",
+    "settleable_status_constant": "pinned by GoldenFinancialBoundaryTest::test_settleable_booking_status_set_is_unchanged",
+    "lock_preservation": "pinned by GoldenFinancialBoundaryTest::test_commission_repository_preserves_pessimistic_locking"
+  }
+}

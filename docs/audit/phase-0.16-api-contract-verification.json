@@ -1,0 +1,46 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "api-contract-verification",
+  "verdict": "IDENTICAL - no contract change was introduced by Phases 0.15-0.16",
+  "baseline_source": "docs/audit/routes-baseline.json (pre-remediation snapshot)",
+  "live_source": "php artisan route:list --json",
+  "route_count": {
+    "baseline": 385,
+    "live": 385,
+    "delta": 0
+  },
+  "changed_actions": 0,
+  "changed_middleware": 0,
+  "added": 0,
+  "removed": 0,
+  "golden_suites": "all passing",
+  "golden_test_files": [
+    "GoldenApiContractRegressionTest",
+    "GoldenAvailabilityRegressionTest",
+    "GoldenBookingRegressionTest",
+    "GoldenConcurrencyVerificationTest",
+    "GoldenFinancialBoundaryTest",
+    "GoldenFinancialRegressionTest",
+    "GoldenPaymentBoundaryTest",
+    "GoldenPaymentRegressionTest",
+    "GoldenPricingRegressionTest"
+  ],
+  "known_deviations": [
+    {
+      "route": "PATCH /api/bookings/{booking}",
+      "baseline_middleware": [
+        "api",
+        "Authenticate:sanctum"
+      ],
+      "live_middleware": [
+        "api",
+        "Authenticate:sanctum"
+      ],
+      "status": "UNCHANGED - the defect is pre-existing, see SEC-01"
+    }
+  ],
+  "note": "The 15 shadowed route declarations removed in Phase 0.14 were verified dead before removal; route count, actions and middleware are all unchanged as a result."
+}

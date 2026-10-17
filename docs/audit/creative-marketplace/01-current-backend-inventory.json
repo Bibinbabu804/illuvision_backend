@@ -1,0 +1,363 @@
+{
+  "artifact": "01-current-backend-inventory",
+  "generated": "2026-09-26",
+  "method": "Direct source inspection (find, grep, php artisan route:list). Prior docs/audit/*.json artifacts were treated as evidence, not truth; discrepancies are recorded in section 9.",
+  "scope": "illuvision/core-backend — Laravel 11, PHP ^8.2, modular monolith, Project 01 (Advertising Marketplace).",
+  "classification_legend": {
+    "CURRENT_FACT": "Verified from source code on the measurement date.",
+    "ARCHITECTURE_DOCUMENT": "Defined by project architecture documentation.",
+    "INFERENCE": "Reasonably inferred from implementation or relationships.",
+    "RECOMMENDATION": "Proposed target approach.",
+    "OPEN_DECISION": "Cannot be determined from available evidence."
+  },
+
+  "counts": {
+    "measurement_date": "2026-09-26",
+    "routes_total": 385,
+    "controllers": 68,
+    "form_requests": 5,
+    "api_resources": 7,
+    "middleware_classes": 1,
+    "models": 62,
+    "mailables": 28,
+    "event_classes": 34,
+    "event_classes_note": "33 event classes in app/Support/Events/Notifications plus 1 subscriber (App/Support/Events/NotificationEventSubscriber). There are ZERO listener classes.",
+    "domain_classes": 15,
+    "infrastructure_classes": 14,
+    "support_classes": 44,
+    "application_classes": 32,
+    "repository_classes": 4,
+    "service_classes": 48,
+    "service_providers": 2,
+    "console_commands": 3,
+    "php_enums": 1,
+    "exceptions": 1,
+    "observers": 1,
+    "helpers": 1,
+    "support_configs": 6,
+    "migrations": 112,
+    "seeders": 10,
+    "factories": 2,
+    "test_files": 85,
+    "distinct_database_tables": 73,
+    "foreign_key_definitions": 96,
+    "foreign_key_definitions_note": "94 via ->constrained(...) plus 2 legacy ->foreign(...) across the 112 migrations. The earlier figure of 91 in this artifact was an undercount; the AGENTS.md figure of 94 is the ->constrained() count alone. Three FK-like columns are NOT constrained: bookings.screen_category_id, booking_screens.screen_category_id, booking_screens.screen_provider_id, asset_coverage_cities.state_id (4 columns).",
+    "explicit_foreign_key_constraints_superseded": 91,
+    "creative_classes": 0,
+    "creative_directories_present": false,
+    "empty_directories_under_app": 0
+  },
+
+  "domain_layer_files": {
+    "classification": "CURRENT_FACT",
+    "populated_subdirectories": ["Asset", "Availability", "Booking", "Financial", "Payment", "Pricing"],
+    "absent_subdirectories": ["Campaign", "Media", "Provider", "Partner", "Settlement", "Reporting", "Creative"],
+    "files": [
+      "app/Domain/Asset/Events/AssetCreated.php",
+      "app/Domain/Availability/Exceptions/FleetCapacityExceededException.php",
+      "app/Domain/Booking/Enums/BookingStatus.php",
+      "app/Domain/Booking/Exceptions/InvalidBookingStateException.php",
+      "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php",
+      "app/Domain/Financial/Contracts/SettlementRepositoryInterface.php",
+      "app/Domain/Financial/Support/RevenueAllocation.php",
+      "app/Domain/Payment/Contracts/PaymentGatewayInterface.php",
+      "app/Domain/Payment/Contracts/PaymentRepositoryInterface.php",
+      "app/Domain/Payment/PaymentStatus.php",
+      "app/Domain/Payment/Support/Money.php",
+      "app/Domain/Pricing/CampaignPricingEngine.php",
+      "app/Domain/Pricing/Contracts/PricingEngineInterface.php",
+      "app/Domain/Pricing/Enums/PricingUnit.php",
+      "app/Domain/Pricing/Exceptions/PricingException.php"
+    ]
+  },
+
+  "infrastructure_layer_files": {
+    "classification": "CURRENT_FACT",
+    "note": "Strongest layer in the repository. Every external system is already behind an interface with a Laravel adapter (ARCHITECTURE_RULES.md Rules 1 and 3).",
+    "files": [
+      "app/Infrastructure/Auth/Contracts/GoogleIdentityProviderInterface.php",
+      "app/Infrastructure/Auth/GoogleOAuthAdapter.php",
+      "app/Infrastructure/ExchangeRates/Contracts/ExchangeRateApiClientInterface.php",
+      "app/Infrastructure/ExchangeRates/ExchangeRateApiClient.php",
+      "app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php",
+      "app/Infrastructure/Financial/Persistence/EloquentSettlementRepository.php",
+      "app/Infrastructure/Media/Contracts/ImageProcessingContractInterface.php",
+      "app/Infrastructure/Media/GdImageProcessor.php",
+      "app/Infrastructure/Notifications/Contracts/MailContractInterface.php",
+      "app/Infrastructure/Notifications/LaravelMailAdapter.php",
+      "app/Infrastructure/Payments/Persistence/EloquentPaymentRepository.php",
+      "app/Infrastructure/Payments/Razorpay/RazorpayPaymentGateway.php",
+      "app/Infrastructure/Storage/Contracts/StorageContractInterface.php",
+      "app/Infrastructure/Storage/LaravelStorageAdapter.php"
+    ]
+  },
+
+  "repository_layer": {
+    "classification": "CURRENT_FACT",
+    "app_Repositories": [
+      "app/Repositories/Asset/AssetRepositoryInterface.php",
+      "app/Repositories/Asset/AssetRepository.php",
+      "app/Repositories/Booking/BookingRepositoryInterface.php",
+      "app/Repositories/Booking/BookingRepository.php"
+    ],
+    "domain_owned_contracts_with_eloquent_implementations": [
+      "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface -> App\\Infrastructure\\Payments\\Persistence\\EloquentPaymentRepository",
+      "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface -> App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository",
+      "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface -> App\\Infrastructure\\Financial\\Persistence\\EloquentPartnerCommissionRepository",
+      "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface -> App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter"
+    ]
+  },
+
+  "service_layer": {
+    "classification": "CURRENT_FACT",
+    "total": 48,
+    "flat_at_root": 28,
+    "in_capability_subdirectories": 20,
+    "subdirectory_breakdown": { "Campaign": 13, "Pricing": 4, "Booking": 1, "Payment": 1, "Settlement": 1 },
+    "detail_reference": "11-existing-service-reuse-analysis.json"
+  },
+
+  "application_layer": {
+    "classification": "CURRENT_FACT",
+    "total": 32,
+    "breakdown": { "Reporting": 17, "Payment": 6, "Booking": 4, "Financial": 3, "Pricing": 2 },
+    "status": "Layer is being retired per docs/audit/phase-0.20-final-report.md. Reporting (17) and the use cases (15) are the deliberate exceptions kept behind their own boundary. No new class may be added to app/Application."
+  },
+
+  "http_layer": {
+    "classification": "CURRENT_FACT",
+    "controllers": { "total": 68, "flat": 62, "api_subdirectory": 15, "auth_subdirectory": 4 },
+    "form_requests": {
+      "total": 5,
+      "classes": ["CreateAssetRequest", "UpdateAssetRequest", "SettingsRequest", "RoleRequest", "PricingPlanRequest"],
+      "finding": "All five return true from authorize(). Authorization is enforced exclusively by route middleware; Form Requests validate shape only."
+    },
+    "api_resources": {
+      "total": 7,
+      "classes": ["AssetResource", "MapAssetResource", "UserResource", "PricingPlanResource", "SettingsResource", "RoleResource", "AdminUserResource"],
+      "finding": "6 of 7 are used by controllers. PricingPlanResource appears unused at the HTTP layer. Most controllers return raw Eloquent models instead of Resources."
+    },
+    "middleware": { "total": 1, "class": "App\\Http\\Middleware\\PermissionMiddleware", "alias_registered_in": "bootstrap/app.php" },
+    "policies": 0,
+    "gates": 0
+  },
+
+  "models": {
+    "classification": "CURRENT_FACT",
+    "total": 62,
+    "soft_delete_users": ["App\\Models\\Screen"],
+    "tables_without_model": [
+      "screen_types", "password_setup_tokens", "password_reset_tokens", "blog_tag_relations",
+      "sessions", "cache", "cache_locks", "jobs", "job_batches", "failed_jobs", "personal_access_tokens"
+    ],
+    "orphan_table": "screen_types (id + timestamps only; no model, no code reference anywhere)"
+  },
+
+  "support_layer": {
+    "classification": "CURRENT_FACT",
+    "total": 44,
+    "events": { "total": 34, "domain_events": 1, "notification_events": 33 },
+    "authorization": ["App\\Support\\Authorization\\RolePermissionChecker"],
+    "configs": ["BookingConfig", "ConfigFactory", "MediaConfig", "NotificationConfig", "PricingConfig", "ReferralConfig"],
+    "exceptions": ["UserConflictException"],
+    "root_classes": ["BookingEligibilityResult", "DurationFormatter"],
+    "jobs_directory": "app/Support/Jobs DOES NOT EXIST. There are no queued job classes anywhere in the repository."
+  },
+
+  "mail": {
+    "classification": "CURRENT_FACT",
+    "total": 28,
+    "all_implement_should_queue": true,
+    "consequence": "NotificationService::sendEmail() always takes the MailContractInterface::queue() branch; the send() branch is unreachable in production."
+  },
+
+  "other": {
+    "classification": "CURRENT_FACT",
+    "php_enums": ["App\\Enums\\AssetType"],
+    "domain_enums": ["App\\Domain\\Booking\\Enums\\BookingStatus", "App\\Domain\\Pricing\\Enums\\PricingUnit"],
+    "helpers": ["App\\Helpers\\MediaHelper"],
+    "observers": ["App\\Observers\\AssetObserver"],
+    "console_commands": ["ExpireRewardPoints", "SyncExchangeRates", "ExpirePendingBookings"],
+    "service_providers": ["App\\Providers\\AppServiceProvider", "App\\Providers\\EventServiceProvider"]
+  },
+
+  "routes": {
+    "classification": "CURRENT_FACT",
+    "total": 385,
+    "total_measured_by": "php artisan route:list --json -> 385 route entries",
+    "uri_prefix_split": {
+      "classification": "CURRENT_FACT",
+      "api_prefixed": 380,
+      "non_api_prefixed": 5,
+      "note": "Counted from php artisan route:list --json by the leading 'api' segment of the URI."
+    },
+    "route_definition_files": {
+      "classification": "CURRENT_FACT",
+      "routes_api_php_explicit_definition_calls": 347,
+      "routes_web_php_explicit_definition_calls": 2,
+      "note": "Explicit Route:: verb calls. The remaining routes come from resource()/Route::apiResource expansions, so definition calls and route entries are different numbers and must not be summed or compared as if they were.",
+      "correction": "An earlier draft of this artifact recorded 'api_php: 365, web_php: 2' as though they were route counts. That was unverifiable and has been replaced with the two independently measured figures above (385 total = 380 api-prefixed + 5 non-api)."
+    },
+    "surface_breakdown": {
+      "public_unauthenticated": 90,
+      "auth_sanctum_only": 40,
+      "permission_gated": 250,
+      "versioned_v2": 19,
+      "unversioned": 346
+    },
+    "versioning": {
+      "classification": "CURRENT_FACT",
+      "url_prefix": "/api/v2/* on exactly 19 routes",
+      "v1_prefix": "does not exist",
+      "header_based_versioning": "absent",
+      "middleware_based_versioning": "absent"
+    },
+    "route_naming": {
+      "classification": "CURRENT_FACT",
+      "explicit_name_calls_in_api_php": 0,
+      "only_named_route": "qr.redirect (routes/web.php:10)",
+      "consequence": "Route names are entirely Laravel auto-derived; many custom-action routes have name: null."
+    },
+    "notable_anomalies": [
+      "POST /api/file-upload and /api/video-upload are behind auth:sanctum with NO permission middleware and ZERO validation.",
+      "Route::apiResource('gallery') is registered AFTER the auth:sanctum group closes, so POST/PUT/DELETE /api/gallery are unauthenticated.",
+      "GET/POST /api/admin/assets/import/* are registered before the auth group and have no middleware at all; /import/confirm performs a transactional bulk write to screens."
+    ]
+  },
+
+  "database_tables": {
+    "classification": "CURRENT_FACT",
+    "distinct_total": 73,
+    "groups": {
+      "marketing_cms_content": ["blogs", "blog_descriptions", "blog_tags", "blog_tag_relations", "categories", "testimonials", "galleries", "success_stories", "faqs", "achievements", "announcements", "enquiries", "contact_enquiries", "products", "product_enquiries", "job_categories", "job_posts", "job_applications"],
+      "advertising_domain": ["screens", "screen_categories", "screen_providers", "screen_provider_enquiries", "screen_provider_activities", "screen_provider_settlements", "screen_duration_split_overrides", "asset_coverage_cities", "mobile_asset_coverage_states", "mobile_asset_coverage_cities", "advertisement_categories", "bookings", "booking_screens", "booking_media", "booking_activities", "booking_pricing_breakdowns"],
+      "pricing": ["pricing_plans", "pricing_plan_durations", "pricing_discount_rules", "pricing_screen_rules", "pricing_duration_rules", "pricing_peak_rules", "pricing_weekend_rules", "currency_rates"],
+      "financial": ["payments", "payment_logs", "refunds", "partner_commissions", "referral_usages", "referral_codes", "partners", "settings"],
+      "loyalty": ["reward_accounts", "reward_transactions", "reward_redemptions"],
+      "geography": ["countries", "states", "cities", "screen_types"],
+      "identity": ["users", "roles", "role_permissions", "password_reset_tokens", "password_setup_tokens", "personal_access_tokens"],
+      "platform": ["sessions", "cache", "cache_locks", "jobs", "job_batches", "failed_jobs", "activity_logs", "notification_logs", "qr_codes", "qr_code_scans"]
+    },
+    "creative_marketplace_tables": [],
+    "creative_marketplace_table_count": 0
+  },
+
+  "tests": {
+    "classification": "CURRENT_FACT",
+    "test_files": 85,
+    "golden_suite": ["GoldenApiContractRegressionTest", "GoldenAvailabilityRegressionTest", "GoldenBookingRegressionTest", "GoldenConcurrencyVerificationTest", "GoldenFinancialBoundaryTest", "GoldenFinancialRegressionTest", "GoldenPaymentBoundaryTest", "GoldenPaymentRegressionTest", "GoldenPricingRegressionTest", "GoldenTestSetupTrait"],
+    "security_suite": ["Dep01DebugAndEnvironmentTest", "Sec01BookingAuthorizationTest", "Sec02V2RouteSecurityTest", "Sec03PermissionVocabularyTest", "Sec03RolePartnerAuthorizationTest"],
+    "architecture_suite": ["tests/Unit/Architecture/ArchitectureRuleTest.php"],
+    "integration_suite": ["tests/Feature/Integrations/IntegrationBoundaryTest.php"],
+    "reference_suite_state_2026_09_26": {
+      "passed": 673,
+      "failed": 2,
+      "warning": 1,
+      "skipped": 4,
+      "assertions": 5564,
+      "preexisting_failures": [
+        "Tests\\Feature\\BookingConcurrencyTest — expects 'no longer available'; actual message is '... has only N units available, but M requested.'",
+        "Tests\\Feature\\CampaignBookingPricingIntegrityTest — same message-wording drift"
+      ],
+      "preexisting_warnings": ["Tests\\Unit\\MediaHelperTest — tautological assertion"]
+    }
+  },
+
+  "external_integrations": [
+    { "integration": "Razorpay payments", "entry_point": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway", "contract": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface", "isolated": true, "notes": "SDK (Razorpay\\Api\\Api) is instantiated only inside the adapter. PaymentGatewayInterface is autowired, not explicitly bound." },
+    { "integration": "Google OAuth", "entry_point": "App\\Infrastructure\\Auth\\GoogleOAuthAdapter", "contract": "GoogleIdentityProviderInterface", "isolated": true },
+    { "integration": "Exchange rates", "entry_point": "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient", "contract": "ExchangeRateApiClientInterface", "isolated": true },
+    { "integration": "IP geolocation", "entry_point": "App\\Services\\Campaign\\CountryDetectionService:40", "contract": null, "isolated": false, "notes": "Raw Http::timeout(5)->get('http://ip-api.com/json/') inside a service." },
+    { "integration": "Mail", "entry_point": "App\\Infrastructure\\Notifications\\LaravelMailAdapter", "contract": "MailContractInterface", "isolated": true },
+    { "integration": "Filesystem", "entry_point": "App\\Infrastructure\\Storage\\LaravelStorageAdapter", "contract": "StorageContractInterface", "isolated": false, "notes": "6 controllers call the Storage facade directly across 11 call sites (AuthorController, GalleryController, JobApplicationController, ScreenController, ScreenProviderPortalController, SuccessStoryController), plus app/Models/Screen.php:95. An earlier 10-controllers figure in this artifact was a call-site count reported as a file count. See 17-storage-asset-reuse-analysis.md." },
+    { "integration": "Image processing", "entry_point": "App\\Infrastructure\\Media\\GdImageProcessor", "contract": "ImageProcessingContractInterface", "isolated": true, "notes": "GD only. No Intervention Image, no Imagick anywhere in app/." },
+    { "integration": "Spreadsheet (xlsx/csv)", "entry_point": "app/Http/Controllers/ScreenController.php:21-25, app/Services/AssetImportService.php:15", "isolated": false, "notes": "PhpSpreadsheet imported by a controller — an ARCHITECTURE_RULES.md Rule 1 edge." },
+    { "integration": "Word (docx)", "entry_point": "app/Http/Controllers/ScreenController.php:26-27", "isolated": false, "notes": "phpword imported by a controller — Rule 1 edge." }
+  ],
+
+  "scheduled_jobs": {
+    "classification": "CURRENT_FACT",
+    "registered_in": "routes/console.php",
+    "schedule": [
+      { "command": "currency:sync-rates", "expression": "twiceDaily(1, 13)" },
+      { "command": "inspire", "expression": "hourly()" },
+      { "command": "rewards:expire", "expression": "daily()" },
+      { "command": "bookings:expire-pending", "expression": "everyFiveMinutes()" }
+    ],
+    "standalone_artisan_commands": ["mail:test-approved"]
+  },
+
+  "container_bindings": {
+    "classification": "CURRENT_FACT",
+    "file": "app/Providers/AppServiceProvider.php",
+    "explicit_bindings": [
+      "GoogleIdentityProviderInterface -> App\\Infrastructure\\Auth\\GoogleOAuthAdapter",
+      "ExchangeRateApiClientInterface -> App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient",
+      "MailContractInterface -> App\\Infrastructure\\Notifications\\LaravelMailAdapter",
+      "ImageProcessingContractInterface -> App\\Infrastructure\\Media\\GdImageProcessor",
+      "StorageContractInterface -> App\\Infrastructure\\Storage\\LaravelStorageAdapter"
+    ],
+    "autowired_without_explicit_binding": ["PaymentGatewayInterface -> RazorpayPaymentGateway"],
+    "event_provider": { "subscribe": ["App\\Support\\Events\\NotificationEventSubscriber"], "listen": [] }
+  },
+
+  "creative_current_state": {
+    "classification": "CURRENT_FACT",
+    "creative_directories": "absent (app/Domain/Creative, app/Services/Creative, app/Repositories/Creative, app/Http/Controllers/Creative)",
+    "creative_classes": 0,
+    "creative_routes": 0,
+    "creative_tables": 0,
+    "creative_migrations": 0,
+    "creative_tests": 0,
+    "keyword_sweep_result": "The words creative, creator, brief, proposal, revision, portfolio, freelance, designer, artist, deliverable, escrow, dispute, kyc, onboarding have ZERO occurrences in app/, routes/, database/ or tests/, except (a) governance/audit prose and (b) the unrelated advertising sense of 'creative' meaning an uploaded ad asset (booking_media).",
+    "conclusion": "Creative Marketplace is 100% greenfield. Every capability must be newly built, with shared Marketplace infrastructure reused through contracts."
+  },
+
+  "documentation_vs_reality_discrepancies": [
+    {
+      "id": "D-01",
+      "severity": "high",
+      "prior_claim": "app/Domain/Creative, app/Services/Creative and app/Repositories/Creative exist and are intentionally empty.",
+      "prior_claim_sources": [
+        "docs/audit/phase-0.20-target-structure-comparison.md (12 rows marked 'CREATED (empty)')",
+        "docs/audit/phase-0.20-conformance-checklist.json",
+        "docs/audit/phase-0.20-architecture-conformance-score.json ('All 9 Creative subdomains exist and are intentionally empty')",
+        "docs/audit/phase-0.20-file-movement-ledger.md",
+        "docs/audit/phase-0.20-current-directory-tree.txt",
+        "app/Domain/README.md, app/Services/README.md, app/Repositories/README.md"
+      ],
+      "reality": "All three directories are absent. find app -type d -empty returns nothing; the repository contains zero empty directories.",
+      "resolution": "AGENTS.md section 8 was corrected on 2026-09-26 to state the directories do not exist. The prior audit artifacts remain uncorrected on disk — editing them is out of scope for this read-only audit. Report to the architect."
+    },
+    {
+      "id": "D-02",
+      "severity": "medium",
+      "prior_claim": "74 tables, 94 foreign keys (AGENTS.md section 4, phase-0.20-verification-report.md).",
+      "reality": "73 distinct tables and 96 foreign-key definitions (94 ->constrained() + 2 legacy ->foreign()) derived from the 112 migrations, re-measured 2026-09-26. pricing_peak_rules and pricing_weekend_rules are each created twice (dropIfExists + create in 2026_09_20_000000), so counting Schema::create calls (75) overstates by 2. Three screen_provider_settlements FKs (generated_by, approved_by, paid_by) are declared foreignId()->constrained('users') with no onDelete, defaulting to RESTRICT. Three other FK-like columns are NOT constrained: bookings.screen_category_id, booking_screens.screen_category_id, booking_screens.screen_provider_id, asset_coverage_cities.state_id.",
+      "resolution": "OPEN_DECISION — whether to correct the governance baseline. Requires a live SHOW TABLES to close definitively."
+    },
+    {
+      "id": "D-03",
+      "severity": "low",
+      "prior_claim": "PaymentService instantiates new Razorpay\\Api\\Api directly in its constructor.",
+      "prior_claim_source": "docs/audit/golden-vs-desired-behavior.md section 5",
+      "reality": "Already refactored. PaymentService injects PaymentGatewayInterface; the SDK is confined to RazorpayPaymentGateway.",
+      "resolution": "Stale documentation. No code change needed."
+    },
+    {
+      "id": "D-04",
+      "severity": "high",
+      "prior_claim": "A /webhook/razorpay/payment endpoint exists or is expected; webhook idempotency is a stated requirement.",
+      "prior_claim_sources": ["docs/audit/golden-vs-desired-behavior.md section 3", "App\\Application\\Payment\\UseCases\\ReferralPaymentUseCase docblock"],
+      "reality": "No webhook route exists in routes/api.php, routes/web.php or routes/console.php. No RazorpayWebhookController exists. Payment verification is entirely client-initiated through POST /api/payments/razorpay/verify.",
+      "resolution": "Material for Creative design. A funded-creative-project flow must NOT assume server-to-server webhook infrastructure exists; building one is new work, not reuse."
+    },
+    {
+      "id": "D-05",
+      "severity": "low",
+      "prior_claim": "3 pre-existing test failures + 1 warning.",
+      "reality": "2 failures + 1 warning. The third item is the warning itself.",
+      "resolution": "Corrected in this artifact and in the master report."
+    }
+  ]
+}

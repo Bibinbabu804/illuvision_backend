@@ -1,0 +1,190 @@
+{
+  "version": "0.2",
+  "generated_at": "2026-09-25T20:56:00+05:30",
+  "total_rules_mapped": 12,
+  "rules": [
+    {
+      "domain": "Pricing",
+      "rule_name": "Multi-Asset Campaign Pricing & Breakdown",
+      "description": "Calculates gross base price, screen discounts, duration volume discounts, peak hour surcharges, weekend surcharges, referral discounts, first booking discounts, loyalty redemptions, and 18% GST.",
+      "canonical_owner": "App\\Services\\CampaignPricingService",
+      "canonical_method": "calculateCampaignPreview()",
+      "secondary_or_duplicate_owners": [
+        {
+          "class": "App\\Services\\PricingEngine",
+          "method": "calculatePreview()",
+          "duplication_nature": "Divergent duplicate. Uses hardcoded /30 and *24 math and a flat 10% 30-day discount. Does not invoke injected CampaignPricingService."
+        },
+        {
+          "class": "App\\Http\\Controllers\\BookingController",
+          "method": "store() & calculateCampaignPricing()",
+          "duplication_nature": "Controller wrapper calling CampaignPricingService, but performs secondary calculations for per-screen line item subtotals."
+        }
+      ],
+      "source_evidence": "app/Services/CampaignPricingService.php:L40-L280 vs app/Services/PricingEngine.php:L24-L85",
+      "duplication_level": "Divergent duplicate",
+      "risk": "CRITICAL"
+    },
+    {
+      "domain": "Pricing",
+      "rule_name": "Duration Unit Conversion & Normalization",
+      "description": "Converts duration values between canonical minutes and units (Hour, Day, Week, Month) for pricing rules evaluation.",
+      "canonical_owner": "App\\Services\\PricingRuleEngine",
+      "canonical_method": "durationToMinutes() & minutesToDuration()",
+      "secondary_or_duplicate_owners": [
+        {
+          "class": "App\\Services\\PricingEngine",
+          "method": "calculatePreview()",
+          "duplication_nature": "Uses hardcoded day divisions (/30, /7, *24, *1440) instead of PricingRuleEngine canonical conversion."
+        }
+      ],
+      "source_evidence": "app/Services/PricingRuleEngine.php:L26-L55",
+      "duplication_level": "Partial overlap",
+      "risk": "HIGH"
+    },
+    {
+      "domain": "Pricing",
+      "rule_name": "Duration Split Override Resolution",
+      "description": "Evaluates duration-specific split overrides per screen and pricing plan before falling back to static screen or provider defaults.",
+      "canonical_owner": "App\\Services\\RevenueSplitResolverService",
+      "canonical_method": "resolveEffectiveSplit()",
+      "secondary_or_duplicate_owners": [],
+      "source_evidence": "app/Services/RevenueSplitResolverService.php:L54-L125",
+      "duplication_level": "None (Sole Authority)",
+      "risk": "CRITICAL"
+    },
+    {
+      "domain": "Availability",
+      "rule_name": "Mobile Fleet Concurrency Line-Sweep",
+      "description": "Evaluates maximum concurrent overlapping fleet unit reservations across any minute interval within the campaign dates.",
+      "canonical_owner": "App\\Services\\BookingCapacityService",
+      "canonical_method": "checkEligibility() & validateFleetCapacity()",
+      "secondary_or_duplicate_owners": [
+        {
+          "class": "App\\Services\\InventoryService",
+          "method": "getAvailableFleet()",
+          "duplication_nature": "Querying fleet count without full multi-interval sweep."
+        },
+        {
+          "class": "App\\Http\\Controllers\\BookingController",
+          "method": "checkConflicts()",
+          "duplication_nature": "Directly invokes InventoryService instead of delegating to BookingCapacityService."
+        }
+      ],
+      "source_evidence": "app/Services/BookingCapacityService.php:L120-L240",
+      "duplication_level": "Partial overlap",
+      "risk": "CRITICAL"
+    },
+    {
+      "domain": "Availability",
+      "rule_name": "Fixed Screen Slot & Minute Interval Collision",
+      "description": "Validates fixed screen slot capacity (up to daily_limit) and timestamp interval exclusivity.",
+      "canonical_owner": "App\\Services\\BookingCapacityService",
+      "canonical_method": "checkEligibility() & validateScreenDailyCapacity()",
+      "secondary_or_duplicate_owners": [
+        {
+          "class": "App\\Services\\ConflictDetectionService",
+          "method": "validateBookingConflicts()",
+          "duplication_nature": "Simple date overlap query for v2 bookings."
+        }
+      ],
+      "source_evidence": "app/Services/BookingCapacityService.php:L80-L119",
+      "duplication_level": "Partial overlap",
+      "risk": "CRITICAL"
+    },
+    {
+      "domain": "Availability",
+      "rule_name": "30-Minute Hold Expiration",
+      "description": "Releases capacity for payment_pending bookings exceeding 30 minutes TTL.",
+      "canonical_owner": "App\\Console\\Commands\\ExpirePendingBookings",
+      "canonical_method": "handle()",
+      "secondary_or_duplicate_owners": [],
+      "source_evidence": "app/Console/Commands/ExpirePendingBookings.php:L35-L90",
+      "duplication_level": "None (Sole Authority)",
+      "risk": "HIGH"
+    },
+    {
+      "domain": "Booking",
+      "rule_name": "Campaign Booking Creation & Multi-Screen Allocation",
+      "description": "Creates campaign booking, debits loyalty points, loops screen items, snapshots pricing and ownership, and records line item revenue splits.",
+      "canonical_owner": "App\\Services\\ManualBookingService",
+      "canonical_method": "createCampaignBooking()",
+      "secondary_or_duplicate_owners": [
+        {
+          "class": "App\\Http\\Controllers\\BookingController",
+          "method": "store() & storeCampaign()",
+          "duplication_nature": "Contains duplicate 200-line inline implementation of booking and booking_screens creation."
+        },
+        {
+          "class": "App\\Http\\Controllers\\Api\\BookingEngineController",
+          "method": "store()",
+          "duplication_nature": "Creates booking without pricing snapshots or provider revenue split snapshots."
+        }
+      ],
+      "source_evidence": "app/Services/ManualBookingService.php:L180-L360 vs app/Http/Controllers/BookingController.php:L150-L350",
+      "duplication_level": "Near duplicate",
+      "risk": "CRITICAL"
+    },
+    {
+      "domain": "Payment",
+      "rule_name": "Razorpay Order Creation & Verification",
+      "description": "Creates Razorpay orders in paise, verifies HMAC SHA256 signatures, mutates payment status to paid, records referral usage, and moves booking to pending_approval.",
+      "canonical_owner": "App\\Services\\PaymentService",
+      "canonical_method": "createOrder() & verifyAndConfirmPayment()",
+      "secondary_or_duplicate_owners": [],
+      "source_evidence": "app/Services/PaymentService.php:L30-L160",
+      "duplication_level": "None (Sole Authority)",
+      "risk": "CRITICAL"
+    },
+    {
+      "domain": "Settlement",
+      "rule_name": "Provider Settlement Batch Generation",
+      "description": "Generates provider settlement statements strictly from immutable booking_screen snapshots.",
+      "canonical_owner": "App\\Services\\SettlementService",
+      "canonical_method": "generateSettlement()",
+      "secondary_or_duplicate_owners": [],
+      "source_evidence": "app/Services/SettlementService.php:L38-L150",
+      "duplication_level": "None (Sole Authority)",
+      "risk": "CRITICAL"
+    },
+    {
+      "domain": "Partner Commission",
+      "rule_name": "Partner Referral Tracking & Commission State Machine",
+      "description": "Tracks referral usage and calculates partner commission percentage upon verified payment confirmation.",
+      "canonical_owner": "App\\Services\\ReferralTrackingService",
+      "canonical_method": "createReferralTracking()",
+      "secondary_or_duplicate_owners": [
+        {
+          "class": "App\\Services\\CommissionService",
+          "method": "approve() & markAsPaid()",
+          "duplication_nature": "Manages lifecycle transitions of generated commissions."
+        }
+      ],
+      "source_evidence": "app/Services/ReferralTrackingService.php:L25-L95",
+      "duplication_level": "None (Sole Authority)",
+      "risk": "HIGH"
+    },
+    {
+      "domain": "Loyalty / Rewards",
+      "rule_name": "IlluPoints Earning & Redemption",
+      "description": "Calculates reward points based on campaign spend, debits redeemed points, and logs transactions.",
+      "canonical_owner": "App\\Services\\LoyaltyService",
+      "canonical_method": "earnPointsForBooking() & debitRedeemedPoints()",
+      "secondary_or_duplicate_owners": [],
+      "source_evidence": "app/Services/LoyaltyService.php:L30-L120",
+      "duplication_level": "None (Sole Authority)",
+      "risk": "MEDIUM"
+    },
+    {
+      "domain": "Currency",
+      "rule_name": "Exchange Rate Synchronization & Foreign Rate Conversion",
+      "description": "Syncs foreign exchange rates from ExchangeRate-API twice daily and converts INR to display currencies.",
+      "canonical_owner": "App\\Services\\ExchangeRateService",
+      "canonical_method": "syncRatesFromApi() & convertFromInr()",
+      "secondary_or_duplicate_owners": [],
+      "source_evidence": "app/Services/ExchangeRateService.php:L65-L150",
+      "duplication_level": "None (Sole Authority)",
+      "risk": "HIGH"
+    }
+  ]
+}

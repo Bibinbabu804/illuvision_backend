@@ -1,0 +1,38 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "verification": {
+  "routes_parity": "IDENTICAL",
+  "routes_before_count": 385,
+  "routes_after_count": 385,
+  "architecture_rule_test": "PASS (14 passed, 17 assertions)",
+  "namespace_resolution_orphans": 11,
+  "container_resolution_checked": true,
+  "schema_unchanged": true,
+  "schema_census": {
+   "tables": 74,
+   "fks": 94,
+   "total_distinct_indexes": 222,
+   "views": 0,
+   "migrations_applied": 112,
+   "migration_files_on_disk": 112,
+   "exact_rows_total": 6664
+  }
+ },
+ "baseline_regression": {
+  "after_batch_2c_failure": "170 failed (repaired by adding 3 imports)",
+  "final_state": "571 passed, 2 failed, 1 warning, 4 skipped, 5323 assertions",
+  "known_persistent_failures": [
+   "Tests\\Feature\\BookingConcurrencyTest > second booking rejected after first consumes last unit (message-wording drift, pre-existing)",
+   "Tests\\Feature\\CampaignBookingPricingIntegrityTest > booking rejects quantity over fleet availability (message-wording drift, pre-existing)"
+  ],
+  "known_warnings": [
+   "tests/Unit/MediaHelperTest.php:23,28 - tautological assertion (pre-existing)"
+  ]
+ },
+ "git": {
+  "exists": false,
+  "rollback_available": false,
+  "note": "No .git in core-backend; rollback uses /tmp/p020/report*.json"
+ }
+}

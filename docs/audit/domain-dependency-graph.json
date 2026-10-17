@@ -1,0 +1,233 @@
+{
+  "phase": "0.4",
+  "name": "Marketplace Domain Dependency Graph & Cycle Analysis",
+  "generated_at": "2026-09-25T22:54:00+05:30",
+  "summary": {
+    "total_domains": 12,
+    "direct_dependencies_count": 28,
+    "cycles_detected": {
+      "class_level_cycles": 1,
+      "domain_level_cycles": 1,
+      "database_level_cycles": 2
+    }
+  },
+  "domains": [
+    "Campaign",
+    "Media",
+    "Asset",
+    "Provider",
+    "Partner",
+    "Pricing",
+    "Availability",
+    "Booking",
+    "Payment",
+    "Settlement",
+    "Reporting",
+    "Creative"
+  ],
+  "dependencies": [
+    {
+      "source_domain": "Campaign",
+      "target_domain": "Asset",
+      "nature": "Advertiser chooses screen categories and screens for campaign definition.",
+      "coupling": "Domain lookup via Screen models",
+      "risk": "LOW"
+    },
+    {
+      "source_domain": "Campaign",
+      "target_domain": "Pricing",
+      "nature": "Campaign estimation queries pricing engines for budget recommendations.",
+      "coupling": "Application Service call",
+      "risk": "MEDIUM"
+    },
+    {
+      "source_domain": "Media",
+      "target_domain": "Booking",
+      "nature": "Uploaded creatives bind directly to existing booking IDs.",
+      "coupling": "Foreign key (booking_id) and lifecycle state transitions",
+      "risk": "MEDIUM"
+    },
+    {
+      "source_domain": "Media",
+      "target_domain": "Asset",
+      "nature": "Media validation verifies dimensions against screen display specs.",
+      "coupling": "Resolution/aspect-ratio validation rules",
+      "risk": "LOW"
+    },
+    {
+      "source_domain": "Media",
+      "target_domain": "Creative",
+      "nature": "Media assets link to dynamic templates and rendering assets.",
+      "coupling": "Domain entity association",
+      "risk": "LOW"
+    },
+    {
+      "source_domain": "Asset",
+      "target_domain": "Provider",
+      "nature": "Every screen belongs to a screen provider or partner.",
+      "coupling": "Foreign key (provider_id / partner_id)",
+      "risk": "LOW"
+    },
+    {
+      "source_domain": "Partner",
+      "target_domain": "Asset",
+      "nature": "Partners manage assigned fleet screens and locations.",
+      "coupling": "Foreign key references",
+      "risk": "LOW"
+    },
+    {
+      "source_domain": "Pricing",
+      "target_domain": "Asset",
+      "nature": "Pricing rules inspect screen pricing base_rate, base_price_per_second, and categories.",
+      "coupling": "Direct screen model lookup",
+      "risk": "MEDIUM"
+    },
+    {
+      "source_domain": "Availability",
+      "target_domain": "Asset",
+      "nature": "Capacity checking verifies screen operating hours and slot capacities.",
+      "coupling": "Direct screen model lookup",
+      "risk": "MEDIUM"
+    },
+    {
+      "source_domain": "Availability",
+      "target_domain": "Booking",
+      "nature": "Capacity and conflict checking inspects existing confirmed/running bookings for time overlap.",
+      "coupling": "Direct queries against `bookings` and `booking_screens`",
+      "risk": "HIGH"
+    },
+    {
+      "source_domain": "Booking",
+      "target_domain": "Asset",
+      "nature": "Booking creates line items linking screens to campaigns.",
+      "coupling": "Foreign key (screen_id) and screen snapshot fields",
+      "risk": "LOW"
+    },
+    {
+      "source_domain": "Booking",
+      "target_domain": "Pricing",
+      "nature": "Booking creation requests pricing calculations and discounts.",
+      "coupling": "Synchronous service execution in controller",
+      "risk": "HIGH"
+    },
+    {
+      "source_domain": "Booking",
+      "target_domain": "Availability",
+      "nature": "Booking creation verifies capacity and locks slots.",
+      "coupling": "Synchronous check within transaction",
+      "risk": "HIGH"
+    },
+    {
+      "source_domain": "Booking",
+      "target_domain": "Partner",
+      "nature": "Partner bookings associate partner_id and apply commission logic.",
+      "coupling": "Direct model lookup and column population",
+      "risk": "MEDIUM"
+    },
+    {
+      "source_domain": "Booking",
+      "target_domain": "Payment",
+      "nature": "Booking lifecycle transitions depend on payment confirmation events.",
+      "coupling": "State mutation upon payment receipt",
+      "risk": "CRITICAL"
+    },
+    {
+      "source_domain": "Payment",
+      "target_domain": "Booking",
+      "nature": "Payments are created for a specific booking_id and update booking status to confirmed/paid.",
+      "coupling": "Direct Eloquent update of `bookings.payment_status` and `bookings.status`",
+      "risk": "CRITICAL"
+    },
+    {
+      "source_domain": "Payment",
+      "target_domain": "Partner",
+      "nature": "Payment completion triggers commission records for referring partners.",
+      "coupling": "Service trigger inside PaymentService",
+      "risk": "MEDIUM"
+    },
+    {
+      "source_domain": "Settlement",
+      "target_domain": "Booking",
+      "nature": "Settlement aggregates completed bookings to compute net payable payouts.",
+      "coupling": "Direct queries on `bookings` and `booking_screens`",
+      "risk": "HIGH"
+    },
+    {
+      "source_domain": "Settlement",
+      "target_domain": "Provider",
+      "nature": "Settlement computes provider balances and payouts.",
+      "coupling": "Direct write to `screen_providers.balance`",
+      "risk": "HIGH"
+    },
+    {
+      "source_domain": "Settlement",
+      "target_domain": "Partner",
+      "nature": "Settlement computes partner commission payouts.",
+      "coupling": "Queries on `partner_commissions`",
+      "risk": "MEDIUM"
+    },
+    {
+      "source_domain": "Reporting",
+      "target_domain": "Booking",
+      "nature": "Analytics aggregate bookings, slots, and revenue.",
+      "coupling": "Read-only SQL queries",
+      "risk": "LOW"
+    },
+    {
+      "source_domain": "Reporting",
+      "target_domain": "Payment",
+      "nature": "Financial reports aggregate cash receipts and payment records.",
+      "coupling": "Read-only SQL queries",
+      "risk": "LOW"
+    },
+    {
+      "source_domain": "Reporting",
+      "target_domain": "Asset",
+      "nature": "Occupancy reports aggregate screen utilization.",
+      "coupling": "Read-only SQL queries",
+      "risk": "LOW"
+    }
+  ],
+  "cycle_analysis": [
+    {
+      "type": "CLASS_LEVEL_CYCLE",
+      "participants": [
+        "App\\Services\\CampaignPricingService",
+        "App\\Services\\LoyaltyService"
+      ],
+      "mechanism": "CampaignPricingService constructor injects LoyaltyService; LoyaltyService internally calls app(CampaignPricingService::class) dynamically at runtime.",
+      "classification": "Architectural risk",
+      "mitigation_plan": "Decouple LoyaltyService from CampaignPricingService in Phase 0.5. Pass customer loyalty discount points into the pure calculation engine as a pre-resolved Value Object rather than allowing dynamic circular container resolution."
+    },
+    {
+      "type": "DOMAIN_LEVEL_CYCLE",
+      "participants": [
+        "Booking",
+        "Availability"
+      ],
+      "mechanism": "Booking depends on Availability to check slot capacity before confirming. Availability queries historical and upcoming Bookings to calculate occupied seconds per loop.",
+      "classification": "Acceptable (with read-model abstraction)",
+      "mitigation_plan": "Availability should not query Eloquent Booking domain entities directly for commercial logic. In the target architecture, Availability maintains an inventory/occupancy projection (TimeSlot/ScreenSchedule) or reads from a dedicated BookedSlotReadModel."
+    },
+    {
+      "type": "DATABASE_LEVEL_CYCLE",
+      "participants": [
+        "Payment (payments table)",
+        "Booking (bookings table)"
+      ],
+      "mechanism": "PaymentService directly writes to `bookings.payment_status` and `bookings.status`. BookingController creates pending `payments` records during manual booking.",
+      "classification": "Temporary legacy",
+      "mitigation_plan": "Payment domain should publish a `PaymentReceived` / `PaymentCompleted` domain event or application workflow step. The Booking application use case listens to the event or orchestrates the transition, removing direct foreign table updates across domains."
+    },
+    {
+      "type": "DATABASE_LEVEL_CYCLE",
+      "participants": [
+        "Settlement (provider_settlements table)",
+        "Provider (screen_providers table)"
+      ],
+      "mechanism": "SettlementService updates screen_providers.balance directly inside payout loops.",
+      "classification": "Temporary legacy",
+      "mitigation_plan": "Provider domain encapsulates provider balance mutations via explicit `creditBalance()` and `debitBalance()` methods or ledger entries, rather than Settlement directly executing update queries on foreign models."
+    }
+  ]
+}

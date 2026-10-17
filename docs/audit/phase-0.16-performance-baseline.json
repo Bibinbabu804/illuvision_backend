@@ -1,0 +1,96 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "performance-baseline",
+  "environment": {
+    "php": "8.2.26",
+    "laravel": "11.55.1",
+    "db": "MySQL (db_illuvision_testing)",
+    "env": "local/testing",
+    "app_debug": true,
+    "log_level": "debug"
+  },
+  "caveat": "These are test-environment measurements on a small dataset. They are a STRUCTURAL baseline (query counts are the meaningful signal) and must NOT be presented as production latency SLOs. Production benchmarking requires a production-representative dataset and hardware.",
+  "measurements": [
+    {
+      "workflow": "booking_list",
+      "queries": 2,
+      "ms": 21.94,
+      "mem_delta_bytes": 1168456,
+      "error": null
+    },
+    {
+      "workflow": "booking_count_by_status",
+      "queries": 1,
+      "ms": 1.63,
+      "mem_delta_bytes": 3920,
+      "error": null
+    },
+    {
+      "workflow": "capacity_check",
+      "queries": 0,
+      "ms": 1.33,
+      "mem_delta_bytes": 136232,
+      "error": "Error: Call to undefined method App\\Services\\BookingCapacityService::checkAvailability()"
+    },
+    {
+      "workflow": "pricing_rules_active",
+      "queries": 1,
+      "ms": 1.2,
+      "mem_delta_bytes": 29280,
+      "error": null
+    },
+    {
+      "workflow": "campaign_pricing_service_resolve",
+      "queries": 1,
+      "ms": 3.34,
+      "mem_delta_bytes": 257032,
+      "error": null
+    },
+    {
+      "workflow": "finance_ledger",
+      "queries": 1,
+      "ms": 2.03,
+      "mem_delta_bytes": 38896,
+      "error": null
+    },
+    {
+      "workflow": "partner_commissions",
+      "queries": 1,
+      "ms": 2.56,
+      "mem_delta_bytes": 38304,
+      "error": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "PERF-01",
+      "observation": "booking_list (50 bookings, eager-loaded 'screens') executes 2 queries",
+      "assessment": "GOOD - eager loading is effective; no N+1 in this path."
+    },
+    {
+      "id": "PERF-02",
+      "observation": "booking_list allocates ~1.17 MB for 50 eager-loaded bookings with screens",
+      "assessment": "WATCH - acceptable at this size; worth re-measuring against production row counts and average screens-per-booking."
+    },
+    {
+      "id": "PERF-03",
+      "observation": "All other probed read paths issue exactly 1 query",
+      "assessment": "GOOD."
+    },
+    {
+      "id": "PERF-04",
+      "observation": "73 N+1 candidates were flagged by a lexical heuristic",
+      "assessment": "NOT CONFIRMED. The measured eager-loaded paths above show no N+1. The heuristic is proximity-based and produces false positives; it is recorded as a candidate list only and was not used to justify any change."
+    }
+  ],
+  "n_plus_1_candidate_count": 73,
+  "unmeasured": [
+    "BookingCapacityService::checkAvailability could not be measured - the probe used the wrong method signature. Requires a correctly-shaped fixture.",
+    "HTTP-level latency (including middleware, serialisation and auth) was not measured.",
+    "No load or concurrency testing was performed."
+  ],
+  "changes_made": "None. No index, cache, eager-load or pagination change was made, because no measured regression justified a behaviour-affecting optimisation."
+}

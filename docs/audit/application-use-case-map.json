@@ -1,0 +1,407 @@
+{
+  "phase": "0.4",
+  "name": "Target Application Use Case Inventory",
+  "generated_at": "2026-09-25T22:54:00+05:30",
+  "summary": {
+    "total_use_cases": 12,
+    "domains_covered": ["Pricing", "Availability", "Booking", "Payment", "Settlement", "Partner", "Reporting"]
+  },
+  "use_cases": [
+    {
+      "use_case": "CalculateCampaignPrice",
+      "domain": "Pricing",
+      "trigger": "HTTP POST /api/bookings/calculate-price or campaign quotation workflow",
+      "actor": "Advertiser / Partner / Admin",
+      "input": {
+        "screen_ids": "array of integers",
+        "start_date": "date string (YYYY-MM-DD)",
+        "end_date": "date string (YYYY-MM-DD)",
+        "daily_duration_seconds": "integer (optional)",
+        "referral_code": "string (optional)",
+        "coupon_code": "string (optional)"
+      },
+      "validation": "Screen existence, valid future date window, positive duration",
+      "authorization": "Authenticated user or public quote calculator",
+      "business_rules": [
+        "Base subtotal = sum(screen base_rate or base_price_per_second * duration * days)",
+        "Duration discount applied if days >= threshold",
+        "Referral/coupon discount applied against eligible subtotal",
+        "Tax computed at active percentage rate",
+        "Total payable = max(0, subtotal - discounts + tax)"
+      ],
+      "dependencies": [
+        "Domain\\Pricing\\CampaignPricingEngine",
+        "Domain\\Asset\\Contracts\\ScreenRepositoryInterface"
+      ],
+      "transaction_boundary": "None (Read-only calculation)",
+      "persistence": "None (or quotation cache)",
+      "external_calls": "None (Optional currency exchange lookup if non-base currency requested)",
+      "events": [],
+      "output": "PricingSnapshotDTO (subtotal, discounts, tax, total, currency)",
+      "error_behavior": "Throws InvalidDateRangeException or ScreenNotFoundException",
+      "golden_tests": ["tests/Feature/Golden/GoldenPricingContractTest.php"],
+      "migration_source": "App\\Services\\CampaignPricingService::calculateTotal()",
+      "migration_priority": "HIGH"
+    },
+    {
+      "use_case": "CheckCampaignAvailability",
+      "domain": "Availability",
+      "trigger": "HTTP POST /api/bookings/check-availability",
+      "actor": "Advertiser / Partner / Booking Engine",
+      "input": {
+        "screen_ids": "array of integers",
+        "start_date": "date string",
+        "end_date": "date string",
+        "slot_seconds": "integer (e.g. 10s per loop)"
+      },
+      "validation": "Positive slot duration, date window within allowable horizon (e.g. 1 year)",
+      "authorization": "Authenticated user",
+      "business_rules": [
+        "Screen operational hours (e.g. 06:00 - 23:00)",
+        "Loop duration capacity: sum(active ad slots) + requested slot <= screen.loop_duration",
+        "Excludes cancelled/refunded bookings",
+        "Includes active hold_bookings within TTL"
+      ],
+      "dependencies": [
+        "Domain\\Availability\\CapacityCalculationEngine",
+        "Domain\\Availability\\ConflictDetectionService"
+      ],
+      "transaction_boundary": "None (Read-only availability inspection)",
+      "persistence": "None",
+      "external_calls": "None",
+      "events": [],
+      "output": "AvailabilityStatusDTO (is_available: bool, screens: list with available_seconds, conflicts)",
+      "error_behavior": "Returns detailed conflict window per screen if unavailable",
+      "golden_tests": ["tests/Feature/Golden/GoldenAvailabilityContractTest.php"],
+      "migration_source": "App\\Services\\BookingCapacityService::checkCapacity() & App\\Services\\InventoryService",
+      "migration_priority": "HIGH"
+    },
+    {
+      "use_case": "CreateCampaignBooking",
+      "domain": "Booking",
+      "trigger": "HTTP POST /api/bookings/campaign",
+      "actor": "Advertiser",
+      "input": {
+        "name": "string",
+        "start_date": "date",
+        "end_date": "date",
+        "screen_ids": "array of integers",
+        "slot_duration": "integer",
+        "payment_method": "string (razorpay, wallet, offline)"
+      },
+      "validation": "CampaignBookingRequest validation rules",
+      "authorization": "Role: Advertiser / Admin",
+      "business_rules": [
+        "Atomic inventory lock check before booking row insertion",
+        "Exact pricing calculation snapshot saved in booking record",
+        "Initial status = pending, payment_status = pending",
+        "Unique booking reference generated (e.g. ILV-YYYYMM-XXXX)"
+      ],
+      "dependencies": [
+        "Domain\\Availability\\CapacityCalculationEngine",
+        "Domain\\Pricing\\CampaignPricingEngine",
+        "Domain\\Booking\\BookingRepositoryInterface",
+        "Infrastructure\\Persistence\\UnitOfWork"
+      ],
+      "transaction_boundary": "Database Transaction (SELECT ... FOR UPDATE on screen slots -> INSERT bookings -> INSERT booking_screens -> COMMIT)",
+      "persistence": "bookings, booking_screens",
+      "external_calls": "None during booking transaction (Payment order created in subsequent step)",
+      "events": [
+        "Domain\\Booking\\Events\\BookingCreated"
+      ],
+      "output": "BookingSummaryDTO (id, booking_reference, total_amount, status)",
+      "error_behavior": "Rolls back transaction on InventoryConflictException or ValidationException",
+      "golden_tests": ["tests/Feature/Golden/GoldenBookingContractTest.php"],
+      "migration_source": "App\\Http\\Controllers\\BookingController::store() (1,826 LOC inline logic)",
+      "migration_priority": "CRITICAL"
+    },
+    {
+      "use_case": "CreatePartnerBooking",
+      "domain": "Booking",
+      "trigger": "HTTP POST /api/partner/bookings",
+      "actor": "Partner / Agency",
+      "input": {
+        "partner_id": "integer",
+        "client_name": "string",
+        "screen_ids": "array",
+        "dates": "object",
+        "discount_override": "numeric (optional)"
+      },
+      "validation": "PartnerBookingRequest rules, screen ownership or partner access rights",
+      "authorization": "Role: Partner / Agency",
+      "business_rules": [
+        "Partner must be approved and active",
+        "Partner commission percentage applied according to partner tier",
+        "Pricing snapshot retains partner commission component"
+      ],
+      "dependencies": [
+        "Domain\\Partner\\PartnerService",
+        "Domain\\Booking\\BookingRepositoryInterface",
+        "Domain\\Availability\\CapacityCalculationEngine"
+      ],
+      "transaction_boundary": "Database Transaction",
+      "persistence": "bookings, booking_screens, partner_commissions (pending)",
+      "external_calls": "None",
+      "events": [
+        "Domain\\Booking\\Events\\PartnerBookingCreated"
+      ],
+      "output": "PartnerBookingResponseDTO",
+      "error_behavior": "Rolls back on invalid partner state or capacity failure",
+      "golden_tests": ["tests/Feature/Golden/GoldenBookingContractTest.php"],
+      "migration_source": "App\\Http\\Controllers\\PartnerBookingController::store()",
+      "migration_priority": "HIGH"
+    },
+    {
+      "use_case": "CreateAdminManualBooking",
+      "domain": "Booking",
+      "trigger": "HTTP POST /api/admin/bookings/manual",
+      "actor": "Super Admin / Operations",
+      "input": {
+        "user_id": "integer",
+        "screen_ids": "array",
+        "custom_pricing": "numeric",
+        "override_conflicts": "boolean",
+        "notes": "string"
+      },
+      "validation": "AdminManualBookingRequest",
+      "authorization": "Role: Admin / SuperAdmin",
+      "business_rules": [
+        "Allows commercial overrides with mandatory audit log note",
+        "Can force slot allocation if override_conflicts = true",
+        "Can mark payment as pre-authorized / offline"
+      ],
+      "dependencies": [
+        "Domain\\Booking\\BookingRepositoryInterface",
+        "Domain\\Availability\\CapacityCalculationEngine"
+      ],
+      "transaction_boundary": "Database Transaction",
+      "persistence": "bookings, booking_screens, audit_logs",
+      "external_calls": "None",
+      "events": [
+        "Domain\\Booking\\Events\\ManualBookingCreated"
+      ],
+      "output": "BookingResource",
+      "error_behavior": "Rollback on database exception",
+      "golden_tests": ["tests/Feature/Golden/GoldenBookingContractTest.php"],
+      "migration_source": "App\\Services\\ManualBookingService & App\\Http\\Controllers\\AdminManualBookingController",
+      "migration_priority": "HIGH"
+    },
+    {
+      "use_case": "CreateV2Booking",
+      "domain": "Booking",
+      "trigger": "HTTP POST /api/v2/bookings/estimate",
+      "actor": "API Consumer / Next-Gen Frontend",
+      "input": {
+        "campaign_payload": "object"
+      },
+      "validation": "V2BookingSchema validation",
+      "authorization": "Bearer Token",
+      "business_rules": [
+        "Delegates to canonical CreateCampaignBookingUseCase under the hood",
+        "Transforms response to V2 JSON envelope for client compatibility"
+      ],
+      "dependencies": [
+        "Application\\Booking\\UseCases\\CreateCampaignBookingUseCase"
+      ],
+      "transaction_boundary": "Delegated to CreateCampaignBookingUseCase",
+      "persistence": "Delegated",
+      "external_calls": "None",
+      "events": ["Delegated"],
+      "output": "V2ResponseEnvelopeDTO",
+      "error_behavior": "Standard V2 error format with code and trace",
+      "golden_tests": ["tests/Feature/Golden/GoldenBookingContractTest.php"],
+      "migration_source": "App\\Http\\Controllers\\Api\\V2\\BookingController",
+      "migration_priority": "MEDIUM"
+    },
+    {
+      "use_case": "CreatePaymentOrder",
+      "domain": "Payment",
+      "trigger": "HTTP POST /api/payments/create-order",
+      "actor": "Advertiser / Partner",
+      "input": {
+        "booking_id": "integer"
+      },
+      "validation": "Booking exists, belongs to auth user, payment_status is pending",
+      "authorization": "Policy: BookingPolicy@pay",
+      "business_rules": [
+        "Order amount in smallest currency unit (INR Paise = amount * 100)",
+        "Receipt string generated (e.g. bkg_order_123_epoch)",
+        "Gateway order ID stored in payments table with status = created"
+      ],
+      "dependencies": [
+        "Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+        "Domain\\Booking\\Contracts\\BookingRepositoryInterface",
+        "Domain\\Payment\\Contracts\\PaymentRepositoryInterface"
+      ],
+      "transaction_boundary": "Local DB Transaction around payments row creation (Razorpay API call outside DB lock)",
+      "persistence": "payments table",
+      "external_calls": "Razorpay Orders API (orders->create)",
+      "events": [],
+      "output": "PaymentOrderDTO (order_id, razorpay_order_id, amount, currency, key_id)",
+      "error_behavior": "Throws GatewayConnectionException without leaving dangling DB state",
+      "golden_tests": ["tests/Feature/Golden/GoldenPaymentIntegrationTest.php"],
+      "migration_source": "App\\Services\\PaymentService::createOrder()",
+      "migration_priority": "CRITICAL"
+    },
+    {
+      "use_case": "VerifyPayment",
+      "domain": "Payment",
+      "trigger": "HTTP POST /api/payments/verify",
+      "actor": "Advertiser Checkout Client / Webhook",
+      "input": {
+        "razorpay_order_id": "string",
+        "razorpay_payment_id": "string",
+        "razorpay_signature": "string"
+      },
+      "validation": "Non-empty signature parameters",
+      "authorization": "Public callback / Webhook signature verification",
+      "business_rules": [
+        "Cryptographic HMAC-SHA256 signature verification over (order_id + '|' + payment_id) using gateway secret",
+        "Idempotency: if payment already marked verified, return success without duplicate side-effects",
+        "Row lock on payments and bookings during state transition to paid/confirmed",
+        "Trigger partner commission calculation and referral reward generation"
+      ],
+      "dependencies": [
+        "Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+        "Domain\\Booking\\Contracts\\BookingRepositoryInterface",
+        "Domain\\Partner\\CommissionEngine"
+      ],
+      "transaction_boundary": "Database Transaction (SELECT ... FOR UPDATE on payment and booking records)",
+      "persistence": "payments, bookings",
+      "external_calls": "None inside transaction (HMAC is computed locally)",
+      "events": [
+        "Domain\\Payment\\Events\\PaymentVerified",
+        "Domain\\Booking\\Events\\BookingConfirmed"
+      ],
+      "output": "PaymentVerificationResultDTO (success: bool, booking_id, status)",
+      "error_behavior": "Logs signature mismatch security alert; marks payment failed; rolls back transaction",
+      "golden_tests": ["tests/Feature/Golden/GoldenPaymentIntegrationTest.php"],
+      "migration_source": "App\\Services\\PaymentService::verifyPayment()",
+      "migration_priority": "CRITICAL"
+    },
+    {
+      "use_case": "CalculateProviderRevenue",
+      "domain": "Settlement",
+      "trigger": "Campaign completion or recurring billing cycle",
+      "actor": "System Scheduler / Admin",
+      "input": {
+        "booking_id": "integer"
+      },
+      "validation": "Booking must have payment_status = paid and status in [confirmed, running, completed]",
+      "authorization": "System / Admin",
+      "business_rules": [
+        "Provider share = net_booking_amount * 80% (or provider contract percentage)",
+        "Platform fee = net_booking_amount * 20%",
+        "Pro-rated across multiple screens based on individual screen base rates"
+      ],
+      "dependencies": [
+        "Domain\\Settlement\\RevenueDistributionEngine"
+      ],
+      "transaction_boundary": "Read-only calculation or sub-step of settlement creation",
+      "persistence": "None (pure calculation)",
+      "external_calls": "None",
+      "events": [],
+      "output": "RevenueDistributionDTO (provider_revenue, platform_revenue, breakdown_per_screen)",
+      "error_behavior": "Throws UnsettledBookingException if booking is unpaid",
+      "golden_tests": ["tests/Feature/Golden/GoldenFinancialContractTest.php"],
+      "migration_source": "App\\Services\\RevenueDistributionService::distribute()",
+      "migration_priority": "HIGH"
+    },
+    {
+      "use_case": "CalculatePartnerCommission",
+      "domain": "Partner",
+      "trigger": "Payment verification or monthly partner ledger reconciliation",
+      "actor": "System / Admin",
+      "input": {
+        "partner_id": "integer",
+        "booking_id": "integer"
+      },
+      "validation": "Partner exists and is associated with booking or referral code",
+      "authorization": "System",
+      "business_rules": [
+        "Commission rate derived from partner contract tier (default e.g. 5% - 15%)",
+        "Commission calculated on subtotal before tax and platform markup",
+        "Saved in partner_commissions with status = pending_payout"
+      ],
+      "dependencies": [
+        "Domain\\Partner\\CommissionEngine"
+      ],
+      "transaction_boundary": "Database Transaction",
+      "persistence": "partner_commissions",
+      "external_calls": "None",
+      "events": [
+        "Domain\\Partner\\Events\\CommissionCalculated"
+      ],
+      "output": "CommissionRecordDTO (partner_id, commission_amount, status)",
+      "error_behavior": "Rollback on database error",
+      "golden_tests": ["tests/Feature/Golden/GoldenFinancialContractTest.php"],
+      "migration_source": "App\\Services\\CommissionService::calculate()",
+      "migration_priority": "HIGH"
+    },
+    {
+      "use_case": "CreateSettlement",
+      "domain": "Settlement",
+      "trigger": "HTTP POST /api/admin/settlements/create",
+      "actor": "Finance Admin",
+      "input": {
+        "provider_id": "integer",
+        "period_start": "date",
+        "period_end": "date"
+      },
+      "validation": "Provider exists, valid date window, unsettled confirmed bookings exist",
+      "authorization": "Role: Finance Admin",
+      "business_rules": [
+        "Aggregates all unpaid provider revenue line items for the period",
+        "Deducts applicable withholding taxes (TDS) and platform adjustments",
+        "Creates provider_settlement record and generates settlement reference",
+        "Marks aggregated booking line items as settled"
+      ],
+      "dependencies": [
+        "Domain\\Settlement\\SettlementEngine",
+        "Domain\\Provider\\ProviderRepositoryInterface"
+      ],
+      "transaction_boundary": "Database Transaction (SELECT ... FOR UPDATE on unsettled bookings -> INSERT provider_settlements -> UPDATE bookings.settlement_status -> COMMIT)",
+      "persistence": "provider_settlements, bookings",
+      "external_calls": "Optional bank transfer gateway (Payout API)",
+      "events": [
+        "Domain\\Settlement\\Events\\SettlementCreated"
+      ],
+      "output": "SettlementRecordDTO (settlement_id, total_amount, provider_id, status)",
+      "error_behavior": "Rolls back on balance inconsistency",
+      "golden_tests": ["tests/Feature/Golden/GoldenFinancialContractTest.php"],
+      "migration_source": "App\\Services\\SettlementService::createSettlement()",
+      "migration_priority": "CRITICAL"
+    },
+    {
+      "use_case": "GenerateReport",
+      "domain": "Reporting",
+      "trigger": "HTTP GET /api/reports/analytics or scheduled export",
+      "actor": "Admin / Advertiser / Screen Provider",
+      "input": {
+        "report_type": "string (revenue, occupancy, campaign_performance)",
+        "start_date": "date",
+        "end_date": "date",
+        "filter_ids": "array (optional)"
+      },
+      "validation": "Supported report_type, valid date range",
+      "authorization": "Role-scoped data access",
+      "business_rules": [
+        "Reads from aggregated read models or optimized SQL views",
+        "Restricts data to caller's owned assets or bookings",
+        "Formats into tabular/JSON/CSV payload"
+      ],
+      "dependencies": [
+        "Domain\\Reporting\\ReportQueryService"
+      ],
+      "transaction_boundary": "None (Read-only query)",
+      "persistence": "None (or report cache / async export file)",
+      "external_calls": "None",
+      "events": [],
+      "output": "ReportDatasetDTO (aggregates, series, metadata)",
+      "error_behavior": "Returns 400 for unsupported report types",
+      "golden_tests": ["tests/Feature/Golden/GoldenReportingContractTest.php"],
+      "migration_source": "App\\Services\\ReportService::generate()",
+      "migration_priority": "LOW"
+    }
+  ]
+}

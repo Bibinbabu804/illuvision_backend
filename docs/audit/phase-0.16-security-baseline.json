@@ -1,0 +1,136 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "security-baseline",
+  "verdict": "FAIL - three P0 pre-existing authorization defects block Phase 1 readiness",
+  "critical": [
+    {
+      "id": "SEC-01",
+      "title": "PATCH /api/bookings/{booking} bypasses permission:bookings.edit",
+      "severity": "critical",
+      "pre_existing": true,
+      "introduced_by_remediation": false,
+      "proof": "Runtime probe, not inference. A User with role 'user' and RolePermissionChecker::userHasPermission($u,'bookings.edit') === false issued PATCH /api/bookings/{id} with {'status':'approved','price':1} and received HTTP 200 'Booking updated successfully'. The persisted row afterwards had status='approved' and price=1.00.",
+      "mechanism": "Route::apiResource('bookings')->only([... 'update' ...]) registers BOTH PUT and PATCH for the same URI. The later, permission-gated Route::put('/bookings/{booking}') overrides only PUT in Laravel's per-method lookup table. PATCH therefore resolves to the apiResource route whose middleware is only ['api','auth:sanctum'].",
+      "amplifiers": [
+        "BookingController::update validates 'status' => 'sometimes|string' with no Rule::in(...) constraint and 'price' => 'sometimes|numeric|min:0'.",
+        "Both 'status' and 'price' are in Booking::$fillable (lines 113 and 103).",
+        "RescheduleBookingUseCase line 135 performs $booking->update($validated) with the validated payload."
+      ],
+      "impact": "Any authenticated user can set any booking's status and price. That is unauthenticated-in-effect financial tampering and state-machine bypass, and it bypasses the payment and approval flows entirely.",
+      "remediation_requires": "Adding permission middleware to the PATCH verb, or restricting the accepted fields, or both. Either changes the external API contract and the authorization outcome, so it is NOT applied here - it needs explicit approval."
+    },
+    {
+      "id": "SEC-02",
+      "title": "19 /api/v2/* routes are fully anonymous",
+      "severity": "critical",
+      "pre_existing": true,
+      "proof": "php artisan route:list --json shows middleware ['api'] with no Authenticate entry for all 19.",
+      "anonymously_writable": [
+        "POST /api/v2/bookings",
+        "POST /api/v2/bookings/{id}/transition",
+        "POST /api/v2/assets",
+        "PUT /api/v2/assets/{id}",
+        "DELETE /api/v2/assets/{id}",
+        "POST /api/v2/assets/{id}/coverage",
+        "POST /api/v2/finance/settlements/batch"
+      ],
+      "anonymously_readable": [
+        "GET /api/v2/bookings",
+        "GET /api/v2/bookings/{id}",
+        "GET /api/v2/assets",
+        "GET /api/v2/finance/payments",
+        "GET /api/v2/finance/ledger",
+        "GET /api/v2/finance/settlements",
+        "GET /api/v2/finance/summary",
+        "GET /api/v2/coverage/cities/{cityId}"
+      ],
+      "impact": "Anonymous read of all payments, ledger and settlement data; anonymous write of settlement batches and booking state transitions.",
+      "remediation_requires": "Adding auth middleware changes the API contract (200 -> 401) and is not applied here."
+    },
+    {
+      "id": "SEC-03",
+      "title": "Role and partner administration have no permission middleware",
+      "severity": "critical",
+      "pre_existing": true,
+      "proof": "route:list shows Authenticate:sanctum present but zero PermissionMiddleware entries for all /api/roles* and /api/partners* routes.",
+      "detail": [
+        "PUT /api/roles/{role}/permissions - any authenticated user can grant permissions to any role, including their own. This is direct privilege escalation.",
+        "POST /api/roles, DELETE /api/roles/{role}, POST /api/roles/{role}/clone",
+        "DELETE /api/partners/{partner}, POST /api/partners/{partner}/approve, POST /api/partners/{partner}/reject, POST /api/partners/{partner}/mark-under-review, GET /api/partners/kpis, GET /api/partners/{partner}/commissions, POST /api/partners/create-with-onboarding"
+      ],
+      "impact": "Privilege escalation and unauthenticated-in-effect partner lifecycle control.",
+      "remediation_requires": "Permission middleware must be added per route, which changes authorization outcomes. Not applied here."
+    }
+  ],
+  "high": [
+    {
+      "id": "SEC-04",
+      "title": "Gallery CRUD is fully anonymous",
+      "severity": "high",
+      "pre_existing": true,
+      "detail": "GET/POST /api/gallery, GET/PUT|PATCH/DELETE /api/gallery/{gallery} all have middleware ['api'] only."
+    },
+    {
+      "id": "SEC-05",
+      "title": "Admin bulk asset import endpoints are anonymous",
+      "severity": "high",
+      "pre_existing": true,
+      "detail": "POST /api/admin/assets/import/confirm performs a bulk inventory write with middleware ['api'] only, despite the /admin/ prefix. Also anonymous: /api/admin/assets/import/template (GET), /api/admin/assets/import/validate (POST), POST /api/admin/screen-categories."
+    },
+    {
+      "id": "SEC-06",
+      "title": ".env.testing contains real database credentials and is not git-ignored",
+      "severity": "high",
+      "pre_existing": true,
+      "detail": "db_illuvision_testing credentials are committed in plaintext. If the repository is ever published, or if .env.testing is deployed, those credentials are exposed. It is not listed in .gitignore."
+    }
+  ],
+  "medium": [
+    {
+      "id": "SEC-07",
+      "title": "Authenticated-but-unpermissioned uploads",
+      "severity": "medium",
+      "pre_existing": true,
+      "detail": "POST /api/file-upload and POST /api/video-upload require only auth:sanctum, so any authenticated user can upload."
+    },
+    {
+      "id": "SEC-08",
+      "title": "Controller-internal authorization is inconsistent",
+      "severity": "medium",
+      "pre_existing": true,
+      "detail": "Because middleware is the primary gate, any route with a missing or mis-scoped permission entry is unprotected. SEC-01, SEC-03, SEC-07 are all instances of this single root cause."
+    }
+  ],
+  "verified_clean": [
+    {
+      "check": "client-supplied money trusted on the campaign booking path",
+      "result": "clean",
+      "detail": "CreateCampaignBookingUseCase derives authoritative subtotal/discount/final from CampaignPricingService; client subtotal/discount_amount/final_amount are informational only and never stored or charged."
+    },
+    {
+      "check": "payment amount tampering",
+      "result": "clean",
+      "detail": "CreatePaymentOrderUseCase derives the order amount from the persisted Payment record. PaymentController::verify accepts only razorpay_order_id, razorpay_payment_id and razorpay_signature - no amount field exists on the request, and the Razorpay signature covers order_id|payment_id."
+    },
+    {
+      "check": "SQL injection via request data",
+      "result": "clean",
+      "detail": "No request input reaches DB::raw or string-concatenated SQL. The 3 interpolated DB::raw expressions (RewardReportQuery, RevenueAnalyticsService, RevenueDistributionService) interpolate hardcoded DB-driver literals only."
+    },
+    {
+      "check": "mass assignment",
+      "result": "clean",
+      "detail": "No model has an empty $fillable together with an empty $guarded."
+    },
+    {
+      "check": "Model -> Http dependency",
+      "result": "clean",
+      "detail": "The Phase 0.13 fix holds; now enforced by ArchitectureRuleTest::test_no_model_imports_the_http_layer."
+    }
+  ],
+  "all_findings_pre_existing": "Every finding above was compared against docs/audit/routes-baseline.json, the pre-remediation snapshot. All appear with IDENTICAL middleware. Phases 0.5-0.14 neither introduced nor worsened any of them.",
+  "hard_stop_note": "SEC-01, SEC-02 and SEC-03 are contract-changing remediations. The Phase 0.16 brief forbids changing authorization outcomes or the API contract as a side effect, so they are recorded as P0 blockers for explicit approval rather than silently fixed."
+}

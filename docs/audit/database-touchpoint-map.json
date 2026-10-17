@@ -1,0 +1,3390 @@
+{
+  "version": "0.2",
+  "generated_at": "2026-09-25T20:56:00+05:30",
+  "total_touchpoints": 259,
+  "touchpoints": [
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\SettingsService",
+      "model_class": "Setting",
+      "table_name": "settings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\BudgetRecommendationService",
+      "model_class": "ScreenCategory",
+      "table_name": "screen_categorys",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\BudgetRecommendationService",
+      "model_class": "City",
+      "table_name": "citys",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\BudgetRecommendationService",
+      "model_class": "State",
+      "table_name": "states",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\BudgetRecommendationService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\BookingWorkflowService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\NotificationService",
+      "model_class": "NotificationLog",
+      "table_name": "notification_logs",
+      "operations": [
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenDeletionService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenDeletionService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenDeletionService",
+      "model_class": "ActivityLog",
+      "table_name": "activity_logs",
+      "operations": [
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenDeletionService",
+      "model_class": "ScreenProviderActivity",
+      "table_name": "screen_provider_activitys",
+      "operations": [
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenDeletionService",
+      "model_class": "ScreenProvider",
+      "table_name": "screen_providers",
+      "operations": [
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenDeletionService",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReferralTrackingService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReferralTrackingService",
+      "model_class": "ReferralUsage",
+      "table_name": "referral_usages",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReferralTrackingService",
+      "model_class": "PartnerCommission",
+      "table_name": "partner_commissions",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReferralTrackingService",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PaymentService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PaymentService",
+      "model_class": "BookingActivity",
+      "table_name": "booking_activitys",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PaymentService",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PaymentService",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\BookingPriceCalculator",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\FinanceService",
+      "model_class": "Refund",
+      "table_name": "refunds",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\FinanceService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\FinanceService",
+      "model_class": "ScreenProviderSettlement",
+      "table_name": "screen_provider_settlements",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\FinanceService",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\FinanceService",
+      "model_class": "ActivityLog",
+      "table_name": "activity_logs",
+      "operations": [
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "BookingActivity",
+      "table_name": "booking_activitys",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "BookingMedia",
+      "table_name": "booking_media",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "PricingDurationRule",
+      "table_name": "pricing_duration_rules",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ManualBookingService",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueDistributionService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueDistributionService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueDistributionService",
+      "model_class": "ScreenProviderActivity",
+      "table_name": "screen_provider_activitys",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueDistributionService",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\BookingCapacityService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PaymentAnalyticsService",
+      "model_class": "Refund",
+      "table_name": "refunds",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PaymentAnalyticsService",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PaymentAnalyticsService",
+      "model_class": "ReferralUsage",
+      "table_name": "referral_usages",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PaymentAnalyticsService",
+      "model_class": "PartnerCommission",
+      "table_name": "partner_commissions",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\NotificationDispatcher",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenAnalyticsService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenAnalyticsService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\CampaignPricingService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\CampaignPricingService",
+      "model_class": "BookingPricingBreakdown",
+      "table_name": "booking_pricing_breakdowns",
+      "operations": [
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\CampaignPricingService",
+      "model_class": "RewardAccount",
+      "table_name": "reward_accounts",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\CampaignPricingService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\CampaignPricingService",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\BookingAnalyticsService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\AssetImportService",
+      "model_class": "ScreenCategory",
+      "table_name": "screen_categorys",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\AssetImportService",
+      "model_class": "Country",
+      "table_name": "countrys",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\AssetImportService",
+      "model_class": "City",
+      "table_name": "citys",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\AssetImportService",
+      "model_class": "State",
+      "table_name": "states",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\AssetImportService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\AssetImportService",
+      "model_class": "ScreenProvider",
+      "table_name": "screen_providers",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\AssetImportService",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\FirstBookingDiscountService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\FirstBookingDiscountService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\InventoryService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": true,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\SettlementService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\SettlementService",
+      "model_class": "ScreenProviderSettlement",
+      "table_name": "screen_provider_settlements",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\SettlementService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\SettlementService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\SettlementService",
+      "model_class": "ScreenProviderActivity",
+      "table_name": "screen_provider_activitys",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\SettlementService",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RefundService",
+      "model_class": "Refund",
+      "table_name": "refunds",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RefundService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RefundService",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RefundService",
+      "model_class": "PaymentLog",
+      "table_name": "payment_logs",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\CommissionService",
+      "model_class": "PartnerCommission",
+      "table_name": "partner_commissions",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "LOCKED_READ",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": true,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ClientAnalyticsService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ClientAnalyticsService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ClientAnalyticsService",
+      "model_class": "ReferralUsage",
+      "table_name": "referral_usages",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\LoyaltyService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\LoyaltyService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\LoyaltyService",
+      "model_class": "RewardAccount",
+      "table_name": "reward_accounts",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\LoyaltyService",
+      "model_class": "RewardRedemption",
+      "table_name": "reward_redemptions",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\LoyaltyService",
+      "model_class": "RewardTransaction",
+      "table_name": "reward_transactions",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ProfileService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ProfileService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueAnalyticsService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueSplitResolverService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueSplitResolverService",
+      "model_class": "BookingPricingBreakdown",
+      "table_name": "booking_pricing_breakdowns",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueSplitResolverService",
+      "model_class": "ScreenDurationSplitOverride",
+      "table_name": "screen_duration_split_overrides",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueSplitResolverService",
+      "model_class": "PricingDurationRule",
+      "table_name": "pricing_duration_rules",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueSplitResolverService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueSplitResolverService",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RevenueSplitResolverService",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PartnerService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PartnerService",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PartnerService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PartnerService",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PartnerService",
+      "model_class": "ReferralUsage",
+      "table_name": "referral_usages",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PartnerService",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ClientService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ClientService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ClientService",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ClientService",
+      "model_class": "ReferralUsage",
+      "table_name": "referral_usages",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PricingRuleEngine",
+      "model_class": "PricingDurationRule",
+      "table_name": "pricing_duration_rules",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PricingRuleEngine",
+      "model_class": "PricingWeekendRule",
+      "table_name": "pricing_weekend_rules",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PricingRuleEngine",
+      "model_class": "PricingPeakRule",
+      "table_name": "pricing_peak_rules",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PricingRuleEngine",
+      "model_class": "PricingScreenRule",
+      "table_name": "pricing_screen_rules",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PricingRuleEngine",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PricingEngine",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ExchangeRateService",
+      "model_class": "CurrencyRate",
+      "table_name": "currency_rates",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReferralService",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReferralService",
+      "model_class": "ReferralUsage",
+      "table_name": "referral_usages",
+      "operations": [
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReferralService",
+      "model_class": "PartnerCommission",
+      "table_name": "partner_commissions",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReferralService",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReportService",
+      "model_class": "Category",
+      "table_name": "categorys",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReportService",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReportService",
+      "model_class": "RewardAccount",
+      "table_name": "reward_accounts",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ReportService",
+      "model_class": "RewardTransaction",
+      "table_name": "reward_transactions",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\PricingService",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\RecommendationService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenProviderService",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenProviderService",
+      "model_class": "ScreenProviderEnquiry",
+      "table_name": "screen_provider_enquirys",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenProviderService",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenProviderService",
+      "model_class": "ActivityLog",
+      "table_name": "activity_logs",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenProviderService",
+      "model_class": "ScreenProviderActivity",
+      "table_name": "screen_provider_activitys",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\ScreenProviderService",
+      "model_class": "ScreenProvider",
+      "table_name": "screen_providers",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\Pricing\\PeakPricingCalculator",
+      "model_class": "PricingPeakRule",
+      "table_name": "pricing_peak_rules",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\Pricing\\DailyPricingCalculator",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\Pricing\\WeekendPricingCalculator",
+      "model_class": "PricingWeekendRule",
+      "table_name": "pricing_weekend_rules",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\Pricing\\ReferralPricingCalculator",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\Pricing\\ScreenPricingResolver",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\Pricing\\ScreenPricingResolver",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Service",
+      "caller_class": "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\EnquiryController",
+      "model_class": "Enquiry",
+      "table_name": "enquirys",
+      "operations": [
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\EnquiryController",
+      "model_class": "ContactEnquiry",
+      "table_name": "contact_enquirys",
+      "operations": [
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ReferralCodeController",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BlogTagController",
+      "model_class": "BlogTag",
+      "table_name": "blog_tags",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\JobPostController",
+      "model_class": "JobPost",
+      "table_name": "job_posts",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\JobCategoryController",
+      "model_class": "JobCategory",
+      "table_name": "job_categorys",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\TestimonialController",
+      "model_class": "Testimonial",
+      "table_name": "testimonials",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminScreenProviderEnquiryController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminScreenProviderEnquiryController",
+      "model_class": "ScreenProviderEnquiry",
+      "table_name": "screen_provider_enquirys",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdvertisementCategoryController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdvertisementCategoryController",
+      "model_class": "AdvertisementCategory",
+      "table_name": "advertisement_categorys",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ReferralAnalyticsController",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ReferralAnalyticsController",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AuthorController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\DashBoardController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\DashBoardController",
+      "model_class": "ScreenProviderSettlement",
+      "table_name": "screen_provider_settlements",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\DashBoardController",
+      "model_class": "RewardAccount",
+      "table_name": "reward_accounts",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\DashBoardController",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\DashBoardController",
+      "model_class": "ContactEnquiry",
+      "table_name": "contact_enquirys",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\DashBoardController",
+      "model_class": "ScreenProvider",
+      "table_name": "screen_providers",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\DashBoardController",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\DashBoardController",
+      "model_class": "RewardTransaction",
+      "table_name": "reward_transactions",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BlogController",
+      "model_class": "Category",
+      "table_name": "categorys",
+      "operations": [
+        "UPDATE",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BlogController",
+      "model_class": "BlogTag",
+      "table_name": "blog_tags",
+      "operations": [
+        "UPDATE",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BlogController",
+      "model_class": "Blog",
+      "table_name": "blogs",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\SuccessStoryController",
+      "model_class": "SuccessStory",
+      "table_name": "success_storys",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AuthController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenCategoryController",
+      "model_class": "ScreenCategory",
+      "table_name": "screen_categorys",
+      "operations": [
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminScreenProviderController",
+      "model_class": "ScreenProviderSettlement",
+      "table_name": "screen_provider_settlements",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminScreenProviderController",
+      "model_class": "ScreenProvider",
+      "table_name": "screen_providers",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PricingPlanController",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "UPDATE",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ContactEnquiryController",
+      "model_class": "ContactEnquiry",
+      "table_name": "contact_enquirys",
+      "operations": [
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerApprovalController",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "UPDATE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "ScreenCategory",
+      "table_name": "screen_categorys",
+      "operations": [
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "Country",
+      "table_name": "countrys",
+      "operations": [
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "City",
+      "table_name": "citys",
+      "operations": [
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "ScreenDurationSplitOverride",
+      "table_name": "screen_duration_split_overrides",
+      "operations": [
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "PricingDurationRule",
+      "table_name": "pricing_duration_rules",
+      "operations": [
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "State",
+      "table_name": "states",
+      "operations": [
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "ActivityLog",
+      "table_name": "activity_logs",
+      "operations": [
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "ScreenProvider",
+      "table_name": "screen_providers",
+      "operations": [
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenController",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerPortalController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerPortalController",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerPortalController",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminSettlementController",
+      "model_class": "ScreenProviderSettlement",
+      "table_name": "screen_provider_settlements",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminManualBookingController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminManualBookingController",
+      "model_class": "BookingActivity",
+      "table_name": "booking_activitys",
+      "operations": [
+        "UPDATE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminManualBookingController",
+      "model_class": "BookingMedia",
+      "table_name": "booking_media",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ProductEnquiryController",
+      "model_class": "ProductEnquiry",
+      "table_name": "product_enquirys",
+      "operations": [
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerClientController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerClientController",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerClientController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerClientController",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminProductController",
+      "model_class": "Product",
+      "table_name": "products",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\GalleryController",
+      "model_class": "Gallery",
+      "table_name": "gallerys",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ProductController",
+      "model_class": "Product",
+      "table_name": "products",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AchievementController",
+      "model_class": "Achievement",
+      "table_name": "achievements",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "NotificationLog",
+      "table_name": "notification_logs",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "ScreenProviderSettlement",
+      "table_name": "screen_provider_settlements",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "ActivityLog",
+      "table_name": "activity_logs",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "ContactEnquiry",
+      "table_name": "contact_enquirys",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "ScreenProvider",
+      "table_name": "screen_providers",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminPaymentController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminPaymentController",
+      "model_class": "BookingActivity",
+      "table_name": "booking_activitys",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminPaymentController",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "UPDATE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminPaymentController",
+      "model_class": "PaymentLog",
+      "table_name": "payment_logs",
+      "operations": [
+        "UPDATE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\ScreenProviderEnquiryController",
+      "model_class": "ScreenProviderEnquiry",
+      "table_name": "screen_provider_enquirys",
+      "operations": [
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\JobApplicationController",
+      "model_class": "JobApplication",
+      "table_name": "job_applications",
+      "operations": [
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerController",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerController",
+      "model_class": "ReferralUsage",
+      "table_name": "referral_usages",
+      "operations": [
+        "UPDATE",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerController",
+      "model_class": "PartnerCommission",
+      "table_name": "partner_commissions",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerController",
+      "model_class": "ReferralCode",
+      "table_name": "referral_codes",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerBookingController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerBookingController",
+      "model_class": "BookingActivity",
+      "table_name": "booking_activitys",
+      "operations": [
+        "UPDATE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerBookingController",
+      "model_class": "BookingMedia",
+      "table_name": "booking_media",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerBookingController",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerBookingController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminProductEnquiryController",
+      "model_class": "ProductEnquiry",
+      "table_name": "product_enquirys",
+      "operations": [
+        "UPDATE",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PaymentController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PaymentController",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\CategoryController",
+      "model_class": "Category",
+      "table_name": "categorys",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\FaqController",
+      "model_class": "Faq",
+      "table_name": "faqs",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AnnouncementController",
+      "model_class": "Announcement",
+      "table_name": "announcements",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\QrCodeController",
+      "model_class": "QrCode",
+      "table_name": "qr_codes",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\QrCodeController",
+      "model_class": "QrCodeScan",
+      "table_name": "qr_code_scans",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\PartnerApplicationController",
+      "model_class": "Partner",
+      "table_name": "partners",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminContactEnquiryController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\AdminContactEnquiryController",
+      "model_class": "ContactEnquiry",
+      "table_name": "contact_enquirys",
+      "operations": [
+        "UPDATE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BookingController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BookingController",
+      "model_class": "BookingActivity",
+      "table_name": "booking_activitys",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BookingController",
+      "model_class": "BookingMedia",
+      "table_name": "booking_media",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BookingController",
+      "model_class": "PricingDurationRule",
+      "table_name": "pricing_duration_rules",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BookingController",
+      "model_class": "Payment",
+      "table_name": "payments",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BookingController",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BookingController",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE",
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\BookingController",
+      "model_class": "PricingPlan",
+      "table_name": "pricing_plans",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Auth\\ForgotPasswordController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "SELECT",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Auth\\ResetPasswordController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Auth\\GoogleAuthController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "UPDATE",
+        "SELECT",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\PermissionController",
+      "model_class": "Role",
+      "table_name": "roles",
+      "operations": [
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\PermissionController",
+      "model_class": "ActivityLog",
+      "table_name": "activity_logs",
+      "operations": [
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\PermissionController",
+      "model_class": "RolePermission",
+      "table_name": "role_permissions",
+      "operations": [
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\AdminUserController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\AdminUserController",
+      "model_class": "Role",
+      "table_name": "roles",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\AdminUserController",
+      "model_class": "ActivityLog",
+      "table_name": "activity_logs",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\BudgetRecommendationController",
+      "model_class": "City",
+      "table_name": "citys",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\BudgetRecommendationController",
+      "model_class": "State",
+      "table_name": "states",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\RoleController",
+      "model_class": "Role",
+      "table_name": "roles",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\RoleController",
+      "model_class": "ActivityLog",
+      "table_name": "activity_logs",
+      "operations": [
+        "UPDATE",
+        "DELETE"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\RoleController",
+      "model_class": "RolePermission",
+      "table_name": "role_permissions",
+      "operations": [
+        "UPDATE",
+        "DELETE",
+        "INSERT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\AdminCurrencyController",
+      "model_class": "CurrencyRate",
+      "table_name": "currency_rates",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\BookingEngineController",
+      "model_class": "Booking",
+      "table_name": "bookings",
+      "operations": [
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\BookingEngineController",
+      "model_class": "Screen",
+      "table_name": "screens",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\BookingEngineController",
+      "model_class": "BookingScreen",
+      "table_name": "booking_screens",
+      "operations": [
+        "INSERT",
+        "TRANSACTIONAL_WRITE"
+      ],
+      "uses_transaction": true,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\ProfileController",
+      "model_class": "RewardAccount",
+      "table_name": "reward_accounts",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\ProfileController",
+      "model_class": "RewardTransaction",
+      "table_name": "reward_transactions",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\AdminRewardsController",
+      "model_class": "User",
+      "table_name": "users",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\AdminRewardsController",
+      "model_class": "RewardAccount",
+      "table_name": "reward_accounts",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\AdminRewardsController",
+      "model_class": "RewardTransaction",
+      "table_name": "reward_transactions",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    },
+    {
+      "caller_type": "Controller",
+      "caller_class": "App\\Http\\Controllers\\Api\\SettingsController",
+      "model_class": "Setting",
+      "table_name": "settings",
+      "operations": [
+        "SELECT"
+      ],
+      "uses_transaction": false,
+      "uses_lock": false,
+      "bypasses_repository": true
+    }
+  ]
+}

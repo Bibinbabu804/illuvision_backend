@@ -1,0 +1,21 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "domain-purity-audit",
+  "domain_class_count": 9,
+  "framework_facade_calls": 0,
+  "service_locators": 0,
+  "model_imports": 0,
+  "verdict": "Domain is free of container lookups, facades and framework models. Its single defect is the outward dependency on 7 legacy Services classes from CampaignPricingEngine.",
+  "open": {
+    "id": "DV-01",
+    "category": "C"
+  },
+  "enforcement": [
+    "ArchitectureRuleTest::test_domain_uses_no_illuminate_facade",
+    "ArchitectureRuleTest::test_domain_has_no_service_locators",
+    "ArchitectureRuleTest::test_domain_must_not_import_app_services (pinned debt)"
+  ]
+}

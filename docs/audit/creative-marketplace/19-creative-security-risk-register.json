@@ -1,0 +1,629 @@
+{
+  "artifact": "19-creative-security-risk-register",
+  "generated": "2026-09-26",
+  "classification": "CURRENT_FACT for every evidence citation. RECOMMENDATION for every mitigation. OPEN_DECISION where a mitigation depends on an unresolved product, finance or architect question.",
+  "status": "READ-ONLY RISK REGISTER. NO FIX IS APPLIED BY THIS AUDIT. No code, migration, route, test, config or model was created, modified or deleted. Every risk below is 'open'. Each maps to a recommended control that will be implemented in a LATER, SEPARATELY AUTHORISED task, each with its own verification.",
+  "scope": "Security exposure for a Creative Marketplace bounded context that DOES NOT EXIST: 0 classes, 0 routes, 0 tables, 0 migrations, 0 policies, 0 tests. Every risk is therefore PROSPECTIVE — a risk of the proposed design — except where the evidence is an existing pattern or a live defect in current code that Creative would inherit.",
+  "method": "Direct source inspection of the authorization, storage, payment, notification and concurrency paths that a Creative build would touch, plus the absence checks: `find app -type d -name Policies -o -name Listeners` (no results), `grep -rn 'Policy|Gate::' app/`, throttle/rate-limiter search, mass-assignment surface survey, and the enumeration surface implied by the route model.",
+  "classification_legend": {
+    "CURRENT_FACT": "Verified from source code on the measurement date, cited as file:line.",
+    "INFERENCE": "Reasonably inferred from the implementation or from relationships between facts.",
+    "RECOMMENDATION": "Proposed control. Not implemented.",
+    "OPEN_DECISION": "Cannot be determined from available evidence. What is missing is stated explicitly."
+  },
+  "severity_scale": {
+    "P0": "An attacker or an ordinary client can cause irreversible financial loss, take over an identity, or read another party's confidential material. Must exist before the corresponding endpoint is exposed.",
+    "P1": "Exploitable to read or modify data belonging to another party, or to corrupt a financial or contractual record, without immediate irreversible loss. Must exist before production use.",
+    "P2": "Exploitable to degrade integrity, auditability or fairness of the marketplace, or requires a non-trivial precondition. Must exist before the feature is generally available.",
+    "P3": "Weakens defence in depth or creates a future trap. Should be scheduled, not shipped around."
+  },
+  "mitigation_type_legend": {
+    "preventive": "Stops the attack from succeeding. Implemented in code, schema, configuration or authorization.",
+    "detective": "Does not stop the attack; makes it observable, attributable or recoverable after the fact (audit row, log, alert, reconciliation)."
+  },
+  "global_statement": {
+    "classification": "CURRENT_FACT",
+    "no_fix_applied": "This register applies NO fix. It is documentation. Per the task's safety rules and AGENTS.md sections 18 and 19, the live defects recorded here (CRE-SEC-018, -020, -022 and the storage findings) are RECORDED, NOT FIXED. Fixing any of them would require its own authorisation, characterisation tests where behaviour changes, and its own regression run.",
+    "risk_maps_to_control": "Each risk's 'recommended_mitigation' describes a control to be built in a later, separately authorised task. No control in this register has been written, prototyped or partially applied.",
+    "prospective_caveat": "Because no Creative code exists, the 'evidence' field of most risks is evidence about the PLATFORM the Creative context will be built on, not about Creative code. Each is labelled accordingly. A risk whose evidence is only a structural property of the current system is marked 'no Creative code exists — risk is prospective' AND given the current-code evidence that makes it prospective."
+  },
+  "risks": [
+    {
+      "id": "CRE-SEC-001",
+      "title": "Insecure direct object reference on a project, revision or delivery via sequential integer ids",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "IDOR",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: the route model is integer-id-only. `routes/api.php` binds resources by numeric id throughout (e.g. :278 `POST /bookings/{booking}/media`, :683 `POST /bookings/{booking}/media/{media}/approve`). Zero UUIDs and zero ULIDs exist anywhere in 112 migrations (artifact 08, re-derived 2026-09-26). There is NO policy layer (`find app -type d -name Policies` -> no results; no `Gate::` or Policy class in app/), so authorization on those routes is permission-based (role) and not ownership-based (instance).",
+      "affected_future_component": "Every Creative read endpoint for briefs, projects, revisions, deliveries, reviews and file access; the artifact-09 `public_id` convention if it is not adopted.",
+      "attack_scenario": "An authenticated user — a client who has never been in the same engagement — iterates `GET /api/creative/projects/1`, `/2`, `/3` … and reads another client's project scope, another creator's delivery metadata, or the file descriptors attached to them. Because ids are dense auto-increments, enumeration is trivial and the total space is knowable from any single valid id. If file access is implemented over a bare `creative_files` id, the same enumeration yields file paths.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, three layers: (1) Adopt the artifact-09 `public_id` convention (opaque, UNIQUE, INDEXED) as the ONLY route key for every Creative aggregate — never the auto-increment id. (2) Add an ownership/party authorization check on every read and write, expressed as a policy class per aggregate, invoked from the controller; treat 'not yours' as 404 rather than 403 so existence is not confirmed. (3) Return `public_id` in every response and never a numeric id, a storage path, or a filesystem directory. Pin with a test that asserts no Creative route parameter is a bare integer.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-DB-01 / OD-ST-10 — the public identifier strategy (ULID, UUID, or a prefixed sequential reference such as CRJ-2026-000123) is undecided. A prefixed sequential reference is more human-quotable in emails but is ENUMERABLE, so it must be combined with the ownership check (layer 2) and must not be treated as a security control on its own.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-002",
+      "title": "Unauthorised access to another party's brief, revision or delivery (ownership not enforced)",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "authorization / IDOR",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: ownership is enforced ad hoc in controllers, never by a policy. `app/Http/Controllers/BookingController.php:116-118` (`if ($booking->user_id !== $request->user()->id) return 403`), `app/Http/Controllers/PaymentController.php:48-51` (same shape), and the partner equivalents. The parent/child binding check in `BookingController::approveMedia`/`::rejectMedia`/`::deleteMedia` compares two integers in PHP with no scoped route binding. There is no mechanism that would make a FORGOT ownership check fail closed: each endpoint simply has to remember.",
+      "affected_future_component": "CreativeBrief, CreativeProject, CreativeRevision, CreativeDelivery, CreativeReview, CreatorEarning — every two-party aggregate in artifact 06.",
+      "attack_scenario": "A developer writes `GET /api/creative/projects/{project}` with a permission middleware but no ownership check, exactly as several existing endpoints do. Any authenticated user reads any project. The variant that is hardest to catch in review is the child route: `GET /api/creative/deliveries/{delivery}/files/{file}` where each id is checked in isolation and the relationship between them is not.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: introduce the repository's FIRST policy layer (app/Policies/Creative/*) and make it the ownership gate, keeping route middleware as the role/permission gate per ARCHITECTURE_RULES.md Rule 12. Require that every Creative policy answer three questions explicitly: is the actor a party to the engagement, are they the correct party for THIS transition, and may they see this FILE. Do not rely on a hand-written inline check per controller, because the existing ad-hoc pattern is exactly what fails under endpoint growth. Add a test that, for every Creative route, asserts the controller authorizes rather than only the middleware.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-CTX-01 — creating the first policy layer in this repository is a new architectural construct and needs architect sign-off under AGENTS.md section 20. Artifact 05 records the same requirement.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-003",
+      "title": "Client editing a proposal after submission",
+      "classification": "RECOMMENDATION + OPEN_DECISION",
+      "category": "proposal manipulation",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. There is no proposal concept in the repository at all (`grep -ri 'proposal' app/` -> 0 matches), so no precedent constrains the design. The nearest structural risk precedent is the booking payment path, where client-supplied `subtotal` / `discount_amount` / `final_amount` are accepted by the request and then explicitly treated as informational only, with the stored amounts recomputed server-side (documented in `app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php:43-45`).",
+      "affected_future_component": "CreativeProposal, and through it CreativeProject.AgreedTerms and every earning derived from it.",
+      "attack_scenario": "A proposal is submitted at 10,000. After the client has shown interest, the creator is pressured to lower the price, or the client discovers the endpoint and issues `PUT /api/creative/proposals/{id}` with a lower amount. If the update endpoint does not assert `status === 'submitted'` under a row lock (artifact 16), a submitted quote is silently rewritten. Worse: if the client can write it, the client can also write the delivery date and the included revision count, and then argue later that those were the agreed terms.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: a proposal is IMMUTABLE once submitted. A change means WITHDRAW_AND_RESUBMIT, creating a new proposal version with a new status transition under a row lock, never an in-place edit. Server-side: validate that the persisted amount equals the last server-accepted amount, and reject any update path that does not perform the status-guarded transition described in artifact 16. Pin with a test asserting that no route can mutate a submitted proposal's commercial fields.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-TC-01 / OD-TC-02 — whether one brief receives multiple proposals, and whether the quoted amount is server-derived or creator-proposed, are undecided. If the amount is creator-proposed, immutability is the ONLY thing preventing a post-hoc rewrite and it is non-negotiable. If it is server-derived from a rate card, the exposure is lower but the revision-count and timeline fields are still client-influenceable.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-004",
+      "title": "Client-supplied amount used instead of a server-derived amount",
+      "classification": "RECOMMENDATION + OPEN_DECISION",
+      "category": "price manipulation",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform precedent to REJECT is the `AdminManualBookingController` / legacy `BookingController` path where the request accepts `price`, `subtotal`, `discount_amount` and `final_amount` (`app/Http/Controllers/BookingController.php:1119` validates `'price' => 'required|numeric|min:0'` on the legacy single-screen route). The campaign path is the correct counter-example: the same fields arrive and the stored values are recomputed by the pricing engine (documented at CreateCampaignBookingUseCase.php:43-45).",
+      "affected_future_component": "CreativeProposal.quoted_amount, CreativeProject agreed terms, CreativeFunding.amount, CreatorEarning.",
+      "attack_scenario": "A client POSTs a project with `amount: 100` where the agreed amount is 100,000, and the implementation persists the request value. The creator is underpaid by 99.9% and, because financial history is immutable under AGENTS.md section 10, the wrong figure cannot be corrected — only compensated forward, from the platform's own money.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: the amount that reaches a financial table must be server-derived and snapshotted. Enforce it in three places, not one: (1) the FormRequest must not accept an amount field that is later used, or must accept it and ignore it explicitly; (2) a pure domain service computes the agreed terms from the rate card and the frozen inputs; (3) a test asserts that two requests with identical inputs but wildly different client-supplied amounts produce IDENTICAL stored values. This is the pattern CreateCampaignBookingUseCase already documents, and it is the reason that comment exists.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-TC-02, OD-TC-09, OD-TC-12 — whether the amount is server-derived or creator-proposed, whether commission is on gross or net, and whether tax/third-party costs are in the split. None of these may be invented by an implementer.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-005",
+      "title": "Payment manipulation via replay of a client-initiated verification with no webhook reconciliation",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "payment manipulation / webhook replay",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: there is NO webhook anywhere. `grep -rni 'webhook' app/ routes/` -> 0 matches. Payment confirmation is entirely client-initiated at `POST /api/payments/razorpay/verify` (`routes/api.php:303`) -> `PaymentController::verify` (`:80`) -> `VerifyPaymentUseCase` -> `PaymentService::verifyAndConfirmPayment` (`app/Services/PaymentService.php:103`). `payments.razorpay_order_id` is indexed but NOT unique. The only duplicate guard is a hard-coded throw at `PaymentService.php:105-107`. `config/sanctum.php:50` sets `expiration => null`, so API tokens never expire.",
+      "affected_future_component": "CreativeFunding, CreativeProject funding state, and every earning triggered by funding.",
+      "attack_scenario": "An attacker captures one valid `(razorpay_order_id, razorpay_payment_id, razorpay_signature)` triple from their own legitimate low-value order and replays it against another funding endpoint. Because verification is client-initiated and there is no webhook to reconcile against, the server only ever learns what the client tells it, at whatever moment the client chooses. Without a unique constraint on the gateway order id and a status-guarded, lock-protected transition, the replayed confirmation re-drives the state machine. With the never-expiring token, the captured credential is valid indefinitely.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, four controls: (1) UNIQUE on the gateway order id (artifact 09 already specifies `gateway_order_id` nullable-unique) so a duplicate is impossible at the schema level. (2) A status-guarded transition under a row lock, as artifact 16 specifies — an already-confirmed funding returns unchanged rather than re-confirming. (3) The gateway call OUTSIDE any transaction and any lock (ARCHITECTURE_RULES.md Rule 4), with the network call between two transactions, NOT inside one as `RefundService.php:51` does. (4) Server-side reconciliation against the gateway so that the client's claim is a REQUEST, not the source of truth. Control 4 requires a webhook, which is OD-TC-07.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-TC-07 — whether an inbound gateway webhook is in scope, and if so its signature-verification, replay-window and idempotency contract. There is NO existing contract in this repository to copy and none may be invented. Until it is decided, Creative funding is client-initiated only and controls 1-3 are the entire defence.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-006",
+      "title": "File access leakage through the public disk",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "file access leakage",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: `config/filesystems.php:41-48` defines the `public` disk with `root => storage_path('app/public')` and `url => env('APP_URL').'/storage'`, and `config/filesystems.php:77` symlinks `public/storage` to it. `LaravelStorageAdapter` hard-pins `protected const DISK = 'public'`. `grep -rn 'temporarySignedRoute|signedRoute|temporaryUrl|hasValidSignature'` over app/, routes/, config/ and tests/ -> **0 matches**. There is no download controller in the route table at all. A live instance of the same defect already ships: `job_applications.resume` is written to the public disk (deleted via `Storage::disk('public')` at `app/Http/Controllers/JobApplicationController.php:65`), i.e. applicant PII is world-readable today.",
+      "affected_future_component": "Every Creative file kind: brief attachments, project files, revision files, delivery files, source files, previews, and any payout document.",
+      "attack_scenario": "A brief attachment is uploaded through the only available upload path and lands at `storage/app/public/briefs/12/1712_abc.pdf`. Anyone who guesses or enumerates the path fetches the client's confidential brief with no authentication, no expiry and no revocation. Because the file is now cached and mirrored outside the application, it cannot be recalled. The same applies to an undelivered draft and to a source file.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, and this is NEW work because nothing exists to extend: (1) a `creative_files` record per file with disk, path, visibility, owner, size, detected mime and checksum; (2) a dedicated PRIVATE disk, never `public`; (3) a Creative file-access contract (artifact 17 section 4) whose `issueAccess()` performs the authorization check and returns a SHORT-LIVED SIGNED URL or streams the bytes; (4) an explicit, authorized, audited `publish` action as the only route by which a Creative file reaches a public disk — and it creates a DISTINCT artefact, never the original; (5) a hard rule that no response contains a storage path. Private reads must never be a static file fetch.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-ST-01 (which physical store), OD-ST-02 (are previews public or private), OD-ST-09 (signed-URL TTLs), OD-ST-10 (contract namespace).",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-007",
+      "title": "Unauthorised file upload path traversal and client-controlled destination",
+      "classification": "CURRENT_FACT (live defect) + RECOMMENDATION (do not inherit)",
+      "category": "file access leakage / mass assignment",
+      "severity": "P0",
+      "evidence": "LIVE DEFECT in current code, not Creative code. `app/Http/Controllers/FileController.php:13` sets `$path = $request->path` — a fully client-controlled string — and `:29` / `:44` pass it verbatim to `$file->storeAs($path, $fileName, 'public')`. There is NO validation in the file: raw `Illuminate-Http-Request`, no FormRequest, no `validate()` call. The extension is the client-supplied `getClientOriginalExtension()` (`:28`, `:43`). The routes are `routes/api.php:659-660` with no permission middleware and no throttle. In the same class, `MediaHelper::compressUploadedImage` builds its directory from the same client-supplied path (`app/Helpers/MediaHelper.php:44-47`).",
+      "attack_scenario": "A caller posts `path=../../` or `path=products` (overwriting another feature's directory) or a filename with a double extension. The file is written wherever the caller asked, inside the public tree, with a caller-chosen extension. Because `local` has `serve => true` and the web server serves the public tree, a written `.php` or `.html` file in a served location is a route to stored active content.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, for Creative: uploads go through a FormRequest, MIME-level validation (not extension — `MediaService::validate()` uses `allowedMediaExtensionsString()`, i.e. extension-based, and `MediaConfig::allowedImageTypes()` is never called by it), a size cap, a per-context count cap, a SERVER-GENERATED path built from the aggregate's `public_id` and a random name, and a server-derived extension from the detected type. Separately: `FileController` is a live defect and should be hardened, but that is a behaviour change requiring characterisation tests, an explicit authorisation, its own report, and a regression run under AGENTS.md sections 3 and 18. **This audit does not harden it and does not write the tests.**",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-008",
+      "title": "Creator or client impersonation — acting as the other party",
+      "classification": "RECOMMENDATION + OPEN_DECISION",
+      "category": "impersonation",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence relevant to the identity model: `users.role` is a free-form VARCHAR with no foreign key to `roles` and no enum (it was an ENUM, converted by raw ALTER in migration 2026_07_10_000002). A misspelled role yields an empty permission list with no error (`RolePermissionChecker::permissionsForRole` returns `[]` when the Role row is not found). There is no way for one user to hold two roles. `AuthController::register` hardcodes the role, so role promotion is always a separate privileged action.",
+      "affected_future_component": "CreativeProject, CreativeProposal, CreativeRevision, CreativeDelivery, CreativeReview — every aggregate with two parties and asymmetric transition rights.",
+      "attack_scenario": "The client is also a registered creator (or simply a user who guesses a route). Because there is exactly one role per user and no policy layer, 'is this actor the client on this project?' must be an explicit per-instance check. If any Creative endpoint decides identity from the request body (`creator_id`, `client_id`, `user_id`) rather than from the authenticated principal plus an ownership check, a client can submit a delivery as the creator, or a creator can accept a delivery as the client, and thereby approve their own work and trigger their own earning.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: derive the actor from `$request->user()` ONLY; never from a request field. Resolve the counterparty from the project row, not from the request. A CreativeProjectPolicy must assert the actor's role in THIS engagement explicitly ('client' vs 'creator'), and the transition guard must require the matching role — the same shape as the existing state machines, applied to two parties for the first time (artifact 06 records that no existing aggregate has this shape, so there is no template to copy and it must be designed deliberately). Add a test per transition for: correct party allowed, wrong party denied, non-party denied.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-DB-08 / OD-TC-17 — can a user be BOTH an advertiser (client) and a creator? The single `users.role` varchar cannot express it. This is BLOCKING for the identity model, because if the answer is yes, a role-join or an independent creator record is required and every authorization check changes shape. This artifact 09 marks it as the single most blocking decision.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-009",
+      "title": "Privilege escalation via free-text role plus a super-admin bypass that exists only in middleware",
+      "classification": "CURRENT_FACT (live design property) + RECOMMENDATION (control)",
+      "category": "privilege escalation",
+      "severity": "P0",
+      "evidence": "CURRENT_FACT: the super-admin bypass lives ONLY in `app/Http/Middleware/PermissionMiddleware.php:27-29` (`if ($user->role === 'super-admin' || $user->role === 'superadmin') return $next($request);`) and is DELIBERATELY absent from `RolePermissionChecker`, whose own docblock records this as a pinned asymmetry. Because the check is a raw string comparison against `users.role`, an account whose role column says 'super-admin' bypasses EVERY permission middleware in the application regardless of what the `roles` / `role_permissions` tables say — the role need not even exist in `roles`. Additionally `app/Http/Controllers/Api/AdminUserController.php:101-115` mass-assigns `role` from the request with validation `Rule::in(Role::pluck('slug')->toArray())` — i.e. any user holding `user_management.edit` (`routes/api.php:342`) may set any seeded account's role to 'super-admin'. `RolePermissionChecker` caches permissions for 3600 seconds, so a REVOKED permission still grants access for up to an hour.",
+      "affected_future_component": "Every Creative route gated by `permission:creative.*`; the creator approval action; the payout approval action.",
+      "attack_scenario": "An operator holding only `user_management.edit` promotes a low-privilege account to 'super-admin' (or to any role whose slug is in the `roles` table), and that account now bypasses every permission check in the application, including every future `creative.payouts.approve`. The same escalation is reachable if a role column is ever written by any code path that is not the admin controller. A second variant: revoke a Creative permission and the holder keeps access for up to 3600 seconds, long enough to complete a payout approval.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: (1) Do NOT extend the middleware-only bypass. ARCHITECTURE_RULES.md Rule 12 requires that asymmetry be preserved and pinned — so the Creative design must assume the bypass exists and must not depend on the permission table for super-admins. (2) Require that any Creative action with a financial consequence (payout approval, earning approval, project cancellation) performs a SECOND, non-permission check that the middleware bypass cannot satisfy: an explicit actor record on the row, validated inside the transaction, compared against the acting user. `creator_payouts.approved_by != requested_by` is exactly this control and artifact 09 already specifies it as the single most important internal-control requirement. (3) Require a DB constraint or an in-transaction assertion for role changes, and audit every role change to `activity_logs` (AdminUserController already does, at :118). (4) For Creative, prefer a short cache TTL for the Creative permission slice, or accept the 3600-second window and document it.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-EN-03 — which role is accountable for Creative financial actions, and whether a finance-specific role is created. Until that is decided, 'admin' is an email list rather than a role query (see artifact 18), so the accountability boundary is undefined.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-010",
+      "title": "Mass assignment on nested creative payloads",
+      "classification": "CURRENT_FACT (platform posture) + RECOMMENDATION (control)",
+      "category": "mass assignment",
+      "severity": "P1",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: all 62 models declare `$fillable` (verified: 0 models lack it), and no model declares `$guarded`, so the allow-list posture is correct and the default direction is safe. The exposure is therefore NOT `Model::create($request->all())` on a flat model — it is the NESTED pattern. `app/Http/Controllers/Api/AdminUserController.php:115` shows the pattern that is already used for the most sensitive scalar in the system: `$user->fill($request->only(['name','email','phone','role','status']))`. `app/Http/Controllers/SuccessStoryController.php:19` uses `$request->all()` and relies entirely on later filtering. Validation is also the only gate: `app/Http/Controllers/FileController.php` demonstrates the opposite failure — raw request, no validation, values used as a filesystem path.",
+      "affected_future_component": "CreativeProject and its children (deliveries, delivered files, earnings, payouts), CreativeProposal, and any aggregate whose creation accepts a nested array of child payloads.",
+      "attack_scenario": "A Creative endpoint accepts `deliveries: [{files: [...], amount: 5000, earning_type: 'bonus'}]` and hydrates the children with `Delivery::create($child)`. Extra keys in the child array set columns the developer did not intend to expose — an `earning_type`, a `commission_rate`, a `creator_id`, a `status` that skips the state machine, or `reviewed_by` on a review that should be immutable. The nested form is much harder to see in review than a flat one because each child's keys are read far from the FormRequest.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: (1) Never hydrate a child model from request data directly. Validate each child through its own DTO or a dedicated FormRequest, and construct the child from an explicit allow-list of resolved values. (2) Never accept a money or a status field in a nested payload — those must be server-derived (see CRE-SEC-004) or set by the state machine under a lock. (3) For every Creative model, declare `$fillable` explicitly at creation time and add a test asserting that no request field outside the intended set can reach a column — a mass-assignment test per endpoint, not per model. (4) For financial columns, prefer guarded-by-omission: do not put them in `$fillable` at all, and set them explicitly in the use case.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-011",
+      "title": "No policy layer: authorization is permission-based only, with no ownership gate",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "missing policy",
+      "severity": "P1",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: `find app -type d -name Policies` -> no results; there is no class in app/ implementing a policy and no `Gate::policy` call. `app/Providers/AuthServiceProvider.php` exists but registers no policies (per artifact 05). Every authorization decision is therefore (a) a role permission at the middleware boundary and (b) ad hoc inline ownership checks in controllers: `BookingController.php:116-118`, `PaymentController.php:48-51`, and the partner equivalents. ARCHITECTURE_RULES.md Rule 12 makes the middleware the AUTHORITATIVE check, and states it must never be owned by the transport layer — the Creative design must not invert that.",
+      "affected_future_component": "All nine Creative aggregates. This is the structural root cause of CRE-SEC-001, -002, -008 and -012.",
+      "attack_scenario": "Every Creative endpoint must be individually correct about ownership. At nine aggregates and roughly 40-60 endpoints, the probability that at least one omits the check is high, and the failure is silent — there is no framework layer to fail closed. A new endpoint added under time pressure inherits whatever the developer remembered, and no test suite asserts it.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, and explicitly a new architectural construct: introduce `app/Policies/Creative/*`, registered in a service provider, and make them the ownership gate while the route middleware remains the role/permission gate per Rule 12. Two non-negotiable properties: (1) a policy failure is DENY by default — an aggregate with no registered policy must fail closed for non-admin actors, not open; (2) a contract test enumerates every Creative route and asserts the resolved policy is invoked, so a new endpoint without a policy fails CI. This requires architect sign-off per AGENTS.md section 20, and the task's requirement not to create a new layer to avoid a decision applies — so this must be a recorded decision, not an improvisation.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-CTX-01 — creating the first policy layer in this repository is a new architectural construct requiring architect approval.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-012",
+      "title": "Unauthorised earnings access — one creator reading another's earnings, or a client reading the platform's margin on the work",
+      "classification": "RECOMMENDATION + OPEN_DECISION",
+      "category": "earnings disclosure / IDOR",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence relevant to the pattern: there is no existing per-actor balance surface to copy. `reward_accounts` is the only balance in the database and it is a POINTS balance, not money (artifact 08), and it is keyed to `user_id` with no ownership check beyond the route. The financial tables that do exist (`partner_commissions`, `screen_provider_settlements`) carry gross, platform and provider amounts in the same row, and the portal that surfaces them (`ScreenProviderPortalController`) filters by the provider id at the query level rather than by a policy.",
+      "affected_future_component": "CreatorEarning, CreatorPayout, and the CreativeProject agreed-terms snapshot (which contains platform commission and creator net).",
+      "attack_scenario": "Two variants. (a) `GET /api/creative/earnings/{id}` with no ownership check lets any authenticated user enumerate earning ids and read another creator's earnings history. (b) More damaging and more likely: the project read model returns the AgreedTerms snapshot verbatim to BOTH parties. The client then sees the platform's commission rate and the creator's exact net, and the creator sees the client's internal budget if it was snapshotted. Either party can use that to renegotiate the NEXT engagement, and the creator learns the platform margin, which is commercially sensitive.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: (1) earnings and payouts are readable ONLY by the owning creator (or an admin holding the specific permission), enforced by a policy and NOT by a query filter alone. (2) The agreed-terms snapshot must be projected per audience by an API Resource, never serialised wholesale: the client sees the total they are paying; the creator sees the gross they are earning; the PLATFORM margin is NEVER returned to either party, and a test asserts the response shape contains no commission field on either party's read model. (3) Earnings are immutable financial facts (AGENTS.md section 10), so exposure is permanent once made — treat this as a P0 read-model design constraint, not a runtime check.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-TC-09 / OD-TC-12 / OD-TC-13 — the commission basis, whether tax/third-party costs exist, and the currency model. Until these are decided the exact field list that must be hidden cannot be written, so the mitigation cannot be implemented precisely.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-013",
+      "title": "Unauthorised payout operations — self-approval and self-payout",
+      "classification": "RECOMMENDATION + OPEN_DECISION",
+      "category": "payment manipulation / privilege escalation / auditability",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: the nearest analogue is `CommissionService`, which takes `int $approvedBy` and `?array $payoutData` (`app/Services/CommissionService.php:38`, `:61`) and records `approved_by`, `paid_by` and payout metadata — but it enforces NO separation of duties. `partner_commissions` has no constraint preventing `approved_by` equalling the party who generated it, and the migration `add_payout_fields_to_partner_commissions` added no payout-destination columns at all (artifact 08). There is no payout destination model anywhere in the repository: no bank account, no UPI id, no KYC record. That is a NEW compliance surface, not a reuse.",
+      "affected_future_component": "CreatorPayout, CreatorPayoutItem, and the Creator payout-details record.",
+      "attack_scenario": "A creator with (or who can obtain) the payout-request permission also holds, or can acquire, the payout-approve permission — because `users.role` holds exactly one value and a single user can be granted many permissions via role_permissions. They request a payout and approve it, and the money leaves. Second variant: the payout destination is a free-text field on a request, so an attacker supplies a destination that is not the verified one. Third variant: `PartnerCommission::markAsPaid` demonstrates that a 'paid' transition can be performed with no gateway call and no external verification, so a recorded payout may not correspond to any money movement at all.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, four controls: (1) SEPARATION OF DUTIES as a hard invariant, asserted INSIDE the approval transaction (`approved_by !== requested_by`) and additionally enforced by distinct route permissions `creative.payouts.request` vs `creative.payouts.approve` — artifact 09 already records this as the single most important internal-control requirement in the Creative financial design. (2) The payout destination must be a SEPARATE, verified, ownership-checked record on the creator, never a field of a payout request; a payout may only reference a destination the creator has already verified. (3) Idempotent-RETURN on the paid transition under a row lock, mirroring the correct existing precedent at `CommissionService.php:66-68`, so a retry cannot disburse twice. (4) UNIQUE on `creator_payout_items.earning_id`, the hard guarantee that one earning is never paid twice (artifact 09). Additionally detective: every payout transition writes an `activity_logs` row and a table-local append-only log.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-TC-15 — whether a payout is a real gateway disbursement or a recorded manual bank transfer. `PaymentGatewayInterface` exposes only `createOrder`, `verifySignature`, `fetchPayment` and `refund`: there is NO payout/disburse method, so a real disbursement would require a change to the gateway contract (an ARCHITECTURE_RULES.md Rule 3 concern). Also OD-TC-16 for cadence and separation-of-duties actors. And no KYC/AML or payout-destination model is specified anywhere — a new compliance surface this audit does not design.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-014",
+      "title": "Race condition enabling double-spend on funding or double-earning on accrual",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "race condition / payment manipulation",
+      "severity": "P0",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: 24 files contain a real `DB::transaction(` call at 41 call sites (artifact 16, re-verified 2026-09-26) and only THREE take a row lock: `app/Services/InventoryService.php:45-49`, `app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php:31`, and `app/Console/Commands/ExpirePendingBookings.php:56`. There is NO optimistic locking anywhere (no version column in any of 112 migrations), NO idempotency mechanism (`grep -rni 'idempot' app/ routes/ database/ config/` -> 1 unrelated English-word match in a seeder comment), and NO after-commit mechanism (0 occurrences of `afterCommit` or `ShouldHandleEventsAfterCommit`). The three ad-hoc duplicate guards are one hard-coded throw (`PaymentService.php:105-107`), one idempotent return (`CommissionService.php:66-68`) and one race guard (`ExpirePendingBookings.php:59-61`).",
+      "affected_future_component": "Proposal acceptance, project creation, funding confirmation, revision round allocation, delivery sequence allocation, delivery acceptance (the earning trigger), earning accrual, commission calculation, payout request, payout processing.",
+      "attack_scenario": "A client double-clicks 'Accept proposal'. Two requests race; both see the proposal as `submitted`; both create a project. The same shape on delivery acceptance creates two earnings. The same shape on payout processing disburses twice. A determined attacker does not need to be fast — a scripted concurrent request pair against a slow endpoint reliably wins this race, because there is no lock and no unique constraint to lose.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: apply the shape the repository already proves at `app/Console/Commands/ExpirePendingBookings.php:51-76` to every Creative transition — transaction, lock the natural-key resource row, RE-READ the status predicate under the lock, then mutate. And express natural uniqueness as a DATABASE constraint, because a lock alone is not enough when two transactions both believe they won: UNIQUE `creative_projects.proposal_id`, UNIQUE `(project_id, round)`, UNIQUE `(project_id, sequence)`, UNIQUE `(project_id, earning_type)`, UNIQUE `creator_payout_items.earning_id`, UNIQUE `creative_fundings.gateway_order_id`. Prefer idempotent-RETURN over idempotent-throw for every client-retryable operation. Pin with a concurrency test in the style of `tests/Feature/Golden/GoldenConcurrencyVerificationTest.php`.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-TC-18 / OD-EN-09 — whether a queue worker is guaranteed. If any control may be asynchronous, the design changes. This register's recommendation deliberately assumes NO guarantee: all correctness controls are synchronous and database-constrained. Also OD-TC-17 for where the orchestration lives.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-015",
+      "title": "Review manipulation — self-review, duplicate review, review tampering",
+      "classification": "RECOMMENDATION + OPEN_DECISION",
+      "category": "review manipulation",
+      "severity": "P1",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence and an explicit DO-NOT-REUSE: `testimonials` exists with `rating decimal(3,2)` validated `min:0|max:5` in the controller and NOT cast on the model, and it has NO author binding — `entity` owner, no reviewer FK, no soft delete (artifact 08, re-derived 2026-09-26). Reusing it for creator reviews would let anyone edit any rating. The one existing author-bound review-shaped flow is `booking_media` (review_status + reviewed_by + reviewed_at + rejection_reason), which is an admin approval, not a client review.",
+      "affected_future_component": "CreativeReview, the creator's public rating, and any ranking or commission tier derived from it.",
+      "attack_scenario": "Three variants. (a) SELF-REVIEW: a creator is also a client on some other project and reviews that, or reviews their own project through a crafted client account — allowed unless the policy asserts the reviewer was a party to THIS project and is not the creator. (b) DUPLICATE: N reviews for one project, each nudging an average, if there is no unique constraint. (c) TAMPERING: a PATCH / DELETE on a submitted review, or a second submission overwriting the first, if a review is treated as a mutable row rather than an immutable fact.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: (1) a review is WRITE-ONCE — no update route, no delete route, ever; (2) UNIQUE `(project_id, reviewer_user_id)` (artifact 09) as the sole duplicate defence, surfaced as 409; (3) the policy asserts the reviewer was a party to the project AND is not the creator AND has not already reviewed — all three, not just authentication; (4) rate-limit review submission (see CRE-SEC-022); (5) `testimonials` must NOT be reused. If a rating ever affects money, immutability becomes a financial invariant under AGENTS.md section 10 and the no-edit rule is absolute.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-TC-10 and OD-TC-11 — whether a review is required or optional, one per project or one per delivery, whether it is public, and whether a rating affects money or ranking. OD-TC-11 in particular determines whether this is a P1 fairness issue or a P0 financial one.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-016",
+      "title": "Missing audit trail for creative financial operations",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "auditability",
+      "severity": "P1",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: a generic audit table EXISTS and is reusable — `activity_logs` with `user_id` (FK to users, **ON DELETE CASCADE**), `action` (free-form string), `entity_type` + `entity_id` (polymorphic, no FK), `description`, `old_values`/`new_values` JSON, `ip_address`, `user_agent`, `created_at` only, and an `ActivityLog::log()` static helper (artifact 08; re-confirmed 2026-09-26). The two properties that matter here: it is polymorphic and unconstrained, so it cannot be relied on for referential integrity, and `user_id` cascades on user delete, so DELETING A USER ERASES THEIR AUDIT TRAIL. There is also a proven template for a table-local append-only financial log: `payment_logs` with 10 event types.",
+      "affected_future_component": "Every financial Creative transition: funding confirmation, earning accrual/approval/release/reversal, commission calculation, payout request/approval/processing.",
+      "attack_scenario": "A disputed payout has no attributable record. The actor field cascades away when the actor's user row is deleted, and the polymorphic entity pointer has no constraint, so a query cannot prove the referenced row existed. A malicious or negligent admin can process a payout with a free-form action string that no one can later interpret, and because financial history is immutable the transaction itself cannot be corrected after the fact.",
+      "recommended_mitigation": "RECOMMENDATION, preventive + detective. Preventive: for every financial transition, store the acting user id on the row itself (`approved_by`, `processed_by`, `released_by`) with a real FK, so the record survives user deletion. Detective: additionally write a table-local append-only log per financial aggregate — the `payment_logs` pattern (event enum, actor, metadata JSON, no updated_at) — because `activity_logs` alone is insufficient. `AGENTS.md` section 10 makes financial history immutable, so the log is the only mechanism that can explain a later discrepancy. Do not depend on `activity_logs` alone for a Creative financial audit.",
+      "mitigation_type": "detective",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-017",
+      "title": "No rate limiting on sensitive Creative endpoints",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "missing control / abuse",
+      "severity": "P2",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: there is exactly ONE rate limiter in the entire application. `app/Providers/AppServiceProvider.php:126-133` defines `RateLimiter::for('recommendations', ...)` (30/min, 300/hour by IP), and it is applied to exactly ONE route: `routes/api.php:240` (`->middleware('throttle:recommendations')`), with the comment that the endpoint is public and computationally expensive. `grep -rn 'RateLimiter|throttle' app/ routes/` returns only those hits plus the import. There is no global `api` limiter, no default throttle group on any route group, and no per-user limiter. `config/cors.php:22` sets `allowed_origins => ['*']` and `:30` `max_age => 0`.",
+      "affected_future_component": "Public creative discovery and service listing, brief creation, proposal submission, review submission, payout request, and every authenticated endpoint that triggers a notification or a queued job.",
+      "attack_scenario": "Credential-stuffing or token-replay against the creator portal; spam-brief creation to flood creator inboxes (a harassment vector that also degrades the marketplace's signal); automated review submission for ranking manipulation; a script hammering payout requests to enumerate earning balances through error-message or timing differences; unbounded fan-out triggering a notification storm that fills the `jobs` table.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: define explicit `RateLimiter::for(...)` entries for the sensitive Creative surfaces and apply `throttle:` middleware to those routes — authenticated-user-keyed (not IP-keyed) for brief, proposal, review, payout and earnings endpoints, since IP keying does nothing against an authenticated attacker. Add a strict low limit to payout request/approval. Also rate-limit the general login and password-reset endpoints, which currently have none. The `recommendations` limiter is the only template, and it demonstrates the correct pattern for a public expensive endpoint; it is not a template for an authenticated financial endpoint.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-018",
+      "title": "Live defect inherited from booking media — deleteMedia has no ownership check",
+      "classification": "CURRENT_FACT (live defect)",
+      "category": "authorization / IDOR",
+      "severity": "P1",
+      "evidence": "LIVE DEFECT IN CURRENT CODE. `app/Http/Controllers/BookingController.php:153-163` (`deleteMedia`) checks only that `$booking->id === $media->booking_id` and then deletes the file and the row. It performs NO check that the caller owns the booking — unlike `uploadMedia` at the same controller's `:116-118`, which does. The route is `routes/api.php:279`, inside the `auth:sanctum` group opened at `routes/api.php:257` with no permission middleware. Therefore any authenticated user who knows a booking id and a media id can delete that media.",
+      "affected_future_component": "Every Creative delete endpoint for a file-bearing child of a party-owned aggregate.",
+      "attack_scenario": "Direct: any authenticated user deletes another client's uploaded creative files. For Creative the analogous defect is worse — if `deleteMedia`'s shape is copied to 'delete this delivery file', a client or a competing creator could destroy a creator's delivered work. Because the row is hard-deleted and the bytes are hard-deleted, the destruction is irreversible and, per AGENTS.md section 10's spirit, an undelivered work artefact that a payout dispute depends on is gone.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, for Creative: never expose a bare delete on a child. Use the three-operation model from artifact 17 section 7 — `retire` (soft delete, authorised, bytes retained), `purge` (retention policy only, never a request handler) and `revoke` (access withdrawal by admin, bytes retained) — and require a policy check on every one of them. Additionally, never allow a hard delete of a delivered artefact at all: a delivered file is a contractual fact, not a cache entry. For the live defect itself: RECORDED, NOT FIXED. Remediating it is a behaviour change requiring characterisation tests, an authorised fix, and its own report per AGENTS.md sections 3 and 18.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-019",
+      "title": "Notification discloses a financial fact that a rollback erased, or reveals internal margin to the wrong party",
+      "classification": "CURRENT_FACT (platform) + RECOMMENDATION (control)",
+      "category": "earnings disclosure / auditability",
+      "severity": "P1",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: events are dispatched BOTH inside and after transactions, inconsistently. `app/Services/ManualBookingService.php:642` dispatches `event(new PaymentReceived(...))` INSIDE the `DB::transaction` closure opened at `:579`; `app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php:327` does the same for `BookingCreated` and its docblock at `:48-50` records the choice as intentionally preserved. But `app/Http/Controllers/PaymentController.php:95` dispatches the SAME `PaymentReceived` event AFTER the transaction has committed. So the correct pattern already exists in the repository. Separately, `NotificationService::send()` swallows every send failure (`app/Services/NotificationService.php:167-177`) and has no `creator` recipient branch (`:107-130` handles only user/partner/admin), and its dedup is a process-local static array (`app/Support/Events/NotificationEventSubscriber.php:71`, `:78-86`).",
+      "affected_future_component": "CreativeFundingConfirmed, CreativeEarningAccrued, CreativePayoutRequested, CreativePayoutProcessed, CreativeProposalAccepted, CreativeDeliveryAccepted.",
+      "attack_scenario": "Two distinct exposures. (a) PREMATURE DISCLOSURE: an 'earning accrued' or 'payout processed' message is sent inside a transaction that then rolls back; the creator acts on money that does not exist. For a payout-bearing party this is a financial-integrity problem, not a cosmetic one. (b) OVER-DISCLOSURE: a single Mailable is reused for a money event and a courtesy event, so a client receives a message that renders the platform's commission or the creator's exact net. The existing reuse pattern is real and is being applied deliberately for marketing (handleMediaUploaded sends BookingCreatedMail, `NotificationEventSubscriber.php:162`), which makes accidental reuse for a money event plausible.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: (1) EVERY Creative event is dispatched AFTER commit, from the use case, following the pattern already present at `PaymentController.php:95` — no framework feature is needed, so nothing has to be invented. (2) Money-bearing facts get DEDICATED Mailables, never a reused marketing Mailable, and the payload is rendered from the committed row via an API Resource so the amount, currency and reference cannot be absent or stale. (3) The same audience-projection rule as CRE-SEC-012 applies: the platform margin is never rendered to either party. Detective: a failed money notification must produce a detectable record — the current machinery writes nothing when the mail driver is `log`/`array` (`NotificationService.php:236-242`), so Creative needs its own detection path for failed money notifications.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-EN-07 (extend NotificationService vs a Creative-facing contract) and OD-EN-08 (retry/alerting policy for failed money notifications).",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-020",
+      "title": "Live concurrency defect inherited by analogy — SettlementService approves and pays with no transaction and no lock",
+      "classification": "CURRENT_FACT (live defect)",
+      "category": "race condition / payment manipulation",
+      "severity": "P1",
+      "evidence": "LIVE DEFECT IN CURRENT CODE. `app/Services/SettlementService.php:143` (`approveSettlement`) and `:176` (`markAsPaid`) perform financial state transitions with NO `DB::transaction` (the file's only two transactions are at `:79` and `:221`) and NO row lock. They are guarded only by an in-memory predicate read before the update: `canBeApproved()` at `:145` and `canBePaid()` at `:178`, defined in `app/Models/ScreenProviderSettlement.php:117` and `:122`. `screen_provider_settlements.status` has no index (artifact 08).",
+      "affected_future_component": "Any Creative earnings approve / release / payout-processing flow built by analogy to this shape.",
+      "attack_scenario": "Two concurrent approvals both evaluate `canBeApproved()` against the same stale in-memory instance and both write `approved_by`/`approved_at`; the second overwrites the first approver, so accountability is lost. A concurrent approve and markAsPaid can interleave so that 'paid' is written by an actor who never observed the approved state. For Creative, the same shape applied to earning approval or payout processing means a payout can be marked paid twice, or approved by a party who is also the requester, with no lock to prevent it.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, for Creative: do NOT copy this shape. Use `CommissionService` as the template instead — `DB::transaction` → `findOrFailForUpdate` (a genuine `SELECT ... FOR UPDATE` at `app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php:31`) → assert the expected status → mutate → commit, with an idempotent return for the terminal transition at `CommissionService.php:66-68`. For the live defect itself: RECORDED, NOT FIXED. Settlement is financial-critical (AGENTS.md section 10), so remediating it requires the full financial regression suite and its own authorisation.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-021",
+      "title": "External network call performed while holding a database transaction, in a flow Creative might inherit",
+      "classification": "CURRENT_FACT (live defect / anti-pattern)",
+      "category": "payment manipulation / availability",
+      "severity": "P2",
+      "evidence": "LIVE ANTI-PATTERN IN CURRENT CODE. `app/Services/RefundService.php:51` opens `DB::transaction` and calls `$this->gateway->refund(...)` — a Razorpay network round-trip — INSIDE it, at `:53-61`, before writing the refunds row. This is a direct violation of ARCHITECTURE_RULES.md Rule 4 ('External network operations must be isolated outside database row locks to prevent connection pool exhaustion and lock timeouts') and of AGENTS.md section 11. A second instance of the same family: `app/Services/ScreenProviderService.php:123-125` dispatches three notification events inside a transaction opened at `:37`, and `:290-294` does the same inside the transaction at `:271` — so a rolled-back provider approval has already emailed the provider and the admin.",
+      "affected_future_component": "CreativeFundingConfirmation, CreativePayoutProcessing, any Creative flow that calls the gateway or a mail transport inside a transaction.",
+      "attack_scenario": "Not primarily an attacker vector; a reliability and self-inflicted-DoS vector. An attacker who can make the gateway slow (or simply a slow gateway) holds a database transaction and its connection for the duration of the network call; concurrent requests exhaust the connection pool, and a refund that has already been accepted by the gateway can be rolled back locally, leaving the gateway and the ledger permanently out of agreement. In Creative, a funding confirmation with the gateway call inside the transaction can record a payment that the commit then discarded — or vice versa.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: enforce the two-transaction shape for every Creative money operation — transaction A (create the pending record), NETWORK CALL outside any transaction and outside every lock, transaction B (lock, re-read, assert, confirm). This is exactly what artifact 16 specifies for funding confirmation and payout processing, and it is the correct reading of Rule 4. Add a contract test or a code-review checklist item forbidding a `DB::transaction` closure from containing a gateway or mail call. For the live defect itself: RECORDED, NOT FIXED — `RefundService::initiateRefund` is financial-critical and the gateway-inside-transaction shape is a documented golden behaviour that may not be altered opportunistically.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-022",
+      "title": "Never-expiring API tokens on a payout-bearing role, and credential lifetime in general",
+      "classification": "CURRENT_FACT (platform)",
+      "category": "impersonation / privilege escalation",
+      "severity": "P1",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: `config/sanctum.php:50` sets `expiration => null`, so a Sanctum personal access token never expires and there is no rotation. There is no refresh-token mechanism, no device/session registry and no revocation-on-role-change: `app/Http/Controllers/Api/AdminUserController.php:101-115` changes `role` without touching `personal_access_tokens`. `personal_access_tokens.tokenable_type` + `tokenable_id` is a polymorphic pair with no foreign key, so a token's owner cannot be constrained at the database level. Combined with CRE-SEC-009, a token minted to a demoted or suspended account keeps full access indefinitely.",
+      "affected_future_component": "The creator portal, the payout request surface, the payout approval surface, and the file-access surface.",
+      "attack_scenario": "A creator's token leaks (a shared machine, a committed `.env`, a client-side storage bug, a proxy log). The attacker has permanent, non-expiring access to the creator's earnings, their files and their payout requests, with no way for the creator to invalidate it. If the same account is later used for a privileged role, the token inherits that. There is no 'sign out all devices' because there is no session concept.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: (1) Creative must not require a stricter global token expiry to be safe — that is a global auth change affecting every existing client and would need its own authorisation under AGENTS.md section 3. Instead, bound the blast radius: require a FRESH authenticated session for the highest-consequence operations (payout request, payout approval, payout destination change), for example by requiring the password to be re-entered or by requiring `email_verified_at` to be recent. (2) Revoke a user's tokens when their role or status changes — `AdminUserController` should call `tokens()->delete()` on a role change. (3) Provide creator-visible token/session listing and revocation so a compromised token can be killed by its owner. Detective: log every payout operation with the token id so a leaked token's activity is attributable.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "Whether a global token-expiry policy may change is an explicit AGENTS.md section 3 authorisation question that this audit does not answer. Artifact 05 records the same exposure and reaches the same conclusion.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-023",
+      "title": "Role vocabulary has no creator concept and a single role per user, so authorization is ambiguous by construction",
+      "classification": "CURRENT_FACT (platform) + OPEN_DECISION",
+      "category": "privilege escalation / authorization",
+      "severity": "P1",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: `users.role` is a free-form VARCHAR with no FK to `roles` and no enum (converted from ENUM by raw ALTER in migration 2026_07_10_000002). Seeded role slugs are exactly `super-admin`, `admin`, `manager`, `staff`, `screen_provider` (`database/seeders/RolesAndPermissionsSeeder.php:16-36`); `partner`, `client` and `user` are used in code but NOT seeded, so those roles resolve to an EMPTY permission list silently (`RolePermissionChecker::permissionsForRole` returns `[]` when the Role row is missing). There is no `creator` role and no way to express 'this user is both an advertiser and a creator'. Additionally two places hardcode the permission vocabulary — `App-Http-Resources-RoleResource::getAllPermissionKeys()` and `App\\Http\\Controllers\\Api\\PermissionController` — and `tests/Feature/Security/Sec03PermissionVocabularyTest.php` asserts every route permission exists in the seeded vocabulary, so adding Creative routes without extending all three turns the suite red.",
+      "affected_future_component": "The entire Creative authorization model.",
+      "attack_scenario": "A developer writes `middleware('permission:creative.earnings.view')` and a role is granted a mis-spelled `creative.earnings.view_all`, believing it is stricter. No error is raised; the permission simply does not exist on the route and the intended holder is denied — or, in the inverse case, a role is granted a permission that no route uses while a route uses a permission nobody holds, and the endpoint is either unreachable (a functional outage) or reachable by the wrong role. A creator who is also a client cannot be expressed at all, so the developer picks one and one class of access is silently wrong.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: (1) Resolve the identity model BEFORE any Creative route: either a `creators` table keyed to `users.id` independent of `users.role` (which is what artifact 05 and artifact 08 recommend, mirroring `screen_providers.user_id`), or a role-join table. Do not add a `creator` value to the single `users.role` varchar and call it solved. (2) Before adding a single Creative route, extend the seeder, `RoleResource::getAllPermissionKeys()` and `Api\\PermissionController` together — the vocabulary is hardcoded in three places and a partial update fails the suite. (3) Add a CI assertion that every string passed to `middleware('permission:...')` in `routes/` exists in the seeded `role_permissions` set, and a test that no misspelled role string is used anywhere in `app/`. (4) Treat a missing Role row as a startup-visible error in the seeder rather than a silent empty permission set.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": true,
+      "blocked_by": "OD-DB-08 / OD-CTX-02 — can a user be both an advertiser and a creator? Artifact 09 marks this as BLOCKING because it determines the entire identity model. Not answerable from this repository.",
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-024",
+      "title": "Permission revocation is delayed by up to one hour, including on a financial action",
+      "classification": "CURRENT_FACT (platform)",
+      "category": "privilege escalation",
+      "severity": "P2",
+      "evidence": "No Creative code exists — risk is prospective. Platform evidence: `app/Support/Authorization/RolePermissionChecker.php:35` defines `public const CACHE_TTL_SECONDS = 3600;` and `permissionsForRole()` caches the granted permission list under `role_permissions:{slug}` for that TTL. There is a `clearCache()` method and `PermissionMiddleware::clearPermissionCache()` calls it, but grep shows no caller invalidating a single role's cache on a role or role_permissions change, so a revoked permission keeps granting access for up to an hour.",
+      "affected_future_component": "Every `creative.*` permission, and most sharply `creative.payouts.approve`.",
+      "attack_scenario": "An administrator revokes `creative.payouts.approve` from a role in response to an incident, and the holder continues approving payouts for up to 3600 seconds. In that window they can approve and process a payout to a destination they control. The revocation is the incident-response action and it does not take effect immediately, which is the specific failure mode that makes it dangerous.",
+      "recommended_mitigation": "RECOMMENDATION, preventive: call `RolePermissionChecker::clearCache($roleSlug)` on every role and role_permissions mutation — the method already exists and the middleware already exposes a static entry point, so the fix is to CALL it, not to build it. Additionally, for the single highest-consequence action (payout approval), do not rely on the cached permission alone: re-assert the actor's authorisation INSIDE the approval transaction from a non-cached source, so a cache staleness window cannot authorise a disbursement. The cache TTL itself is a shared-behaviour change (Rule 12 pins the algorithm) and is therefore NOT something a Creative build may alter.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    },
+    {
+      "id": "CRE-SEC-025",
+      "title": "Unvalidated upload endpoint reachable without a permission gate, with a hard-coded public disk",
+      "classification": "CURRENT_FACT (live defect)",
+      "category": "file access leakage / missing policy",
+      "severity": "P1",
+      "evidence": "LIVE DEFECT IN CURRENT CODE. `app/Http/Controllers/FileController.php` is 51 lines, has no FormRequest, no `validate()` call, no permission check in either method, and hard-codes the `public` disk at `:29` and `:44`. It is registered at `routes/api.php:659-660` (`POST /file-upload`, `POST /video-upload`) with no permission middleware and no throttle. Its directory is the client-supplied `$request->path` (`:13`, `:42`) and the extension is the client-supplied `getClientOriginalExtension()` (`:28`, `:43`). `App\\Helpers\\MediaHelper` is called from it at `:25` with that same client-supplied path, and MediaHelper builds the directory from it at `:44-47` and writes with `@mkdir($dir, 0755, true)` and `file_put_contents`. `App\\Support\\Configs\\MediaConfig::maxTotalUploadSizeMb()` exists (default 500 MB) and has NO consumer anywhere in `app/`, so no total-size enforcement exists.",
+      "affected_future_component": "Any Creative endpoint that a developer wires to a general-purpose upload, and the storage-exhaustion risk for the shared public disk.",
+      "attack_scenario": "An authenticated user fills the public disk with arbitrarily large uploads of arbitrary type, into a directory of their choosing, at no rate limit. Because the disk is the one serving `APP_URL/storage`, the effect is both a storage-exhaustion denial of service against the whole application and a hosting location for attacker-chosen content.",
+      "recommended_mitigation": "RECOMMENDATION, preventive, for Creative: Creative uploads must never use this path. Require a FormRequest with MIME-level validation, a per-kind size cap from a `creative.media.*` config group, a per-context count cap, a server-generated path and a server-derived extension, on a private disk, behind a policy check. Additionally apply a rate limit and a total-quota check. For the live defect itself: RECORDED, NOT FIXED. Hardening `FileController` changes existing behaviour for existing consumers (products, blogs, galleries, screens) and therefore requires characterisation tests, an authorised change, a regression run and its own report under AGENTS.md sections 3, 5 and 18.",
+      "mitigation_type": "preventive",
+      "blocked_by_open_decision": false,
+      "status": "open, not fixed by this audit"
+    }
+  ],
+  "risk_summary": {
+    "classification": "CURRENT_FACT",
+    "total_risks": 25,
+    "by_severity": {
+      "P0": 12,
+      "P1": 10,
+      "P2": 3,
+      "P3": 0
+    },
+    "by_category": {
+      "IDOR": 4,
+      "authorization": 3,
+      "proposal manipulation": 1,
+      "price manipulation": 1,
+      "payment manipulation": 5,
+      "webhook replay": 1,
+      "file access leakage": 3,
+      "mass assignment": 2,
+      "impersonation": 2,
+      "privilege escalation": 5,
+      "missing policy": 2,
+      "earnings disclosure": 2,
+      "auditability": 3,
+      "race condition": 2,
+      "review manipulation": 1,
+      "missing control": 1,
+      "abuse": 1,
+      "availability": 1
+    },
+    "by_mitigation_type": {
+      "preventive": 24,
+      "detective": 1,
+      "preventive + detective": 0
+    },
+    "prospective_only": "20 of 25 risks are prospective (no Creative code exists). 5 record a LIVE defect in current code that Creative would inherit by analogy: CRE-SEC-007, -018, -020, -021, -025. All 5 are marked status 'open, not fixed by this audit'.",
+    "blocked_by_an_open_decision": 16,
+    "unblocked_and_actionable_now": 9,
+    "unblocked_ids": [
+      "CRE-SEC-007",
+      "CRE-SEC-010",
+      "CRE-SEC-016",
+      "CRE-SEC-017",
+      "CRE-SEC-018",
+      "CRE-SEC-020",
+      "CRE-SEC-021",
+      "CRE-SEC-024",
+      "CRE-SEC-025"
+    ],
+    "note_on_unblocked": "Of the 9, five are Creative-design controls that can be specified now (010, 016, 017, 021, 024) and four are LIVE defects in current code (007, 018, 020, 025) whose remediation is deliberately deferred because each is either financial-critical (020), behaviour-changing for existing consumers (007, 025), or a security defect that AGENTS.md section 3 permits to be fixed but only through the mandatory characterize -> fix -> test -> document -> verify sequence with explicit authorisation."
+  },
+  "open_decisions_referenced_by_this_register": [
+    {
+      "id": "OD-CTX-01",
+      "question": "Is creating the repository's FIRST policy layer (app/Policies/Creative/*) authorised?",
+      "blocks": [
+        "CRE-SEC-002",
+        "CRE-SEC-011"
+      ],
+      "why": "AGENTS.md section 20 requires a documented architect decision rather than a guess when a location or construct is unclear, and this is a new architectural construct in a repository that has never had one."
+    },
+    {
+      "id": "OD-CTX-02",
+      "question": "Can a user be both an advertiser (client) and a creator?",
+      "blocks": [
+        "CRE-SEC-008",
+        "CRE-SEC-023"
+      ],
+      "why": "users.role is a single VARCHAR. This determines whether a creators table is independent of the role column or a role-join is required, and therefore the shape of every authorization check. Artifact 09 marks it as the single most blocking decision."
+    },
+    {
+      "id": "OD-DB-01",
+      "question": "Public identifier strategy: ULID, UUID, or a prefixed sequential reference?",
+      "blocks": [
+        "CRE-SEC-001"
+      ],
+      "why": "A prefixed sequential reference is human-quotable but ENUMERABLE, so it is not a security control on its own. The choice must be made knowing it will be combined with, not substituted for, an ownership check."
+    },
+    {
+      "id": "OD-TC-02",
+      "question": "Is the amount server-derived from a rate card, or creator-proposed and client-accepted?",
+      "blocks": [
+        "CRE-SEC-003",
+        "CRE-SEC-004"
+      ],
+      "why": "Determines whether a price-manipulation surface exists at all, and whether immutability of a submitted proposal is the sole defence."
+    },
+    {
+      "id": "OD-TC-07",
+      "question": "Is an inbound gateway webhook in scope, and what is its idempotency contract?",
+      "blocks": [
+        "CRE-SEC-005"
+      ],
+      "why": "There are ZERO webhooks in this repository. Without one, the client's claim is the only source of truth and controls 1-3 of the mitigation are the entire defence. No contract may be invented here."
+    },
+    {
+      "id": "OD-TC-15",
+      "question": "Is a payout an actual gateway disbursement or a recorded manual bank transfer?",
+      "blocks": [
+        "CRE-SEC-013"
+      ],
+      "why": "PaymentGatewayInterface exposes only createOrder, verifySignature, fetchPayment and refund — there is no payout method. A real disbursement requires a gateway-contract change (Rule 3). No KYC, bank-account or payout-destination model exists anywhere in the repository."
+    },
+    {
+      "id": "OD-TC-16",
+      "question": "Payout cadence, threshold, and whether a settlement period exists?",
+      "blocks": [
+        "CRE-SEC-013"
+      ],
+      "why": "Determines the window in which double-payment is possible and whether the SettlementService period pattern is reused via a contract."
+    },
+    {
+      "id": "OD-TC-10",
+      "question": "Is a review required, one per project or per delivery, and public?",
+      "blocks": [
+        "CRE-SEC-015"
+      ],
+      "why": "Determines the unique-constraint scope and whether review content is a public disclosure."
+    },
+    {
+      "id": "OD-TC-11",
+      "question": "Does a rating ever affect money (ranking, commission tier, pricing)?",
+      "blocks": [
+        "CRE-SEC-015",
+        "CRE-SEC-012"
+      ],
+      "why": "If yes, review immutability becomes a financial invariant under AGENTS.md section 10 and this becomes a P0 rather than a P1."
+    },
+    {
+      "id": "OD-TC-18",
+      "question": "Is a background queue worker guaranteed in every environment?",
+      "blocks": [
+        "CRE-SEC-014"
+      ],
+      "why": "This register deliberately assumes NO guarantee, so all correctness controls are synchronous and database-constrained. If that assumption is wrong the design changes."
+    },
+    {
+      "id": "OD-EN-03",
+      "question": "Which role is accountable for Creative financial actions, and does a finance recipient/role exist?",
+      "blocks": [
+        "CRE-SEC-009"
+      ],
+      "why": "There is no finance role in the seeded vocabulary and 'admin' in the notification system is an email distribution list, not a role query."
+    },
+    {
+      "id": "OD-EN-07",
+      "question": "Extend NotificationService with a creator branch, or build a Creative-facing contract over MailContractInterface?",
+      "blocks": [
+        "CRE-SEC-019"
+      ],
+      "why": "The first option changes shared code that the advertising path depends on and needs explicit authorisation plus a regression run."
+    },
+    {
+      "id": "OD-EN-08",
+      "question": "What is the retry and alerting policy for a FAILED money notification?",
+      "blocks": [
+        "CRE-SEC-019"
+      ],
+      "why": "NotificationService swallows failures and nothing alerts; a creator who never learns a payout was sent is a real-world harm."
+    },
+    {
+      "id": "OD-ST-01",
+      "question": "Which physical store holds Creative private files?",
+      "blocks": [
+        "CRE-SEC-006"
+      ],
+      "why": "The s3 disk is configured with throw=false, so silent I/O failure is currently possible on it."
+    },
+    {
+      "id": "OD-ST-02",
+      "question": "Are delivery previews public or private?",
+      "blocks": [
+        "CRE-SEC-006"
+      ],
+      "why": "A preview of confidential work is still confidential work. Private-by-default is recommended; the decision is the product's."
+    },
+    {
+      "id": "OD-ST-09",
+      "question": "What are the signed-URL TTLs per intent?",
+      "blocks": [
+        "CRE-SEC-006"
+      ],
+      "why": "No precedent exists in the repository, so no value can be derived; it is a security decision."
+    },
+    {
+      "id": "OD-ST-10",
+      "question": "What is the namespace and location of the Creative file-access contract and adapter?",
+      "blocks": [
+        "CRE-SEC-006"
+      ],
+      "why": "An architect decision under AGENTS.md section 20; it affects Rule 11 compliance."
+    }
+  ],
+  "explicit_statement_of_non_remediation": {
+    "classification": "CURRENT_FACT + ARCHITECTURE_DOCUMENT",
+    "no_fix_statement": "NO FIX IS APPLIED BY THIS AUDIT. This register is documentation. It created exactly one file — itself — and modified no application code, no migration, no route, no test, no config, no model and no existing audit artifact.",
+    "live_defects_recorded_and_deliberately_not_fixed": [
+      {
+        "risk": "CRE-SEC-018",
+        "defect": "BookingController::deleteMedia has no ownership check (app/Http/Controllers/BookingController.php:153-163, route routes/api.php:279)",
+        "why_not_fixed": "A security defect, so AGENTS.md section 3 permits remediation — but only through the mandatory sequence characterize current behaviour -> fix -> test -> document -> verify, with characterisation tests written BEFORE the fix. That sequence is a separate, explicitly authorised task with its own report (AGENTS.md section 24). AGENTS.md section 18 also forbids expanding scope beyond the assigned task."
+      },
+      {
+        "risk": "CRE-SEC-020",
+        "defect": "SettlementService::approveSettlement / markAsPaid run with no transaction and no row lock (app/Services/SettlementService.php:143, :176)",
+        "why_not_fixed": "Financial-critical. AGENTS.md section 10 requires the full financial regression suite and the identify -> inspect -> minimal change -> run sequence, and section 19 forbids opportunistic fixing of recorded debt during an unrelated task."
+      },
+      {
+        "risk": "CRE-SEC-007 and CRE-SEC-025",
+        "defect": "FileController has no validation, uses a client-supplied storage directory, preserves the client-supplied extension, hard-codes the public disk, and is unthrottled",
+        "why_not_fixed": "Hardening it changes behaviour for existing consumers (products, blogs, galleries, screens, job applications) and therefore touches the API contract and the storage layout of unrelated features. AGENTS.md sections 3, 5 and 18 all apply. The fix must be separately authorised, characterised, tested and reported."
+      },
+      {
+        "risk": "CRE-SEC-021",
+        "defect": "RefundService::initiateRefund calls the payment gateway inside a DB::transaction (app/Services/RefundService.php:51)",
+        "why_not_fixed": "Financial-critical and a documented golden behaviour; changing it is a Rule 4 conformance fix on an existing financial path, not a Creative concern."
+      },
+      {
+        "risk": "CRE-SEC-024",
+        "defect": "RolePermissionChecker caches permissions for 3600 seconds and no code invalidates a role's cache on a permission change",
+        "why_not_fixed": "The permission algorithm has exactly one owner and its behaviour is pinned by Rule 12. Changing the TTL or the algorithm is an authorisation change requiring explicit approval."
+      }
+    ],
+    "risk_maps_to_later_authorised_task": "Every risk in this register maps to a recommended control that will be implemented in a LATER, SEPARATELY AUTHORISED task, each with its own verification: the Creative ones with a policy/IDOR test suite, the storage ones with a file-access authorization test per intent, the financial ones with the six financial regression suites listed in AGENTS.md section 10, and the live-defect ones with characterisation tests written before the fix.",
+    "verification_claim": "Per AGENTS.md section 24, NO architecture-conformance claim is made. `tests/Unit/Architecture/ArchitectureRuleTest.php` was NOT run by this audit, and `php artisan test` was NOT run, because no executable file was created or changed. The only command executed that touches the application was `php artisan route:list`, used solely to confirm the 385-route baseline; it mutates nothing."
+  },
+  "cross_references": {
+    "16-transaction-concurrency-analysis.json": "The lock, transaction, unique-constraint and idempotency requirements behind CRE-SEC-003, -005, -013, -014, -020, -021.",
+    "17-storage-asset-reuse-analysis.md": "The full storage substrate audit behind CRE-SEC-006, -007, -025, and the file lifecycle policy behind CRE-SEC-018.",
+    "18-event-notification-analysis.json": "The dispatch-timing, recipient-vocabulary and failure-handling findings behind CRE-SEC-019, and the notification-key omission trap.",
+    "08-creative-database-current-schema-map.json": "The schema facts behind CRE-SEC-001, -006, -012, -015, -016 (no public ids, no central file record, testimonials has no author binding, activity_logs user_id cascades).",
+    "09-creative-database-target-schema-blueprint.json": "The proposed unique constraints this register depends on — proposal_id on projects, (project_id, round), (project_id, sequence), (project_id, earning_type), (project_id, reviewer_user_id), creator_payout_items.earning_id, and gateway_order_id — plus the recorded separation-of-duties requirement."
+  }
+}

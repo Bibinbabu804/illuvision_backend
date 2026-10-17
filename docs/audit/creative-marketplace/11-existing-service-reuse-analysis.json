@@ -1,0 +1,2985 @@
+{
+  "artifact": "11-existing-service-reuse-analysis",
+  "generated": "2026-09-26",
+  "method": [
+    "Enumerated every class file under app/Services (flat root plus the Campaign/, Booking/, Pricing/, Payment/, Settlement/ capability subdirectories).",
+    "Computed per class: line count, App\\Models / App\\Services / App\\Domain / App\\Infrastructure / App\\Http imports, real DB::transaction( call sites, real ->lockForUpdate( call sites, and query-builder or ::query call sites.",
+    "Read the class-level docblock or the public method list to state the current responsibility.",
+    "Source code wins over any existing docs/audit artifact. Conflicts are recorded in discrepancies_vs_existing_artifacts."
+  ],
+  "classification_legend": {
+    "CURRENT_FACT": "Verified from source code on 2026-09-26.",
+    "ARCHITECTURE_DOCUMENT": "Defined by docs/architecture/ARCHITECTURE_RULES.md or root AGENTS.md.",
+    "INFERENCE": "Reasonably inferred.",
+    "RECOMMENDATION": "Proposed target design; not implemented.",
+    "OPEN_DECISION": "Cannot be determined from available evidence."
+  },
+  "status": "PROPOSAL ONLY. No service was moved, renamed, modified or deleted. No Creative service exists.",
+  "purpose": "The service-level reuse decision record. It exists so that no Creative use case calls a legacy advertising service by accident, and so that the four services which genuinely are shared are reused instead of rebuilt.",
+  "summary": {
+    "classification": "RECOMMENDATION derived from the rows below",
+    "by_creative_reuse": {
+      "DO_NOT_REUSE": 31,
+      "PATTERN_ONLY": 10,
+      "DIRECT_REUSE": 1,
+      "REUSE_THROUGH_CONTRACT": 4,
+      "EXTEND": 1,
+      "DO_NOT_USE": 1
+    },
+    "by_classification": {
+      "legacy service": 42,
+      "reusable shared service": 3,
+      "infrastructure adapter": 3
+    },
+    "headline": "Of 48 services, 6 are reusable by Creative (directly or through a contract) and 10 are pattern-only. The remaining 32 must not be called from Creative code. Only 1 of the 48 takes a real row lock (InventoryService), and it locks advertising inventory, so Creative inherits no lock discipline from a service - it must be designed per aggregate."
+  },
+  "verified_totals": {
+    "classification": "CURRENT_FACT",
+    "services": 48,
+    "total_loc": 10803,
+    "importing_app_models": 41,
+    "importing_app_http": 0,
+    "with_real_db_transaction": 14,
+    "with_real_lock_for_update": 1,
+    "model_import_edges": 132,
+    "service_import_edges": 33,
+    "domain_import_edges": 15,
+    "infrastructure_import_edges": 4,
+    "largest_services": [
+      [
+        1349,
+        "BudgetRecommendationService"
+      ],
+      [
+        586,
+        "ManualBookingService"
+      ],
+      [
+        555,
+        "BookingCapacityService"
+      ],
+      [
+        553,
+        "AssetImportService"
+      ],
+      [
+        481,
+        "PricingRuleEngine"
+      ]
+    ],
+    "measurement_note": "Comment-stripped counts: docblocks and inline comments are removed before counting, so these are real call expressions. 14 of 48 services contain a real DB::transaction( call; only 1 service (InventoryService) contains a real ->lockForUpdate( call. CommissionService.php mentions lockForUpdate only in a docblock (line 19): its lock was relocated to app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php:31 in Phase 0.10. Across app/ as a whole there are 3 real lock call sites (InventoryService.php:48, EloquentPartnerCommissionRepository.php:31, app/Console/Commands/ExpirePendingBookings.php:56) in 24 files that contain a real DB::transaction( call at 41 sites. An earlier figure of 26 transaction files / 15 services was a raw string grep that included comment-only matches."
+  },
+  "services": [
+    {
+      "service": "App\\Services\\Campaign\\BudgetRecommendationService",
+      "path": "app/Services/Campaign/BudgetRecommendationService.php",
+      "loc": 1349,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Multi-strategy budget planner recommendation engine: given a budget, geography, screen categories and a date window, discovers and ranks campaign combinations.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "City",
+          "Screen",
+          "ScreenCategory",
+          "State"
+        ],
+        "app_services": [
+          "Campaign",
+          "CampaignPricingService",
+          "InventoryService",
+          "Pricing"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via City, Screen, ScreenCategory, State; 4 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative must not call it. A creative recommendation engine would need its own inputs (discipline, deliverables, budget) and its own ranking; wrapping this engine would return advertising inventory recommendations for a creative request."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "1445 LOC, 4 App\\Models imports, 4 App\\Services imports, 0 transactions. Largest service in the repository and the single largest concentration of advertising discovery logic. Calling it from Creative would couple creative matching to advertising inventory ranking."
+      }
+    },
+    {
+      "service": "App\\Services\\ManualBookingService",
+      "path": "app/Services/ManualBookingService.php",
+      "loc": 586,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Admin/manual booking creation and client lookup, orchestrating pricing, availability and payment intent for a campaign booked by staff.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "BookingActivity",
+          "BookingMedia",
+          "BookingPricingBreakdown",
+          "BookingScreen",
+          "Payment",
+          "PricingDurationRule",
+          "ReferralCode",
+          "Screen",
+          "User"
+        ],
+        "app_services": [
+          "Campaign",
+          "SettingsService"
+        ],
+        "app_domain": [
+          "Pricing\\Exceptions\\PricingException"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, BookingActivity, BookingMedia, BookingPricingBreakdown, BookingScreen, Payment...; 1 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 2,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Booking creation is the campaign aggregate root. A Creative project is created by accepting a proposal, not by this path."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "647 LOC, 10 model imports, 2 transactions, 1 domain import. Creates users with role 'user' at line 93. Touching it risks booking creation, pricing and payment intent."
+      }
+    },
+    {
+      "service": "App\\Services\\BookingCapacityService",
+      "path": "app/Services/BookingCapacityService.php",
+      "loc": 555,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Computes booking capacity and availability for campaign dates and assets.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Screen"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Screen; 4 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative has no inventory. Reusing an availability engine for creative engagements would invent a capacity model that does not exist."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "602 LOC, 4 query-builder call sites, 0 transactions, 0 locks. Availability is protected behaviour under AGENTS.md section 11."
+      }
+    },
+    {
+      "service": "App\\Services\\AssetImportService",
+      "path": "app/Services/AssetImportService.php",
+      "loc": 553,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Bulk import of advertising inventory from spreadsheet headers into screens and related tables, with an alias dictionary.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "City",
+          "Country",
+          "PricingPlan",
+          "Screen",
+          "ScreenCategory",
+          "ScreenProvider",
+          "State"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via City, Country, PricingPlan, Screen, ScreenCategory, ScreenProvider..."
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 1,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Imports advertising inventory. No Creative analogue; Creative file handling is upload-and-bind, not bulk inventory import."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "565 LOC, 7 model imports, 1 transaction, 0 query-builder calls. Its transactional bulk write to screens is referenced by an unauthenticated import route (see artifact 14)."
+      }
+    },
+    {
+      "service": "App\\Services\\PricingRuleEngine",
+      "path": "app/Services/PricingRuleEngine.php",
+      "loc": 481,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Legacy advertising pricing rule evaluation; converts duration values to canonical minutes and applies plan rules.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "PricingDurationRule",
+          "PricingPeakRule",
+          "PricingPlan",
+          "PricingScreenRule",
+          "PricingWeekendRule"
+        ],
+        "app_services": [
+          "Pricing"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via PricingDurationRule, PricingPeakRule, PricingPlan, PricingScreenRule, PricingWeekendRule"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Media-time pricing. Creative quote derivation is a small deterministic Creative calculation, not a plan-rule engine."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "506 LOC, 5 model imports, 1 service import, 0 transactions. Pinned by GoldenPricingRegressionTest."
+      }
+    },
+    {
+      "service": "App\\Services\\ScreenProviderService",
+      "path": "app/Services/ScreenProviderService.php",
+      "loc": 457,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Screen-provider onboarding and approval: approves an enquiry, creates the provider, issues a portal invitation via password_setup_tokens.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "ActivityLog",
+          "Screen",
+          "ScreenProvider",
+          "ScreenProviderActivity",
+          "ScreenProviderEnquiry",
+          "User"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via ActivityLog, Screen, ScreenProvider, ScreenProviderActivity, ScreenProviderEnquiry, User; 2 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 5,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The closest existing onboarding-plus-approval precedent for a Creator. Copy the SHAPE (enquiry -> approve -> create + invite). Do not call it: it is provider-specific and writes provider rows."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "App\\Services\\Creative (reference only)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "479 LOC, 6 model imports, 5 transactions, 2 query-builder calls. Uses raw DB::table against password_setup_tokens, which is the invitation mechanism Creative may reuse as-is."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\LoyaltyService",
+      "path": "app/Services/Campaign/LoyaltyService.php",
+      "loc": 341,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Calculates and awards loyalty points for a booking, with account and transaction writes.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "RewardAccount",
+          "RewardRedemption",
+          "RewardTransaction",
+          "User"
+        ],
+        "app_services": [
+          "Campaign",
+          "SettingsService"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, RewardAccount, RewardRedemption, RewardTransaction, User"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 5,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Points are non-cash loyalty tied to bookings. Creator earnings are money and are handled in a separate Creative earnings domain."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "355 LOC, 5 model imports, 5 transactions, 2 service imports. Its integer-points representation must never leak into a money ledger."
+      }
+    },
+    {
+      "service": "App\\Services\\SettlementService",
+      "path": "app/Services/SettlementService.php",
+      "loc": 316,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Generates and manages screen-provider settlement periods, sourced from immutable booking_screen revenue snapshots.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "BookingScreen",
+          "Screen",
+          "ScreenProvider",
+          "ScreenProviderActivity",
+          "ScreenProviderSettlement",
+          "User"
+        ],
+        "app_services": [],
+        "app_domain": [
+          "Financial\\Contracts\\SettlementRepositoryInterface"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, BookingScreen, Screen, ScreenProvider, ScreenProviderActivity, ScreenProviderSettlement..."
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 2,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The payout-PERIOD structure is the template for creator_payouts. The service itself is provider- and period-bound and is NOT reused. Verified: approveSettlement and markAsPaid take neither a transaction nor a row lock."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "352 LOC, 7 model imports, 2 transactions, 1 domain import. Financial-critical (AGENTS.md section 10). Absence of a transaction/lock on its approval and paid transitions is a recorded finding, not a pattern to copy."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\ScreenAnalyticsService",
+      "path": "app/Services/Campaign/ScreenAnalyticsService.php",
+      "loc": 338,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Screen performance overview for dashboards and reports.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "Screen"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, Screen; 7 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Reads advertising inventory performance. Creative reporting is separate work reading Creative records."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "348 LOC, 7 query-builder call sites, 0 transactions. Read-only."
+      }
+    },
+    {
+      "service": "App\\Services\\RevenueDistributionService",
+      "path": "app/Services/RevenueDistributionService.php",
+      "loc": 297,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Calculates and snapshots revenue distribution per booked screen at booking creation.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "BookingScreen",
+          "Screen",
+          "ScreenProviderActivity"
+        ],
+        "app_services": [],
+        "app_domain": [
+          "Financial\\Support\\RevenueAllocation"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, BookingScreen, Screen, ScreenProviderActivity"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 1,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The discipline to copy is 'snapshot the split at the moment of the commercial event'. The service is booking-bound and must not be called from Creative."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "343 LOC, 4 model imports, 1 transaction, 1 domain import. Financial-critical; the snapshot timing is the reusable idea."
+      }
+    },
+    {
+      "service": "App\\Services\\SettingsService",
+      "path": "app/Services/SettingsService.php",
+      "loc": 278,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Centralised grouped key/value configuration with per-request caching and typed accessors.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "reusable shared service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Setting"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Setting"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DIRECT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative adds a creative.* settings group. No Creative settings service."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "app\\Services\\SettingsService (unchanged)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "333 LOC, 1 model import, 0 transactions. Guardrail: no settings key may be created for a rule that is still OPEN_DECISION, and no key may determine a monetary outcome."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\ClientService",
+      "path": "app/Services/Campaign/ClientService.php",
+      "loc": 321,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Lists and filters clients with sorting and pagination.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "Payment",
+          "ReferralUsage",
+          "User"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, Payment, ReferralUsage, User; 3 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Client directory for advertising administration. Creative participants are users, not client records."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "333 LOC, 4 model imports, 1 service import, 3 query-builder call sites."
+      }
+    },
+    {
+      "service": "App\\Services\\PartnerService",
+      "path": "app/Services/PartnerService.php",
+      "loc": 304,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Partner application approval: creates the user, assigns the partner role, links user to partner, generates a referral code.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "Partner",
+          "Payment",
+          "ReferralCode",
+          "ReferralUsage",
+          "User"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, Partner, Payment, ReferralCode, ReferralUsage, User; 3 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 2,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The approval SHAPE is a precedent; the partner model is not. A creator is an individual supplier, not an affiliate organisation."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "323 LOC, 6 model imports, 2 transactions, 3 query-builder call sites. Writes users.role='partner' (line 29), a value that is NOT seeded, so RolePermissionChecker resolves it to an empty permission list."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\ExchangeRateService",
+      "path": "app/Services/Campaign/ExchangeRateService.php",
+      "loc": 256,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Fetches FX rates from ExchangeRate-API, stores them in currency_rates and caches aggressively.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "infrastructure adapter"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "CurrencyRate"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [
+          "ExchangeRates\\Contracts\\ExchangeRateApiClientInterface"
+        ],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via CurrencyRate"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "REUSE_THROUGH_CONTRACT"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative reads FX through this infrastructure if it is ever multi-currency. Creative must not implement its own rate fetch."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "app\\Services\\Campaign\\ExchangeRateService (unchanged)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "317 LOC, 1 model import, 1 service import, 1 infrastructure import, 0 transactions. A second FX implementation is forbidden."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\CoverageService",
+      "path": "app/Services/Campaign/CoverageService.php",
+      "loc": 22,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Coverage lookup helpers used by discovery and planning.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "none in this class (delegates or is pure)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Media coverage. No Creative analogue."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "22 LOC, 0 model imports, 1 service import."
+      }
+    },
+    {
+      "service": "App\\Services\\Settlement\\RevenueAnalyticsService",
+      "path": "app/Services/Settlement/RevenueAnalyticsService.php",
+      "loc": 281,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Revenue overview KPIs for dashboards and reports.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "Payment"
+        ],
+        "app_services": [
+          "Settlement"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, Payment; 4 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising revenue analytics. Creative reporting is separate."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "295 LOC, 2 model imports, 4 query-builder call sites. Read-only."
+      }
+    },
+    {
+      "service": "App\\Services\\ProfileService",
+      "path": "app/Services/ProfileService.php",
+      "loc": 249,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Builds the authenticated user's dashboard overview from profile, booking and payment data.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "User"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [
+          "Storage\\Contracts\\StorageContractInterface"
+        ],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, User"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Its aggregation shape is a precedent for a Creative dashboard query. It is advertising-scoped and must not be extended for Creative."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "259 LOC, 2 model imports, 1 service import, 1 infrastructure import, 0 transactions. Also a Support->Services style coupling that is recorded debt."
+      }
+    },
+    {
+      "service": "App\\Services\\Payment\\PaymentAnalyticsService",
+      "path": "app/Services/Payment/PaymentAnalyticsService.php",
+      "loc": 235,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Payment KPIs for the admin dashboard.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "PartnerCommission",
+          "Payment",
+          "ReferralUsage",
+          "Refund"
+        ],
+        "app_services": [
+          "Payment"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, PartnerCommission, Payment, ReferralUsage, Refund; 1 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Payment analytics over the payments table. Creative funding is a separate record."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "247 LOC, 5 model imports, 1 service import, 1 query-builder call site. Read-only."
+      }
+    },
+    {
+      "service": "App\\Services\\CommissionService",
+      "path": "app/Services/CommissionService.php",
+      "loc": 215,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Owns the partner commission lifecycle: approve -> paid / cancelled, plus reporting reads (transaction owner after the Phase 0.10 repository extraction).",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "PartnerCommission",
+          "ReferralUsage"
+        ],
+        "app_services": [],
+        "app_domain": [
+          "Financial\\Contracts\\PartnerCommissionRepositoryInterface"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via PartnerCommission, ReferralUsage"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 3,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The LIFECYCLE (pending/approved/paid/cancelled) and the pessimistic-lock discipline are the model for creator earnings. The service is partner-bound and is not called. Verified: its lockForUpdate now lives in EloquentPartnerCommissionRepository::findOrFailForUpdate(); CommissionService.php:19 only documents the legacy call."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "245 LOC, 3 transactions, 1 domain import. Financial-critical. Lock order (commission row, then referral usage row) must not be disturbed."
+      }
+    },
+    {
+      "service": "App\\Services\\InventoryService",
+      "path": "app/Services/InventoryService.php",
+      "loc": 210,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Locking inventory retrieval and capacity consumption for bookings.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Screen"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Screen; 5 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 1,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising inventory locking. Creative has no inventory to lock."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "245 LOC, 1 real lockForUpdate call site (line 48), 5 query-builder call sites, 0 transactions. lockScreensForBooking orders by id for deadlock avoidance - the closest existing example of disciplined locking."
+      }
+    },
+    {
+      "service": "App\\Services\\RevenueSplitResolverService",
+      "path": "app/Services/RevenueSplitResolverService.php",
+      "loc": 207,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Single authoritative resolver for the effective revenue split for any asset/booking context, with a precedence hierarchy.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "BookingPricingBreakdown",
+          "BookingScreen",
+          "PricingDurationRule",
+          "PricingPlan",
+          "Screen",
+          "ScreenDurationSplitOverride"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, BookingPricingBreakdown, BookingScreen, PricingDurationRule, PricingPlan, Screen..."
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The PRECEDENCE-RESOLVER shape is reusable for a Creative commission/split resolver. The rules and columns are advertising-specific."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "245 LOC, 7 model imports, 0 transactions. Financial-critical: the split it resolves feeds revenue distribution and settlement."
+      }
+    },
+    {
+      "service": "App\\Services\\NotificationService",
+      "path": "app/Services/NotificationService.php",
+      "loc": 210,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Centralised notification dispatch: reads per-event settings, determines recipients, dispatches Mailables and records notification_logs.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "reusable shared service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "NotificationLog"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [
+          "Notifications\\Contracts\\MailContractInterface"
+        ],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via NotificationLog"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "EXTEND"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative extends the recipient resolution with a creator recipient and adds Creative Mailables. Creative does not build a second dispatch path."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "app\\Services\\NotificationService (unchanged) + new Creative Mailables"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "243 LOC, 1 model import, 1 infrastructure import, 0 transactions. Current recipient roles exclude creator; dispatch timing (synchronous event-triggered) is preserved behaviour."
+      }
+    },
+    {
+      "service": "App\\Services\\ScreenDeletionService",
+      "path": "app/Services/ScreenDeletionService.php",
+      "loc": 223,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Deletes screens, blocking deletion where active or future bookings exist.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "ActivityLog",
+          "Booking",
+          "BookingScreen",
+          "Screen",
+          "ScreenProvider",
+          "ScreenProviderActivity"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via ActivityLog, Booking, BookingScreen, Screen, ScreenProvider, ScreenProviderActivity; 2 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 1,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Inventory deletion rules. No Creative analogue."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "233 LOC, 6 model imports, 1 transaction, 2 query-builder call sites."
+      }
+    },
+    {
+      "service": "App\\Services\\CampaignPricingService",
+      "path": "app/Services/CampaignPricingService.php",
+      "loc": 170,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Legacy compatibility wrapper (Phase 0.13) delegating to App\\Domain\\Pricing\\CampaignPricingEngine.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "BookingPricingBreakdown",
+          "Screen"
+        ],
+        "app_services": [],
+        "app_domain": [
+          "Pricing\\Contracts\\PricingEngineInterface"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, BookingPricingBreakdown, Screen"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 1,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising campaign pricing. Creative pricing is a different, small, deterministic calculation."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "225 LOC, 3 model imports, 2 domain imports, 1 transaction. Part of the strangler state (Rule 7)."
+      }
+    },
+    {
+      "service": "App\\Services\\PaymentService",
+      "path": "app/Services/PaymentService.php",
+      "loc": 183,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "LEGACY transaction owner of the payment workflows: createOrder(Booking), verifySignature, verifyAndConfirmPayment, fetchPayment, refund.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "BookingActivity",
+          "BookingPricingBreakdown",
+          "Payment",
+          "ReferralCode"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [
+          "Payment\\Contracts\\PaymentGatewayInterface",
+          "Payment\\Contracts\\PaymentRepositoryInterface",
+          "Payment\\Support\\Money"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, BookingActivity, BookingPricingBreakdown, Payment, ReferralCode"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 2,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "REUSE_THROUGH_CONTRACT"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative reuses the GATEWAY CONTRACT (App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface) and does not call this service. The service's methods are typed to Booking, so Creative funding is a new use case over the same contract."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "app\\Services\\PaymentService (unchanged) - contract only"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "221 LOC, 5 model imports, 3 domain imports, 2 transactions. Financial-critical. Payments are advertising-bound: payments.booking_id is NOT NULL with CASCADE and confirmation transitions a booking status."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\ReferralTrackingService",
+      "path": "app/Services/Campaign/ReferralTrackingService.php",
+      "loc": 176,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Creates referral usage and partner commission after successful payment verification.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "PartnerCommission",
+          "ReferralCode",
+          "ReferralUsage"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [
+          "Financial\\Contracts\\PartnerCommissionRepositoryInterface"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, PartnerCommission, ReferralCode, ReferralUsage"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Booking referral attribution. No Creative analogue at launch."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "212 LOC, 4 model imports, 1 service import, 1 domain import, 2 transactions. Its DB::transaction references include a comment-only match, so the real count is lower than a string grep suggests."
+      }
+    },
+    {
+      "service": "App\\Services\\Booking\\BookingAnalyticsService",
+      "path": "app/Services/Booking/BookingAnalyticsService.php",
+      "loc": 165,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Booking analytics overview for dashboards and reports.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking"
+        ],
+        "app_services": [
+          "Booking"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising booking analytics."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "175 LOC, 1 model import, 1 service import. Read-only."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\ReferralService",
+      "path": "app/Services/Campaign/ReferralService.php",
+      "loc": 158,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Validates a referral code and returns discount/commission details without creating records.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Partner",
+          "PartnerCommission",
+          "ReferralCode",
+          "ReferralUsage"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Partner, PartnerCommission, ReferralCode, ReferralUsage"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Referral validation is a booking acquisition concern."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "174 LOC, 4 model imports, 1 service import, 0 transactions. Documented as a pure validator - a good discipline, irrelevant to Creative."
+      }
+    },
+    {
+      "service": "App\\Services\\PricingService",
+      "path": "app/Services/PricingService.php",
+      "loc": 190,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Normalises admin-entered base prices to canonical INR and exposes plan pricing reads/writes.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "PricingPlan"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via PricingPlan; 2 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 2,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising plan pricing administration."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "209 LOC, 1 model import, 1 service import, 2 transactions, 2 query-builder call sites. Pinned by GoldenPricingRegressionTest."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\ClientAnalyticsService",
+      "path": "app/Services/Campaign/ClientAnalyticsService.php",
+      "loc": 192,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Aggregated client KPIs for dashboards.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "ReferralUsage",
+          "User"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, ReferralUsage, User; 2 query-builder/::query call site(s)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising client analytics."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "198 LOC, 3 model imports, 2 query-builder call sites. Read-only."
+      }
+    },
+    {
+      "service": "App\\Services\\FinanceService",
+      "path": "app/Services/FinanceService.php",
+      "loc": 176,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "High-level financial summary KPIs and totals for dashboards.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "ActivityLog",
+          "Booking",
+          "Payment",
+          "Refund",
+          "ScreenProviderSettlement"
+        ],
+        "app_services": [
+          "Settlement"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via ActivityLog, Booking, Payment, Refund, ScreenProviderSettlement"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 1,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising financial summary. Creative reporting must read Creative records and must not extend this."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "186 LOC, 5 model imports, 1 service import, 1 transaction. Financial-critical."
+      }
+    },
+    {
+      "service": "App\\Services\\RefundService",
+      "path": "app/Services/RefundService.php",
+      "loc": 132,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Owns the recorded refund path: creates a refunds ledger row, writes a payment_logs audit row, and transitions payment and booking.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "Payment",
+          "PaymentLog",
+          "Refund"
+        ],
+        "app_services": [],
+        "app_domain": [
+          "Payment\\Contracts\\PaymentGatewayInterface",
+          "Payment\\Support\\Money"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, Payment, PaymentLog, Refund"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 2,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The three-part shape (ledger row + append-only audit row + state transition) is the template for creative_refunds. The service is advertising-bound and is not called. Verified: it invokes the gateway inside a transaction, which Rule 4 forbids - do not copy that."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "164 LOC, 4 model imports, 2 domain imports, 1 infrastructure import, 2 transactions. Financial-critical."
+      }
+    },
+    {
+      "service": "App\\Services\\FirstBookingDiscountService",
+      "path": "app/Services/FirstBookingDiscountService.php",
+      "loc": 104,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "First-booking discount eligibility and percentage calculation.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking",
+          "User"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking, User"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "A booking acquisition discount. Whether Creative has an analogous incentive is an OPEN_DECISION, and if it does it is new Creative logic."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "150 LOC, 2 model imports, 0 transactions."
+      }
+    },
+    {
+      "service": "App\\Services\\Pricing\\DailyPricingCalculator",
+      "path": "app/Services/Pricing/DailyPricingCalculator.php",
+      "loc": 108,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Calculates runtime hours for a single campaign day from a start and end time.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "PricingPlan",
+          "PricingPlanDuration"
+        ],
+        "app_services": [
+          "Pricing"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via PricingPlan, PricingPlanDuration"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Media-day runtime maths for advertising time slots."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "128 LOC, 2 model imports, 1 service import. Pure calculation, but advertising-specific; returns a float, which is a further reason Creative money must not pass through it."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\CurrencyService",
+      "path": "app/Services/Campaign/CurrencyService.php",
+      "loc": 98,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Orchestrates currency detection, rate retrieval and display conversion over ExchangeRateService and CountryDetectionService.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "reusable shared service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "none in this class (delegates or is pure)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "REUSE_THROUGH_CONTRACT"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative displays amounts through the same currency infrastructure. Creative must not implement its own conversion."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "app\\Services\\Campaign\\CurrencyService (unchanged)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "124 LOC, 0 model imports, 1 service import, 0 transactions."
+      }
+    },
+    {
+      "service": "App\\Services\\ReportService",
+      "path": "app/Services/ReportService.php",
+      "loc": 73,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Backward-compatible facade over App\\Application\\Reporting\\Queries, retained for existing callers.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "none in this class (delegates or is pure)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The facade-over-a-query-layer shape is the precedent for a Creative reporting facade. It must not be extended with Creative queries."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "106 LOC, 0 model imports, 0 transactions, 0 query-builder calls - it is a pure delegate. The reporting query layer it fronts lives in app/Application/Reporting, a layer being retired."
+      }
+    },
+    {
+      "service": "App\\Services\\MediaService",
+      "path": "app/Services/MediaService.php",
+      "loc": 81,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Uploads a media file and returns the stored path, through the storage adapter contract.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "infrastructure adapter"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [
+          "Storage\\Contracts\\StorageContractInterface"
+        ],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "none in this class (delegates or is pure)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "REUSE_THROUGH_CONTRACT"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Creative stores files through the existing disks and image-processing contract. Creative additionally needs a file RECORD with owner and visibility, which does not exist."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "app\\Services\\MediaService (unchanged)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "93 LOC, 0 model imports, 1 infrastructure import. DISK is hard-coded to 'public' in the adapter, which is why private Creative files need a new access mechanism."
+      }
+    },
+    {
+      "service": "App\\Services\\AssetService",
+      "path": "app/Services/AssetService.php",
+      "loc": 88,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Advertising asset (screen) CRUD and filtering.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Screen"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Screen"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_USE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Name collision: 'Asset' in this repository means advertising inventory, not a creative work file."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "88 LOC, 1 model import, 1 service import. This is the single most likely wrong target for a developer looking for Creative assets."
+      }
+    },
+    {
+      "service": "App\\Services\\PricingEngine",
+      "path": "app/Services/PricingEngine.php",
+      "loc": 77,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Multi-asset campaign pricing preview calculation.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Screen"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Screen"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising campaign pricing preview."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "86 LOC, 1 model import, 0 transactions. Pinned by golden pricing suites."
+      }
+    },
+    {
+      "service": "App\\Services\\Pricing\\ScreenPricingResolver",
+      "path": "app/Services/Pricing/ScreenPricingResolver.php",
+      "loc": 66,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Resolves the pricing plan attached to a screen, throwing PricingException when absent.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "PricingPlan",
+          "Screen"
+        ],
+        "app_services": [
+          "Pricing"
+        ],
+        "app_domain": [
+          "Pricing\\Exceptions\\PricingException"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via PricingPlan, Screen"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Screen-to-plan resolution. No Creative analogue."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "78 LOC, 2 model imports, 1 service import, 1 domain import."
+      }
+    },
+    {
+      "service": "App\\Services\\BookingWorkflowService",
+      "path": "app/Services/BookingWorkflowService.php",
+      "loc": 60,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Allowed booking status transition graph and workflow application.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Booking"
+        ],
+        "app_services": [],
+        "app_domain": [
+          "Booking\\Enums\\BookingStatus",
+          "Booking\\Exceptions\\InvalidBookingStateException"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Booking"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "PATTERN_ONLY"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "The transition-graph shape is the closest existing state-machine precedent. Verified finding: BookingStatus has 8 cases while Booking::STATUS_* has 13, and the ?? [] at line 45 silently makes the 5 unmapped states terminal - so do not copy its implementation, only its shape."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "62 LOC, 1 model import, 2 domain imports, 0 transactions. Booking lifecycle is protected behaviour."
+      }
+    },
+    {
+      "service": "App\\Services\\BookingPriceCalculator",
+      "path": "app/Services/BookingPriceCalculator.php",
+      "loc": 37,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Converts a duration value and type to hours.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "PricingPlan"
+        ],
+        "app_services": [],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via PricingPlan"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Duration-to-hours conversion for media time."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "43 LOC, 1 model import. Pure and tiny."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\RecommendationService",
+      "path": "app/Services/Campaign/RecommendationService.php",
+      "loc": 35,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Smart asset recommendations by city, budget or asset type.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "Screen"
+        ],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via Screen"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising asset recommendation."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "37 LOC, 1 model import, 1 service import."
+      }
+    },
+    {
+      "service": "App\\Services\\Pricing\\ReferralPricingCalculator",
+      "path": "app/Services/Pricing/ReferralPricingCalculator.php",
+      "loc": 30,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Calculates the referral discount for a campaign against a referral code.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "ReferralCode"
+        ],
+        "app_services": [
+          "Pricing"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via ReferralCode"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Booking referral discount."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "36 LOC, 1 model import, 1 service import. Operates on a float campaign total - never route Creative money through it."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\AssetDiscoveryFilterService",
+      "path": "app/Services/Campaign/AssetDiscoveryFilterService.php",
+      "loc": 26,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Unified asset filtering for discovery, campaign planner and price estimator.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "none in this class (delegates or is pure)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Media filtering by geography and category."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "32 LOC, 0 model imports, 1 service import."
+      }
+    },
+    {
+      "service": "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+      "path": "app/Services/Pricing/FirstBookingDiscountPricingCalculator.php",
+      "loc": 23,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Calculates the first-booking discount for a campaign for an authenticated user.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [
+          "User"
+        ],
+        "app_services": [
+          "FirstBookingDiscountService",
+          "Pricing"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "Eloquent via User"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Booking acquisition discount."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "29 LOC, 1 model import, 2 service imports. Float-based."
+      }
+    },
+    {
+      "service": "App\\Services\\ConflictDetectionService",
+      "path": "app/Services/ConflictDetectionService.php",
+      "loc": 21,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Validates daily booking quotas, fixed time conflicts and mobile fleet capacity.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "legacy service"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [],
+        "app_services": [],
+        "app_domain": [
+          "Availability\\Exceptions\\FleetCapacityExceededException"
+        ],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "none in this class (delegates or is pure)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Advertising scheduling conflict detection. Creative has no time-slot inventory."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "24 LOC, 1 domain import. Throws FleetCapacityExceededException. Concurrency-critical under AGENTS.md section 11."
+      }
+    },
+    {
+      "service": "App\\Services\\Campaign\\CountryDetectionService",
+      "path": "app/Services/Campaign/CountryDetectionService.php",
+      "loc": 50,
+      "current_responsibility": {
+        "classification": "CURRENT_FACT",
+        "statement": "Resolves visitor country from IP via ip-api.com with an IN fallback.",
+        "basis": "class name and public method list (this class has no class-level docblock)"
+      },
+      "classification": {
+        "classification": "RECOMMENDATION",
+        "decision": "infrastructure adapter"
+      },
+      "dependencies": {
+        "classification": "CURRENT_FACT",
+        "app_models": [],
+        "app_services": [
+          "Campaign"
+        ],
+        "app_domain": [],
+        "app_infrastructure": [],
+        "app_http": [],
+        "note": "Empty list means no import of that namespace, not that the capability is unused."
+      },
+      "database_access": {
+        "classification": "CURRENT_FACT",
+        "detail": "none in this class (delegates or is pure)"
+      },
+      "transaction_usage": {
+        "classification": "CURRENT_FACT",
+        "db_transaction_call_sites": 0,
+        "lock_for_update_call_sites": 0,
+        "note": "Counts are real call expressions, not string occurrences in comments."
+      },
+      "creative_reuse": {
+        "classification": "RECOMMENDATION",
+        "decision": "DO_NOT_REUSE"
+      },
+      "reuse_strategy": {
+        "classification": "RECOMMENDATION",
+        "statement": "Geolocation by IP for display currency. Creative captures an explicit address, not a visitor IP."
+      },
+      "target_location": {
+        "classification": "RECOMMENDATION",
+        "statement": "n/a (do not call)"
+      },
+      "refactor_required": {
+        "classification": "RECOMMENDATION",
+        "statement": "None"
+      },
+      "risk": {
+        "classification": "RECOMMENDATION",
+        "statement": "64 LOC, 1 service import. Makes an external HTTP call; a reminder that adapters own external access (Rule 3)."
+      }
+    }
+  ],
+  "reusable_shared_services": {
+    "classification": "RECOMMENDATION",
+    "statement": "These four are shared infrastructure for Creative as well as for advertising. Reuse them; do not wrap them in a Creative facade that duplicates their surface.",
+    "items": [
+      {
+        "service": "App\\Services\\Campaign\\ExchangeRateService",
+        "used_by_creative_for": "FX rate retrieval and caching, if Creative is ever multi-currency (OD-DB-07)",
+        "guard": "no second FX implementation"
+      },
+      {
+        "service": "App\\Services\\Campaign\\CurrencyService",
+        "used_by_creative_for": "currency display conversion",
+        "guard": "no second conversion path; no new exchange-rate provider"
+      },
+      {
+        "service": "App\\Services\\NotificationService",
+        "used_by_creative_for": "dispatch of Creative notifications, with a creator recipient added",
+        "guard": "no second dispatch path; no Creative notification log"
+      },
+      {
+        "service": "App\\Services\\SettingsService",
+        "used_by_creative_for": "a creative.* configuration group",
+        "guard": "no settings key for an undecided rule; no monetary rule in settings"
+      },
+      {
+        "service": "App\\Services\\MediaService",
+        "used_by_creative_for": "file storage through the existing adapter contract",
+        "guard": "no second storage architecture; the adapter's hard-coded 'public' disk means private files need a new access path"
+      }
+    ]
+  },
+  "must_not_be_called_from_creative_domain_logic": {
+    "classification": "RECOMMENDATION",
+    "statement": "Domain and application Creative code must not call these. Each entry states the reason. Artifact 23 is the enforcement companion; artifact 22 rule D is the boundary statement.",
+    "groups": [
+      {
+        "group": "Every service that imports App\\Models (41 of 48)",
+        "reason": "A service that reaches for Eloquent models is a persistence-bound application service, not a domain collaborator. Calling it from Creative domain logic drags Active Record into the domain and defeats the boundary ArchitectureRuleTest enforces.",
+        "how_to_check": "grep the App\\Models import list in the dependencies block of each row above."
+      },
+      {
+        "group": "Advertising financial services (PaymentService, RefundService, SettlementService, CommissionService, RevenueDistributionService, RevenueSplitResolverService, FinanceService, FirstBookingDiscountService)",
+        "reason": "Their rules, columns and state machines are advertising- and provider-specific. Creative reuses PaymentGatewayInterface, not PaymentService. Any Creative financial use case is new.",
+        "how_to_check": "financial regression suites in AGENTS.md section 10 must not change behaviour."
+      },
+      {
+        "group": "Booking and inventory services (ManualBookingService, BookingCapacityService, ConflictDetectionService, InventoryService, BookingWorkflowService, BookingPriceCalculator)",
+        "reason": "Protected booking and availability behaviour (AGENTS.md section 11). Creative must not create a campaign booking, and must not introduce creative work into the booking aggregate.",
+        "how_to_check": "GoldenBookingRegressionTest, GoldenAvailabilityRegressionTest, GoldenConcurrencyVerificationTest."
+      },
+      {
+        "group": "Pricing services (PricingService, PricingEngine, PricingRuleEngine, CampaignPricingService, Pricing/* calculators)",
+        "reason": "They price advertising media time and several operate on float totals. Creative quote derivation is a small deterministic Creative calculation, frozen at acceptance.",
+        "how_to_check": "GoldenPricingRegressionTest."
+      },
+      {
+        "group": "Analytics and reporting services (ReportService, ProfileService, FinanceService, *AnalyticsService)",
+        "reason": "They are read services over advertising records. Creative reporting reads Creative records and must never recalculate a Creative amount.",
+        "how_to_check": "A Creative report that calls these is reading advertising economics, not Creative economics."
+      },
+      {
+        "group": "Discovery and inventory services (BudgetRecommendationService, AssetService, AssetImportService, ScreenDeletionService, Campaign/ClientService, Campaign/AssetDiscoveryFilterService, Campaign/RecommendationService, Campaign/CoverageService)",
+        "reason": "They operate on advertising inventory, whose meaning ('Asset' = purchasable ad slot) collides confusingly with Creative vocabulary.",
+        "how_to_check": "Name collision list in artifact 21 ownership conflicts."
+      },
+      {
+        "group": "Partner and loyalty services (PartnerService, Campaign/ReferralService, Campaign/ReferralTrackingService, Campaign/LoyaltyService)",
+        "reason": "A creator is not an affiliate partner, and loyalty points are not money.",
+        "how_to_check": "partner_commissions and reward_* must be untouched by Creative."
+      }
+    ]
+  },
+  "creative_relevant_services_absent": {
+    "classification": "CURRENT_FACT",
+    "statement": "None of the following exists anywhere in app/ as of 2026-09-26: a Creative application service, a Creative domain service, a Creative repository, a Creative use-case handler, a Creative event, a Creative Mailable, a Creative policy, a Creative job, or a Creative query class.",
+    "evidence": "app/Domain/Creative, app/Services/Creative, app/Repositories/Creative, app/Http/Controllers/Creative, app/Http/Requests/Creative, app/Http/Resources/Creative and app/Policies do not exist; find app -type d -empty returns nothing.",
+    "consequence": "The entire Creative application and domain layer is NEW work. Artifacts 20 and 24 define it. The only Creative-compatible services that exist are the five shared services listed above."
+  },
+  "discrepancies_vs_existing_artifacts": [
+    {
+      "topic": "AGENTS.md and the audit baseline state 27 flat root-level services",
+      "resolution": "Measured 28 flat at the root and 20 in capability subdirectories, 48 total. The counts are recorded here so no downstream artifact depends on the older figure."
+    },
+    {
+      "topic": "AGENTS.md section 19 describes 33 repository-extraction candidates",
+      "resolution": "Consistent with docs/audit/phase-0.20-repository-extraction-candidates.json. Not re-derived here; it is a backlog, not a Creative task."
+    },
+    {
+      "topic": "app/Application/Reporting/Queries is described in ReportService's docblock as the reporting implementation",
+      "resolution": "Verified as a facade target, but app/Application/ is a layer under retirement with 32 deferred classes. Creative reporting must not be added there."
+    },
+    {
+      "topic": "AGENTS.md section 5 pins 7 Domain -> Services imports in CampaignPricingEngine",
+      "resolution": "Not contradicted by this scan. It is the reason must_not_be_called_from_creative_domain_logic treats App\\Services imports as disqualifying."
+    }
+  ],
+  "safety_statement": {
+    "classification": "CURRENT_FACT",
+    "statement": "No production code, migration, route, test or configuration file was modified in producing this artifact. The only file created is this document."
+  }
+}

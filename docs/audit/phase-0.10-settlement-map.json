@@ -1,0 +1,111 @@
+{
+  "phase": "0.10",
+  "name": "Settlement Map",
+  "generated_at": "2026-09-26T00:36:00+05:30",
+  "owner_before": "App\\Services\\SettlementService::generateSettlement() (controller called the service directly)",
+  "owner_after": "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase -> App\\Services\\SettlementService",
+  "eligibility_query_owner": "App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository::findEligibleBookingScreens()",
+  "entry_point": "POST /api/admin/screen-providers/settlements (AdminSettlementController::store)",
+  "data_source_invariant": "ALL settlement figures are summed from immutable booking_screen revenue snapshots. Live Screen percentages, live ScreenProvider percentages and live pricing plans are NEVER consulted.",
+  "eligibility_predicate": {
+    "note": "Reproduced byte-for-byte from the legacy inline query, including the two-branch structure.",
+    "always_applied": [
+      "booking_screens.screen_provider_id = :providerId",
+      "booking_screens.owner_type = 'provider' (Screen::OWNER_TYPE_PROVIDER)",
+      "booking_screens.settlement_status = 'pending'"
+    ],
+    "booking_status_filter": {
+      "applies_to": "both branches",
+      "values": ["approved", "scheduled", "running", "completed"],
+      "constant": "App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository::SETTLEABLE_BOOKING_STATUSES",
+      "excludes": [
+        "pending_approval",
+        "payment_pending",
+        "payment_failed",
+        "media_review_pending",
+        "expired",
+        "cancelled"
+      ],
+      "enforced_by": [
+        "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_settlement_excludes_non_settleable_booking_statuses",
+        "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_settleable_booking_status_set_is_unchanged"
+      ]
+    },
+    "period_overlap_filter": {
+      "applies_to": "the period branch ONLY (when bookingId is null)",
+      "predicate": "end_time BETWEEN :start AND :end  OR  start_time BETWEEN :start AND :end  OR  (start_time <= :start AND end_time >= :end)",
+      "period_normalisation": "periodStart = parse(periodStart)->startOfDay(); periodEnd = parse(periodEnd)->endOfDay()",
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_settlement_excludes_screens_outside_the_period"
+    },
+    "booking_id_branch": {
+      "behaviour": "When bookingId is supplied the period filter is SKIPPED entirely, but the booking-status filter still applies.",
+      "consequence": "A booking far outside the requested period is still settleable when explicitly targeted by id.",
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_booking_scoped_settlement_generation_ignores_the_period_filter",
+      "changed_in_phase_0_10": false,
+      "note": "This asymmetry is legacy behaviour. It was preserved deliberately and is pinned by a test so a future refactor cannot silently change it."
+    },
+    "ownership_filter": {
+      "behaviour": "Illuvision-owned booking_screens are never settleable, because owner_type must equal 'provider'.",
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_settlement_excludes_illuvision_owned_screens"
+    },
+    "already_settled_filter": {
+      "behaviour": "settlement_status must be 'pending'; a screen already marked 'settled' is excluded.",
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_settlement_excludes_already_settled_screens"
+    }
+  },
+  "computation": {
+    "gross_revenue": "sum of booking_screens.gross_revenue",
+    "platform_revenue": "sum of booking_screens.platform_share",
+    "provider_revenue": "sum of booking_screens.provider_share",
+    "booking_count": "unique booking_id count across eligible rows",
+    "screen_count": "unique screen_id count across eligible rows",
+    "reference_number_format": "SET-{providerId zero-padded to 4}-{Ymd}-{4 random uppercase chars}",
+    "recalculates_snapshots": false,
+    "uses_live_percentages": false,
+    "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_generated_settlement_sums_snapshots_not_live_percentages"
+  },
+  "transaction": {
+    "boundary": "DB::transaction(...) inside SettlementService::generateSettlement()",
+    "external_network_call_inside": false,
+    "writes": [
+      "screen_provider_settlements row (status = generated)",
+      "each eligible booking_screen -> settlement_id, settlement_status = 'settled', settled_at = now()",
+      "screen_provider_activities row (type = settlement_generated)"
+    ],
+    "pessimistic_locks": [],
+    "concurrency_profile": "Two concurrent generateSettlement() calls for overlapping periods can BOTH read the same eligible pending screens and create two overlapping settlements, because the eligibility read takes no lock and the marking of booking_screens happens only after the settlement row exists. This is a pre-existing double-settlement risk and is recorded in the concurrency verification artifact, not fixed here.",
+    "changed_in_phase_0_10": false,
+    "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_settlement_generation_marks_screens_settled"
+  },
+  "lifecycle": {
+    "note": "Unchanged in Phase 0.10. Only GENERATION was moved behind a use case.",
+    "states": {
+      "draft": "declared but unused by the generation path",
+      "generated": "created by generateSettlement()",
+      "approved": "approveSettlement() — requires canBeApproved()",
+      "paid": "markAsPaid() — requires canBePaid()",
+      "cancelled": "cancelSettlement() — requires canBeCancelled()"
+    },
+    "guards": [
+      "approveSettlement() throws RuntimeException when !canBeApproved()",
+      "markAsPaid() throws RuntimeException when !canBePaid()",
+      "cancelSettlement() throws RuntimeException when !canBeCancelled()"
+    ],
+    "cancel_semantics": {
+      "behaviour": "Reverts linked booking_screens to settlement_id = null, settlement_status = 'pending', settled_at = null",
+      "note": "This makes the screens eligible again, so a later settlement can pick them up."
+    },
+    "activities_written": [
+      "settlement_generated",
+      "settlement_approved",
+      "settlement_paid",
+      "settlement_cancelled"
+    ],
+    "empty_result_contract": {
+      "message_when_period_scoped": "No eligible booking screens found for the given period.",
+      "message_when_booking_scoped": "No eligible booking screens found for this booking.",
+      "exception": "RuntimeException",
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_settlement_generation_without_eligible_screens_still_throws"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "phase": "0.10",
+  "name": "Financial Transaction Map",
+  "generated_at": "2026-09-26T00:48:00+05:30",
+  "principle": "Phase 0.10 is behaviour-preserving. NO transaction boundary was added, removed, widened or narrowed.",
+  "transactions": [
+    {
+      "id": "FIN-TXN-01",
+      "name": "Booking revenue distribution",
+      "entry_points": [
+        "POST /api/bookings/campaign (BookingController::storeCampaign)",
+        "POST /api/admin/manual-bookings/{booking}/payment (ManualBookingService::recordOfflinePayment)",
+        "Referral tracking revenue backfill"
+      ],
+      "application_boundary": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "legacy_owner": "App\\Services\\RevenueDistributionService::processBookingScreens()",
+      "own_transaction": false,
+      "note": "The distribution method does NOT open its own transaction. It runs inside whatever transaction its caller has already opened, so snapshots commit or roll back atomically with the booking. Preserved.",
+      "writes": [
+        "booking_screens: owner_type, screen_provider_id, screen_provider_name, illuvision_percentage, screen_provider_percentage, gross_revenue, platform_share, provider_share, pricing_snapshot"
+      ],
+      "pessimistic_locks": [],
+      "external_network_call_inside": false,
+      "concurrency_profile": "No lock. Two concurrent distribution passes for the same booking would each write snapshots; the writes are idempotent because the values are deterministic from the booking and its screens.",
+      "behaviour_changed_in_phase_0_10": false
+    },
+    {
+      "id": "FIN-TXN-02",
+      "name": "Settlement generation",
+      "entry_point": "POST /api/admin/screen-providers/settlements",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+      "legacy_owner": "App\\Services\\SettlementService::generateSettlement()",
+      "transaction": true,
+      "boundary": "DB::transaction(...) inside the service",
+      "external_network_call_inside": false,
+      "sequence": [
+        "1. eligibility read — OUTSIDE the transaction, no lock",
+        "2. if zero eligible rows: throw RuntimeException",
+        "3. begin transaction",
+        "4. sum gross/platform/provider from snapshots; count unique bookings and screens",
+        "5. insert screen_provider_settlements (status = generated)",
+        "6. update each eligible booking_screen -> settlement_id, settlement_status = 'settled', settled_at = now()",
+        "7. insert screen_provider_activities (settlement_generated)",
+        "8. commit"
+      ],
+      "pessimistic_locks": [],
+      "concurrency_profile": "PRE-EXISTING DOUBLE-SETTLEMENT RISK. The eligibility read is outside the transaction and takes no lock, so two concurrent generateSettlement() calls covering overlapping periods can both observe the same pending screens and both create a settlement, double-counting the revenue.",
+      "behaviour_changed_in_phase_0_10": false,
+      "why_not_fixed": "Serialising this requires either a lock on the provider row, a period-overlap uniqueness constraint, or moving the read inside the transaction with FOR UPDATE. Each changes locking behaviour and can introduce deadlocks against the booking and screen paths. It requires a dedicated concurrency phase. Recorded in the combined concurrency verification artifact.",
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_settlement_generation_marks_screens_settled"
+    },
+    {
+      "id": "FIN-TXN-03",
+      "name": "Settlement cancellation with screen reversion",
+      "entry_point": "POST /api/admin/settlements/{id}/cancel",
+      "legacy_owner": "App\\Services\\SettlementService::cancelSettlement()",
+      "transaction": true,
+      "boundary": "DB::transaction(...)",
+      "external_network_call_inside": false,
+      "sequence": [
+        "1. guard: canBeCancelled()",
+        "2. booking_screens where settlement_id = X -> settlement_id = null, settlement_status = 'pending', settled_at = null",
+        "3. settlement -> cancelled, cancellation_reason, cancelled_by",
+        "4. screen_provider_activities (settlement_cancelled)",
+        "5. commit"
+      ],
+      "pessimistic_locks": [],
+      "concurrency_profile": "Reverts rows to 'pending', making them eligible for a later settlement. A concurrent generation could re-claim them mid-cancellation.",
+      "behaviour_changed_in_phase_0_10": false,
+      "note": "Cancellation was NOT moved behind a use case in Phase 0.10 — it is part of the lifecycle state machine that stayed on SettlementService."
+    },
+    {
+      "id": "FIN-TXN-04",
+      "name": "Referral attribution and partner commission creation",
+      "entry_points": [
+        "POST /api/payments/razorpay/verify (inside the payment verification transaction)",
+        "POST /api/admin/payments/{id}/approve (inside the controller transaction)",
+        "POST /api/admin/manual-bookings/{booking}/payment (inside the offline transaction)"
+      ],
+      "application_boundary": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "legacy_owner": "App\\Services\\ReferralTrackingService::createReferralTracking()",
+      "transaction": false,
+      "note": "The use case does NOT open a transaction. It REQUIRES the caller to already be inside one, because the commission lock is only meaningful within a transaction. This requirement is documented on the use case and is unchanged from the legacy service.",
+      "pessimistic_locks": [
+        {
+          "table": "partner_commissions",
+          "call": "PartnerCommission::where('referral_usage_id', $x)->lockForUpdate()->first()",
+          "now_via": "PartnerCommissionRepositoryInterface::findOrFailForUpdate() / findForReferralUsage()",
+          "purpose": "Duplicate-commission guard",
+          "strength_preserved": true,
+          "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_commission_repository_preserves_pessimistic_locking"
+        }
+      ],
+      "external_network_call_inside": false,
+      "writes": [
+        "referral_usages (discount_amount, commission_amount, status)",
+        "referral_codes.used_count increment",
+        "partner_commissions (amount, status = pending)"
+      ],
+      "concurrency_profile": "The commission lock makes the check-then-create atomic, so concurrent attribution for the same referral usage produces at most one commission. The referral_usage creation itself is not separately locked, so concurrent callers can each create a usage row and the first to commit wins the commission.",
+      "behaviour_changed_in_phase_0_10": false
+    },
+    {
+      "id": "FIN-TXN-05",
+      "name": "Commission lifecycle transitions",
+      "entry_point": "Commission admin endpoints",
+      "legacy_owner": "App\\Services\\CommissionService (approve, markPaid, cancel/reject)",
+      "transaction": false,
+      "own_transaction": false,
+      "pessimistic_locks": [
+        {
+          "table": "partner_commissions",
+          "call": "lockForUpdate() on the commission row before each transition",
+          "count": 3,
+          "now_via": "PartnerCommissionRepositoryInterface::findOrFailForUpdate()",
+          "strength_preserved": true
+        }
+      ],
+      "concurrency_profile": "Serialised per commission row. This is the only place in the Financial subsystem where a state transition is properly serialised.",
+      "behaviour_changed_in_phase_0_10": false,
+      "note": "The transitions themselves are NOT wrapped in a transaction by the service. The lock is therefore acquired and released within a single statement-level scope; pre-existing behaviour, preserved."
+    },
+    {
+      "id": "FIN-TXN-06",
+      "name": "Revenue backfill on referral tracking",
+      "entry_point": "Referral tracking revenue backfill path",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "legacy_owner": "App\\Services\\ReferralTrackingService (lazy backfill)",
+      "transaction": false,
+      "note": "Runs inside the caller's transaction. A failure here rolls back the entire payment verification, which is pre-existing behaviour and was preserved.",
+      "pessimistic_locks": [],
+      "external_network_call_inside": false,
+      "behaviour_changed_in_phase_0_10": false
+    }
+  ],
+  "pessimistic_lock_inventory": {
+    "note": "Complete inventory of FOR UPDATE usage in the Payment + Financial subsystem. Count and call sites are unchanged by Phases 0.9 and 0.10.",
+    "payment_subsystem": "ZERO pessimistic locks. PaymentService, RefundService, CreatePaymentOrderUseCase, verifyPaymentSignature and the offline path all use plain reads.",
+    "financial_subsystem": [
+      "App\\Services\\CommissionService — 3 sites (approve, markPaid, cancel/reject) via PartnerCommissionRepositoryInterface::findOrFailForUpdate()",
+      "App\\Services\\ReferralTrackingService — 1 duplicate-guard site via PartnerCommissionRepositoryInterface"
+    ],
+    "adjacent_subsystems_untouched": [
+      "App\\Services\\InventoryService — screen availability locking",
+      "App\\Services\\ExpirePendingBookings — expiry sweep"
+    ],
+    "explicitly_not_a_lock": [
+      "Payment::firstOrFail() — plain SELECT",
+      "findPendingForBooking() — plain SELECT",
+      "BookingScreen settlement eligibility read — plain SELECT, outside the settlement transaction"
+    ]
+  },
+  "rollback_verification": {
+    "enforced_by_tests": [
+      "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_commission_repository_preserves_pessimistic_locking",
+      "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_refund_failure_rolls_back_partial_refund_rows",
+      "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_payment_transaction_rollback_is_observable",
+      "Tests\\Feature\\Golden\\GoldenConcurrencyVerificationTest::test_transaction_rollback_reverts_partial_mutations"
+    ]
+  }
+}

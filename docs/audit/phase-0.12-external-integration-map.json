@@ -1,0 +1,225 @@
+{
+  "phase": "0.12",
+  "name": "External Integration Map",
+  "generated_at": "2026-09-26T06:05:00+05:30",
+  "purpose": "Map all external service integrations to ensure they are properly encapsulated behind infrastructure adapters",
+  "integrations": [
+    {
+      "provider": "Razorpay",
+      "purpose": "Payment processing gateway",
+      "current_caller": [
+        "App\\Services\\PaymentService",
+        "App\\Services\\RefundService"
+      ],
+      "domain_application_caller": "App\\Application\\Payment\\UseCases\\*UseCase",
+      "authentication": "API key (key_id:key_secret)",
+      "request_format": "JSON over HTTP POST",
+      "response_format": "JSON over HTTP",
+      "failure_behavior": "Throws exceptions with error codes",
+      "timeout": "30 seconds",
+      "retry_behavior": "No automatic retries in current implementation",
+      "logging": "Logs requests and responses for debugging",
+      "queue_behavior": "Synchronous - called directly from transaction flow",
+      "webhook": "Yes - payment verification and refund processing",
+      "credentials": [
+        "RAZORPAY_KEY_ID",
+        "RAZORPAY_KEY_SECRET"
+      ],
+      "environment_variables": [
+        "razorpay.key",
+        "razorpay.secret"
+      ],
+      "target_adapter": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway",
+      "adapter_interface": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface"
+    },
+    {
+      "provider": "Google",
+      "purpose": "OAuth authentication for user login",
+      "current_caller": [
+        "App\\Http\\Controllers\\Api\\AuthController",
+        "App\\Services\\GoogleAuthService"
+      ],
+      "domain_application_caller": "App\\Application\\Auth\\UseCases\\*UseCase",
+      "authentication": "OAuth 2.0",
+      "request_format": "HTTP redirects and JSON token exchange",
+      "response_format": "JSON user info",
+      "failure_behavior": "Redirects to error pages or returns authentication failures",
+      "timeout": "10 seconds",
+      "retry_behavior": "No automatic retries",
+      "logging": "Logs authentication attempts and failures",
+      "queue_behavior": "Synchronous - part of login flow",
+      "webhook": "No",
+      "credentials": [
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET"
+      ],
+      "environment_variables": [
+        "google.client_id",
+        "google.client_secret"
+      ],
+      "target_adapter": "App\\Infrastructure\\Auth\\Google\\GoogleOAuthAdapter",
+      "adapter_interface": "App\\Domain\\Auth\\Contracts\\GoogleIdentityProviderInterface"
+    },
+    {
+      "provider": "Exchange Rate API",
+      "purpose": "Currency conversion for multi-currency support",
+      "current_caller": [
+        "App\\Services\\ExchangeRateService"
+      ],
+      "domain_application_caller": "App\\Application\\Financial\\UseCases\\*UseCase",
+      "authentication": "API key in header",
+      "request_format": "HTTP GET",
+      "response_format": "JSON",
+      "failure_behavior": "Falls back to last known rates or cached values",
+      "timeout": "5 seconds",
+      "retry_behavior": "No automatic retries",
+      "logging": "Logs API calls and fallback usage",
+      "queue_behavior": "Synchronous - called when conversion needed",
+      "webhook": "No",
+      "credentials": [
+        "EXCHANGE_RATE_API_KEY"
+      ],
+      "environment_variables": [
+        "exchangerate.api.key"
+      ],
+      "target_adapter": "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient",
+      "adapter_interface": "App\\Domain\\Financial\\Contracts\\ExchangeRateApiClientInterface"
+    },
+    {
+      "provider": "Mail (SMTP)",
+      "purpose": "Sending transactional and marketing emails",
+      "current_caller": [
+        "App\\Services\\MailService",
+        "App\\Services\\NotificationService",
+        "App\\Services\\ReferralService",
+        "App\\Services\\PaymentService"
+      ],
+      "domain_application_caller": "App\\Application\\Notification\\UseCases\\*UseCase",
+      "authentication": "Username/password or API key",
+      "request_format": "SMTP protocol",
+      "response_format": "SMTP response codes",
+      "failure_behavior": "Throws exceptions, may be queued for retry",
+      "timeout": "30 seconds",
+      "retry_behavior": "Configured retry attempts with exponential backoff",
+      "logging": "Logs email sending attempts and failures",
+      "queue_behavior": "Queued - emails sent via queue workers",
+      "webhook": "No",
+      "credentials": [
+        "MAIL_USERNAME",
+        "MAIL_PASSWORD"
+      ],
+      "environment_variables": [
+        "mail.host",
+        "mail.port",
+        "mail.username",
+        "mail.password",
+        "mail.encryption"
+      ],
+      "target_adapter": "App\\Infrastructure\\Mail\\MailAdapter",
+      "adapter_interface": "App\\Domain\\Notification\\Contracts\\MailContractInterface"
+    },
+    {
+      "provider": "Storage (Local/S3)",
+      "purpose": "Storing uploaded files (profile pictures, documents, etc.)",
+      "current_caller": [
+        "App\\Services\\MediaHelper",
+        "App\\Services\\UploadService",
+        "App\\Services\\PartnerService"
+      ],
+      "domain_application_caller": "App\\Application\\Media\\UseCases\\*UseCase",
+      "authentication": "Access keys for S3, none for local",
+      "request_format": "Filesystem API or REST API",
+      "response_format": "File metadata or URLs",
+      "failure_behavior": "Throws exceptions for failed uploads/downloads",
+      "timeout": "30 seconds",
+      "retry_behavior": "Configurable retry attempts",
+      "logging": "Logs file operations",
+      "queue_behavior": "Can be queued for large files",
+      "webhook": "No",
+      "credentials": [
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY"
+      ],
+      "environment_variables": [
+        "filesystem.default",
+        "aws.access_key_id",
+        "aws.secret_access_key",
+        "aws.bucket"
+      ],
+      "target_adapter": [
+        "App\\Infrastructure\\Storage\\LocalAdapter",
+        "App\\Infrastructure\\Storage\\S3Adapter"
+      ],
+      "adapter_interface": "App\\Domain\\Media\\Contracts\\StorageContractInterface"
+    },
+    {
+      "provider": "Image Processing (GD/Intervention)",
+      "purpose": "Processing uploaded images (resizing, cropping, thumbnails)",
+      "current_caller": [
+        "App\\Services\\MediaHelper"
+      ],
+      "domain_application_caller": "App\\Application\\Media\\UseCases\\*UseCase",
+      "authentication": "None - local library usage",
+      "request_format": "Library method calls",
+      "response_format": "Processed image data",
+      "failure_behavior": "Throws exceptions for processing failures",
+      "timeout": "10 seconds",
+      "retry_behavior": "No automatic retries",
+      "logging": "Logs processing attempts",
+      "queue_behavior": "Can be queued for large images",
+      "webhook": "No",
+      "credentials": [],
+      "environment_variables": [],
+      "target_adapter": [
+        "App\\Infrastructure\\ImageProcessing\\GDAdapter",
+        "App\\Infrastructure\\ImageProcessing\\InterventionAdapter"
+      ],
+      "adapter_interface": "App\\Domain\\Media\\Contracts\\ImageProcessingContractInterface"
+    },
+    {
+      "provider": "SMS (Twilio/Nexmo)",
+      "purpose": "Sending SMS notifications",
+      "current_caller": [
+        "App\\Services\\NotificationService"
+      ],
+      "domain_application_caller": "App\\Application\\Notification\\UseCases\\*UseCase",
+      "authentication": "API key/secret",
+      "request_format": "HTTP POST to SMS API",
+      "response_format": "API response",
+      "failure_behavior": "Returns error codes, may be queued for retry",
+      "timeout": "10 seconds",
+      "retry_behavior": "Configurable retry attempts",
+      "logging": "Logs SMS sending attempts",
+      "queue_behavior": "Queued - SMS sent via queue workers",
+      "webhook": "No",
+      "credentials": [
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN"
+      ],
+      "environment_variables": [
+        "twilio.sid",
+        "twilio.token"
+      ],
+      "target_adapter": "App\\Infrastructure\\Sms\\TwilioAdapter",
+      "adapter_interface": "App\\Domain\\Notification\\Contracts\\SmsContractInterface"
+    }
+  ],
+  "summary": {
+    "total_integrations_documentated": 7,
+    "payment_integrations": 1,
+    "identity_integrations": 1,
+    "exchange_rate_integrations": 1,
+    "email_integrations": 1,
+    "storage_integrations": 1,
+    "media_processing_integrations": 1,
+    "sms_integrations": 1,
+    "adheres_to_boundary_rule": "To be verified - need to check for direct calls in domain/application layers",
+    "existing_adapters_reused": true,
+    "recommendations": [
+      "Verify no direct external service calls exist in app/Domain or app/Application",
+      "Ensure all integrations go through the appropriate adapter interfaces",
+      "Check that adapter implementations correctly implement their interfaces",
+      "Verify that credentials are properly managed through environment variables/config"
+    ]
+  }
+}

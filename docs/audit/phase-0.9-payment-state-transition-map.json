@@ -1,0 +1,236 @@
+{
+  "phase": "0.9",
+  "name": "Payment State Transition Map",
+  "generated_at": "2026-09-26T00:18:00+05:30",
+  "principle": "PaymentStatus is a READ-ONLY vocabulary alias. App\\Models\\Payment remains the single source of truth for status values, and the existing services remain the transition owners. No state machine, enum, guard or transition validator was introduced.",
+  "status_vocabulary": {
+    "source_of_truth": "App\\Models\\Payment",
+    "alias_layer": "App\\Domain\\Payment\\PaymentStatus (constants only, no logic)",
+    "columns_in_play": [
+      "payments.payment_status",
+      "payments.verification_status",
+      "payments.refund_status"
+    ],
+    "two_overlapping_sets": {
+      "legacy_compatibility_set": {
+        "description": "Written by the Razorpay verify and refund flows.",
+        "values": {
+          "STATUS_PENDING": "pending",
+          "STATUS_VERIFICATION_PENDING": "verification_pending",
+          "STATUS_PAID": "paid",
+          "STATUS_FAILED": "failed",
+          "STATUS_REFUNDED": "refunded",
+          "STATUS_PARTIALLY_REFUNDED": "partially_refunded"
+        }
+      },
+      "payment_mode_set": {
+        "description": "Written by the direct/offline and admin-verification flows.",
+        "values": {
+          "PAYMENT_STATUS_PENDING": "pending",
+          "PAYMENT_STATUS_AWAITING_VERIFICATION": "awaiting_verification",
+          "PAYMENT_STATUS_COMPLETED": "completed",
+          "PAYMENT_STATUS_FAILED": "failed",
+          "PAYMENT_STATUS_REFUNDED": "refunded"
+        }
+      },
+      "overlap": "'pending' is shared by both sets. Terminal states are NOT shared ('paid' vs 'completed', 'partially_refunded' has no payment-mode equivalent). The overlap is intentional and was NOT normalised.",
+      "enforced_by_test": "Tests\\Unit\\Domain\\Payment\\PaymentStatusTest::test_both_status_vocabularies_are_preserved_verbatim"
+    }
+  },
+  "transitions": [
+    {
+      "id": "TRN-01",
+      "flow": "Razorpay order creation",
+      "trigger": "POST /api/payments/razorpay/create-order",
+      "from": { "payment_status": "(none — new row)" },
+      "to": { "payment_status": "pending" },
+      "owner": "App\\Services\\PaymentService::createOrder()",
+      "guarded": false,
+      "side_effects": ["Payment row inserted with gateway order id, integer paise amount, currency INR"],
+      "changed_in_phase_0_9": false,
+      "note": "If a pending payment already exists, this transition does not occur — the existing row is returned instead (IDEM-PAY-01)."
+    },
+    {
+      "id": "TRN-02",
+      "flow": "Successful signature verification",
+      "trigger": "POST /api/payments/razorpay/verify with a valid signature",
+      "from": { "payment_status": "pending" },
+      "to": { "payment_status": "paid", "paid_at": "<now>" },
+      "owner": "App\\Services\\PaymentService::verifyPaymentSignature()",
+      "guarded": true,
+      "guard": "Signature must verify AND payment must not already be paid",
+      "coupled_transitions": [
+        {
+          "target": "bookings.status",
+          "from": "payment_pending",
+          "to": "pending_approval"
+        }
+      ],
+      "side_effects": [
+        "Referral usage + partner commission created (when a referral code is attached)",
+        "PaymentReceived event dispatched"
+      ],
+      "changed_in_phase_0_9": false,
+      "enforced_by_test": "Tests\\Feature\\Golden\\GoldenPaymentRegressionTest::test_verify_and_confirm_payment_successful_state_transition"
+    },
+    {
+      "id": "TRN-03",
+      "flow": "Failed signature verification",
+      "trigger": "POST /api/payments/razorpay/verify with an invalid signature",
+      "from": { "payment_status": "pending" },
+      "to": { "payment_status": "failed" },
+      "owner": "App\\Services\\PaymentService::verifyPaymentSignature()",
+      "guarded": true,
+      "guard": "Signature must fail",
+      "coupled_transitions": [
+        {
+          "target": "bookings.status",
+          "from": "payment_pending",
+          "to": "payment_failed"
+        }
+      ],
+      "rollback_semantics": "The status updates are written and an exception is then thrown INSIDE the same DB::transaction, so the transaction rolls back and the payment remains 'pending'. The caller receives an error but the persisted state is unchanged.",
+      "rollback_semantics_status": "PRE_EXISTING_ODDITY_PRESERVED",
+      "changed_in_phase_0_9": false,
+      "enforced_by_test": "Tests\\Feature\\Golden\\GoldenPaymentRegressionTest::test_verify_and_confirm_payment_invalid_signature_marks_failed"
+    },
+    {
+      "id": "TRN-04",
+      "flow": "Duplicate verification",
+      "trigger": "POST /api/payments/razorpay/verify on an already-paid payment",
+      "from": { "payment_status": "paid" },
+      "to": { "payment_status": "paid (no change)" },
+      "owner": "App\\Services\\PaymentService::verifyPaymentSignature()",
+      "guarded": true,
+      "guard": "Throws 'Payment already processed'; transaction rolls back",
+      "changed_in_phase_0_9": false,
+      "enforced_by_test": "Tests\\Feature\\Golden\\GoldenPaymentRegressionTest::test_duplicate_verification_request_is_rejected"
+    },
+    {
+      "id": "TRN-05",
+      "flow": "Partial refund",
+      "trigger": "POST /api/admin/payments/{id}/refund with amount < payment amount",
+      "from": { "payment_status": "paid" },
+      "to": { "payment_status": "partially_refunded", "refund_status": "processed", "razorpay_refund_id": "<gateway id>" },
+      "owner": "App\\Services\\RefundService::initiateRefund()",
+      "guarded": true,
+      "guard": "Gateway refund must succeed; otherwise the transaction rolls back entirely",
+      "coupled_transitions": [
+        {
+          "target": "bookings.status",
+          "transition": "NONE — the booking is NOT moved to refunded on a partial refund",
+          "status": "PRESERVED_VERIFIED"
+        }
+      ],
+      "side_effects": ["Refund row created", "PaymentLog created"],
+      "changed_in_phase_0_9": false,
+      "enforced_by_test": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_recorded_refund_writes_row_log_and_partial_status"
+    },
+    {
+      "id": "TRN-06",
+      "flow": "Full refund",
+      "trigger": "POST /api/admin/payments/{id}/refund with amount >= payment amount",
+      "from": { "payment_status": "paid" },
+      "to": { "payment_status": "refunded", "refund_status": "processed", "razorpay_refund_id": "<gateway id>" },
+      "owner": "App\\Services\\RefundService::initiateRefund()",
+      "guarded": true,
+      "guard": "Amount comparison via Money::isFullRefund($amount, $payment->amount)",
+      "coupled_transitions": [
+        {
+          "target": "bookings.status",
+          "from": "any paid-adjacent state",
+          "to": "refunded"
+        }
+      ],
+      "side_effects": ["Refund row created", "PaymentLog created"],
+      "changed_in_phase_0_9": false,
+      "note": "The >= comparison means an OVER-payment request is also treated as a full refund. Preserved verbatim."
+    },
+    {
+      "id": "TRN-07",
+      "flow": "Offline payment recording",
+      "trigger": "POST /api/admin/manual-bookings/{booking}/payment",
+      "from": { "payment_status": "(none — new row)" },
+      "to": { "payment_status": "awaiting_verification", "verification_status": "pending" },
+      "owner": "App\\Services\\ManualBookingService::recordOfflinePayment()",
+      "guarded": true,
+      "guard": "payment_mode must be one of bank_transfer|cash|upi|manual",
+      "coupled_transitions": [
+        {
+          "target": "bookings.status",
+          "from": "payment_pending",
+          "to": "pending_approval",
+          "condition": "ONLY if the booking is currently payment_pending"
+        }
+      ],
+      "side_effects": [
+        "Referral attribution when a referral code is attached",
+        "BookingActivity 'payment_completed'",
+        "PaymentReceived event dispatched"
+      ],
+      "changed_in_phase_0_9": false,
+      "note": "Uses the payment_mode status set, not the legacy set. The booking transition is conditional and does NOT fire from other statuses."
+    },
+    {
+      "id": "TRN-08",
+      "flow": "Admin payment approval",
+      "trigger": "POST /api/admin/payments/{id}/approve",
+      "from": { "payment_status": "awaiting_verification" },
+      "to": { "payment_status": "completed", "verification_status": "verified", "verified_by_admin_id": "<admin>", "verified_at": "<now>", "paid_at": "<now>" },
+      "owner": "App\\Http\\Controllers\\AdminPaymentController::approvePayment()",
+      "guarded": true,
+      "guard": "Runs inside a DB::transaction",
+      "coupled_transitions": [
+        {
+          "target": "bookings.status",
+          "from": "any",
+          "to": "pending_approval"
+        }
+      ],
+      "side_effects": [
+        "Referral attribution via RecordReferralAttributionUseCase (service locator replaced with constructor injection)",
+        "PaymentLog created"
+      ],
+      "changed_in_phase_0_9": false
+    },
+    {
+      "id": "TRN-09",
+      "flow": "Admin payment rejection",
+      "trigger": "POST /api/admin/payments/{id}/reject",
+      "from": { "payment_status": "awaiting_verification" },
+      "to": { "payment_status": "failed", "verification_status": "failed" },
+      "owner": "App\\Http\\Controllers\\AdminPaymentController::rejectPayment()",
+      "guarded": true,
+      "guard": "Runs inside a DB::transaction",
+      "coupled_transitions": [
+        {
+          "target": "referral tracking",
+          "transition": "Cancelled via ReferralTrackingService::cancelReferralTracking()"
+        }
+      ],
+      "changed_in_phase_0_9": false,
+      "note": "The reject path still resolves ReferralTrackingService via the service locator. It was intentionally left as-is because it is a CANCELLATION, not an attribution, and RecordReferralAttributionUseCase does not model cancellation."
+    }
+  ],
+  "unmodelled_transitions": [
+    "ExpirePendingBookings sweeps payment_pending bookings to an expired state on a schedule. Out of scope; not a PaymentStatus transition."
+  ],
+  "invariant_assertions": [
+    {
+      "invariant": "No status string was added, removed or renamed in Phase 0.9",
+      "enforced_by": "Tests\\Unit\\Domain\\Payment\\PaymentStatusTest"
+    },
+    {
+      "invariant": "The legacy and payment-mode vocabularies remain distinct where they were distinct",
+      "enforced_by": "Tests\\Unit\\Domain\\Payment\\PaymentStatusTest::test_both_status_vocabularies_are_preserved_verbatim"
+    },
+    {
+      "invariant": "Partial refund does not move the booking to refunded",
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_recorded_refund_writes_row_log_and_partial_status"
+    },
+    {
+      "invariant": "Successful verification moves the booking to pending_approval",
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenPaymentRegressionTest::test_verify_and_confirm_payment_successful_state_transition"
+    }
+  ]
+}

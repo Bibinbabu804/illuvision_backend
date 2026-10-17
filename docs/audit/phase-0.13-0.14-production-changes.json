@@ -1,0 +1,178 @@
+{
+  "phases": "0.13-0.14",
+  "name": "Production Change Ledger",
+  "generated_at": "2026-09-26",
+  "vcs_note": "The project directory is not a Git repository, so no commit, branch or diff reference is available. Change attribution was established by filesystem inspection and by diffing the live framework route table against docs/audit/routes-baseline.json.",
+  "summary": {
+    "files_added": 5,
+    "files_modified": 7,
+    "files_deleted": 13,
+    "files_created_after_baseline_migration": 0,
+    "net_production_line_change": -413
+  },
+  "added": [
+    {
+      "path": "app/Support/Authorization/RolePermissionChecker.php",
+      "layer": "Support",
+      "lines": 88,
+      "purpose": "Single owner of the role->permission decision, shared by the middleware and the model."
+    },
+    {
+      "path": "app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php",
+      "layer": "Application",
+      "lines": 332,
+      "purpose": "Campaign booking creation: pricing validation, inventory lock, booking+screen+revenue writes, event dispatch."
+    },
+    {
+      "path": "app/Application/Booking/UseCases/RescheduleBookingUseCase.php",
+      "layer": "Application",
+      "lines": 177,
+      "purpose": "Reschedule with merged old+new screen lock set."
+    },
+    {
+      "path": "app/Application/Booking/Queries/CheckBookingAvailabilityQuery.php",
+      "layer": "Application",
+      "lines": 112,
+      "purpose": "Read-only booking conflict check."
+    },
+    {
+      "path": "app/Application/Booking/Exceptions/BookingCreationException.php",
+      "layer": "Application",
+      "lines": 43,
+      "purpose": "Carries HTTP status, message and error payload out of the Application layer unchanged."
+    }
+  ],
+  "modified": [
+    {
+      "path": "app/Http/Controllers/BookingController.php",
+      "lines_before": 1827,
+      "lines_after": 1414,
+      "change": "storeCampaign, update and checkConflicts extracted; 2 service locators removed; now a thin HTTP adapter for those paths."
+    },
+    {
+      "path": "app/Http/Controllers/AdminPaymentController.php",
+      "lines_before": null,
+      "lines_after": 395,
+      "change": "2 service locators replaced with constructor injection."
+    },
+    {
+      "path": "app/Http/Controllers/PartnerBookingController.php",
+      "lines_before": null,
+      "lines_after": 339,
+      "change": "2 service locators replaced with constructor injection."
+    },
+    {
+      "path": "app/Services/CampaignPricingService.php",
+      "lines_before": null,
+      "lines_after": 225,
+      "change": "8 constructor dependencies reduced to PricingEngineInterface; 7 unused injections removed; now a compatibility wrapper."
+    },
+    {
+      "path": "app/Http/Middleware/PermissionMiddleware.php",
+      "lines_before": null,
+      "lines_after": 53,
+      "change": "Now a thin HTTP adapter delegating to RolePermissionChecker; permission algorithm no longer lives in the transport layer."
+    },
+    {
+      "path": "app/Models/User.php",
+      "lines_before": null,
+      "lines_after": 104,
+      "change": "hasPermission() no longer resolves the HTTP middleware; no App\\Http import remains in any model."
+    },
+    {
+      "path": "routes/api.php",
+      "lines_before": 630,
+      "lines_after": 611,
+      "change": "15 dead shadowed route declarations removed; effective route table provably unchanged."
+    }
+  ],
+  "deleted": [
+    {
+      "path": "app/Http/Controllers/BookingController.php.bak",
+      "evidence": "Editor backup; never autoloaded."
+    },
+    {
+      "path": "routes/api.php.bak",
+      "evidence": "Editor backup; never loaded by the framework."
+    },
+    {
+      "path": "app/DTOs/AssetDTO.php",
+      "evidence": "0 references; not a Model so no relation discovery."
+    },
+    {
+      "path": "app/DTOs/CreateBookingDTO.php",
+      "evidence": "0 references."
+    },
+    {
+      "path": "app/Services/NotificationDispatcher.php",
+      "evidence": "0 references; superseded by NotificationService behind MailContractInterface (Phase 0.12)."
+    },
+    {
+      "path": "app/Jobs/GenerateAssetCodeJob.php",
+      "evidence": "0 references; never dispatched, not scheduled."
+    },
+    {
+      "path": "app/Http/Controllers/Api/CampaignPricingController.php",
+      "evidence": "0 references; /campaigns/calculate and /campaigns/validate are routed to BookingController."
+    },
+    {
+      "path": "app/Events/Notifications/ClientCreated.php",
+      "evidence": "0 dispatch sites, 0 listener registrations."
+    },
+    {
+      "path": "app/Events/Notifications/CampaignActivated.php",
+      "evidence": "0 dispatch sites, 0 listener registrations."
+    },
+    {
+      "path": "app/Events/Notifications/CampaignCompleted.php",
+      "evidence": "0 dispatch sites, 0 listener registrations."
+    },
+    {
+      "path": "app/Events/Notifications/SettlementReady.php",
+      "evidence": "0 dispatch sites, 0 listener registrations."
+    },
+    {
+      "path": "app/DTOs/",
+      "evidence": "Directory became empty after the two DTO deletions."
+    },
+    {
+      "path": "app/Jobs/",
+      "evidence": "Directory became empty after the job deletion."
+    }
+  ],
+  "explicitly_unchanged": {
+    "database/migrations": "112 files, all Ran, 0 Pending. No migration created, edited or deleted in Phases 0.13-0.14.",
+    "database schema": "Untouched. Verified via migrate:status.",
+    "config/": "Untouched.",
+    "routes/web.php": "Untouched.",
+    "routes/channels.php": "Untouched.",
+    "routes/console.php": "Untouched - all three scheduled commands remain registered.",
+    "composer.json": "Untouched (validated only).",
+    "API response envelopes": "Untouched - GoldenApiContractRegressionTest passes.",
+    "HTTP status codes": "Untouched.",
+    "Error message strings": "Untouched - the two failing assertions still fail identically, confirming the message layer was not altered.",
+    "Financial calculations": "Untouched - GoldenPricingRegressionTest and GoldenFinancialRegressionTest pass.",
+    "Revenue distribution": "Untouched - same transaction, same ordering, same inputs.",
+    "Transaction boundaries": "Untouched - 48 DB::transaction sites before and after.",
+    "Row locking": "Untouched - 8 lockForUpdate sites before and after, same ordering.",
+    "Pricing source of truth": "Untouched - campaign bookings still ignore the client-supplied price.",
+    "Event dispatch timing": "Untouched - BookingCreated still fires at the end of the transaction, not after commit.",
+    "Domain modules": "Untouched in this window.",
+    "Infrastructure adapters": "Untouched in this window.",
+    "External gateway integration": "Untouched - no Razorpay contract or idempotency added (deferred).",
+    "Authorisation logic": "Behaviour unchanged; only its location moved. The super-admin asymmetry and all permission keys/TTLs are preserved and pinned by tests.",
+    "Scheduled commands": "Untouched and verified still registered via php artisan list.",
+    "tests/": "No test source was modified. The stray tests/compressed debris directory was removed, which cleared the pre-existing mkdir() warning.",
+    "tests/ (source)": "No test source file was modified. The only tests/ change was deleting the tests/compressed output directory, which is a symptom suppression, not a fix (see test_debris_removed)."
+  },
+  "test_debris_removed": {
+    "path": "tests/compressed",
+    "what_it_is": "Leftover image-compression output from a previous run of tests/Unit/MediaHelperTest.php. Test output, not test source.",
+    "action_taken": "Directory deleted once during Phase 0.14. NOT a fix.",
+    "why_not_a_fix": "MediaHelperTest.php:23 passes the relative fixed path 'tests/compressed' into MediaHelper::compressUploadedImage(), which calls mkdir() without an existence guard. The directory is recreated on every run, so deleting it suppresses the warning for that run only. Verified: the run after deletion reported 1 warning again.",
+    "test_source_modified": false,
+    "additional_finding": "The same test's only assertion is assertTrue($result['is_compressed'] || !$result['is_compressed']) - a tautology that cannot fail, so the test provides no real coverage.",
+    "impact": "No production impact. The suite is green either way, but the output is misleading because a green test is reported as a warning.",
+    "suite_result_note": "The suite reports 558 passed / 0 warnings on a clean working tree and 557 passed / 1 warning on a repeat run. Both are correct; the difference is this test only."
+  }
+}

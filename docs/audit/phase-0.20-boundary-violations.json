@@ -1,0 +1,252 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "method": "Static scan of every App\\ import in app/ against the plan's prohibited-direction rules, cross-checked against tests/Unit/Architecture/ArchitectureRuleTest.php exact-pinned debt.",
+ "total": 23,
+ "by_rule": {
+  "Support must not depend on Services.": 7,
+  "Domain must not depend on the persistence layer (Models).": 9,
+  "Domain must not depend on Services (Rule 2).": 7
+ },
+ "by_layer_pair": {
+  "Support->Services": 7,
+  "Domain->Models": 9,
+  "Domain->Services": 7
+ },
+ "violations": [
+  {
+   "class": "App\\Support\\Configs\\BookingConfig",
+   "file": "app/Support/Configs/BookingConfig.php",
+   "from_layer": "Support",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\SettingsService",
+   "rule": "Support must not depend on Services.",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Support\\Configs\\MediaConfig",
+   "file": "app/Support/Configs/MediaConfig.php",
+   "from_layer": "Support",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\SettingsService",
+   "rule": "Support must not depend on Services.",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Support\\Configs\\PricingConfig",
+   "file": "app/Support/Configs/PricingConfig.php",
+   "from_layer": "Support",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\SettingsService",
+   "rule": "Support must not depend on Services.",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Support\\Configs\\NotificationConfig",
+   "file": "app/Support/Configs/NotificationConfig.php",
+   "from_layer": "Support",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\SettingsService",
+   "rule": "Support must not depend on Services.",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Support\\Configs\\ConfigFactory",
+   "file": "app/Support/Configs/ConfigFactory.php",
+   "from_layer": "Support",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\SettingsService",
+   "rule": "Support must not depend on Services.",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Support\\Configs\\ReferralConfig",
+   "file": "app/Support/Configs/ReferralConfig.php",
+   "from_layer": "Support",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\SettingsService",
+   "rule": "Support must not depend on Services.",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Support\\Events\\NotificationEventSubscriber",
+   "file": "app/Support/Events/NotificationEventSubscriber.php",
+   "from_layer": "Support",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\NotificationService",
+   "rule": "Support must not depend on Services.",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Domain\\Asset\\Events\\AssetCreated",
+   "file": "app/Domain/Asset/Events/AssetCreated.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\Screen",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+   "file": "app/Domain/Financial/Contracts/SettlementRepositoryInterface.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\BookingScreen",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+   "file": "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\PartnerCommission",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Domain\\Payment\\PaymentStatus",
+   "file": "app/Domain/Payment/PaymentStatus.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\Payment",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+   "file": "app/Domain/Payment/Contracts/PaymentRepositoryInterface.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\Booking",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+   "file": "app/Domain/Payment/Contracts/PaymentRepositoryInterface.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\Payment",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "NOT ENFORCED BY TESTS"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\ReferralCode",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\RewardAccount",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Models",
+   "depends_on": "App\\Models\\Screen",
+   "rule": "Domain must not depend on the persistence layer (Models).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\Campaign\\LoyaltyService",
+   "rule": "Domain must not depend on Services (Rule 2).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\PricingRuleEngine",
+   "rule": "Domain must not depend on Services (Rule 2).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\Pricing\\DailyPricingCalculator",
+   "rule": "Domain must not depend on Services (Rule 2).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+   "rule": "Domain must not depend on Services (Rule 2).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\Pricing\\ReferralPricingCalculator",
+   "rule": "Domain must not depend on Services (Rule 2).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\Pricing\\ScreenPricingResolver",
+   "rule": "Domain must not depend on Services (Rule 2).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  },
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "from_layer": "Domain",
+   "to_layer": "Services",
+   "depends_on": "App\\Services\\SettingsService",
+   "rule": "Domain must not depend on Services (Rule 2).",
+   "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php"
+  }
+ ],
+ "known_debt_pinned_by_tests": [
+  {
+   "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+   "violation": "7 imports of App\\Services\\*",
+   "status": "PINNED AS DEBT - unchanged in count and in responsibility",
+   "note": "The LoyaltyService pin was updated to App\\Services\\Campaign\\LoyaltyService because that class moved. The debt COUNT is unchanged."
+  }
+ ],
+ "unpinned_gaps": [
+  {
+   "gap": "Domain -> Models is not enforced by ArchitectureRuleTest",
+   "affected_files": [
+    "app/Domain/Asset/Events/AssetCreated.php",
+    "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php",
+    "app/Domain/Financial/Contracts/SettlementRepositoryInterface.php",
+    "app/Domain/Payment/Contracts/PaymentRepositoryInterface.php",
+    "app/Domain/Payment/Contracts/PaymentRepositoryInterface.php",
+    "app/Domain/Payment/PaymentStatus.php",
+    "app/Domain/Pricing/CampaignPricingEngine.php",
+    "app/Domain/Pricing/CampaignPricingEngine.php",
+    "app/Domain/Pricing/CampaignPricingEngine.php"
+   ],
+   "note": "6 Domain files import App\\Models. This is a genuine plan violation (Domain must not depend on the persistence layer) that the test suite does not currently catch.",
+   "priority": "P1",
+   "decision": "REPORTED, NOT FIXED IN PHASE 0.20 - removing these requires introducing repository contracts for Screen, ReferralCode, RewardAccount, BookingScreen, PartnerCommission, Payment and Booking, which is a behavioural change to the persistence boundary."
+  }
+ ]
+}

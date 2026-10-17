@@ -1,0 +1,214 @@
+{
+  "phase": "0.4",
+  "name": "Controller Extraction Map",
+  "generated_at": "2026-09-25T22:52:00+05:30",
+  "controllers": [
+    {
+      "controller": "App\\Http\\Controllers\\BookingController",
+      "current_loc": 1826,
+      "responsibilities": [
+        {
+          "responsibility": "Advertiser campaign booking creation & transactional persistence",
+          "action": "storeCampaign",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Booking\\CreateCampaignBookingUseCase",
+          "domain": "Booking",
+          "dependencies": ["InventoryService", "BookingCapacityService", "CampaignPricingService", "RevenueDistributionService"],
+          "regression_tests": [
+            "GoldenApiContractRegressionTest::test_advertiser_campaign_booking_contract_and_auth",
+            "GoldenBookingRegressionTest::test_advertiser_channel_booking_creation_and_snapshots"
+          ],
+          "migration_priority": "CRITICAL"
+        },
+        {
+          "responsibility": "Campaign pricing calculation preview",
+          "action": "calculateCampaignPricing",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Pricing\\CalculateCampaignPricingUseCase",
+          "domain": "Pricing",
+          "dependencies": ["CampaignPricingService"],
+          "regression_tests": [
+            "GoldenApiContractRegressionTest::test_campaign_pricing_calculate_contract_success_and_validation",
+            "GoldenPricingRegressionTest::test_case_pricing_001_single_screen_one_day"
+          ],
+          "migration_priority": "HIGH"
+        },
+        {
+          "responsibility": "Capacity availability evaluation",
+          "action": "checkScreenCapacity",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Availability\\CheckScreenCapacityUseCase",
+          "domain": "Availability",
+          "dependencies": ["BookingCapacityService", "InventoryService"],
+          "regression_tests": [
+            "GoldenAvailabilityRegressionTest::test_available_screen_returns_eligible",
+            "GoldenAvailabilityRegressionTest::test_overlapping_active_booking_causes_ineligibility"
+          ],
+          "migration_priority": "HIGH"
+        },
+        {
+          "responsibility": "Booking lifecycle approval and media checks",
+          "action": "approve",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Booking\\ApproveBookingUseCase",
+          "domain": "Booking",
+          "dependencies": ["LoyaltyService", "SettingsService"],
+          "regression_tests": ["BookingChannelsAndRescheduleHardeningTest"],
+          "migration_priority": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "controller": "App\\Http\\Controllers\\ScreenController",
+      "current_loc": 1065,
+      "responsibilities": [
+        {
+          "responsibility": "Screen inventory listing and multi-attribute filtering",
+          "action": "index",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Asset\\ListScreensQuery",
+          "domain": "Asset",
+          "dependencies": ["Screen", "ScreenCategory", "City"],
+          "regression_tests": ["AssetManagementFiltersTest"],
+          "migration_priority": "MEDIUM"
+        },
+        {
+          "responsibility": "Screen creation and asset code generation",
+          "action": "store",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Asset\\CreateScreenUseCase",
+          "domain": "Asset",
+          "dependencies": ["GenerateAssetCodeJob", "MediaHelper"],
+          "regression_tests": ["AssetApiTest"],
+          "migration_priority": "MEDIUM"
+        },
+        {
+          "responsibility": "Safe screen deletion preventing active booking cancellation",
+          "action": "destroy",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Asset\\DeleteScreenUseCase",
+          "domain": "Asset",
+          "dependencies": ["ScreenDeletionService"],
+          "regression_tests": ["AssetSoftDeleteTest", "AssetBulkDeleteTest"],
+          "migration_priority": "HIGH"
+        }
+      ]
+    },
+    {
+      "controller": "App\\Http\\Controllers\\PaymentController",
+      "current_loc": 165,
+      "responsibilities": [
+        {
+          "responsibility": "Razorpay payment order initialization and paise conversion",
+          "action": "createOrder",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Payment\\CreatePaymentOrderUseCase",
+          "domain": "Payment",
+          "dependencies": ["PaymentService"],
+          "regression_tests": [
+            "GoldenApiContractRegressionTest::test_payment_order_create_contract_and_auth",
+            "GoldenPaymentRegressionTest::test_signature_verification_valid_and_invalid"
+          ],
+          "migration_priority": "CRITICAL"
+        },
+        {
+          "responsibility": "Cryptographic signature verification, booking transition, revenue distribution",
+          "action": "verify",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Payment\\VerifyPaymentUseCase",
+          "domain": "Payment",
+          "dependencies": ["PaymentService", "ReferralTrackingService"],
+          "regression_tests": [
+            "GoldenPaymentRegressionTest::test_verify_and_confirm_payment_successful_state_transition",
+            "GoldenPaymentRegressionTest::test_duplicate_verification_request_is_rejected"
+          ],
+          "migration_priority": "CRITICAL"
+        }
+      ]
+    },
+    {
+      "controller": "App\\Http\\Controllers\\PartnerBookingController",
+      "current_loc": 342,
+      "responsibilities": [
+        {
+          "responsibility": "Partner managed campaign creation and referral auto-injection",
+          "action": "store",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Partner\\CreatePartnerBookingUseCase",
+          "domain": "Partner",
+          "dependencies": ["ManualBookingService"],
+          "regression_tests": [
+            "GoldenBookingRegressionTest::test_partner_channel_booking_creation"
+          ],
+          "migration_priority": "HIGH"
+        },
+        {
+          "responsibility": "Partner campaign pricing calculation with referral discounts",
+          "action": "calculate",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Partner\\CalculatePartnerPricingUseCase",
+          "domain": "Pricing",
+          "dependencies": ["ManualBookingService"],
+          "regression_tests": [
+            "GoldenApiContractRegressionTest::test_partner_calculate_contract_and_auth"
+          ],
+          "migration_priority": "HIGH"
+        }
+      ]
+    },
+    {
+      "controller": "App\\Http\\Controllers\\AdminManualBookingController",
+      "current_loc": 280,
+      "responsibilities": [
+        {
+          "responsibility": "Admin client auto-creation, offline payment recording, manual booking creation",
+          "action": "store",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Booking\\CreateAdminManualBookingUseCase",
+          "domain": "Booking",
+          "dependencies": ["ManualBookingService"],
+          "regression_tests": [
+            "GoldenBookingRegressionTest::test_admin_manual_booking_creation"
+          ],
+          "migration_priority": "HIGH"
+        }
+      ]
+    },
+    {
+      "controller": "App\\Http\\Controllers\\Api\\BookingEngineController",
+      "current_loc": 139,
+      "responsibilities": [
+        {
+          "responsibility": "V2 automated multi-asset campaign creation and line-item creation",
+          "action": "store",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Booking\\CreateV2BookingUseCase",
+          "domain": "Booking",
+          "dependencies": ["ConflictDetectionService", "PricingEngine", "InventoryService"],
+          "regression_tests": [
+            "GoldenBookingRegressionTest::test_v2_api_booking_creation"
+          ],
+          "migration_priority": "HIGH"
+        }
+      ]
+    },
+    {
+      "controller": "App\\Http\\Controllers\\Auth\\GoogleAuthController",
+      "current_loc": 84,
+      "responsibilities": [
+        {
+          "responsibility": "Google OAuth token verification and user linking",
+          "action": "__invoke",
+          "target_layer": "Application",
+          "target_use_case": "App\\Application\\Identity\\AuthenticateWithGoogleUseCase",
+          "domain": "Identity",
+          "dependencies": ["Infrastructure\\External\\GoogleOAuthAdapter"],
+          "regression_tests": [
+            "GoldenApiContractRegressionTest::test_google_auth_contract_with_mocked_tokeninfo"
+          ],
+          "migration_priority": "MEDIUM"
+        }
+      ]
+    }
+  ]
+}

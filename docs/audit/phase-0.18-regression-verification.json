@@ -1,0 +1,81 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "regression-verification",
+  "baseline": "571 passed, 2 failed, 1 warning, 4 skipped, 5323 assertions",
+  "after_phase_0_18": {
+    "tests": "571 passed, 2 failed, 1 warning, 4 skipped",
+    "assertions": 5323,
+    "duration_seconds": 68.03,
+    "verdict": "IDENTICAL to baseline"
+  },
+  "verification_performed_after_each_move": [
+    {
+      "move": "Listeners/NotificationEventSubscriber -> Support/Events",
+      "checks": [
+        "old FQCN grep -> 0",
+        "new FQCN class_exists -> true",
+        "EventServiceProvider::$subscribe -> correct",
+        "container resolution",
+        "full suite 571 passed",
+        "route parity IDENTICAL"
+      ]
+    },
+    {
+      "move": "Services/{AssetDiscoveryFilterService,CoverageService} -> Application/Asset/Services",
+      "checks": [
+        "old FQCN grep -> 0",
+        "new FQCN class_exists -> true",
+        "container resolution of both -> OK",
+        "container resolution of CONSUMER AssetService -> FAILED, then fixed",
+        "CoverageController import rewritten",
+        "full suite 571 passed",
+        "route parity IDENTICAL",
+        "architecture test 14 passed"
+      ]
+    }
+  ],
+  "route_contract": {
+    "routes": 385,
+    "differences": 0
+  },
+  "schema": {
+    "tables": 74,
+    "columns": 796,
+    "indexes": 252,
+    "foreign_keys": 94,
+    "verdict": "IDENTICAL",
+    "migrations": {
+      "applied": 112,
+      "pending": 0
+    }
+  },
+  "architecture_test": "14 passed, 17 assertions",
+  "financial_behaviour": {
+    "verdict": "UNCHANGED",
+    "detail": "No pricing, availability, booking, payment, refund, settlement or commission class was moved or edited. The only Services touched were two pure Asset collaborators and one notification subscriber. CampaignBookingPricingIntegrityTest, MinutePricingEngineTest and the payment tests all run inside the 571 passing set, unchanged."
+  },
+  "concurrency": {
+    "verdict": "UNCHANGED",
+    "detail": "InventoryService, its lockForUpdate reservation and the booking transaction boundaries were untouched."
+  },
+  "authorization": {
+    "verdict": "UNCHANGED",
+    "detail": "No middleware entry, Gate, policy or permission mapping was modified. The 19 anonymous /api/v2 routes and the SEC-01 booking bypass remain exactly as Phase 0.16 recorded them."
+  },
+  "scheduler_queue_events": {
+    "verdict": "UNCHANGED",
+    "detail": "4 scheduler entries, 133 Artisan commands, 34 event classes. The only change was the FQCN of one provider-registered subscriber, verified registered."
+  },
+  "external_integrations": {
+    "verdict": "UNCHANGED",
+    "detail": "All 14 Infrastructure classes untouched."
+  },
+  "known_failures": {
+    "status": "PRE-EXISTING",
+    "count": 2,
+    "note": "BookingConcurrencyTest and CampaignBookingPricingIntegrityTest message-wording drift, plus the MediaHelperTest tautological-assertion warning. None introduced or altered by Phase 0.18."
+  }
+}

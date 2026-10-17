@@ -1,0 +1,32 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "migration-ledger",
+  "migrations_on_disk": 112,
+  "migrations_applied": 112,
+  "pending": 0,
+  "schema_changed_in_phase_015": false,
+  "before": {
+    "source": "/tmp/p016/schema.before.json",
+    "tables": 74,
+    "columns": 796,
+    "index_entries": 252,
+    "foreign_keys": 94,
+    "sha256": "393d68633c3f5dc8b013631a44c28dd31d3f812c2efadd3f61140fdbf69baa1a"
+  },
+  "after": {
+    "tables": 74,
+    "columns": 796,
+    "index_entries": 252,
+    "foreign_keys": 94,
+    "sha256": "393d68633c3f5dc8b013631a44c28dd31d3f812c2efadd3f61140fdbf69baa1a"
+  },
+  "verdict": "IDENTICAL - no schema drift",
+  "notes": [
+    "mysqldump is not installed in this environment; drift was detected by fingerprinting information_schema through Laravel instead.",
+    "route count verified identical at 385 with zero changed actions or middleware.",
+    "no migration was added, renamed or edited."
+  ]
+}

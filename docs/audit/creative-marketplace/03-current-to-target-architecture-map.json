@@ -1,0 +1,164 @@
+{
+  "artifact": "03-current-to-target-architecture-map",
+  "generated": "2026-09-26",
+  "purpose": "Maps the current implementation to the approved target architecture, and states the Creative relationship for each. Nothing is moved by this audit; every 'migration_required' entry is a proposal requiring architect approval.",
+  "rules_applied": [
+    "ARCHITECTURE_RULES.md Rule 5 — external contracts are frozen",
+    "ARCHITECTURE_RULES.md Rule 6 — repository abstraction only where justified",
+    "ARCHITECTURE_RULES.md Rule 7 — strangler: wrap and delegate, never duplicate",
+    "ARCHITECTURE_RULES.md Rule 11 — strict layer dependency direction",
+    "ARCHITECTURE_RULES.md Rule 13 — verified deletion"
+  ],
+  "classification_legend": {
+    "CURRENT_FACT": "Verified from source code.",
+    "ARCHITECTURE_DOCUMENT": "Defined by project architecture documentation.",
+    "INFERENCE": "Reasonably inferred.",
+    "RECOMMENDATION": "Proposed target approach.",
+    "OPEN_DECISION": "Requires architect/product decision."
+  },
+
+  "layers": [
+    {
+      "current_layer": "app/Domain",
+      "current_classes": 15,
+      "target_responsibility": "Pure business rules, value objects, domain contracts, domain states, domain services. No HTTP, no Eloquent, no SDKs, no transaction orchestration.",
+      "current_to_target_gaps": [
+        "6 Domain files import App\\Models (9 edges) — unenforced debt",
+        "7 imports in CampaignPricingEngine point Domain -> Services — pinned debt",
+        "No aggregates, no repository implementations, no domain events other than AssetCreated (dead)"
+      ],
+      "creative_relationship": "NEW. app/Domain/Creative/** does not exist and must be created with zero App\\Models and zero App\\Services imports.",
+      "migration_required": false,
+      "creative_action": "CREATE (new tree)"
+    },
+    {
+      "current_layer": "app/Services",
+      "current_classes": 48,
+      "target_responsibility": "Application / use-case orchestration. Coordinate domain operations, repositories, transactions, external contracts, workflows.",
+      "current_to_target_gaps": [
+        "28 classes still flat at the root (recorded Phase 0.20 debt)",
+        "~30 of 48 do direct Eloquent instead of going through repositories",
+        "10 open DB::transaction; the class is both application layer and data layer"
+      ],
+      "creative_relationship": "EXTEND with a new app/Services/Creative subdirectory. Creative application services only; no legacy service may be called from Creative domain code.",
+      "migration_required": false,
+      "creative_action": "CREATE (new subdirectory)"
+    },
+    {
+      "current_layer": "app/Application",
+      "current_classes": 32,
+      "target_responsibility": "Layer being retired. Reporting (17) and payment/financial use cases (15) are the deliberate survivors.",
+      "current_to_target_gaps": ["Being retired; no new class may be added"],
+      "creative_relationship": "DO NOT USE. Creative has no place in app/Application.",
+      "migration_required": false,
+      "creative_action": "AVOID ENTIRELY"
+    },
+    {
+      "current_layer": "app/Repositories",
+      "current_classes": 4,
+      "target_responsibility": "Repository contracts + persistence-facing abstractions where isolation/complex query/testability is justified (Rule 6).",
+      "current_to_target_gaps": ["Only Asset and Booking have repositories; 4 capabilities have none (recorded P2 debt)"],
+      "creative_relationship": "NEW app/Repositories/Creative with contracts + implementations, matching the Asset/Booking precedent.",
+      "migration_required": false,
+      "creative_action": "CREATE (new subdirectory)"
+    },
+    {
+      "current_layer": "app/Infrastructure",
+      "current_classes": 14,
+      "target_responsibility": "Adapters, vendor drivers, persistence implementations. May depend on Laravel and vendor SDKs. SDK types must not leak inward (Rule 3).",
+      "current_to_target_gaps": [
+        "No app/Infrastructure/Persistence directory — Eloquent repositories live under Payments/ and Financial/Persistence/ instead",
+        "10 controllers bypass the Storage contract"
+      ],
+      "creative_relationship": "REUSE all 6 existing contracts as-is. A private-disk contract is NEW WORK (see storage artifact).",
+      "migration_required": false,
+      "creative_action": "REUSE + 1 NEW ADAPTER"
+    },
+    {
+      "current_layer": "app/Http",
+      "current_classes": 81,
+      "target_responsibility": "Controllers, Requests, Resources, Middleware. Thin: validate/authorize -> invoke use case -> respond.",
+      "current_to_target_gaps": [
+        "68 controllers, of which ScreenController and DashBoardController are fat (Rule 1 violations)",
+        "No Policies directory",
+        "6 distinct response envelopes",
+        "Only 5 Form Requests for 385 routes; most validation is inline"
+      ],
+      "creative_relationship": "NEW app/Http/Controllers/Creative, app/Http/Requests/Creative, app/Http/Resources/Creative, built to the thin pattern with a policy layer.",
+      "migration_required": false,
+      "creative_action": "CREATE (new subdirectories)"
+    },
+    {
+      "current_layer": "app/Support",
+      "current_classes": 44,
+      "target_responsibility": "Genuinely cross-cutting: Events, Jobs, Exceptions, Authorization, Configs.",
+      "current_to_target_gaps": ["app/Support/Jobs does not exist", "Support -> Services imports (7) are recorded debt"],
+      "creative_relationship": "EXTEND Events (new notification events) and Configs (new creative_* groups). Authorization gains policies, not a new algorithm.",
+      "migration_required": false,
+      "creative_action": "EXTEND"
+    },
+    {
+      "current_layer": "app/Models",
+      "current_classes": 62,
+      "target_responsibility": "Active Record persistence. Retained and justified per Phase 0.20. Must not reference the HTTP layer (Rule 11).",
+      "current_to_target_gaps": ["A Model -> Http inversion was found and fixed in Phase 0.14 (User::hasPermission resolving PermissionMiddleware)"],
+      "creative_relationship": "NEW Creative models. The Creative domain must NOT reference them; only Creative repositories may.",
+      "migration_required": false,
+      "creative_action": "CREATE (new models)"
+    }
+  ],
+
+  "class_level_mapping": [
+    { "current_class": "App\\Services\\PaymentService", "current_responsibility": "Razorpay order creation, signature verification, payment confirmation + referral attribution + booking status transition, fetch, refund", "target_location": ["App\\Services\\Payment\\PaymentService (orchestration)", "App\\Application\\Payment\\UseCases (already exists)", "App\\Infrastructure\\Payments (gateway — already exists)"], "creative_relationship": "NEEDS_ARCHITECTURAL_DECISION — the gateway contract is reusable, the booking-coupled confirmation flow is not", "migration_required": false, "classification": "CURRENT_FACT + OPEN_DECISION" },
+    { "current_class": "App\\Domain\\Payment\\Support\\Money", "current_responsibility": "Paise/rupee conversion and normalisation; int paise for the gateway, float rupees rounded to 2dp for persistence", "target_location": ["App\\Domain\\Payment\\Support\\Money (stays)"], "creative_relationship": "REUSE for gateway amount conversion only. Creative must define its own money value object for domain arithmetic, because the existing Money class has no add/subtract/allocate operations.", "migration_required": false, "classification": "RECOMMENDATION" },
+    { "current_class": "App\\Services\\SettlementService", "current_responsibility": "Screen-provider settlement period lifecycle: generate, approve, markAsPaid, cancel", "target_location": ["App\\Services\\Settlement\\SettlementService", "App\\Domain\\Financial (period + release rules)", "App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository"], "creative_relationship": "PATTERN ONLY. The eligibility predicate is hard-wired to screen_providers and booking_screens.settlement_status.", "migration_required": false, "classification": "INFERENCE" },
+    { "current_class": "App\\Services\\CommissionService", "current_responsibility": "Affiliate partner commission lifecycle; its pessimistic lock was extracted to EloquentPartnerCommissionRepository::findOrFailForUpdate in Phase 0.10", "target_location": ["App\\Services\\Financial or a new Commission capability", "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface"], "creative_relationship": "NEEDS_ARCHITECTURAL_DECISION — the only complete approve->paid->cancel machine in the repo, but bound to partner_commissions semantics", "migration_required": false, "classification": "OPEN_DECISION" },
+    { "current_class": "App\\Services\\MediaService", "current_responsibility": "File upload/delete via StorageContractInterface plus booking-media validation-rule builders", "target_location": ["App\\Services\\Media\\MediaService", "App\\Infrastructure\\Storage (already exists)"], "creative_relationship": "WRAP/ADAPT — the only zero-Eloquent file primitive in the repository", "migration_required": false, "classification": "RECOMMENDATION" },
+    { "current_class": "App\\Services\\NotificationService", "current_responsibility": "Single notification dispatch point: config gate -> recipient resolution -> MailContractInterface -> notification_logs", "target_location": ["App\\Services\\Notification (or Support\\Notifications)"], "creative_relationship": "EXTEND — add a creator recipient role and creative_* config keys", "migration_required": false, "classification": "RECOMMENDATION" },
+    { "current_class": "App\\Support\\Events\\NotificationEventSubscriber", "current_responsibility": "33 synchronous event handlers mapping events to mailables and recipients", "target_location": ["App\\Support\\Events (stays)"], "creative_relationship": "EXTEND with creative handlers", "migration_required": false, "classification": "RECOMMENDATION" },
+    { "current_class": "App\\Support\\Authorization\\RolePermissionChecker", "current_responsibility": "SINGLE owner of the permission algorithm (Rule 12). Role-slug -> role_permissions lookup, 3600s cache. No super-admin bypass.", "target_location": ["Stays exactly where it is"], "creative_relationship": "REUSE AS-IS. Creative permissions are granted through the same matrix. Creative must NOT implement a second permission algorithm.", "migration_required": false, "classification": "ARCHITECTURE_DOCUMENT" },
+    { "current_class": "App\\Http\\Middleware\\PermissionMiddleware", "current_responsibility": "Route-boundary authorization; contains the super-admin bypass", "target_location": ["Stays exactly where it is"], "creative_relationship": "REUSE AS-IS for all Creative routes", "migration_required": false, "classification": "ARCHITECTURE_DOCUMENT" },
+    { "current_class": "App\\Services\\ScreenProviderService", "current_responsibility": "Provider onboarding: enquiry->approve, portal invitation, reject, create, update, revenue-split update, activity log, notes, timeline", "target_location": ["Would become Provider capability; currently un-migrated"], "creative_relationship": "STRUCTURAL TEMPLATE for creator onboarding/profile, but its 5 inline transactions and 6 models must be extracted, not called", "migration_required": false, "classification": "INFERENCE" },
+    { "current_class": "App\\Services\\BookingWorkflowService", "current_responsibility": "7-state booking transition guard", "target_location": ["App\\Domain\\Booking (state machine)"], "creative_relationship": "PATTERN ONLY for the Creative Project state machine. Booking status vocabulary is wrong.", "migration_required": false, "classification": "INFERENCE" },
+    { "current_class": "App\\Services\\SettingsService", "current_responsibility": "DB-cached key/value settings with 11 typed accessors", "target_location": ["Stays"], "creative_relationship": "EXTEND with creative_* groups — lowest-risk reuse in the repository", "migration_required": false, "classification": "RECOMMENDATION" },
+    { "current_class": "App\\Services\\ProfileService", "current_responsibility": "ADVERTISER dashboard and avatar upload", "target_location": ["Stays (advertiser-facing)"], "creative_relationship": "DO NOT USE. It is a creator profile that shares a name with an advertiser profile — a trap. Only uploadAvatar():209 is generic.", "migration_required": false, "classification": "CURRENT_FACT" },
+    { "current_class": "App\\Services\\AssetService / App\\Repositories\\Asset\\*", "current_responsibility": "Ad inventory (Screen) CRUD and stats", "target_location": ["Stays"], "creative_relationship": "DO NOT USE the service. 'Asset' means media inventory, not creative work files. The repository pattern is a good template but the subject is wrong.", "migration_required": false, "classification": "CURRENT_FACT" },
+    { "current_class": "App\\Services\\ReportService", "current_responsibility": "@deprecated facade delegating 10 report getters to ReportQueryRegistry", "target_location": ["ReportQueryRegistry (app/Application/Reporting)"], "creative_relationship": "DO NOT USE. Creative reporting must add ReportQuery implementations to the registry, or a new Creative query namespace, not extend this facade.", "migration_required": false, "classification": "CURRENT_FACT" },
+    { "current_class": "App\\Services\\Campaign\\LoyaltyService", "current_responsibility": "Reward-points accrual/reversal/redeem against reward_accounts (5 transactions)", "target_location": ["Stays (advertising loyalty)"], "creative_relationship": "PATTERN ONLY — the only ledger-with-balance implementation in the repo, but it is non-cash points tied to bookings.", "migration_required": false, "classification": "INFERENCE" },
+    { "current_class": "App\\Helpers\\MediaHelper", "current_responsibility": "WebP compression ladder (70KB target, q80->q20 step 10), raw file_put_contents, no DB writes", "target_location": ["Should move to Infrastructure\\Media", "Stays reachable for now"], "creative_relationship": "DO NOT CALL from Creative. It bypasses the storage contract, uses an unsanitised path, has no size/mime policy, and only ever used by FileController (which is itself unsafe).", "migration_required": false, "classification": "RECOMMENDATION" }
+  ],
+
+  "creative_target_layers": {
+    "classification": "RECOMMENDATION",
+    "domain": {
+      "path": "app/Domain/Creative/",
+      "subdomains": ["Creator", "Service", "Brief", "Proposal", "Project", "Revision", "Delivery", "Review", "Earnings"],
+      "current_state": "ABSENT — verified 2026-09-26"
+    },
+    "application": { "path": "app/Services/Creative/", "current_state": "ABSENT" },
+    "repositories": { "path": "app/Repositories/Creative/", "current_state": "ABSENT" },
+    "http": {
+      "controllers": "app/Http/Controllers/Creative/",
+      "requests": "app/Http/Requests/Creative/",
+      "resources": "app/Http/Resources/Creative/",
+      "current_state": "ABSENT"
+    },
+    "policies": { "path": "app/Policies/Creative/", "current_state": "ABSENT — would be the FIRST policy layer in the repository", "classification": "RECOMMENDATION" },
+    "infrastructure_reuse": {
+      "reuse_as_is": ["StorageContractInterface", "MailContractInterface", "ImageProcessingContractInterface", "PaymentGatewayInterface"],
+      "new_adapters_required": ["A private-disk storage adapter (signed URL access) — NEW WORK, no precedent exists"]
+    }
+  },
+
+  "migration_sequence_dependencies": [
+    { "order": 1, "step": "Create app/Domain/Creative module root and 9 subdomain directories", "blocked_by": [], "note": "OPEN_DECISION: this is a structural decision, not a file move. AGENTS.md forbids creating new layers to dodge decisions, but Creative is an already-authorised bounded domain." },
+    { "order": 2, "step": "Add 'creator' role + creative.* permissions to RolesAndPermissionsSeeder and ScreenProviderRoleSeeder-equivalent", "blocked_by": [], "note": "Also requires a Policy vocabulary test extension; Sec03PermissionVocabularyTest will fail until the seeder and routes agree." },
+    { "order": 3, "step": "Build Creator aggregate (onboarding, profile, portfolio) — first vertical slice", "blocked_by": [1, 2] },
+    { "order": 4, "step": "Build Creative Service listing + Brief", "blocked_by": [3] },
+    { "order": 5, "step": "Build Proposal + acceptance", "blocked_by": [4] },
+    { "order": 6, "step": "Build Creative Project + funding", "blocked_by": [5], "open_decision": "Funding model (escrow vs upfront vs milestone) is not determined by any existing document." },
+    { "order": 7, "step": "Build Revision + Delivery + Review", "blocked_by": [6] },
+    { "order": 8, "step": "Build Earnings + commission + payout", "blocked_by": [6, 7], "open_decision": "Earning release rules and payout mechanics are undetermined." },
+    { "order": 9, "step": "Notifications, reporting, hardening", "blocked_by": [3, 6, 8] }
+  ]
+}

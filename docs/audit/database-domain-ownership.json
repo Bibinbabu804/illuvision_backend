@@ -1,0 +1,216 @@
+{
+  "phase": "0.4",
+  "name": "Database Domain Ownership Map",
+  "generated_at": "2026-09-25T22:52:00+05:30",
+  "tables": [
+    {
+      "table_name": "bookings",
+      "model_class": "App\\Models\\Booking",
+      "business_domain": "Booking",
+      "target_owner": "Domain\\Booking",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "CRITICAL",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Pricing", "Availability", "Payment", "Partner", "Provider"],
+      "migration_risk": "CRITICAL"
+    },
+    {
+      "table_name": "booking_screens",
+      "model_class": "App\\Models\\BookingScreen",
+      "business_domain": "Booking / Settlement",
+      "target_owner": "Domain\\Booking",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "CRITICAL",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Asset", "Provider", "Settlement"],
+      "migration_risk": "CRITICAL"
+    },
+    {
+      "table_name": "booking_pricing_breakdowns",
+      "model_class": "App\\Models\\BookingPricingBreakdown",
+      "business_domain": "Pricing",
+      "target_owner": "Domain\\Pricing",
+      "read_write_responsibility": "Append-Only",
+      "financial_sensitivity": "HIGH",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Booking"],
+      "migration_risk": "LOW"
+    },
+    {
+      "table_name": "booking_activities",
+      "model_class": "App\\Models\\BookingActivity",
+      "business_domain": "Booking",
+      "target_owner": "Domain\\Booking",
+      "read_write_responsibility": "Append-Only Audit Log",
+      "financial_sensitivity": "MEDIUM",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["User", "Payment", "Partner"],
+      "migration_risk": "LOW"
+    },
+    {
+      "table_name": "booking_media",
+      "model_class": "App\\Models\\BookingMedia",
+      "business_domain": "Media",
+      "target_owner": "Domain\\Media",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "LOW",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": ["Booking", "Creative"],
+      "migration_risk": "MEDIUM"
+    },
+    {
+      "table_name": "payments",
+      "model_class": "App\\Models\\Payment",
+      "business_domain": "Payment",
+      "target_owner": "Domain\\Payment",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "CRITICAL",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Booking", "Partner"],
+      "migration_risk": "CRITICAL"
+    },
+    {
+      "table_name": "payment_logs",
+      "model_class": "App\\Models\\PaymentLog",
+      "business_domain": "Payment",
+      "target_owner": "Domain\\Payment",
+      "read_write_responsibility": "Append-Only",
+      "financial_sensitivity": "HIGH",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Payment"],
+      "migration_risk": "LOW"
+    },
+    {
+      "table_name": "refunds",
+      "model_class": "App\\Models\\Refund",
+      "business_domain": "Payment",
+      "target_owner": "Domain\\Payment",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "CRITICAL",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Payment", "Booking"],
+      "migration_risk": "HIGH"
+    },
+    {
+      "table_name": "screens",
+      "model_class": "App\\Models\\Screen",
+      "business_domain": "Asset",
+      "target_owner": "Domain\\Asset",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "HIGH",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": ["Provider", "Pricing", "Availability"],
+      "migration_risk": "HIGH"
+    },
+    {
+      "table_name": "screen_categories",
+      "model_class": "App\\Models\\ScreenCategory",
+      "business_domain": "Asset",
+      "target_owner": "Domain\\Asset",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "LOW",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": [],
+      "migration_risk": "LOW"
+    },
+    {
+      "table_name": "screen_providers",
+      "model_class": "App\\Models\\ScreenProvider",
+      "business_domain": "Provider",
+      "target_owner": "Domain\\Provider",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "HIGH",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": ["Settlement", "Asset"],
+      "migration_risk": "HIGH"
+    },
+    {
+      "table_name": "screen_provider_settlements",
+      "model_class": "App\\Models\\ScreenProviderSettlement",
+      "business_domain": "Settlement",
+      "target_owner": "Domain\\Settlement",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "CRITICAL",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Provider", "BookingScreen"],
+      "migration_risk": "CRITICAL"
+    },
+    {
+      "table_name": "partners",
+      "model_class": "App\\Models\\Partner",
+      "business_domain": "Partner",
+      "target_owner": "Domain\\Partner",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "HIGH",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": ["Booking", "Settlement"],
+      "migration_risk": "HIGH"
+    },
+    {
+      "table_name": "partner_commissions",
+      "model_class": "App\\Models\\PartnerCommission",
+      "business_domain": "Partner / Settlement",
+      "target_owner": "Domain\\Partner",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "CRITICAL",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Partner", "Booking", "Payment"],
+      "migration_risk": "CRITICAL"
+    },
+    {
+      "table_name": "referral_codes",
+      "model_class": "App\\Models\\ReferralCode",
+      "business_domain": "Partner",
+      "target_owner": "Domain\\Partner",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "HIGH",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": ["Pricing", "Booking"],
+      "migration_risk": "MEDIUM"
+    },
+    {
+      "table_name": "pricing_plans",
+      "model_class": "App\\Models\\PricingPlan",
+      "business_domain": "Pricing",
+      "target_owner": "Domain\\Pricing",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "HIGH",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": ["Asset"],
+      "migration_risk": "HIGH"
+    },
+    {
+      "table_name": "pricing_duration_rules",
+      "model_class": "App\\Models\\PricingDurationRule",
+      "business_domain": "Pricing",
+      "target_owner": "Domain\\Pricing",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "HIGH",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": ["PricingPlan"],
+      "migration_risk": "MEDIUM"
+    },
+    {
+      "table_name": "screen_duration_split_overrides",
+      "model_class": "App\\Models\\ScreenDurationSplitOverride",
+      "business_domain": "Settlement",
+      "target_owner": "Domain\\Settlement",
+      "read_write_responsibility": "Read/Write",
+      "financial_sensitivity": "CRITICAL",
+      "immutable_historical_data": false,
+      "cross_domain_dependencies": ["Screen", "PricingDurationRule", "PricingPlan"],
+      "migration_risk": "HIGH"
+    },
+    {
+      "table_name": "accounting_ledger_entries",
+      "model_class": "App\\Models\\AccountingLedgerEntry",
+      "business_domain": "Settlement",
+      "target_owner": "Domain\\Settlement",
+      "read_write_responsibility": "Append-Only",
+      "financial_sensitivity": "CRITICAL",
+      "immutable_historical_data": true,
+      "cross_domain_dependencies": ["Booking", "Payment", "Settlement"],
+      "migration_risk": "HIGH"
+    }
+  ]
+}

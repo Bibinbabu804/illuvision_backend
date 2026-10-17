@@ -1,0 +1,90 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "dependency-conformance",
+  "authority": "tests/Unit/Architecture/ArchitectureRuleTest.php (14 tests, 17 assertions) plus targeted greps performed in this phase",
+  "executable_rules": {
+    "rule_2_domain_must_not_import": {
+      "state": "RED - debt pinned",
+      "pinned_imports": 7,
+      "pinned_file": "app/Domain/Pricing/CampaignPricingEngine.php",
+      "pinned_targets": [
+        "App\\Services\\LoyaltyService",
+        "App\\Services\\PricingRuleEngine",
+        "App\\Services\\Pricing\\DailyPricingCalculator",
+        "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+        "App\\Services\\Pricing\\ReferralPricingCalculator",
+        "App\\Services\\Pricing\\ScreenPricingResolver",
+        "App\\Services\\SettingsService"
+      ],
+      "delta_in_this_phase": "NONE. Identical before and after; the allowlist did not change."
+    },
+    "rule_2b_domain_must_not_import_console_infrastructure_application": {
+      "state": "GREEN",
+      "violations": 0
+    },
+    "rule_11_domain_must_not_import_http": {
+      "state": "GREEN",
+      "violations": 0
+    },
+    "rule_11_inner_layers_have_no_service_locators": {
+      "state": "GREEN",
+      "domain": 0,
+      "application": 0
+    },
+    "rule_12_service_locator_debt_does_not_grow": {
+      "state": "RED - debt pinned",
+      "pinned_classes": 8,
+      "delta_in_this_phase": "NONE"
+    },
+    "domain_uses_no_illuminate_facade": {
+      "state": "GREEN",
+      "violations": 0
+    }
+  },
+  "newly_discovered_enforcement_gap": {
+    "finding": "Domain -> Models is NOT enforced by the architecture test, and 5 Domain files import App\\Models.",
+    "evidence": "The LAYER_IMPORTS forbidden list for 'Domain' is [App\\Http, App\\Console, App\\Infrastructure, App\\Application, App\\Services, App\\Http\\Controllers]. App\\Models is absent from it, even though the target architecture states Domain must not import Models.",
+    "affected_files": [
+      "app/Domain/Financial/Contracts/SettlementRepositoryInterface.php (App\\Models\\BookingScreen)",
+      "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php (App\\Models\\PartnerCommission)",
+      "app/Domain/Payment/Contracts/PaymentRepositoryInterface.php (App\\Models\\Booking, App\\Models\\Payment)",
+      "app/Domain/Payment/PaymentStatus.php (App\\Models\\Payment)",
+      "app/Domain/Pricing/CampaignPricingEngine.php (App\\Models\\ReferralCode, App\\Models\\RewardAccount, App\\Models\\Screen)"
+    ],
+    "severity": "MEDIUM - architecture debt, not a security or financial defect",
+    "reason_not_repaired": "Adding a Domain->Models ban would make the test RED on 5 files and require either rewriting repository contracts around DTOs (a large, behaviour-sensitive change touching settlement, commission and payment) or expanding the allowlist. Both are out of scope for a migration phase. The test was NOT weakened and no rule was removed.",
+    "recommended_next_step": "Add 'App\\Models' to the Domain forbidden list with an explicit 5-class allowlist, so the debt becomes visible and cannot grow - then remove it class by class by introducing DTO-returning repository contracts."
+  },
+  "edges_created_by_this_phase": [
+    {
+      "from": "App\\Application\\Asset\\Services\\AssetDiscoveryFilterService",
+      "to": "App\\Repositories\\AssetRepositoryInterface",
+      "type": "contract",
+      "note": "legitimate Application -> contract edge"
+    },
+    {
+      "from": "App\\Application\\Asset\\Services\\CoverageService",
+      "to": "App\\Repositories\\AssetRepositoryInterface",
+      "type": "contract",
+      "note": "legitimate Application -> contract edge"
+    },
+    {
+      "from": "App\\Services\\AssetService",
+      "to": "App\\Application\\Asset\\Services\\*",
+      "type": "legacy Service -> Application",
+      "note": "a temporary backward edge; it disappears when AssetService is migrated, per plan order 7"
+    },
+    {
+      "from": "App\\Support\\Events\\NotificationEventSubscriber",
+      "to": "App\\Events\\Notifications\\* (18 events) + App\\Mail\\*",
+      "type": "cross-cutting subscriber",
+      "note": "acceptable for Support"
+    }
+  ],
+  "illegal_edges_introduced": 0,
+  "cycles_introduced": 0,
+  "conclusion": "Phase 0.18 introduced zero illegal dependencies and zero cycles. It did, however, surface an unenforced Domain->Models rule that the Phase 0.15 debt register did not previously capture."
+}

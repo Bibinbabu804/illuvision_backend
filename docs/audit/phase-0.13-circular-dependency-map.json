@@ -1,0 +1,141 @@
+{
+  "phase": "0.13",
+  "name": "Circular Dependency Map",
+  "generated_at": "2026-09-26",
+  "search_commands": [
+    "grep -rnE '[^>a-zA-Z_$](app|resolve)\\(' app/",
+    "grep -rn 'lockForUpdate' app/",
+    "composer dump-autoload -o (classmap inspection)"
+  ],
+  "service_locator_sites_remaining": [
+    {
+      "file": "app/Models/Booking.php",
+      "count": 7,
+      "classes": [
+        "LoyaltyService",
+        "SettingsService",
+        "ReferralTrackingService"
+      ],
+      "status": "deferred - see circular map"
+    },
+    {
+      "file": "app/Models/User.php",
+      "count": 1,
+      "classes": [
+        "RolePermissionChecker"
+      ],
+      "status": "acceptable - a model convenience helper, no longer reaching into Http"
+    },
+    {
+      "file": "app/Services/ManualBookingService.php",
+      "count": 3,
+      "classes": [
+        "LoyaltyService",
+        "SettingsService"
+      ],
+      "status": "deferred"
+    },
+    {
+      "file": "app/Services/RevenueSplitResolverService.php",
+      "count": 1,
+      "classes": [
+        "PricingRuleEngine"
+      ],
+      "status": "deferred - Phase 0.10 'Revenue split resolution' deferral"
+    },
+    {
+      "file": "app/Services/ExchangeRateService.php",
+      "count": 1,
+      "classes": [
+        "ExchangeRateApiClientInterface"
+      ],
+      "status": "acceptable - intentional optional-DI fallback in a constructor default"
+    },
+    {
+      "file": "app/Helpers/MediaHelper.php",
+      "count": 1,
+      "classes": [
+        "ImageProcessingContractInterface"
+      ],
+      "status": "acceptable - intentional optional-DI fallback so bare static callers keep working"
+    },
+    {
+      "file": "app/Http/Controllers/BookingController.php",
+      "count": 1,
+      "classes": [
+        "LoyaltyService"
+      ],
+      "status": "deferred - inside the now-extracted creation flow's legacy sibling"
+    }
+  ],
+  "service_locator_sites_removed": [
+    {
+      "file": "app/Http/Controllers/BookingController.php",
+      "count": 2,
+      "classes": [
+        "MediaService",
+        "BookingCapacityService"
+      ],
+      "reason": "already constructor-injected; resolution was redundant"
+    },
+    {
+      "file": "app/Http/Controllers/AdminPaymentController.php",
+      "count": 2,
+      "classes": [
+        "PaymentService",
+        "ReferralTrackingService"
+      ],
+      "reason": "converted to constructor injection"
+    },
+    {
+      "file": "app/Http/Controllers/PartnerBookingController.php",
+      "count": 2,
+      "classes": [
+        "MediaService"
+      ],
+      "reason": "converted to constructor injection"
+    }
+  ],
+  "framework_level_resolution_retained": [
+    "app/Support/Configs/ConfigFactory.php - documented config accessor pattern",
+    "app/Helpers/MediaHelper.php - app()->bound() probe before resolving the optional image port"
+  ],
+  "cycles": [
+    {
+      "cycle": "CampaignPricingEngine (Domain) -> App\\Services\\LoyaltyService / SettingsService / PricingRuleEngine / Pricing\\* -> Eloquent models -> Booking model -> LoyaltyService",
+      "status": "not_a_true_cycle_but_a_layering_violation",
+      "root_cause": "The pricing calculators are stateless and take Eloquent models as parameters, so the calculation logic is bound to persistence shapes. Relocating them to app/Domain would move the leak rather than remove it, because they would then import App\\Models.",
+      "current_behavior": "Loyalty point conversion and DB-backed settings reads participate in the campaign price calculation.",
+      "risk": "medium - Rule 9 requires pricing determinism, and a DB-backed setting is an external input to the calculation. A settings change alters historical replayability of a price.",
+      "chosen_solution": "Leave in place for now and record as architecture debt. The correct end state is value-object parameters on the calculators plus a PricingSettingsProvider contract, which is a financial-determinism change requiring its own approved phase.",
+      "migration_status": "deferred"
+    },
+    {
+      "cycle": "Booking model events -> app(LoyaltyService, SettingsService, ReferralTrackingService) -> Eloquent models -> Booking model",
+      "status": "real_layering_violation_not_a_resolution_cycle",
+      "root_cause": "Domain side effects (loyalty reversal, referral cancellation/refund) were attached as Eloquent model events and therefore have no injectable dependency, forcing service location.",
+      "current_behavior": "Every booking status change to cancelled/rejected/refunded/completed automatically reverses points and cancels or refunds referral tracking, inside whatever transaction the caller opened.",
+      "risk": "high - these are financial side effects whose transaction timing is implicit and untested in isolation; they also fire for status changes made by reporting-adjacent code paths.",
+      "chosen_solution": "Not remediated in Phase 0.13. The behaviour is correct and covered; extracting it would change when the side effects commit, which is a financial-semantics change. Recommended as the first Phase 0.15 item with dedicated coverage.",
+      "migration_status": "deferred"
+    },
+    {
+      "cycle": "CampaignPricingService -> (previously) 7 unused service deps mirroring CampaignPricingEngine",
+      "status": "resolved",
+      "root_cause": "The legacy wrapper copied the canonical engine's constructor signature when Phase 0.6 extracted the engine, then never used seven of the eight properties.",
+      "current_behavior": "Resolved. The wrapper now declares only PricingEngineInterface.",
+      "risk": "low - cosmetic dependency-surface inflation that obscured the real Domain->Services coupling.",
+      "chosen_solution": "Dead constructor dependencies removed; class retained as a thin compatibility wrapper.",
+      "migration_status": "migrated"
+    },
+    {
+      "cycle": "CampaignPricingService <-> LoyaltyService (soft cycle named in the Phase 0.2 audit)",
+      "status": "still_present_at_constructor_level",
+      "root_cause": "CampaignPricingEngine needs loyalty point-value conversion, and LoyaltyService needs booking context. Neither depends on the other in its constructor, so there is no container resolution cycle - but both read the same reward configuration.",
+      "current_behavior": "The engine calls LoyaltyService::calculatePointsForAmount(); LoyaltyService never calls back into pricing.",
+      "risk": "low-medium - no runtime cycle; the coupling is one-directional today and would become a true cycle if pricing were ever called from inside a loyalty operation.",
+      "chosen_solution": "Left as-is and documented. The relationship is one-directional, so no container cycle exists to remove.",
+      "migration_status": "retained"
+    }
+  ]
+}

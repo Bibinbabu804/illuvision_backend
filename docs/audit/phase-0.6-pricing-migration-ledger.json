@@ -1,0 +1,67 @@
+{
+  "phase": "0.6",
+  "name": "Pricing Migration Ledger",
+  "generated_at": "2026-09-25T23:53:00+05:30",
+  "entries": [
+    {
+      "component": "Campaign Pricing Calculation",
+      "before": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "after": "App\\Domain\\Pricing\\CampaignPricingEngine::calculate()",
+      "domain": "Domain\\Pricing",
+      "application_boundary": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_compatibility": "Preserved via CampaignPricingService facade delegation",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_campaign_pricing_calculate_contract_success_and_validation",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Duration Validation & Conversion",
+      "before": "App\\Services\\CampaignPricingService::validateMinimumDuration(), convertMinDurationToDays()",
+      "after": "App\\Domain\\Pricing\\CampaignPricingEngine::validateMinimumDuration(), convertMinDurationToDays()",
+      "domain": "Domain\\Pricing",
+      "application_boundary": "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+      "legacy_compatibility": "Preserved via CampaignPricingService method delegation",
+      "golden_tests": "Tests\\Feature\\MinutePricingEngineTest, Tests\\Feature\\MinuteFullRegressionTest",
+      "financial_tests": "N/A (Structural validation)",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Legacy Multi-Asset Quotation (V2)",
+      "before": "App\\Http\\Controllers\\Api\\PricingEngineController directly calling App\\Services\\PricingEngine::calculatePreview()",
+      "after": "App\\Http\\Controllers\\Api\\PricingEngineController injecting App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "domain": "Domain\\Pricing (Legacy)",
+      "application_boundary": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "legacy_compatibility": "100% preserved; no algorithm duplication",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_010_v2_pricing_engine",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_011_divergence_between_v1_and_v2_engines",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_v2_pricing_calculate_contract_success_and_validation",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Partner Campaign Quotation",
+      "before": "PartnerBookingController -> ManualBookingService -> CampaignPricingService",
+      "after": "PartnerBookingController -> ManualBookingService -> CampaignPricingService -> CampaignPricingEngine",
+      "domain": "Domain\\Pricing",
+      "application_boundary": "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+      "legacy_compatibility": "100% preserved with partner referral and commission attribution intact",
+      "golden_tests": "Tests\\Feature\\AdminAndPartnerMinuteBookingTest",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest::test_partner_commission_calculation",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_partner_calculate_contract_and_auth",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Booking Pricing Snapshot Storage",
+      "before": "App\\Services\\CampaignPricingService::storePricingBreakdowns()",
+      "after": "App\\Services\\CampaignPricingService::storePricingBreakdowns() (Scheduled for Phase 0.8)",
+      "domain": "Domain\\Booking",
+      "application_boundary": "Application\\Booking",
+      "legacy_compatibility": "Preserved in service; consumes canonical pricing result structure",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenBookingRegressionTest",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_advertiser_campaign_booking_contract_and_auth",
+      "status": "PRESERVED_FOR_PHASE_0.8"
+    }
+  ]
+}

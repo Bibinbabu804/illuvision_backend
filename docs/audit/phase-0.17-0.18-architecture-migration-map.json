@@ -1,0 +1,118 @@
+{
+  "phases": "0.17 + 0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy retirement and modular monolith migration",
+  "artifact": "architecture-migration-map",
+  "target": "modular monolith; HTTP -> Application -> Domain -> Contracts -> Infrastructure -> Persistence/External",
+  "migrations_completed": [
+    {
+      "from": "app/Listeners/NotificationEventSubscriber.php",
+      "to": "app/Support/Events/NotificationEventSubscriber.php",
+      "from_ns": "App\\Listeners",
+      "to_ns": "App\\Support\\Events",
+      "consumers": 1,
+      "status": "VERIFIED"
+    },
+    {
+      "from": "app/Services/AssetDiscoveryFilterService.php",
+      "to": "app/Application/Asset/Services/AssetDiscoveryFilterService.php",
+      "from_ns": "App\\Services",
+      "to_ns": "App\\Application\\Asset\\Services",
+      "consumers": 2,
+      "status": "VERIFIED"
+    },
+    {
+      "from": "app/Services/CoverageService.php",
+      "to": "app/Application/Asset/Services/CoverageService.php",
+      "from_ns": "App\\Services",
+      "to_ns": "App\\Application\\Asset\\Services",
+      "consumers": 2,
+      "status": "VERIFIED"
+    }
+  ],
+  "modules_established": [
+    "Application\\Asset (new module, 2 contract-only services)",
+    "Support\\Events (new home for the cross-cutting notification subscriber)"
+  ],
+  "modules_still_unowned": 8,
+  "modules_still_unowned_list": [
+    "Campaign",
+    "Media",
+    "Provider",
+    "Partner",
+    "Availability",
+    "Settlement",
+    "Creative",
+    "Asset (partial - Eloquent-shaped services remain in Services)"
+  ],
+  "best_covered_modules": [
+    "Payment (4 Domain / 6 Application)",
+    "Financial (3 / 3)",
+    "Reporting (0 / 17, read-side)",
+    "Booking (0 / 4)"
+  ],
+  "infrastructure": "Already conformant. All 14 classes are contracts plus adapters; zero Services make external HTTP calls. No migration required or performed.",
+  "http": "Already conformant. All 81 controllers correctly layered. No migration required or performed.",
+  "sequenced_remainder": [
+    {
+      "order": 1,
+      "move": "MediaService -> Application\\Media\\Services",
+      "gate": "Media golden tests (image dimensions, storage paths, MimeType edge cases)"
+    },
+    {
+      "order": 2,
+      "move": "CurrencyService + ExchangeRateService -> Application\\Campaign\\Services",
+      "gate": "CurrencyTest, exchange-rate refresh job assertions"
+    },
+    {
+      "order": 3,
+      "move": "ProfileService + CountryDetectionService -> Application\\Support\\Services",
+      "gate": "profile/auth feature tests"
+    },
+    {
+      "order": 4,
+      "move": "NotificationService -> Application\\Notification\\Services",
+      "gate": "notification tests + mail fakes"
+    },
+    {
+      "order": 5,
+      "move": "read-side analytics services -> Application\\Reporting",
+      "gate": "existing Reporting query tests"
+    },
+    {
+      "order": 6,
+      "move": "SettingsService -> Application\\Settings\\Services",
+      "gate": "23-call-site fan-in; own phase"
+    },
+    {
+      "order": 7,
+      "move": "Eloquent-heavy Asset/Provider/Partner services",
+      "gate": "extract a persistence port FIRST, then move"
+    },
+    {
+      "order": 8,
+      "move": "Domain->Models debt",
+      "gate": "add the missing architecture check with a 5-class allowlist, then introduce DTO-returning repository contracts"
+    }
+  ],
+  "blocked_forever_without_a_behaviour_decision": [
+    "Services/PricingEngine",
+    "Services/PricingRuleEngine",
+    "Services/CampaignPricingService",
+    "Services/BookingCapacityService",
+    "Services/InventoryService",
+    "Services/ConflictDetectionService",
+    "Services/ManualBookingService",
+    "Services/PaymentService",
+    "Services/RefundService",
+    "Services/SettlementService",
+    "Services/CommissionService",
+    "Services/RevenueSplitResolverService",
+    "Services/RevenueDistributionService",
+    "Services/BookingPriceCalculator",
+    "Services/FirstBookingDiscountService",
+    "Services/Pricing/*",
+    "Services/BookingWorkflowService"
+  ]
+}

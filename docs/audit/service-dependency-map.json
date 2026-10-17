@@ -1,0 +1,2126 @@
+{
+  "version": "0.2",
+  "generated_at": "2026-09-25T20:56:00+05:30",
+  "total_services": 52,
+  "services": {
+    "App\\Services\\SettingsService": {
+      "class": "App\\Services\\SettingsService",
+      "name": "SettingsService",
+      "file_path": "app/Services/SettingsService.php",
+      "namespace": "App\\Services",
+      "domain": "SETTINGS",
+      "public_methods": [
+        "clearCache",
+        "getGroup",
+        "get",
+        "getBool",
+        "getInt",
+        "getFloat",
+        "getArray",
+        "getList",
+        "getAll",
+        "getPublicBookingConfig"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:FirstBookingDiscountService",
+        "Controller:ProfileController",
+        "Service:ManualBookingService",
+        "Service:LoyaltyService",
+        "Controller:SettingsController",
+        "Service:CampaignPricingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Setting"
+      ],
+      "tables_accessed": [
+        "settings"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\BudgetRecommendationService": {
+      "class": "App\\Services\\BudgetRecommendationService",
+      "name": "BudgetRecommendationService",
+      "file_path": "app/Services/BudgetRecommendationService.php",
+      "namespace": "App\\Services",
+      "domain": "OTHER",
+      "public_methods": [
+        "calculate"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "CampaignPricingService",
+          "var": "campaignPricingService"
+        },
+        {
+          "type": "InventoryService",
+          "var": "inventoryService"
+        },
+        {
+          "type": "ScreenPricingResolver",
+          "var": "screenPricingResolver"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:BudgetRecommendationController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "ScreenCategory",
+        "City",
+        "State",
+        "Screen"
+      ],
+      "tables_accessed": [
+        "screens",
+        "states",
+        "citys",
+        "screen_categorys"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\BookingWorkflowService": {
+      "class": "App\\Services\\BookingWorkflowService",
+      "name": "BookingWorkflowService",
+      "file_path": "app/Services/BookingWorkflowService.php",
+      "namespace": "App\\Services",
+      "domain": "BOOKING",
+      "public_methods": [
+        "transition"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:BookingEngineController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking"
+      ],
+      "tables_accessed": [
+        "bookings"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\NotificationService": {
+      "class": "App\\Services\\NotificationService",
+      "name": "NotificationService",
+      "file_path": "app/Services/NotificationService.php",
+      "namespace": "App\\Services",
+      "domain": "NOTIFICATION",
+      "public_methods": [
+        "getAdminRecipients",
+        "send"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "NotificationConfig",
+          "var": "config"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [],
+      "repositories_called": [],
+      "models_accessed": [
+        "NotificationLog"
+      ],
+      "tables_accessed": [
+        "notification_logs"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [
+        "SMTP / Email"
+      ],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\ScreenDeletionService": {
+      "class": "App\\Services\\ScreenDeletionService",
+      "name": "ScreenDeletionService",
+      "file_path": "app/Services/ScreenDeletionService.php",
+      "namespace": "App\\Services",
+      "domain": "ASSET",
+      "public_methods": [
+        "validateDeletion",
+        "deleteScreens",
+        "deleteProviderScreens"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:AdminScreenProviderController",
+        "Controller:ScreenController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "Screen",
+        "ActivityLog",
+        "ScreenProviderActivity",
+        "ScreenProvider",
+        "BookingScreen"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "activity_logs",
+        "screen_providers",
+        "screen_provider_activitys",
+        "screens",
+        "booking_screens"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\ReferralTrackingService": {
+      "class": "App\\Services\\ReferralTrackingService",
+      "name": "ReferralTrackingService",
+      "file_path": "app/Services/ReferralTrackingService.php",
+      "namespace": "App\\Services",
+      "domain": "PARTNER",
+      "public_methods": [
+        "createReferralTracking",
+        "cancelReferralTracking",
+        "refundReferralTracking"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "ReferralService",
+          "var": "referralService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:PaymentService",
+        "Service:ManualBookingService",
+        "Controller:AdminPaymentController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "ReferralUsage",
+        "PartnerCommission",
+        "ReferralCode"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "partner_commissions",
+        "referral_codes",
+        "referral_usages"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [
+        "ReferralUsed"
+      ],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\PaymentService": {
+      "class": "App\\Services\\PaymentService",
+      "name": "PaymentService",
+      "file_path": "app/Services/PaymentService.php",
+      "namespace": "App\\Services",
+      "domain": "PAYMENT",
+      "public_methods": [
+        "createOrder",
+        "verifySignature",
+        "verifyAndConfirmPayment",
+        "fetchPayment",
+        "refund"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "ReferralTrackingService",
+          "var": "referralTrackingService"
+        },
+        {
+          "type": "CampaignPricingService",
+          "var": "campaignPricingService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:AdminPaymentController",
+        "Service:ReferralTrackingService",
+        "Service:FinanceService",
+        "Service:ManualBookingService",
+        "Controller:PaymentController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "BookingActivity",
+        "Payment",
+        "ReferralCode"
+      ],
+      "tables_accessed": [
+        "payments",
+        "bookings",
+        "booking_activitys",
+        "referral_codes"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [
+        "Razorpay API"
+      ],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\BookingPriceCalculator": {
+      "class": "App\\Services\\BookingPriceCalculator",
+      "name": "BookingPriceCalculator",
+      "file_path": "app/Services/BookingPriceCalculator.php",
+      "namespace": "App\\Services",
+      "domain": "PRICING",
+      "public_methods": [
+        "durationToHours",
+        "timeInRange",
+        "calculate"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "PricingRuleEngine",
+          "var": "ruleEngine"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:BookingController",
+        "Controller:PricingPlanController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "PricingPlan"
+      ],
+      "tables_accessed": [
+        "pricing_plans"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\FinanceService": {
+      "class": "App\\Services\\FinanceService",
+      "name": "FinanceService",
+      "file_path": "app/Services/FinanceService.php",
+      "namespace": "App\\Services",
+      "domain": "SETTLEMENT",
+      "public_methods": [
+        "getFinancialSummary",
+        "getPayments",
+        "getSettlements",
+        "processSettlementBatch",
+        "getAccountingLedger"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "PaymentService",
+          "var": "paymentService"
+        },
+        {
+          "type": "SettlementService",
+          "var": "settlementService"
+        },
+        {
+          "type": "RefundService",
+          "var": "refundService"
+        },
+        {
+          "type": "CommissionService",
+          "var": "commissionService"
+        },
+        {
+          "type": "RevenueAnalyticsService",
+          "var": "revenueAnalyticsService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:FinanceController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Refund",
+        "Booking",
+        "ScreenProviderSettlement",
+        "Payment",
+        "ActivityLog"
+      ],
+      "tables_accessed": [
+        "payments",
+        "bookings",
+        "activity_logs",
+        "refunds",
+        "screen_provider_settlements"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\ManualBookingService": {
+      "class": "App\\Services\\ManualBookingService",
+      "name": "ManualBookingService",
+      "file_path": "app/Services/ManualBookingService.php",
+      "namespace": "App\\Services",
+      "domain": "BOOKING",
+      "public_methods": [
+        "searchClients",
+        "findOrCreateClient",
+        "calculatePricing",
+        "createCampaignBooking",
+        "uploadMedia",
+        "recordOfflinePayment"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "CampaignPricingService",
+          "var": "campaignPricingService"
+        },
+        {
+          "type": "BookingCapacityService",
+          "var": "capacityService"
+        },
+        {
+          "type": "InventoryService",
+          "var": "inventoryService"
+        },
+        {
+          "type": "MediaService",
+          "var": "mediaService"
+        },
+        {
+          "type": "PaymentService",
+          "var": "paymentService"
+        },
+        {
+          "type": "RevenueDistributionService",
+          "var": "revenueDistributionService"
+        },
+        {
+          "type": "RevenueSplitResolverService",
+          "var": "splitResolver"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:PartnerClientController",
+        "Controller:AdminManualBookingController",
+        "Controller:PartnerBookingController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "BookingActivity",
+        "BookingMedia",
+        "User",
+        "PricingDurationRule",
+        "Payment",
+        "Screen",
+        "ReferralCode",
+        "BookingScreen"
+      ],
+      "tables_accessed": [
+        "payments",
+        "bookings",
+        "booking_activitys",
+        "users",
+        "booking_media",
+        "screens",
+        "booking_screens",
+        "referral_codes",
+        "pricing_duration_rules"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [
+        "PaymentReceived"
+      ],
+      "external_integrations": [],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\RevenueDistributionService": {
+      "class": "App\\Services\\RevenueDistributionService",
+      "name": "RevenueDistributionService",
+      "file_path": "app/Services/RevenueDistributionService.php",
+      "namespace": "App\\Services",
+      "domain": "OTHER",
+      "public_methods": [
+        "processBookingScreens",
+        "getProviderRevenueStats",
+        "getProviderScreenRevenue",
+        "getProviderBookingHistory"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "RevenueSplitResolverService",
+          "var": "splitResolver"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:ReferralTrackingService",
+        "Controller:ScreenProviderPortalController",
+        "Controller:AdminScreenProviderController",
+        "Service:ManualBookingService",
+        "Controller:BookingController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "Screen",
+        "ScreenProviderActivity",
+        "BookingScreen"
+      ],
+      "tables_accessed": [
+        "screens",
+        "bookings",
+        "booking_screens",
+        "screen_provider_activitys"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\BookingCapacityService": {
+      "class": "App\\Services\\BookingCapacityService",
+      "name": "BookingCapacityService",
+      "file_path": "app/Services/BookingCapacityService.php",
+      "namespace": "App\\Services",
+      "domain": "AVAILABILITY",
+      "public_methods": [
+        "checkEligibility",
+        "validateBookingCapacity",
+        "validateScreenDailyCapacity",
+        "getMaxAdsPerDay",
+        "screenHasAvailableCapacity",
+        "hasScreenIntervalConflict"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "BookingConfig",
+          "var": "bookingConfig"
+        },
+        {
+          "type": "InventoryService",
+          "var": "inventoryService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:BookingController",
+        "Controller:AvailabilityEngineController",
+        "Service:ManualBookingService",
+        "Service:ConflictDetectionService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Screen"
+      ],
+      "tables_accessed": [
+        "screens"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\AssetDiscoveryFilterService": {
+      "class": "App\\Services\\AssetDiscoveryFilterService",
+      "name": "AssetDiscoveryFilterService",
+      "file_path": "app/Services/AssetDiscoveryFilterService.php",
+      "namespace": "App\\Services",
+      "domain": "ASSET",
+      "public_methods": [
+        "getFilteredAssets"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "AssetRepositoryInterface",
+          "var": "assetRepository"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:AssetService"
+      ],
+      "repositories_called": [
+        "AssetRepositoryInterface"
+      ],
+      "models_accessed": [],
+      "tables_accessed": [],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\PaymentAnalyticsService": {
+      "class": "App\\Services\\PaymentAnalyticsService",
+      "name": "PaymentAnalyticsService",
+      "file_path": "app/Services/PaymentAnalyticsService.php",
+      "namespace": "App\\Services",
+      "domain": "PAYMENT",
+      "public_methods": [
+        "getKPIs",
+        "revenueTrends",
+        "paymentStatusDistribution",
+        "paymentMethodUsage",
+        "refundTrends",
+        "getAnalytics"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:AdminPaymentController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Refund",
+        "Payment",
+        "ReferralUsage",
+        "PartnerCommission"
+      ],
+      "tables_accessed": [
+        "payments",
+        "partner_commissions",
+        "refunds",
+        "referral_usages"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\NotificationDispatcher": {
+      "class": "App\\Services\\NotificationDispatcher",
+      "name": "NotificationDispatcher",
+      "file_path": "app/Services/NotificationDispatcher.php",
+      "namespace": "App\\Services",
+      "domain": "NOTIFICATION",
+      "public_methods": [
+        "dispatchBookingNotification"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking"
+      ],
+      "tables_accessed": [
+        "bookings"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\ScreenAnalyticsService": {
+      "class": "App\\Services\\ScreenAnalyticsService",
+      "name": "ScreenAnalyticsService",
+      "file_path": "app/Services/ScreenAnalyticsService.php",
+      "namespace": "App\\Services",
+      "domain": "REPORTING",
+      "public_methods": [
+        "overview",
+        "screenPerformance",
+        "cityPerformance",
+        "campaignAnalytics",
+        "utilizationDistribution"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "BookingConfig",
+          "var": "bookingConfig"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:DashBoardController",
+        "Service:ReportService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "Screen"
+      ],
+      "tables_accessed": [
+        "screens",
+        "bookings"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\CampaignPricingService": {
+      "class": "App\\Services\\CampaignPricingService",
+      "name": "CampaignPricingService",
+      "file_path": "app/Services/CampaignPricingService.php",
+      "namespace": "App\\Services",
+      "domain": "PRICING",
+      "public_methods": [
+        "calculateCampaignPreview",
+        "validateCampaignPricing",
+        "validateMinimumDuration",
+        "convertMinDurationToDays",
+        "storePricingBreakdowns"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "ScreenPricingResolver",
+          "var": "screenPricingResolver"
+        },
+        {
+          "type": "DailyPricingCalculator",
+          "var": "dailyPricingCalculator"
+        },
+        {
+          "type": "ReferralPricingCalculator",
+          "var": "referralPricingCalculator"
+        },
+        {
+          "type": "FirstBookingDiscountPricingCalculator",
+          "var": "firstBookingDiscountPricingCalculator"
+        },
+        {
+          "type": "PricingRuleEngine",
+          "var": "pricingRuleEngine"
+        },
+        {
+          "type": "LoyaltyService",
+          "var": "loyaltyService"
+        },
+        {
+          "type": "SettingsService",
+          "var": "settingsService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:BudgetRecommendationService",
+        "Service:ManualBookingService",
+        "Controller:BookingController",
+        "Service:PricingEngine",
+        "Service:PaymentService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "BookingPricingBreakdown",
+        "RewardAccount",
+        "Screen",
+        "ReferralCode"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "screens",
+        "booking_pricing_breakdowns",
+        "referral_codes",
+        "reward_accounts"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\BookingAnalyticsService": {
+      "class": "App\\Services\\BookingAnalyticsService",
+      "name": "BookingAnalyticsService",
+      "file_path": "app/Services/BookingAnalyticsService.php",
+      "namespace": "App\\Services",
+      "domain": "BOOKING",
+      "public_methods": [
+        "overview",
+        "bookingTrends",
+        "approvalMetrics",
+        "sourceBreakdown",
+        "dailyVolumes"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:DashBoardController",
+        "Service:ReportService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking"
+      ],
+      "tables_accessed": [
+        "bookings"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\AssetImportService": {
+      "class": "App\\Services\\AssetImportService",
+      "name": "AssetImportService",
+      "file_path": "app/Services/AssetImportService.php",
+      "namespace": "App\\Services",
+      "domain": "ASSET",
+      "public_methods": [
+        "normalizeHeader",
+        "buildHeaderMap",
+        "validateImport",
+        "confirmImport",
+        "getTemplateHeaders"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "AssetService",
+          "var": "assetService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:AssetImportController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "ScreenCategory",
+        "Country",
+        "City",
+        "State",
+        "Screen",
+        "ScreenProvider",
+        "PricingPlan"
+      ],
+      "tables_accessed": [
+        "citys",
+        "countrys",
+        "screen_providers",
+        "states",
+        "screen_categorys",
+        "screens",
+        "pricing_plans"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\FirstBookingDiscountService": {
+      "class": "App\\Services\\FirstBookingDiscountService",
+      "name": "FirstBookingDiscountService",
+      "file_path": "app/Services/FirstBookingDiscountService.php",
+      "namespace": "App\\Services",
+      "domain": "PRICING",
+      "public_methods": [
+        "isEnabled",
+        "getDiscountPercentage",
+        "getMaxDiscountAmount",
+        "getSettingsSnapshot",
+        "isEligible",
+        "calculateDiscount",
+        "validateAndCalculate"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "SettingsService",
+          "var": "settingsService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:FirstBookingDiscountPricingCalculator"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "User"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "users"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\InventoryService": {
+      "class": "App\\Services\\InventoryService",
+      "name": "InventoryService",
+      "file_path": "app/Services/InventoryService.php",
+      "namespace": "App\\Services",
+      "domain": "AVAILABILITY",
+      "public_methods": [
+        "lockScreensForBooking",
+        "normalizeDateTime",
+        "getAvailableFleet",
+        "calculateMaxConcurrentUnits",
+        "hasFixedScreenConflict",
+        "validateFleetAvailability"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:BudgetRecommendationService",
+        "Service:ConflictDetectionService",
+        "Service:ManualBookingService",
+        "Controller:BookingController",
+        "Controller:BookingEngineController",
+        "Service:BookingCapacityService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Screen"
+      ],
+      "tables_accessed": [
+        "screens"
+      ],
+      "has_transactions": false,
+      "has_locks": true,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\SettlementService": {
+      "class": "App\\Services\\SettlementService",
+      "name": "SettlementService",
+      "file_path": "app/Services/SettlementService.php",
+      "namespace": "App\\Services",
+      "domain": "SETTLEMENT",
+      "public_methods": [
+        "generateSettlement",
+        "approveSettlement",
+        "markAsPaid",
+        "cancelSettlement",
+        "getProviderSettlements",
+        "getProviderRevenueStatsWithSettlements"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:AdminScreenProviderController",
+        "Controller:AdminSettlementController",
+        "Service:FinanceService",
+        "Controller:ScreenProviderPortalController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "ScreenProviderSettlement",
+        "User",
+        "Screen",
+        "ScreenProviderActivity",
+        "BookingScreen"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "users",
+        "screen_provider_activitys",
+        "screen_provider_settlements",
+        "screens",
+        "booking_screens"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\CoverageService": {
+      "class": "App\\Services\\CoverageService",
+      "name": "CoverageService",
+      "file_path": "app/Services/CoverageService.php",
+      "namespace": "App\\Services",
+      "domain": "ASSET",
+      "public_methods": [
+        "syncCoverage",
+        "getAssetsByCity"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "AssetRepositoryInterface",
+          "var": "assetRepository"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:AssetService",
+        "Controller:CoverageController"
+      ],
+      "repositories_called": [
+        "AssetRepositoryInterface"
+      ],
+      "models_accessed": [],
+      "tables_accessed": [],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\MediaService": {
+      "class": "App\\Services\\MediaService",
+      "name": "MediaService",
+      "file_path": "app/Services/MediaService.php",
+      "namespace": "App\\Services",
+      "domain": "OTHER",
+      "public_methods": [
+        "upload",
+        "delete",
+        "validate",
+        "batchValidationRules"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "MediaConfig",
+          "var": "mediaConfig"
+        },
+        {
+          "type": "BookingConfig",
+          "var": "bookingConfig"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:PartnerBookingController",
+        "Controller:BookingController",
+        "Controller:AdminManualBookingController",
+        "Service:ManualBookingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [],
+      "tables_accessed": [],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\RefundService": {
+      "class": "App\\Services\\RefundService",
+      "name": "RefundService",
+      "file_path": "app/Services/RefundService.php",
+      "namespace": "App\\Services",
+      "domain": "PAYMENT",
+      "public_methods": [
+        "initiateRefund",
+        "markRefundFailed",
+        "getRefunds"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:AdminPaymentController",
+        "Service:FinanceService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Refund",
+        "Booking",
+        "Payment",
+        "PaymentLog"
+      ],
+      "tables_accessed": [
+        "payments",
+        "bookings",
+        "payment_logs",
+        "refunds"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [
+        "Razorpay API"
+      ],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\CommissionService": {
+      "class": "App\\Services\\CommissionService",
+      "name": "CommissionService",
+      "file_path": "app/Services/CommissionService.php",
+      "namespace": "App\\Services",
+      "domain": "PARTNER",
+      "public_methods": [
+        "approve",
+        "markAsPaid",
+        "markAsCancelled",
+        "getCommission",
+        "getAllCommissions",
+        "getSummary",
+        "getStatusTimeline"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:ReferralAnalyticsController",
+        "Service:FinanceService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "PartnerCommission"
+      ],
+      "tables_accessed": [
+        "partner_commissions"
+      ],
+      "has_transactions": true,
+      "has_locks": true,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\ConflictDetectionService": {
+      "class": "App\\Services\\ConflictDetectionService",
+      "name": "ConflictDetectionService",
+      "file_path": "app/Services/ConflictDetectionService.php",
+      "namespace": "App\\Services",
+      "domain": "AVAILABILITY",
+      "public_methods": [
+        "validateBookingConflicts"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "InventoryService",
+          "var": "inventoryService"
+        },
+        {
+          "type": "BookingCapacityService",
+          "var": "bookingCapacityService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:BookingEngineController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [],
+      "tables_accessed": [],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\ClientAnalyticsService": {
+      "class": "App\\Services\\ClientAnalyticsService",
+      "name": "ClientAnalyticsService",
+      "file_path": "app/Services/ClientAnalyticsService.php",
+      "namespace": "App\\Services",
+      "domain": "REPORTING",
+      "public_methods": [
+        "kpis",
+        "clientCampaignAnalytics",
+        "clientReferralInfo"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:ProfileService",
+        "Controller:ClientController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "User",
+        "ReferralUsage"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "users",
+        "referral_usages"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\LoyaltyService": {
+      "class": "App\\Services\\LoyaltyService",
+      "name": "LoyaltyService",
+      "file_path": "app/Services/LoyaltyService.php",
+      "namespace": "App\\Services",
+      "domain": "LOYALTY",
+      "public_methods": [
+        "calculatePointsToEarn",
+        "calculatePointsForAmount",
+        "creditEarnedPoints",
+        "reverseEarnedPoints",
+        "debitRedeemedPoints",
+        "refundRedeemedPoints",
+        "adjustPoints"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "SettingsService",
+          "var": "settings"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:AdminRewardsController",
+        "Controller:BookingController",
+        "Service:ManualBookingService",
+        "Service:CampaignPricingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "User",
+        "RewardAccount",
+        "RewardRedemption",
+        "RewardTransaction"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "reward_transactions",
+        "users",
+        "reward_redemptions",
+        "reward_accounts"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [
+        "RewardsRedeemed",
+        "RewardsEarned",
+        "RewardsBonusAwarded"
+      ],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\AssetService": {
+      "class": "App\\Services\\AssetService",
+      "name": "AssetService",
+      "file_path": "app/Services/AssetService.php",
+      "namespace": "App\\Services",
+      "domain": "ASSET",
+      "public_methods": [
+        "getAsset",
+        "listAssets",
+        "getAllAssets",
+        "getMapInventory",
+        "getAssetStats",
+        "createAsset",
+        "updateAsset",
+        "deleteAsset"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "AssetRepositoryInterface",
+          "var": "assetRepository"
+        },
+        {
+          "type": "CoverageService",
+          "var": "coverageService"
+        },
+        {
+          "type": "AssetDiscoveryFilterService",
+          "var": "discoveryFilterService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:AssetImportService",
+        "Controller:ScreenController",
+        "Controller:AssetController"
+      ],
+      "repositories_called": [
+        "AssetRepositoryInterface"
+      ],
+      "models_accessed": [],
+      "tables_accessed": [],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\ProfileService": {
+      "class": "App\\Services\\ProfileService",
+      "name": "ProfileService",
+      "file_path": "app/Services/ProfileService.php",
+      "namespace": "App\\Services",
+      "domain": "OTHER",
+      "public_methods": [
+        "dashboard",
+        "getActiveCampaigns",
+        "getCampaignHistory",
+        "getCampaignDetails",
+        "uploadAvatar",
+        "getRecentActivity"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "ClientService",
+          "var": "clientService"
+        },
+        {
+          "type": "ClientAnalyticsService",
+          "var": "clientAnalyticsService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:ProfileController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "User"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "users"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\RevenueAnalyticsService": {
+      "class": "App\\Services\\RevenueAnalyticsService",
+      "name": "RevenueAnalyticsService",
+      "file_path": "app/Services/RevenueAnalyticsService.php",
+      "namespace": "App\\Services",
+      "domain": "REPORTING",
+      "public_methods": [
+        "overview",
+        "dailyRevenue",
+        "monthlyRevenue",
+        "screenWiseRevenue",
+        "cityWiseRevenue",
+        "referralImpact"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:ReportController",
+        "Controller:DashBoardController",
+        "Service:ReportService",
+        "Service:FinanceService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking"
+      ],
+      "tables_accessed": [
+        "bookings"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\CurrencyService": {
+      "class": "App\\Services\\CurrencyService",
+      "name": "CurrencyService",
+      "file_path": "app/Services/CurrencyService.php",
+      "namespace": "App\\Services",
+      "domain": "CURRENCY",
+      "public_methods": [
+        "getCurrencyContext",
+        "convertToDisplay",
+        "getRate",
+        "getAllRates",
+        "syncRates",
+        "getSupportedCurrencies"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "ExchangeRateService",
+          "var": "exchangeRateService"
+        },
+        {
+          "type": "CountryDetectionService",
+          "var": "countryDetectionService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:CurrencyController",
+        "Controller:AdminCurrencyController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [],
+      "tables_accessed": [],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [
+        "ExchangeRate API"
+      ],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\CountryDetectionService": {
+      "class": "App\\Services\\CountryDetectionService",
+      "name": "CountryDetectionService",
+      "file_path": "app/Services/CountryDetectionService.php",
+      "namespace": "App\\Services",
+      "domain": "OTHER",
+      "public_methods": [
+        "detect"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:CurrencyService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [],
+      "tables_accessed": [],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\RevenueSplitResolverService": {
+      "class": "App\\Services\\RevenueSplitResolverService",
+      "name": "RevenueSplitResolverService",
+      "file_path": "app/Services/RevenueSplitResolverService.php",
+      "namespace": "App\\Services",
+      "domain": "SETTLEMENT",
+      "public_methods": [
+        "resolveEffectiveSplit",
+        "resolveForBookingScreen",
+        "findDurationRuleForBookingScreen"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [
+        "PricingRuleEngine"
+      ],
+      "callers": [
+        "Controller:BookingController",
+        "Service:RevenueDistributionService",
+        "Service:ManualBookingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "BookingPricingBreakdown",
+        "ScreenDurationSplitOverride",
+        "PricingDurationRule",
+        "Screen",
+        "BookingScreen",
+        "PricingPlan"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "screens",
+        "booking_screens",
+        "screen_duration_split_overrides",
+        "booking_pricing_breakdowns",
+        "pricing_plans",
+        "pricing_duration_rules"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "CRITICAL"
+    },
+    "App\\Services\\PartnerService": {
+      "class": "App\\Services\\PartnerService",
+      "name": "PartnerService",
+      "file_path": "app/Services/PartnerService.php",
+      "namespace": "App\\Services",
+      "domain": "PARTNER",
+      "public_methods": [
+        "approve",
+        "reject",
+        "generateReferralCode",
+        "generatePasswordSetupToken",
+        "setupPassword",
+        "getDashboardSummary",
+        "getReferralBookings",
+        "getCommissions",
+        "getActivityTimeline"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:PartnerApprovalController",
+        "Controller:PartnerPortalController",
+        "Controller:PartnerController",
+        "Controller:PartnerApplicationController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "Partner",
+        "User",
+        "Payment",
+        "ReferralUsage",
+        "ReferralCode"
+      ],
+      "tables_accessed": [
+        "payments",
+        "bookings",
+        "partners",
+        "users",
+        "referral_codes",
+        "referral_usages"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\ClientService": {
+      "class": "App\\Services\\ClientService",
+      "name": "ClientService",
+      "file_path": "app/Services/ClientService.php",
+      "namespace": "App\\Services",
+      "domain": "CLIENT",
+      "public_methods": [
+        "list",
+        "getProfile",
+        "getBookings",
+        "getPayments",
+        "getTimeline"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:ProfileService",
+        "Controller:ClientController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Booking",
+        "User",
+        "Payment",
+        "ReferralUsage"
+      ],
+      "tables_accessed": [
+        "payments",
+        "bookings",
+        "users",
+        "referral_usages"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [
+        "Razorpay API"
+      ],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\PricingRuleEngine": {
+      "class": "App\\Services\\PricingRuleEngine",
+      "name": "PricingRuleEngine",
+      "file_path": "app/Services/PricingRuleEngine.php",
+      "namespace": "App\\Services",
+      "domain": "PRICING",
+      "public_methods": [
+        "durationToMinutes",
+        "minutesToDuration",
+        "durationToHours",
+        "hoursToDuration",
+        "convertDuration",
+        "resolveScreenRule",
+        "resolveDurationRule",
+        "calculateCombinedDiscount",
+        "calculatePeakOverlap",
+        "dayMatchesPeakRule",
+        "dayMatchesWeekendRule",
+        "calculate"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "DailyPricingCalculator",
+          "var": "dailyPricingCalculator"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:RevenueSplitResolverService",
+        "Service:CampaignPricingService",
+        "Service:BookingPriceCalculator"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "PricingDurationRule",
+        "PricingWeekendRule",
+        "PricingPeakRule",
+        "PricingScreenRule",
+        "PricingPlan"
+      ],
+      "tables_accessed": [
+        "pricing_weekend_rules",
+        "pricing_screen_rules",
+        "pricing_peak_rules",
+        "pricing_plans",
+        "pricing_duration_rules"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\PricingEngine": {
+      "class": "App\\Services\\PricingEngine",
+      "name": "PricingEngine",
+      "file_path": "app/Services/PricingEngine.php",
+      "namespace": "App\\Services",
+      "domain": "PRICING",
+      "public_methods": [
+        "calculatePreview"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "CampaignPricingService",
+          "var": "campaignPricingService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:BookingEngineController",
+        "Controller:PricingEngineController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Screen"
+      ],
+      "tables_accessed": [
+        "screens"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\ExchangeRateService": {
+      "class": "App\\Services\\ExchangeRateService",
+      "name": "ExchangeRateService",
+      "file_path": "app/Services/ExchangeRateService.php",
+      "namespace": "App\\Services",
+      "domain": "CURRENCY",
+      "public_methods": [
+        "syncRates",
+        "getRate",
+        "getAllRates",
+        "currencyForCountry",
+        "isSupportedCurrency",
+        "getRateToInr",
+        "convertToInr",
+        "convertToDisplay",
+        "clearCache"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:CurrencyService",
+        "Service:PricingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "CurrencyRate"
+      ],
+      "tables_accessed": [
+        "currency_rates"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [
+        "ExchangeRate API"
+      ],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\ReferralService": {
+      "class": "App\\Services\\ReferralService",
+      "name": "ReferralService",
+      "file_path": "app/Services/ReferralService.php",
+      "namespace": "App\\Services",
+      "domain": "PARTNER",
+      "public_methods": [
+        "validate",
+        "calculateDiscount",
+        "calculateCommission",
+        "createUsage",
+        "getAnalytics",
+        "getPartnerCommissionSummary"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:PartnerController",
+        "Controller:ReferralAnalyticsController",
+        "Service:ReferralTrackingService",
+        "Controller:ReferralCodeController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Partner",
+        "ReferralUsage",
+        "PartnerCommission",
+        "ReferralCode"
+      ],
+      "tables_accessed": [
+        "partner_commissions",
+        "partners",
+        "referral_codes",
+        "referral_usages"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\ReportService": {
+      "class": "App\\Services\\ReportService",
+      "name": "ReportService",
+      "file_path": "app/Services/ReportService.php",
+      "namespace": "App\\Services",
+      "domain": "REPORTING",
+      "public_methods": [
+        "getOverview",
+        "getRevenueReport",
+        "getBookingReport",
+        "getScreenReport",
+        "getCityReport",
+        "getCampaignReport",
+        "getReferralReport",
+        "getScreenProviderReport",
+        "getCategoryReport",
+        "getRewardReport"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "RevenueAnalyticsService",
+          "var": "revenueAnalytics"
+        },
+        {
+          "type": "BookingAnalyticsService",
+          "var": "bookingAnalytics"
+        },
+        {
+          "type": "ScreenAnalyticsService",
+          "var": "screenAnalytics"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:ReportController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Category",
+        "Booking",
+        "RewardAccount",
+        "RewardTransaction"
+      ],
+      "tables_accessed": [
+        "bookings",
+        "categorys",
+        "reward_accounts",
+        "reward_transactions"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "MEDIUM"
+    },
+    "App\\Services\\PricingService": {
+      "class": "App\\Services\\PricingService",
+      "name": "PricingService",
+      "file_path": "app/Services/PricingService.php",
+      "namespace": "App\\Services",
+      "domain": "PRICING",
+      "public_methods": [
+        "store",
+        "update"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "ExchangeRateService",
+          "var": "exchangeRateService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:PricingPlanController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "PricingPlan"
+      ],
+      "tables_accessed": [
+        "pricing_plans"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [
+        "ExchangeRate API"
+      ],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\RecommendationService": {
+      "class": "App\\Services\\RecommendationService",
+      "name": "RecommendationService",
+      "file_path": "app/Services/RecommendationService.php",
+      "namespace": "App\\Services",
+      "domain": "OTHER",
+      "public_methods": [
+        "getRecommendations"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:RecommendationEngineController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Screen"
+      ],
+      "tables_accessed": [
+        "screens"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "LOW"
+    },
+    "App\\Services\\ScreenProviderService": {
+      "class": "App\\Services\\ScreenProviderService",
+      "name": "ScreenProviderService",
+      "file_path": "app/Services/ScreenProviderService.php",
+      "namespace": "App\\Services",
+      "domain": "PROVIDER",
+      "public_methods": [
+        "approveFromEnquiry",
+        "sendPortalInvitation",
+        "rejectEnquiry",
+        "create",
+        "update",
+        "updateRevenueSplit",
+        "logScreenOwnershipChange",
+        "addActivity",
+        "addNote",
+        "getActivityTimeline",
+        "generatePasswordSetupToken"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Controller:AdminScreenProviderController",
+        "Controller:AdminScreenProviderEnquiryController",
+        "Controller:ScreenProviderPortalController"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "User",
+        "ScreenProviderEnquiry",
+        "Screen",
+        "ActivityLog",
+        "ScreenProviderActivity",
+        "ScreenProvider"
+      ],
+      "tables_accessed": [
+        "activity_logs",
+        "users",
+        "screen_providers",
+        "screen_provider_activitys",
+        "screen_provider_enquirys",
+        "screens"
+      ],
+      "has_transactions": true,
+      "has_locks": false,
+      "has_direct_db_queries": true,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\Pricing\\PeakPricingCalculator": {
+      "class": "App\\Services\\Pricing\\PeakPricingCalculator",
+      "name": "PeakPricingCalculator",
+      "file_path": "app/Services/Pricing/PeakPricingCalculator.php",
+      "namespace": "App\\Services\\Pricing",
+      "domain": "PRICING",
+      "public_methods": [
+        "calculate",
+        "dayMatchesRule"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [],
+      "repositories_called": [],
+      "models_accessed": [
+        "PricingPeakRule"
+      ],
+      "tables_accessed": [
+        "pricing_peak_rules"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\Pricing\\DailyPricingCalculator": {
+      "class": "App\\Services\\Pricing\\DailyPricingCalculator",
+      "name": "DailyPricingCalculator",
+      "file_path": "app/Services/Pricing/DailyPricingCalculator.php",
+      "namespace": "App\\Services\\Pricing",
+      "domain": "PRICING",
+      "public_methods": [
+        "calculateRuntimeHours",
+        "durationToHours",
+        "calculateBasePrice",
+        "generateCampaignDays"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:PricingRuleEngine",
+        "Service:CampaignPricingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "PricingPlan"
+      ],
+      "tables_accessed": [
+        "pricing_plans"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\Pricing\\WeekendPricingCalculator": {
+      "class": "App\\Services\\Pricing\\WeekendPricingCalculator",
+      "name": "WeekendPricingCalculator",
+      "file_path": "app/Services/Pricing/WeekendPricingCalculator.php",
+      "namespace": "App\\Services\\Pricing",
+      "domain": "PRICING",
+      "public_methods": [
+        "calculate",
+        "isWeekendDay",
+        "getApplicableRule"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "PricingConfig",
+          "var": "pricingConfig"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [],
+      "repositories_called": [],
+      "models_accessed": [
+        "PricingWeekendRule"
+      ],
+      "tables_accessed": [
+        "pricing_weekend_rules"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\Pricing\\CampaignDiscountCalculator": {
+      "class": "App\\Services\\Pricing\\CampaignDiscountCalculator",
+      "name": "CampaignDiscountCalculator",
+      "file_path": "app/Services/Pricing/CampaignDiscountCalculator.php",
+      "namespace": "App\\Services\\Pricing",
+      "domain": "PRICING",
+      "public_methods": [
+        "calculate"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [],
+      "repositories_called": [],
+      "models_accessed": [],
+      "tables_accessed": [],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\Pricing\\ReferralPricingCalculator": {
+      "class": "App\\Services\\Pricing\\ReferralPricingCalculator",
+      "name": "ReferralPricingCalculator",
+      "file_path": "app/Services/Pricing/ReferralPricingCalculator.php",
+      "namespace": "App\\Services\\Pricing",
+      "domain": "PRICING",
+      "public_methods": [
+        "calculate"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:CampaignPricingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "ReferralCode"
+      ],
+      "tables_accessed": [
+        "referral_codes"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\Pricing\\ScreenPricingResolver": {
+      "class": "App\\Services\\Pricing\\ScreenPricingResolver",
+      "name": "ScreenPricingResolver",
+      "file_path": "app/Services/Pricing/ScreenPricingResolver.php",
+      "namespace": "App\\Services\\Pricing",
+      "domain": "PRICING",
+      "public_methods": [
+        "resolve",
+        "resolveMany"
+      ],
+      "constructor_dependencies": [],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:BudgetRecommendationService",
+        "Service:CampaignPricingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "Screen",
+        "PricingPlan"
+      ],
+      "tables_accessed": [
+        "screens",
+        "pricing_plans"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    },
+    "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator": {
+      "class": "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+      "name": "FirstBookingDiscountPricingCalculator",
+      "file_path": "app/Services/Pricing/FirstBookingDiscountPricingCalculator.php",
+      "namespace": "App\\Services\\Pricing",
+      "domain": "PRICING",
+      "public_methods": [
+        "calculate"
+      ],
+      "constructor_dependencies": [
+        {
+          "type": "FirstBookingDiscountService",
+          "var": "firstBookingDiscountService"
+        }
+      ],
+      "runtime_dependencies": [],
+      "callers": [
+        "Service:CampaignPricingService"
+      ],
+      "repositories_called": [],
+      "models_accessed": [
+        "User"
+      ],
+      "tables_accessed": [
+        "users"
+      ],
+      "has_transactions": false,
+      "has_locks": false,
+      "has_direct_db_queries": false,
+      "events_and_notifications": [],
+      "external_integrations": [],
+      "refactor_risk": "HIGH"
+    }
+  }
+}

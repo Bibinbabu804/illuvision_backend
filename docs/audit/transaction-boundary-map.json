@@ -1,0 +1,131 @@
+{
+  "version": "0.2",
+  "generated_at": "2026-09-25T20:56:00+05:30",
+  "total_boundaries": 8,
+  "boundaries": [
+    {
+      "operation": "Manual / Delegated Campaign Booking Creation",
+      "initiator_class": "App\\Services\\ManualBookingService",
+      "initiator_method": "createCampaignBooking()",
+      "file_path": "app/Services/ManualBookingService.php",
+      "transaction_type": "DB::transaction() closure",
+      "locks_acquired": "Screen::whereIn('id', $screenIds)->lockForUpdate()->get()",
+      "tables_mutated": [
+        "bookings",
+        "booking_screens",
+        "booking_pricing_breakdowns",
+        "booking_activities",
+        "payments",
+        "reward_transactions"
+      ],
+      "external_effects_inside": "Optional LoyaltyService::debitRedeemedPoints() calls and BookingActivity logging.",
+      "concurrency_risk": "CRITICAL"
+    },
+    {
+      "operation": "Public / Web Campaign Booking Creation",
+      "initiator_class": "App\\Http\\Controllers\\BookingController",
+      "initiator_method": "storeCampaign() / store()",
+      "file_path": "app/Http/Controllers/BookingController.php",
+      "transaction_type": "DB::transaction() closure",
+      "locks_acquired": "InventoryService::lockScreensForBooking($screenIds)",
+      "tables_mutated": [
+        "bookings",
+        "booking_screens",
+        "booking_pricing_breakdowns",
+        "booking_activities",
+        "reward_transactions"
+      ],
+      "external_effects_inside": "LoyaltyService::debitRedeemedPoints() and BookingActivity inserts.",
+      "concurrency_risk": "CRITICAL"
+    },
+    {
+      "operation": "V2 Multi-Asset Booking Creation",
+      "initiator_class": "App\\Http\\Controllers\\Api\\BookingEngineController",
+      "initiator_method": "store()",
+      "file_path": "app/Http/Controllers/Api/BookingEngineController.php",
+      "transaction_type": "DB::transaction() closure",
+      "locks_acquired": "InventoryService::lockScreensForBooking($screenIds)",
+      "tables_mutated": [
+        "bookings",
+        "booking_screens"
+      ],
+      "external_effects_inside": "None.",
+      "concurrency_risk": "CRITICAL"
+    },
+    {
+      "operation": "Payment Signature Verification & Confirmation",
+      "initiator_class": "App\\Services\\PaymentService",
+      "initiator_method": "verifyAndConfirmPayment()",
+      "file_path": "app/Services/PaymentService.php",
+      "transaction_type": "DB::transaction() closure",
+      "locks_acquired": "Payment::where('razorpay_order_id', $razorpayOrderId)->firstOrFail() (optimistic/row lock)",
+      "tables_mutated": [
+        "payments",
+        "bookings",
+        "referral_usages",
+        "partner_commissions",
+        "booking_activities"
+      ],
+      "external_effects_inside": "ReferralTrackingService::createReferralTracking() and BookingActivity::create().",
+      "concurrency_risk": "CRITICAL"
+    },
+    {
+      "operation": "Payment Refund Processing",
+      "initiator_class": "App\\Services\\PaymentService",
+      "initiator_method": "refund()",
+      "file_path": "app/Services/PaymentService.php",
+      "transaction_type": "DB::transaction() closure",
+      "locks_acquired": "Payment::findOrFail($paymentId)",
+      "tables_mutated": [
+        "payments",
+        "bookings",
+        "refunds",
+        "referral_usages",
+        "partner_commissions"
+      ],
+      "external_effects_inside": "Razorpay API payment refund HTTP call ($this->razorpay->payment->fetch(...)->refund(...)) EXECUTED INSIDE TRANSACTION.",
+      "concurrency_risk": "HIGH"
+    },
+    {
+      "operation": "Partner Commission Approval",
+      "initiator_class": "App\\Services\\CommissionService",
+      "initiator_method": "approve()",
+      "file_path": "app/Services/CommissionService.php",
+      "transaction_type": "DB::transaction() closure",
+      "locks_acquired": "PartnerCommission::where('id', $commissionId)->lockForUpdate()->firstOrFail()",
+      "tables_mutated": [
+        "partner_commissions"
+      ],
+      "external_effects_inside": "None.",
+      "concurrency_risk": "HIGH"
+    },
+    {
+      "operation": "Partner Commission Mark As Paid",
+      "initiator_class": "App\\Services\\CommissionService",
+      "initiator_method": "markAsPaid()",
+      "file_path": "app/Services/CommissionService.php",
+      "transaction_type": "DB::transaction() closure",
+      "locks_acquired": "PartnerCommission::where('id', $commissionId)->lockForUpdate()->firstOrFail()",
+      "tables_mutated": [
+        "partner_commissions"
+      ],
+      "external_effects_inside": "None.",
+      "concurrency_risk": "HIGH"
+    },
+    {
+      "operation": "Provider Settlement Batch Status Transition",
+      "initiator_class": "App\\Services\\SettlementService",
+      "initiator_method": "transitionBatchStatus()",
+      "file_path": "app/Services/SettlementService.php",
+      "transaction_type": "DB::transaction() closure",
+      "locks_acquired": "ScreenProviderSettlement::where('id', $id)->lockForUpdate()",
+      "tables_mutated": [
+        "screen_provider_settlements",
+        "booking_screens",
+        "screen_provider_activities"
+      ],
+      "external_effects_inside": "ScreenProviderActivity logging.",
+      "concurrency_risk": "HIGH"
+    }
+  ]
+}

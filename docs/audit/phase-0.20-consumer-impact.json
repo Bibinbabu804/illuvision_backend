@@ -1,0 +1,1249 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "total_files_affected": 90,
+ "files": [
+  {
+   "file": "app/Application/Asset/Services/AssetDiscoveryFilterService.php",
+   "changes": [
+    {
+     "from": "App\\Repositories\\Asset\\AssetRepositoryInterface",
+     "to": "App\\Repositories\\Asset\\AssetRepositoryInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Asset/Services/CoverageService.php",
+   "changes": [
+    {
+     "from": "App\\Repositories\\Asset\\AssetRepositoryInterface",
+     "to": "App\\Repositories\\Asset\\AssetRepositoryInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingCreated",
+     "to": "App\\Support\\Events\\Notifications\\BookingCreated"
+    },
+    {
+     "from": "App\\Services\\Campaign\\LoyaltyService",
+     "to": "App\\Services\\Campaign\\LoyaltyService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Financial/UseCases/DistributeBookingRevenueUseCase.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Financial/UseCases/RecordReferralAttributionUseCase.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+     "to": "App\\Support\\Events\\Notifications\\CommissionGenerated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ReferralUsed",
+     "to": "App\\Support\\Events\\Notifications\\ReferralUsed"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralService",
+     "to": "App\\Services\\Campaign\\ReferralService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Payment/UseCases/CreateOfflinePaymentUseCase.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentReceived",
+     "to": "App\\Support\\Events\\Notifications\\PaymentReceived"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Payment/UseCases/RefundPaymentUseCase.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Reporting/Queries/BookingReportQuery.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Booking\\BookingAnalyticsService",
+     "to": "App\\Services\\Booking\\BookingAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Reporting/Queries/CampaignReportQuery.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ScreenAnalyticsService",
+     "to": "App\\Services\\Campaign\\ScreenAnalyticsService"
+    },
+    {
+     "from": "App\\Services\\Booking\\BookingAnalyticsService",
+     "to": "App\\Services\\Booking\\BookingAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Reporting/Queries/CityReportQuery.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ScreenAnalyticsService",
+     "to": "App\\Services\\Campaign\\ScreenAnalyticsService"
+    },
+    {
+     "from": "App\\Services\\Settlement\\RevenueAnalyticsService",
+     "to": "App\\Services\\Settlement\\RevenueAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Reporting/Queries/OverviewQuery.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ScreenAnalyticsService",
+     "to": "App\\Services\\Campaign\\ScreenAnalyticsService"
+    },
+    {
+     "from": "App\\Services\\Booking\\BookingAnalyticsService",
+     "to": "App\\Services\\Booking\\BookingAnalyticsService"
+    },
+    {
+     "from": "App\\Services\\Settlement\\RevenueAnalyticsService",
+     "to": "App\\Services\\Settlement\\RevenueAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Reporting/Queries/RevenueReportQuery.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Settlement\\RevenueAnalyticsService",
+     "to": "App\\Services\\Settlement\\RevenueAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Application/Reporting/Queries/ScreenReportQuery.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ScreenAnalyticsService",
+     "to": "App\\Services\\Campaign\\ScreenAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Console/Commands/ExpireRewardPoints.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\RewardsExpiringSoon",
+     "to": "App\\Support\\Events\\Notifications\\RewardsExpiringSoon"
+    }
+   ]
+  },
+  {
+   "file": "app/Console/Commands/SyncExchangeRates.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    }
+   ]
+  },
+  {
+   "file": "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    }
+   ]
+  },
+  {
+   "file": "app/Domain/Pricing/CampaignPricingEngine.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\LoyaltyService",
+     "to": "App\\Services\\Campaign\\LoyaltyService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/AdminContactEnquiryController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned",
+     "to": "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ContactEnquiryClosed",
+     "to": "App\\Support\\Events\\Notifications\\ContactEnquiryClosed"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/AdminManualBookingController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingApproved",
+     "to": "App\\Support\\Events\\Notifications\\BookingApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingCreated",
+     "to": "App\\Support\\Events\\Notifications\\BookingCreated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\MediaUploaded",
+     "to": "App\\Support\\Events\\Notifications\\MediaUploaded"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentReceived",
+     "to": "App\\Support\\Events\\Notifications\\PaymentReceived"
+    },
+    {
+     "from": "App\\Domain\\Pricing\\Exceptions\\PricingException",
+     "to": "App\\Domain\\Pricing\\Exceptions\\PricingException"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/AdminPaymentController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentRefunded",
+     "to": "App\\Support\\Events\\Notifications\\PaymentRefunded"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    },
+    {
+     "from": "App\\Services\\Payment\\PaymentAnalyticsService",
+     "to": "App\\Services\\Payment\\PaymentAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/AdminScreenProviderController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Exceptions\\UserConflictException",
+     "to": "App\\Support\\Exceptions\\UserConflictException"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/AdminScreenProviderEnquiryController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted"
+    },
+    {
+     "from": "App\\Support\\Exceptions\\UserConflictException",
+     "to": "App\\Support\\Exceptions\\UserConflictException"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/Api/AdminCurrencyController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\CurrencyService",
+     "to": "App\\Services\\Campaign\\CurrencyService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/Api/AdminRewardsController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\LoyaltyService",
+     "to": "App\\Services\\Campaign\\LoyaltyService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/Api/BudgetRecommendationController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\BudgetRecommendationService",
+     "to": "App\\Services\\Campaign\\BudgetRecommendationService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/Api/ClientController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ClientService",
+     "to": "App\\Services\\Campaign\\ClientService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ClientAnalyticsService",
+     "to": "App\\Services\\Campaign\\ClientAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/Api/CoverageController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\CoverageService",
+     "to": "App\\Services\\Campaign\\CoverageService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/Api/CurrencyController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\CurrencyService",
+     "to": "App\\Services\\Campaign\\CurrencyService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/Api/RecommendationEngineController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\RecommendationService",
+     "to": "App\\Services\\Campaign\\RecommendationService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/Auth/ForgotPasswordController.php",
+   "changes": [
+    {
+     "from": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+     "to": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/AuthController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\ProfileUpdated",
+     "to": "App\\Support\\Events\\Notifications\\ProfileUpdated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\UserRegistered",
+     "to": "App\\Support\\Events\\Notifications\\UserRegistered"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/BookingController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingApproved",
+     "to": "App\\Support\\Events\\Notifications\\BookingApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingCreated",
+     "to": "App\\Support\\Events\\Notifications\\BookingCreated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingRejected",
+     "to": "App\\Support\\Events\\Notifications\\BookingRejected"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\MediaApproved",
+     "to": "App\\Support\\Events\\Notifications\\MediaApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\MediaRejected",
+     "to": "App\\Support\\Events\\Notifications\\MediaRejected"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\MediaUploaded",
+     "to": "App\\Support\\Events\\Notifications\\MediaUploaded"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentReceived",
+     "to": "App\\Support\\Events\\Notifications\\PaymentReceived"
+    },
+    {
+     "from": "App\\Domain\\Pricing\\Exceptions\\PricingException",
+     "to": "App\\Domain\\Pricing\\Exceptions\\PricingException"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/ContactEnquiryController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted",
+     "to": "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/DashBoardController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ScreenAnalyticsService",
+     "to": "App\\Services\\Campaign\\ScreenAnalyticsService"
+    },
+    {
+     "from": "App\\Services\\Booking\\BookingAnalyticsService",
+     "to": "App\\Services\\Booking\\BookingAnalyticsService"
+    },
+    {
+     "from": "App\\Services\\Settlement\\RevenueAnalyticsService",
+     "to": "App\\Services\\Settlement\\RevenueAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/PartnerApprovalController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\PartnerCreated",
+     "to": "App\\Support\\Events\\Notifications\\PartnerCreated"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/PartnerBookingController.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Exceptions\\PricingException",
+     "to": "App\\Domain\\Pricing\\Exceptions\\PricingException"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/PartnerController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\PartnerCreated",
+     "to": "App\\Support\\Events\\Notifications\\PartnerCreated"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralService",
+     "to": "App\\Services\\Campaign\\ReferralService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/PaymentController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentFailed",
+     "to": "App\\Support\\Events\\Notifications\\PaymentFailed"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentReceived",
+     "to": "App\\Support\\Events\\Notifications\\PaymentReceived"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentRefunded",
+     "to": "App\\Support\\Events\\Notifications\\PaymentRefunded"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/ProductEnquiryController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted",
+     "to": "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/ReferralAnalyticsController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+     "to": "App\\Support\\Events\\Notifications\\CommissionGenerated"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralService",
+     "to": "App\\Services\\Campaign\\ReferralService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/ReferralCodeController.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ReferralService",
+     "to": "App\\Services\\Campaign\\ReferralService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Controllers/ScreenProviderEnquiryController.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Requests/CreateAssetRequest.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+     "to": "App\\Domain\\Pricing\\Enums\\PricingUnit"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Requests/PricingPlanRequest.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Requests/UpdateAssetRequest.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+     "to": "App\\Domain\\Pricing\\Enums\\PricingUnit"
+    }
+   ]
+  },
+  {
+   "file": "app/Http/Resources/AssetResource.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+     "to": "App\\Domain\\Pricing\\Enums\\PricingUnit"
+    }
+   ]
+  },
+  {
+   "file": "app/Infrastructure/Media/LaravelStorageAdapter.php",
+   "changes": [
+    {
+     "from": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+     "to": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Infrastructure/Notification/LaravelMailAdapter.php",
+   "changes": [
+    {
+     "from": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+     "to": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Models/Booking.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\LoyaltyService",
+     "to": "App\\Services\\Campaign\\LoyaltyService"
+    }
+   ]
+  },
+  {
+   "file": "app/Models/Screen.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+     "to": "App\\Domain\\Pricing\\Enums\\PricingUnit"
+    }
+   ]
+  },
+  {
+   "file": "app/Observers/AssetObserver.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Asset\\Events\\AssetCreated",
+     "to": "App\\Domain\\Asset\\Events\\AssetCreated"
+    }
+   ]
+  },
+  {
+   "file": "app/Providers/AppServiceProvider.php",
+   "changes": [
+    {
+     "from": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+     "to": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface"
+    },
+    {
+     "from": "App\\Infrastructure\\Notifications\\LaravelMailAdapter",
+     "to": "App\\Infrastructure\\Notifications\\LaravelMailAdapter"
+    },
+    {
+     "from": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+     "to": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface"
+    },
+    {
+     "from": "App\\Infrastructure\\Storage\\LaravelStorageAdapter",
+     "to": "App\\Infrastructure\\Storage\\LaravelStorageAdapter"
+    },
+    {
+     "from": "App\\Repositories\\Asset\\AssetRepositoryInterface",
+     "to": "App\\Repositories\\Asset\\AssetRepositoryInterface"
+    },
+    {
+     "from": "App\\Repositories\\Asset\\AssetRepository",
+     "to": "App\\Repositories\\Asset\\AssetRepository"
+    },
+    {
+     "from": "App\\Repositories\\Booking\\BookingRepositoryInterface",
+     "to": "App\\Repositories\\Booking\\BookingRepositoryInterface"
+    },
+    {
+     "from": "App\\Repositories\\Booking\\BookingRepository",
+     "to": "App\\Repositories\\Booking\\BookingRepository"
+    }
+   ]
+  },
+  {
+   "file": "app/Repositories/AssetRepository.php",
+   "changes": [
+    {
+     "from": "App\\Repositories\\Asset\\AssetRepositoryInterface",
+     "to": "App\\Repositories\\Asset\\AssetRepositoryInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Repositories/BookingRepository.php",
+   "changes": [
+    {
+     "from": "App\\Repositories\\Booking\\BookingRepositoryInterface",
+     "to": "App\\Repositories\\Booking\\BookingRepositoryInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/AssetService.php",
+   "changes": [
+    {
+     "from": "App\\Repositories\\Asset\\AssetRepositoryInterface",
+     "to": "App\\Repositories\\Asset\\AssetRepositoryInterface"
+    },
+    {
+     "from": "App\\Services\\Campaign\\AssetDiscoveryFilterService",
+     "to": "App\\Services\\Campaign\\AssetDiscoveryFilterService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\CoverageService",
+     "to": "App\\Services\\Campaign\\CoverageService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/BookingWorkflowService.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Booking\\Exceptions\\InvalidBookingStateException",
+     "to": "App\\Domain\\Booking\\Exceptions\\InvalidBookingStateException"
+    },
+    {
+     "from": "App\\Domain\\Booking\\Enums\\BookingStatus",
+     "to": "App\\Domain\\Booking\\Enums\\BookingStatus"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/Campaign/CurrencyService.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\CountryDetectionService",
+     "to": "App\\Services\\Campaign\\CountryDetectionService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/CampaignPricingService.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\LoyaltyService",
+     "to": "App\\Services\\Campaign\\LoyaltyService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\BudgetRecommendationService",
+     "to": "App\\Services\\Campaign\\BudgetRecommendationService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/CommissionService.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+     "to": "App\\Support\\Events\\Notifications\\CommissionGenerated"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/ConflictDetectionService.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Availability\\Exceptions\\FleetCapacityExceededException",
+     "to": "App\\Domain\\Availability\\Exceptions\\FleetCapacityExceededException"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/FinanceService.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Settlement\\RevenueAnalyticsService",
+     "to": "App\\Services\\Settlement\\RevenueAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/LoyaltyService.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\RewardsBonusAwarded",
+     "to": "App\\Support\\Events\\Notifications\\RewardsBonusAwarded"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\RewardsEarned",
+     "to": "App\\Support\\Events\\Notifications\\RewardsEarned"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\RewardsRedeemed",
+     "to": "App\\Support\\Events\\Notifications\\RewardsRedeemed"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/ManualBookingService.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentReceived",
+     "to": "App\\Support\\Events\\Notifications\\PaymentReceived"
+    },
+    {
+     "from": "App\\Domain\\Pricing\\Exceptions\\PricingException",
+     "to": "App\\Domain\\Pricing\\Exceptions\\PricingException"
+    },
+    {
+     "from": "App\\Services\\Campaign\\LoyaltyService",
+     "to": "App\\Services\\Campaign\\LoyaltyService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/MediaService.php",
+   "changes": [
+    {
+     "from": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+     "to": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/NotificationService.php",
+   "changes": [
+    {
+     "from": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+     "to": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/PartnerService.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\PartnerApproved",
+     "to": "App\\Support\\Events\\Notifications\\PartnerApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PartnerRejected",
+     "to": "App\\Support\\Events\\Notifications\\PartnerRejected"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/PaymentService.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/Pricing/ScreenPricingResolver.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Exceptions\\PricingException",
+     "to": "App\\Domain\\Pricing\\Exceptions\\PricingException"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/PricingService.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/ProfileService.php",
+   "changes": [
+    {
+     "from": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+     "to": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ClientService",
+     "to": "App\\Services\\Campaign\\ClientService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ClientAnalyticsService",
+     "to": "App\\Services\\Campaign\\ClientAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/ReferralTrackingService.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+     "to": "App\\Support\\Events\\Notifications\\CommissionGenerated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ReferralUsed",
+     "to": "App\\Support\\Events\\Notifications\\ReferralUsed"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralService",
+     "to": "App\\Services\\Campaign\\ReferralService"
+    }
+   ]
+  },
+  {
+   "file": "app/Services/ScreenProviderService.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderApproved",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderCreated",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderCreated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderRejected",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderRejected"
+    },
+    {
+     "from": "App\\Support\\Exceptions\\UserConflictException",
+     "to": "App\\Support\\Exceptions\\UserConflictException"
+    }
+   ]
+  },
+  {
+   "file": "app/Support/Events/NotificationEventSubscriber.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingApproved",
+     "to": "App\\Support\\Events\\Notifications\\BookingApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingCancelled",
+     "to": "App\\Support\\Events\\Notifications\\BookingCancelled"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingCreated",
+     "to": "App\\Support\\Events\\Notifications\\BookingCreated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingRejected",
+     "to": "App\\Support\\Events\\Notifications\\BookingRejected"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+     "to": "App\\Support\\Events\\Notifications\\CommissionGenerated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned",
+     "to": "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ContactEnquiryClosed",
+     "to": "App\\Support\\Events\\Notifications\\ContactEnquiryClosed"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted",
+     "to": "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\MediaApproved",
+     "to": "App\\Support\\Events\\Notifications\\MediaApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\MediaRejected",
+     "to": "App\\Support\\Events\\Notifications\\MediaRejected"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\MediaUploaded",
+     "to": "App\\Support\\Events\\Notifications\\MediaUploaded"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PartnerApproved",
+     "to": "App\\Support\\Events\\Notifications\\PartnerApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PartnerCreated",
+     "to": "App\\Support\\Events\\Notifications\\PartnerCreated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PartnerRejected",
+     "to": "App\\Support\\Events\\Notifications\\PartnerRejected"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentFailed",
+     "to": "App\\Support\\Events\\Notifications\\PaymentFailed"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentReceived",
+     "to": "App\\Support\\Events\\Notifications\\PaymentReceived"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\PaymentRefunded",
+     "to": "App\\Support\\Events\\Notifications\\PaymentRefunded"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted",
+     "to": "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ProfileUpdated",
+     "to": "App\\Support\\Events\\Notifications\\ProfileUpdated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ReferralUsed",
+     "to": "App\\Support\\Events\\Notifications\\ReferralUsed"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\RewardsBonusAwarded",
+     "to": "App\\Support\\Events\\Notifications\\RewardsBonusAwarded"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\RewardsEarned",
+     "to": "App\\Support\\Events\\Notifications\\RewardsEarned"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\RewardsExpiringSoon",
+     "to": "App\\Support\\Events\\Notifications\\RewardsExpiringSoon"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\RewardsRedeemed",
+     "to": "App\\Support\\Events\\Notifications\\RewardsRedeemed"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderApproved",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderCreated",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderCreated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderRejected",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderRejected"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\UserRegistered",
+     "to": "App\\Support\\Events\\Notifications\\UserRegistered"
+    }
+   ]
+  },
+  {
+   "file": "database/factories/AssetFactory.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+     "to": "App\\Domain\\Pricing\\Enums\\PricingUnit"
+    }
+   ]
+  },
+  {
+   "file": "database/seeders/AssetSeeder.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+     "to": "App\\Domain\\Pricing\\Enums\\PricingUnit"
+    }
+   ]
+  },
+  {
+   "file": "database/seeders/CurrencyRateSeeder.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/AdPartnerCommissionSettlementTest.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+     "to": "App\\Support\\Events\\Notifications\\CommissionGenerated"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/AssetApiTest.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+     "to": "App\\Domain\\Pricing\\Enums\\PricingUnit"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/BookingChannelDurationSplitIntegrationTest.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingCreated",
+     "to": "App\\Support\\Events\\Notifications\\BookingCreated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+     "to": "App\\Support\\Events\\Notifications\\CommissionGenerated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ReferralUsed",
+     "to": "App\\Support\\Events\\Notifications\\ReferralUsed"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/BookingDisplaySplitAuditTest.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingCreated",
+     "to": "App\\Support\\Events\\Notifications\\BookingCreated"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/CampaignDurationConsistencyTest.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ScreenAnalyticsService",
+     "to": "App\\Services\\Campaign\\ScreenAnalyticsService"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/CurrencyTest.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\CurrencyService",
+     "to": "App\\Services\\Campaign\\CurrencyService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\CountryDetectionService",
+     "to": "App\\Services\\Campaign\\CountryDetectionService"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/FinancialRegressionAndHardeningTest.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\BookingCreated",
+     "to": "App\\Support\\Events\\Notifications\\BookingCreated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\CommissionGenerated",
+     "to": "App\\Support\\Events\\Notifications\\CommissionGenerated"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ReferralUsed",
+     "to": "App\\Support\\Events\\Notifications\\ReferralUsed"
+    },
+    {
+     "from": "App\\Services\\Campaign\\CurrencyService",
+     "to": "App\\Services\\Campaign\\CurrencyService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\ReferralTrackingService",
+     "to": "App\\Services\\Campaign\\ReferralTrackingService"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/Golden/GoldenTestSetupTrait.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Pricing\\Enums\\PricingUnit",
+     "to": "App\\Domain\\Pricing\\Enums\\PricingUnit"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/Integrations/IntegrationBoundaryTest.php",
+   "changes": [
+    {
+     "from": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+     "to": "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface"
+    },
+    {
+     "from": "App\\Infrastructure\\Notifications\\LaravelMailAdapter",
+     "to": "App\\Infrastructure\\Notifications\\LaravelMailAdapter"
+    },
+    {
+     "from": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+     "to": "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface"
+    },
+    {
+     "from": "App\\Infrastructure\\Storage\\LaravelStorageAdapter",
+     "to": "App\\Infrastructure\\Storage\\LaravelStorageAdapter"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/PricingPlanCurrencyNormalizationTest.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    }
+   ]
+  },
+  {
+   "file": "tests/Feature/ScreenProviderInvitationTest.php",
+   "changes": [
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderApproved",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderApproved"
+    },
+    {
+     "from": "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation",
+     "to": "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation"
+    }
+   ]
+  },
+  {
+   "file": "tests/Unit/Architecture/ArchitectureRuleTest.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\ExchangeRateService",
+     "to": "App\\Services\\Campaign\\ExchangeRateService"
+    },
+    {
+     "from": "App\\Services\\Campaign\\LoyaltyService",
+     "to": "App\\Services\\Campaign\\LoyaltyService"
+    }
+   ]
+  },
+  {
+   "file": "tests/Unit/BookingWorkflowTest.php",
+   "changes": [
+    {
+     "from": "App\\Domain\\Booking\\Exceptions\\InvalidBookingStateException",
+     "to": "App\\Domain\\Booking\\Exceptions\\InvalidBookingStateException"
+    },
+    {
+     "from": "App\\Domain\\Booking\\Enums\\BookingStatus",
+     "to": "App\\Domain\\Booking\\Enums\\BookingStatus"
+    }
+   ]
+  },
+  {
+   "file": "tests/Unit/Domain/Pricing/CampaignPricingEngineTest.php",
+   "changes": [
+    {
+     "from": "App\\Services\\Campaign\\LoyaltyService",
+     "to": "App\\Services\\Campaign\\LoyaltyService"
+    }
+   ]
+  }
+ ]
+}

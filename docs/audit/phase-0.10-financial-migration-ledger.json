@@ -1,0 +1,159 @@
+{
+  "phase": "0.10",
+  "name": "Financial Migration Ledger",
+  "generated_at": "2026-09-26T00:52:00+05:30",
+  "schema_migrations_added": 0,
+  "schema_migrations_modified": 0,
+  "schema_migrations_removed": 0,
+  "total_files_created": 8,
+  "total_files_modified": 8,
+  "total_files_deleted": 0,
+  "entries": [
+    {
+      "component": "Revenue allocation arithmetic",
+      "before": "Inline arithmetic in App\\Services\\RevenueDistributionService::processBookingScreens()",
+      "after": "App\\Domain\\Financial\\Support\\RevenueAllocation (grossPerScreen, split, illuvisionOwned)",
+      "domain": "Domain\\Financial\\Support",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "legacy_compatibility": "100% — identical rounding order, identical fallback selection, identical independent share rounding",
+      "golden_tests": "Tests\\Unit\\Domain\\Financial\\RevenueAllocationTest",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_revenue_distribution_writes_snapshot_for_each_screen",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Settlement eligibility query",
+      "before": "Inline four-filter aggregate query in App\\Services\\SettlementService::generateSettlement()",
+      "after": "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface -> App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository",
+      "domain": "Domain\\Financial\\Contracts",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+      "legacy_compatibility": "100% — byte-for-byte query reproduction, including the booking_id branch that skips the period filter, and both RuntimeException messages",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest (4 eligibility tests)",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Partner commission persistence",
+      "before": "Direct Eloquent in App\\Services\\CommissionService (3 lock sites) and App\\Services\\ReferralTrackingService (1 duplicate-guard site)",
+      "after": "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface -> App\\Infrastructure\\Financial\\Persistence\\EloquentPartnerCommissionRepository",
+      "domain": "Domain\\Financial\\Contracts",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "legacy_compatibility": "100% — all four lockForUpdate() calls preserved with unchanged strength",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_commission_repository_preserves_pessimistic_locking, ::test_commission_repository_lookup_helpers",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest::test_partner_commission_calculation",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Revenue distribution entry point",
+      "before": "Direct RevenueDistributionService calls from BookingController, ManualBookingService and the referral backfill",
+      "after": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "domain": "Domain\\Financial\\Support (arithmetic)",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "legacy_compatibility": "100% — still runs inside the caller's existing transaction; no boundary change",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenBookingRegressionTest",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_revenue_distribution_writes_snapshot_for_each_screen, ::test_distribution_is_skipped_for_zero_screen_bookings",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Settlement generation entry point",
+      "before": "App\\Http\\Controllers\\AdminSettlementController::store() called SettlementService::generateSettlement() directly",
+      "after": "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+      "domain": "Domain\\Financial\\Contracts",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+      "legacy_compatibility": "100% — response shape, exception contract and transaction boundary unchanged",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_generated_settlement_sums_snapshots_not_live_percentages, ::test_settlement_generation_marks_screens_settled, ::test_booking_scoped_settlement_generation_ignores_the_period_filter, ::test_settlement_generation_without_eligible_screens_still_throws",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Referral attribution entry point",
+      "before": "Two app(\\App\\Services\\ReferralTrackingService::class) service-locator call sites",
+      "after": "Constructor-injected App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "domain": "Domain\\Financial\\Contracts",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "legacy_compatibility": "100% — same call, same enclosing transaction, same commission lock, same backfill",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Settlement lifecycle transitions",
+      "before": "App\\Services\\SettlementService::approveSettlement(), markAsPaid(), cancelSettlement()",
+      "after": "UNCHANGED — still called directly from AdminSettlementController",
+      "domain": "N/A",
+      "application_boundary": "N/A",
+      "legacy_compatibility": "100%",
+      "golden_tests": "Existing settlement feature tests",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "DEFERRED",
+      "deferral_reason": "The lifecycle state machine is cohesive and already separated from generation. Moving it adds indirection with no boundary benefit. See ADR-P10-05."
+    },
+    {
+      "component": "Revenue split resolution",
+      "before": "App\\Services\\RevenueSplitResolverService::resolveForBookingScreen()",
+      "after": "UNCHANGED",
+      "domain": "NOT EXTRACTED",
+      "application_boundary": "N/A",
+      "legacy_compatibility": "100%",
+      "golden_tests": "Tests\\Feature\\ScreenManagementDurationSplitTest, Tests\\Feature\\BookingChannelDurationSplitIntegrationTest",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "DEFERRED",
+      "deferral_reason": "Already an isolated, well-tested rule set with its own coverage. Extracting it would be refactoring for its own sake."
+    },
+    {
+      "component": "Referral tracking cancellation",
+      "before": "App\\Services\\ReferralTrackingService::cancelReferralTracking() via service locator in AdminPaymentController::rejectPayment()",
+      "after": "UNCHANGED",
+      "domain": "N/A",
+      "application_boundary": "NOT EXTRACTED",
+      "legacy_compatibility": "100%",
+      "golden_tests": "N/A",
+      "financial_tests": "N/A",
+      "api_tests": "N/A",
+      "status": "DEFERRED",
+      "deferral_reason": "Cancellation is a distinct operation from attribution. Extending RecordReferralAttributionUseCase to cover it would conflate two responsibilities."
+    }
+  ],
+  "files_created": [
+    "app/Domain/Financial/Support/RevenueAllocation.php",
+    "app/Domain/Financial/Contracts/SettlementRepositoryInterface.php",
+    "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php",
+    "app/Infrastructure/Financial/Persistence/EloquentSettlementRepository.php",
+    "app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php",
+    "app/Application/Financial/UseCases/DistributeBookingRevenueUseCase.php",
+    "app/Application/Financial/UseCases/GenerateProviderSettlementUseCase.php",
+    "app/Application/Financial/UseCases/RecordReferralAttributionUseCase.php"
+  ],
+  "files_modified": [
+    "app/Services/RevenueDistributionService.php",
+    "app/Services/SettlementService.php",
+    "app/Services/CommissionService.php",
+    "app/Services/ReferralTrackingService.php",
+    "app/Services/ManualBookingService.php",
+    "app/Http/Controllers/BookingController.php",
+    "app/Http/Controllers/AdminSettlementController.php",
+    "app/Http/Controllers/AdminPaymentController.php"
+  ],
+  "files_modified_in_0_9_but_touched_again": [
+    {
+      "file": "app/Providers/AppServiceProvider.php",
+      "note": "Registered the two Financial repository bindings alongside the Payment one."
+    }
+  ],
+  "verification": {
+    "php_lint": "pass",
+    "composer_validate": "pass",
+    "migrate_status_pending": 0,
+    "golden_financial_suite": "3/3 pass",
+    "golden_financial_boundary_suite": "15/15 pass",
+    "golden_booking_suite": "4/4 pass",
+    "full_suite": "451 pass / 2 pre-existing failures (availability message wording, unrelated to Financial)"
+  }
+}

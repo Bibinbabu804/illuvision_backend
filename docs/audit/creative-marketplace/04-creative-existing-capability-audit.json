@@ -1,0 +1,228 @@
+{
+  "artifact": "04-creative-existing-capability-audit",
+  "generated": "2026-09-26",
+  "method": "Exhaustive case-insensitive keyword sweep of app/, routes/, database/, tests/, config/, resources/ (vendor/ and node_modules/ excluded via .gitignore). Classification is semantic, not lexical: several Creative-adjacent words exist in this repository with a completely different advertising meaning.",
+
+  "headline": {
+    "classification": "CURRENT_FACT",
+    "creative_classes": 0,
+    "creative_directories": 0,
+    "creative_routes": 0,
+    "creative_tables": 0,
+    "creative_migrations": 0,
+    "creative_tests": 0,
+    "creative_seeders": 0,
+    "conclusion": "Creative Marketplace is 100% greenfield. There is no partial implementation, no dead code, no half-built aggregate, and no reserved table name. Everything must be newly built."
+  },
+
+  "creative_directory_probe": {
+    "classification": "CURRENT_FACT",
+    "command": "ls -d app/Domain/Creative app/Services/Creative app/Repositories/Creative app/Http/Controllers/Creative",
+    "result": "No such file or directory (all four).",
+    "additional_probe": "find app -type d -empty",
+    "additional_result": "zero results — the repository contains no empty directories at all.",
+    "contradicted_claims": [
+      "docs/audit/phase-0.20-target-structure-comparison.md — 12 rows marked 'CREATED (empty)'",
+      "docs/audit/phase-0.20-architecture-conformance-score.json — 'All 9 Creative subdomains exist and are intentionally empty'",
+      "docs/audit/phase-0.20-conformance-checklist.json — 'Domain/Creative includes 9'",
+      "docs/audit/phase-0.20-file-movement-ledger.md — 11 'intentionally empty' rows",
+      "docs/audit/phase-0.20-current-directory-tree.txt — Creative nodes",
+      "app/Domain/README.md, app/Services/README.md, app/Repositories/README.md",
+      "AGENTS.md section 8 (corrected on 2026-09-26 as part of this audit)"
+    ],
+    "corroborating_prior_artifact": "docs/audit/phase-0.18-directory-conformance.json:15 correctly recorded 'app/Domain/Creative': 'absent' — the ONLY prior artifact that agrees with source. Phase 0.20 fabricated the directories."
+  },
+
+  "concept_verdicts": [
+    {
+      "concept": "Creator onboarding / KYC / application",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'kyc' = 0 matches repo-wide. grep -ri 'onboarding' = 0 matches repo-wide. No 'creator' role in database/seeders/RolesAndPermissionsSeeder.php (roles are super-admin, admin, manager, staff, screen_provider).",
+      "nearest_analogues": [
+        { "component": "App\\Services\\PartnerService::approve():20-56", "what_it_does": "Approve a partner application, create a User row, generate a ReferralCode, create a password setup token", "coupling": "Bound to partner_commissions / referral_codes semantics" },
+        { "component": "App\\Services\\ScreenProviderService::approveFromEnquiry():23", "what_it_does": "Convert a provider enquiry into an approved ScreenProvider + User + portal invitation", "coupling": "5 inline DB transactions, 6 models" },
+        { "component": "migration 2026_06_20_000003_add_verification_fields_to_payments_table", "what_it_does": "Adds payment verification fields", "coupling": "Payment verification, NOT identity verification — misleading name" }
+      ],
+      "belongs_to_creative_marketplace": true,
+      "reusable": false,
+      "architecturally_safe_to_reuse": false,
+      "needs_refactoring_before_reuse": true,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Creator profile",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "No creator model, table, controller or route. users table has name, email, phone, avatar, role, status, last_login_at, google_id, created_by_partner_id — no creative fields.",
+      "nearest_analogues": [
+        { "component": "App\\Services\\ProfileService", "what_it_does": "ADVERTISER dashboard (campaigns, history, points)", "coupling": "Bookings-only; NOT reusable as a creator profile" },
+        { "component": "App\\Services\\ScreenProviderService::create/update:217,269", "what_it_does": "Provider profile with revenue split", "coupling": "Revenue-split fields are provider-specific" }
+      ],
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Portfolio",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'portfolio' = 0 matches in the entire repository. No table, no model, no route, no JSON column.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Creative service listing (a creator's offer)",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "No services capability table. The `products` table (2026_07_01_000001) is an advertising marketing catalogue with an `ideal_for` JSON column — not a service offering with a rate, duration and availability.",
+      "collides_with": "App\\Services\\AssetService lists *screens* (media inventory). The word 'asset' means ad inventory here, never creative work files.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Brief",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'brief' = 0 code matches. Appears only in the declared-subdomain list in app/Domain/README.md.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Proposal / pitch / quote",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'proposal' = 0. grep -ri 'pitch' = 0. grep -ri 'quote' = 0 (excluding Illuminate\\Contracts). No quoting engine exists in any form.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Creative project",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "No project aggregate. The only existing lifecycle machine is App\\Services\\BookingWorkflowService (7-state booking graph) which models a CAMPAIGN, not a creative project.",
+      "nearest_analogues": [{ "component": "App\\Services\\BookingWorkflowService:14-39", "what_it_does": "Transition guard over Booking::STATUS_* constants", "coupling": "Booking domain vocabulary and sold_out_reason are wrong for a creative project" }],
+      "reusable": false,
+      "needs_refactoring_before_reuse": true,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Revision",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'revision' = 0 matches repo-wide.",
+      "nearest_analogues": [{ "component": "PartnerBookingController:285-305", "what_it_does": "Replace or remove a rejected booking_media item", "coupling": "A destructive REPLACEMENT, not a versioned revision. No version, no diff, no round number." }],
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Delivery",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'deliverable' = 0. 'delivery' matches only MVC prose (app/Http/README.md), the declared subdomain list, and 'deferred delivery' in MailContractInterface:26.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Review + rating of work",
+      "verdict": "PARTIAL — but the wrong 'review'",
+      "classification": "CURRENT_FACT",
+      "critical_warning": "Reusing booking_media review semantics for a creator review would be a category error. The existing review is an ADMIN reviewing an ADVERTISER's uploaded ad asset; a Creative review is a CLIENT reviewing a CREATOR's delivered work.",
+      "existing_1": { "component": "booking_media review fields", "evidence": "migration 2026_09_16_103654_add_review_fields_to_booking_media_table.php:12-17 — review_status, reviewed_by, reviewed_at, rejection_reason; BookingMedia::REVIEW_* constants; routes /api/bookings/{booking}/review and /mark-media-review (permission bookings.approve)", "structure": "approvable state machine + reviewer identity + rejection reason", "transferable": "The SHAPE is transferable; the SUBJECT is not." },
+      "existing_2": { "component": "testimonials.rating", "evidence": "migration 2026_02_17_100030: rating decimal(3,2), validated 'nullable|numeric|min:0|max:5' in TestimonialController:33", "note": "Marketing CMS content, public CRUD, no author binding, not cast on the model" },
+      "reusable": false,
+      "needs_refactoring_before_reuse": true,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Earnings / wallet / balance",
+      "verdict": "PARTIAL — points only, no cash wallet",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'wallet' = 0. grep -ri 'withdraw' = 0. grep -ri 'escrow' = 0. All 24 'balance' matches are reward_accounts.balance (integer loyalty points) or a provider 'outstanding balance' dashboard figure.",
+      "nearest_analogues": [
+        { "component": "reward_accounts / reward_transactions", "what_it_does": "The ONLY ledger-with-balance implementation (balance, lifetime_earned, lifetime_redeemed, lifetime_expired + append-only transactions, 6 transaction types)", "coupling": "Non-cash integer points; every earn/redeem path is tied to a Booking" },
+        { "component": "partner_commissions", "what_it_does": "Cash commission records with generate->approve->paid->cancel lifecycle and payout fields", "coupling": "Affiliate semantics: percentage of Illuvision revenue on a referred ad booking" },
+        { "component": "App\\Services\\PartnerService:215", "what_it_does": "'lifetime_earnings' => (float) $commissions->sum('amount')", "note": "Closest single expression to a creator earnings figure anywhere in the repository, but it is an affiliate total" }
+      ],
+      "reusable": false,
+      "needs_refactoring_before_reuse": true,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Payout",
+      "verdict": "PARTIAL — affiliate and provider only",
+      "classification": "CURRENT_FACT",
+      "evidence": "No payout endpoint, no bank detail storage, no withdrawal request, no KYC gate for payout. CommissionService::markAsPaid(int, ?string, ?array $payoutData):61 is an admin-driven status change, not a self-serve payout. FinanceService:177 writes a ledger line 'Provider Settlement Payout'.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Escrow / milestone funding",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'escrow' = 0. The 3 'milestone' matches are ad-campaign duration buckets in Campaign\\BudgetRecommendationService:552,596,597. There is no hold/release, no tranche table, no escrow balance, and no Razorpay route or escrow product usage.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Dispute",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "grep -ri 'dispute' = 0 matches repo-wide.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Contract / agreement",
+      "verdict": "ABSENT",
+      "classification": "CURRENT_FACT",
+      "evidence": "No contract table, template, e-sign or version. All 100+ 'contract' matches are Illuminate\\Contracts imports.",
+      "reusable": false,
+      "should_be_replaced": true
+    },
+    {
+      "concept": "Commission",
+      "verdict": "PARTIAL — affiliate semantics",
+      "classification": "CURRENT_FACT",
+      "existing": [
+        "App\\Services\\Campaign\\ReferralService::calculateCommission():59-77 — percentage or fixed, capped by referral_codes.max_commission_amount",
+        "App\\Services\\CommissionService — approve/markAsPaid/markAsCancelled/summary/timeline, 3 transactions, pessimistic lock via PartnerCommissionRepositoryInterface::findOrFailForUpdate",
+        "partner_commissions table with a 5-column immutable profit snapshot (campaign_total, provider_revenue, illuvision_revenue, partner_commission_base, partner_commission_percentage)"
+      ],
+      "coupling": "The basis is a percentage of Illuvision revenue on a partner's referred AD booking. A creative commission (a rate for creative work) is a different money model with a different base.",
+      "reusable": false,
+      "needs_refactoring_before_reuse": true,
+      "open_decision": "Whether to generalise CommissionService into a shared CommissionContractInterface or build a separate Creative earnings domain. Do not do both."
+    }
+  ],
+
+  "shared_capabilities_touching_creative_adjacent_concepts": [
+    { "capability": "Authentication", "current_owner": "app/Http/Controllers/AuthController, Auth\\GoogleAuthController, Auth\\ForgotPasswordController, Auth\\ResetPasswordController", "implementation": "Sanctum tokens (no expiry configured), web guard fallback, Google ID-token via GoogleIdentityProviderInterface", "creative_reuse": "DIRECT", "risk": "New registration assigns role 'user'. A creator must be promoted explicitly." },
+    { "capability": "Identity table", "current_owner": "app/Models/User", "implementation": "users (62-model set, free-form role varchar, no FK to roles)", "creative_reuse": "DIRECT + EXTEND (a creators table referencing users.id)", "risk": "role is free-form; a misspelled 'creator' silently yields zero permissions" },
+    { "capability": "Roles and permissions", "current_owner": "App\\Support\\Authorization\\RolePermissionChecker + App\\Http\\Middleware\\PermissionMiddleware", "implementation": "roles + role_permissions, 70 seeded permissions, 3600s cache", "creative_reuse": "EXTEND (add creator role + creative.* permissions)", "risk": "Cache TTL; Sec03PermissionVocabularyTest will fail until seeder and routes agree" },
+    { "capability": "File storage", "current_owner": "App\\Infrastructure\\Storage\\LaravelStorageAdapter", "implementation": "public disk, StorageContractInterface (6 methods)", "creative_reuse": "DIRECT for public files; NEW ADAPTER for private files", "risk": "No signed URLs exist; every file is a permanent public URL" },
+    { "capability": "Image processing", "current_owner": "App\\Infrastructure\\Media\\GdImageProcessor", "implementation": "isAvailable + encodeWebp only", "creative_reuse": "DIRECT (thumbnails)", "risk": "Does not preserve format; cannot resize; no EXIF handling" },
+    { "capability": "Notifications and mail", "current_owner": "App\\Services\\NotificationService + NotificationEventSubscriber + LaravelMailAdapter", "implementation": "33 events, 28 queued Mailables, notification_logs audit", "creative_reuse": "EXTEND", "risk": "Recipient roles are hardcoded to admin/user/partner; dedup is in-process only" },
+    { "capability": "Payment gateway", "current_owner": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway", "implementation": "PaymentGatewayInterface: createOrder, verifySignature, fetchPayment, refund", "creative_reuse": "DIRECT for the gateway; NOT for the booking-coupled confirmation flow", "risk": "No webhook endpoint exists anywhere" },
+    { "capability": "Money primitives", "current_owner": "App\\Domain\\Payment\\Support\\Money", "implementation": "toPaise (int), toRupees (float, 2dp), normalise, isFullRefund", "creative_reuse": "DIRECT for gateway conversion; NEW value object for domain arithmetic", "risk": "No add/subtract/allocate/multiply; float-based rupees with round()" },
+    { "capability": "Settings", "current_owner": "App\\Services\\SettingsService", "implementation": "settings table, key 'system_settings', 12h cache, 11 typed accessors", "creative_reuse": "DIRECT (add creative_* groups)", "risk": "Low" },
+    { "capability": "Currency and FX", "current_owner": "App\\Services\\Campaign\\ExchangeRateService + CurrencyService", "implementation": "currency_rates table, ExchangeRateApiClientInterface, scheduled twice daily, 12h cache", "creative_reuse": "DIRECT", "risk": "Rates are overwritten in place; there is no rate history. currency_rates has no creator relevance." },
+    { "capability": "Audit logging", "current_owner": "App\\Models\\ActivityLog (static ::log helper), NotificationLog", "implementation": "activity_logs with polymorphic entity_type/entity_id, old_values/new_values JSON, user_id, ip", "creative_reuse": "DIRECT (generic)", "risk": "activity_logs.user_id is ON DELETE CASCADE" },
+    { "capability": "Search", "current_owner": "none", "implementation": "No fulltext index anywhere (0 fullText() calls in 112 migrations). All search is LIKE-based.", "creative_reuse": "NOT AVAILABLE", "risk": "Creator/portfolio discovery will need an index strategy that does not exist today" },
+    { "capability": "API resources and envelopes", "current_owner": "App\\Http\\Controllers\\Controller (successResponse/paginatedResponse/errorResponse)", "implementation": "6 distinct response envelopes across 68 controllers", "creative_reuse": "DIRECT (use the base helpers only)", "risk": "Copying a v2 controller copies the wrong envelope" },
+    { "capability": "Pagination", "current_owner": "Controller::paginatedResponse", "implementation": "meta {total, per_page, current_page, last_page, from, to}; per_page default varies 10/15/20/25/500", "creative_reuse": "DIRECT (pick one default)", "risk": "Inconsistent param naming: per_page vs perPage" },
+    { "capability": "Public identifiers", "current_owner": "per-model", "implementation": "Numeric ids everywhere; only booking_reference, screen_code, referral_codes.code and qr_codes.slug are public strings. No UUIDs.", "creative_reuse": "EXTEND (Creative needs opaque public ids for briefs/projects to avoid id enumeration)", "risk": "OPEN_DECISION: whether Creative introduces UUIDs, which would be the first in this repository" },
+    { "capability": "Idempotency", "current_owner": "none", "implementation": "0 matches for Idempotency in app/. Only ad-hoc checks like PaymentService:106 'Payment already verified'.", "creative_reuse": "NOT AVAILABLE — new work", "risk": "HIGH for any money or state-transition endpoint" },
+    { "capability": "Rate limiting", "current_owner": "App\\Providers\\AppServiceProvider:126-133", "implementation": "Exactly one limiter: 'recommendations' (30/min, 300/hour by IP), used on exactly one route", "creative_reuse": "EXTEND (new limiters)", "risk": "No global api limiter is configured" },
+    { "capability": "Queues", "current_owner": "n/a", "implementation": "No app/Jobs directory, no queued job class. Only the 28 Mailables are queued.", "creative_reuse": "NOT AVAILABLE — new work if Creative needs async work", "risk": "Notification dedup is in-process and therefore not worker-safe" },
+    { "capability": "Caching", "current_owner": "Cache facade", "implementation": "Role permissions (3600s), settings (12h), exchange rates (12h)", "creative_reuse": "DIRECT pattern", "risk": "None" }
+  ],
+
+  "summary_counts": {
+    "classification": "CURRENT_FACT",
+    "concepts_examined": 16,
+    "absent": 11,
+    "partial_but_semantically_different": 5,
+    "fully_implemented": 0,
+    "direct_reusable_creative_components": 0
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "application-module-map",
+  "policy": "Migrate classes only where relocation genuinely clarifies ownership. Rule 11 and Rule 26 of ARCHITECTURE_RULES.md forbid forcing a class into a module merely because its name contains a domain word, and forbid moving classes just to satisfy a directory diagram.",
+  "migrated_in_this_phase": [
+    {
+      "from": "app/Services/AssetDiscoveryFilterService.php",
+      "to": "app/Application/Asset/Services/AssetDiscoveryFilterService.php",
+      "why": "Pure Application orchestration over AssetRepositoryInterface. No Models, no Domain, no Http, no service locator. 33 lines, 1 consumer.",
+      "risk": "VERY LOW"
+    },
+    {
+      "from": "app/Services/CoverageService.php",
+      "to": "app/Application/Asset/Services/CoverageService.php",
+      "why": "Pure Application orchestration over AssetRepositoryInterface. No Models, no Domain, no Http. 23 lines, 2 consumers.",
+      "risk": "VERY LOW"
+    },
+    {
+      "from": "app/Listeners/NotificationEventSubscriber.php",
+      "to": "app/Support/Events/NotificationEventSubscriber.php",
+      "why": "Subscribes to 18 notification events spanning Booking, Media, Partner, Payment, Referral and Profile. Genuinely cross-cutting, so it belongs in Support/Events rather than a domain module. 1 consumer (EventServiceProvider).",
+      "risk": "VERY LOW"
+    }
+  ],
+  "outcome": {
+    "migrated": 3,
+    "total_services_remaining": 45,
+    "candidate_next": 8,
+    "blocked_by_hard_stops": 22,
+    "deferred_low_value": 16
+  },
+  "why_only_three": [
+    "The brief lists pricing, availability, booking, payment, refund, settlement and commission calculation as behaviour-change hard stops. Those classes account for 18 of the 45 remaining Services.",
+    "Most of the remainder are Eloquent-shaped services; moving them into Application/ without first extracting a persistence port would place Models inside Application and make ownership LESS clear, which Rule 26 prohibits.",
+    "The three migrated classes share a property the rest do not: their only dependencies are contracts. That is what made them safe.",
+    "A mass relocation of ~25 services would touch most of the 336 files and could not be verified to the required certainty in this phase."
+  ],
+  "sequenced_plan": [
+    {
+      "order": 1,
+      "target": "Application\\Media\\Services\\MediaService",
+      "gate": "Media golden tests (image sizes, storage paths, MimeType edge cases)"
+    },
+    {
+      "order": 2,
+      "target": "Application\\Campaign\\Services\\CurrencyService + ExchangeRateService",
+      "gate": "CurrencyTest, exchange-rate refresh job assertions"
+    },
+    {
+      "order": 3,
+      "target": "Application\\Support\\Services\\ProfileService, CountryDetectionService",
+      "gate": "profile/auth feature tests"
+    },
+    {
+      "order": 4,
+      "target": "Application\\Notification\\Services\\NotificationService",
+      "gate": "notification + subscriber tests, mail fakes"
+    },
+    {
+      "order": 5,
+      "target": "Read-side analytics services -> Application\\Reporting",
+      "gate": "existing Reporting query tests; Reporting is already an Application module"
+    },
+    {
+      "order": 6,
+      "target": "Application\\Settings\\Services\\SettingsService",
+      "gate": "23-call-site fan-in; needs its own phase"
+    },
+    {
+      "order": 7,
+      "target": "Eloquent-heavy services (Asset, Provider, Partner, Screen)",
+      "gate": "FIRST extract a persistence port, THEN move. Moving before extracting makes ownership worse."
+    }
+  ],
+  "blocked_pending_behaviour_decision": [
+    "BookingCapacityService",
+    "BookingPriceCalculator",
+    "CampaignPricingService",
+    "CommissionService",
+    "ConflictDetectionService",
+    "DailyPricingCalculator",
+    "FinanceService",
+    "FirstBookingDiscountPricingCalculator",
+    "FirstBookingDiscountService",
+    "InventoryService",
+    "ManualBookingService",
+    "PaymentService",
+    "PricingEngine",
+    "PricingRuleEngine",
+    "PricingService",
+    "ReferralPricingCalculator",
+    "RefundService",
+    "RevenueDistributionService",
+    "RevenueSplitResolverService",
+    "ScreenPricingResolver",
+    "SettlementService"
+  ],
+  "explicitly_not_done": "No Domain class was created, no value object was extracted, and no Eloquent call was moved. Phase 0.18 in this run is a partial migration with a verified, ordered plan for the remainder."
+}

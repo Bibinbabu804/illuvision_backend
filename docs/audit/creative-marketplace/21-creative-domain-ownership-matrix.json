@@ -1,0 +1,279 @@
+{
+  "artifact": "21-creative-domain-ownership-matrix",
+  "generated": "2026-09-26",
+  "classification": "CURRENT OWNER columns are CURRENT_FACT, verified against app/ on 2026-09-26. DOMAIN OWNER / CREATIVE OWNER / SHARED columns are RECOMMENDATION. Where ownership cannot be determined from evidence it is OPEN_DECISION.",
+  "status": "PROPOSAL ONLY. Nothing was moved, created, renamed or deleted. This matrix assigns ownership; it does not implement it.",
+  "purpose": "Answers, for every capability a Creative Marketplace touches: who owns the domain rule today, who must own it in the target, whether the capability is shared or Creative-only, and which layer owns the database, the application orchestration and the infrastructure. Its purpose is to make double-ownership and accidental ownership impossible to go unnoticed.",
+  "ownership_rule": {
+    "classification": "ARCHITECTURE_DOCUMENT",
+    "statement": "Every new class must have exactly one clear domain owner (AGENTS.md section 7). A capability that has two domain owners is a defect, not a shared service. Sharing happens through a contract, never through a shared entity.",
+    "consequence_for_creative": "Creative owns Creative aggregates. It does not own identity, storage, payments, FX, notifications, audit, configuration or geography, and it does not co-own them either."
+  },
+  "shared_versus_creative_rule": {
+    "classification": "RECOMMENDATION",
+    "statement": "A capability is SHARED when Creative consumes the identical rule for the identical reason. A capability is CREATIVE when the rule exists only because Creative exists. A capability is BORROWED-PATTERN when Creative must build its own because the existing rule is advertising-specific. These three cases require three different designs and conflating them is the primary risk in this initiative."
+  },
+  "capability_ownership": [
+    {
+      "capability": "Authentication",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Platform (Laravel + Sanctum). No application domain class owns it.", "evidence": "config/auth.php single 'web' guard; personal_access_tokens via Sanctum; app/Http/Controllers/Auth/"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Platform - NOT Creative. Creative must never own authentication."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None. Consumer only."},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED", "statement": "A creator authenticates exactly as any Marketplace user does."},
+      "database_owner": {"classification": "CURRENT_FACT", "tables": ["users", "personal_access_tokens", "password_reset_tokens", "password_setup_tokens", "sessions"], "statement": "Platform. Unchanged by Creative."},
+      "application_owner": {"classification": "CURRENT_FACT", "owner": "AuthController, Api/Auth/GoogleAuthController, Api/ProfileController"},
+      "infrastructure_owner": {"classification": "CURRENT_FACT", "owner": "Laravel session guard, Sanctum token guard, App/Infrastructure/Auth (Google identity adapter)"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Zero new authentication code. A second user system is forbidden by AGENTS.md section 9-boundary rules and by artifact 26."}
+    },
+    {
+      "capability": "Users",
+      "classification_note": "Identity anchor only",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Platform / Identity", "evidence": "App/Models/User; free-text users.role with no FK to roles"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Platform"},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None for the identity itself. Creative owns a CREATOR aggregate that references users.id."},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED", "statement": "One user record serves both client and creator roles."},
+      "database_owner": {"classification": "CURRENT_FACT", "tables": ["users"]},
+      "application_owner": {"classification": "CURRENT_FACT", "owner": "App/Services/ProfileService, Api/ProfileController"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "n/a"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "No column is added to users. The dual-role question is OPEN_DECISION OD-DB-08: users.role cannot express advertiser+creator simultaneously, so the creator role must be derived from the existence of a creators row, never from a new users column."}
+    },
+    {
+      "capability": "Profiles",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Split: App/Models/User for basic profile fields; screen_providers for provider profile+approval; partners for partner profile; testimonials/galleries for public showcase", "evidence": "app/Services/ProfileService (259 LOC, imports App\\Models and App\\Infrastructure)"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Platform for user profile fields; Creative for Creator profile and portfolio"},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "Creative -> Creator aggregate"},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED (base fields) + BORROWED-PATTERN (profile+approval shape)", "statement": "Profile base fields are shared; the creator profile with an approval lifecycle is Creative's own, patterned on screen_providers."},
+      "database_owner": {"classification": "RECOMMENDATION", "tables": ["creators (NEW)", "creative_portfolio_items (NEW)"]},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "App/Services/Creative/RegisterCreatorHandler, PublishCreatorServiceHandler"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "Image processing via the existing ImageProcessingContractInterface for avatar/portfolio thumbnails"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Creative does not extend ProfileService. It owns a separate Creator aggregate so creator approval state cannot be written onto a shared user profile."}
+    },
+    {
+      "capability": "Media (advertising inventory)",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Advertising domain (Asset)", "evidence": "App/Models/Screen, screen_categories, coverage tables; the term 'Asset' in this repository means purchasable advertising inventory"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Advertising domain. Unchanged."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None. Creative must not own or read media inventory."},
+      "shared": {"classification": "RECOMMENDATION", "value": "NOT SHARED - DO NOT USE", "statement": "Creative files are not media inventory. See artifact 10, highest-risk list."},
+      "database_owner": {"classification": "CURRENT_FACT", "tables": ["screens", "screen_categories", "asset_coverage_cities", "mobile_asset_coverage_states", "mobile_asset_coverage_cities", "screen_types"]},
+      "application_owner": {"classification": "CURRENT_FACT", "owner": "AssetService, AssetImportService, Campaign/AssetDiscoveryFilterService"},
+      "infrastructure_owner": {"classification": "CURRENT_FACT", "owner": "n/a"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Zero. Any Creative write into screens is a defect."}
+    },
+    {
+      "capability": "Assets (creative work files)",
+      "classification_note": "Name collision - resolved explicitly",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "There is no 'creative asset' owner. Files are scattered: booking_media holds client-uploaded campaign files; blogs/galleries/testimonials hold marketing media.", "evidence": "artifact 08 section file_bearing_columns_without_a_central_file_record"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Creative -> its own CreativeFile record, scoped to Creative. A future shared File domain is OPEN_DECISION and out of scope for the first Creative release."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "Creative"},
+      "shared": {"classification": "RECOMMENDATION", "value": "BORROWED-PATTERN for the metadata column set; NEW for ownership, visibility and access control", "statement": "The file columns are a pattern. Ownership, visibility and an authorization check are genuinely new and Creative-specific."},
+      "database_owner": {"classification": "RECOMMENDATION", "tables": ["creative_files (NEW)", "creative_brief_attachments (NEW)", "creative_delivered_files (NEW)"]},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "App/Services/Creative/CreativeFileGrantor (access decision)"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "Existing disks in config/filesystems.php; existing MediaHelper / ImageProcessingContractInterface for image processing; NEW: a private-file access contract (no signed-URL mechanism exists today)"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Creative names its aggregate CreativeFile and never uses the word 'Asset' for it, because 'Asset' in this repository means advertising inventory."}
+    },
+    {
+      "capability": "Storage",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Platform / Infrastructure (Flysystem disks)", "evidence": "config/filesystems.php: local (storage/app/private), public (storage/app/public, visibility public, url APP_URL/storage), s3; App/Services/MediaService; App/Helpers/MediaHelper; App/Http/Controllers/FileController (upload + videoupload, no FormRequest validation)"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Platform. Creative does not own storage."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None for the disks. Creative owns only the file RECORD and the access RULE."},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED", "statement": "Same disks, same image processing. A second storage architecture is forbidden."},
+      "database_owner": {"classification": "CURRENT_FACT", "statement": "No central file table exists. Creative adds creative_files for its own scope only."},
+      "application_owner": {"classification": "CURRENT_FACT", "owner": "MediaService, FileController (raw Storage usage in the transport layer)"},
+      "infrastructure_owner": {"classification": "CURRENT_FACT", "owner": "config/filesystems.php; App/Infrastructure/Storage"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Creative must not write Storage:: calls in a controller or a domain class. Private delivery is NEW work; the current public disk plus absent signed URLs is a recorded security risk (artifact 19), not a pattern to copy."}
+    },
+    {
+      "capability": "Creative (the whole bounded context)",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "NOBODY. 0 classes, 0 routes, 0 tables, 0 migrations, 0 tests. app/Domain/Creative, app/Services/Creative, app/Repositories/Creative, app/Http/Controllers/Creative do not exist."},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Creative, as a bounded context inside Project 01 (AGENTS.md section 1)"},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "Creative owns all nine aggregates: Creator, CreatorService, Brief, Proposal, Project, Revision, Delivery, Review, Earnings"},
+      "shared": {"classification": "RECOMMENDATION", "value": "CREATIVE-ONLY", "statement": "No aggregate is shared with the advertising context. Any future 'campaign uses a creative asset' link is a separately authorised cross-domain decision, not part of this context."},
+      "database_owner": {"classification": "RECOMMENDATION", "tables": ["19 NEW tables (14 unconditional + 2 junction + 3 conditional) - authoritative design in artifact 09"]},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "app/Services/Creative/ (16 handlers - artifact 20 section 4)"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "Only 4 Eloquent repository implementations under app/Infrastructure/Persistence/Creative/"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Greenfield. Creating the module root is itself a Creative task and must not occur as a side effect of another task."}
+    },
+    {
+      "capability": "Payments (gateway)",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Payment domain contract + Infrastructure adapter", "evidence": "App/Domain/Payment/Contracts/PaymentGatewayInterface (createOrder, verifySignature, fetchPayment, refund); App/Infrastructure/Payments/RazorpayPaymentGateway; App/Services/PaymentService (221 LOC)"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Payment domain. Unchanged."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None. Creative owns the funding RECORD and its lifecycle, not the gateway."},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED - the contract is the reuse point", "statement": "Reuse PaymentGatewayInterface unchanged. A second payment gateway abstraction is forbidden (artifact 26)."},
+      "database_owner": {"classification": "CURRENT_FACT", "statement": "payments is advertising-bound: payments.booking_id is NOT NULL with CASCADE, and PaymentService couples confirmation to a booking status transition."},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "App/Services/Creative/FundProjectHandler for the Creative flow; the gateway call itself is delegated"},
+      "infrastructure_owner": {"classification": "CURRENT_FACT", "owner": "RazorpayPaymentGateway - the only place the SDK appears"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "New creative_fundings / creative_funding_logs / creative_refunds tables. payments is NOT reused, NOT extended, NOT relaxed."}
+    },
+    {
+      "capability": "Financial transactions (the money record)",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Advertising Payment + Financial domains", "evidence": "payments, payment_logs, refunds, booking_pricing_breakdowns (immutable snapshot), booking_screens (split snapshot), partner_commissions, screen_provider_settlements"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Two distinct owners: the advertising financial domain keeps its records; Creative owns its own money records."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "Creative -> Earnings aggregate, for creator money only"},
+      "shared": {"classification": "RECOMMENDATION", "value": "NOT SHARED for the records; SHARED for the primitives", "statement": "Records are advertising-specific. Primitives (the gateway contract, decimal money representation, FX, append-only log discipline, snapshot immutability) are shared."},
+      "database_owner": {"classification": "RECOMMENDATION", "tables": ["creative_fundings (NEW)", "creative_funding_logs (NEW)", "creative_refunds (NEW)", "creator_earnings (NEW)"]},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "AccrueCreatorEarningHandler, ApproveCreatorEarningHandler, FundProjectHandler"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "Gateway adapter only; persistence via the justified Creative repositories"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Every Creative money row is server-derived and immutable once written. Financial history is fixed forward with compensating records, never rewritten (AGENTS.md section 10)."}
+    },
+    {
+      "capability": "Commissions",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Partner/Financial", "evidence": "App/Services/CommissionService (245 LOC, 3 DB::transaction, the financial service whose commission lock now lives in EloquentPartnerCommissionRepository::findOrFailForUpdate() (app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php:31) after the Phase 0.10 extraction); partner_commissions; referral_usages profit snapshot; screen_providers.illuvision_percentage / screen_provider_percentage"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Partner domain keeps partner commission. Creative commission terms are a Creative concern."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "Creative -> Earnings aggregate (the commission RATE) and the split as a snapshot at project acceptance"},
+      "shared": {"classification": "RECOMMENDATION", "value": "BORROWED-PATTERN", "statement": "The lifecycle (pending -> approved -> paid, plus cancel) and the pessimistic locking are reusable. The columns (partner_id, referral attribution) and the default percentages (10/90) are provider-specific and must NOT be inherited."},
+      "database_owner": {"classification": "RECOMMENDATION", "statement": "If a Creative commission rate is configurable it needs its own versioned Creative table so historical earnings stay reproducible. It must NOT live in settings."},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "Creative commission logic inside the Earnings domain service; orchestration in App/Services/Creative"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "n/a"},
+      "creative_impact": {"classification": "OPEN_DECISION", "statement": "Commission basis, approval authority and whether the rate is per service, per category or global are not derivable from source. No percentage is proposed here."}
+    },
+    {
+      "capability": "Settlement / payout",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Advertising Financial", "evidence": "App/Services/SettlementService (352 LOC), AdminSettlementController, Admin/ScreenProviderController; screen_provider_settlements (period + reference + generated/approved/paid + 3 actor FKs, NO currency column)"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Advertising Financial keeps provider settlement"},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "Creative -> creator_earnings + creator_payouts + creator_payout_items"},
+      "shared": {"classification": "RECOMMENDATION", "value": "BORROWED-PATTERN", "statement": "The payout-batch STRUCTURE is the template. The reuse of the existing settlement SERVICE for creators is not recommended without evidence, because that service is period- and screen-provider-bound and carries no currency."},
+      "database_owner": {"classification": "RECOMMENDATION", "tables": ["creator_payouts (NEW)", "creator_payout_items (NEW)"]},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "ProcessCreatorPayoutHandler, dispatched as a job (decision: app/Support/Jobs does not exist today)"},
+      "infrastructure_owner": {"classification": "OPEN_DECISION", "statement": "Whether payouts are manual (admin batch, like provider settlement) or automated through a payment-gateway payout API is undetermined. No existing payout-processor adapter exists in the repository."},
+      "creative_impact": {"classification": "OPEN_DECISION", "statement": "Payout cadence, minimum, approval chain and provider are product decisions. Also unresolved: whether a creator earnings record needs its own settlement PERIOD at all, which depends on the accrual trigger (OD-DB-05)."}
+    },
+    {
+      "capability": "Notifications",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "App/Services/NotificationService (243 LOC) + app/Mail (28 Mailables, all ShouldQueue) + app/Support/Events/Notifications (33 events) + NotificationEventSubscriber", "evidence": "0 listener classes exist; the subscriber is the only event consumer; notification_logs records dispatch"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Platform / cross-cutting"},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None for delivery. Creative owns WHICH events exist and WHAT they mean."},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED", "statement": "Creative reuses the dispatch path and adds new Mailables. A parallel notification system is forbidden."},
+      "database_owner": {"classification": "CURRENT_FACT", "tables": ["notification_logs"]},
+      "application_owner": {"classification": "CURRENT_FACT", "owner": "NotificationService; dispatch triggered by domain events via NotificationEventSubscriber"},
+      "infrastructure_owner": {"classification": "CURRENT_FACT", "owner": "Laravel Mail + queue connection"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Extend notification_logs recipient_type with 'creator'. Existing recipient roles exclude creator, so recipient resolution must be extended rather than duplicated. Durable de-duplication does not exist today and is a recorded gap, not something Creative must solve."}
+    },
+    {
+      "capability": "Reporting / analytics",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Flat read services + a dashboard controller", "evidence": "App/Services/ReportService (106 LOC), Campaign/ClientAnalyticsService, Campaign/ScreenAnalyticsService, Booking/BookingAnalyticsService, Payment/PaymentAnalyticsService, Settlement/RevenueAnalyticsService, DashBoardController; 0 query-layer classes"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Reporting is a CONSUMER of business truth and owns no business rule (project principle: transactional domains own truth; reporting reads it)."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None. Creative owns no reporting class."},
+      "shared": {"classification": "RECOMMENDATION", "value": "BORROWED-PATTERN at most", "statement": "The existing reporting services are advertising-bound. Creative reporting is NEW work and must read canonical Creative records, never recalculate a Creative amount."},
+      "database_owner": {"classification": "RECOMMENDATION", "statement": "Reads the Creative tables. Adds no Creative aggregate."},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "A Creative reporting query, following the current flat-service convention, in a later phase"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "Export adapters only if exports are required (maatwebsite/excel, phpoffice/phpword are already dependencies)"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Never re-derive a quote, a split or an earning in a report. Consume the stored snapshot."}
+    },
+    {
+      "capability": "Currency / FX",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Shared (Currency)", "evidence": "currency_rates table; App/Services/Campaign/ExchangeRateService (317 LOC, uses the exchange-rate client adapter); Campaign/CurrencyService; scheduled command currency:sync-rates"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Shared. Unchanged."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None"},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED - if Creative is ever multi-currency", "statement": "Creative reads currency_rates through the existing infrastructure. A second FX implementation is forbidden (AGENTS.md section 10: do not change currency conversion; the phase 0.12 work established the adapter boundary)."},
+      "database_owner": {"classification": "CURRENT_FACT", "tables": ["currency_rates"]},
+      "application_owner": {"classification": "CURRENT_FACT", "owner": "Campaign/ExchangeRateService, Campaign/CurrencyService"},
+      "infrastructure_owner": {"classification": "CURRENT_FACT", "owner": "App/Infrastructure/ExchangeRates (ExchangeRateApiClientInterface + client)"},
+      "creative_impact": {"classification": "OPEN_DECISION", "statement": "INR-only vs multi-currency is undecided (OD-DB-07). Note that the existing screen_provider_settlements table has NO currency column, so there is no precedent to copy and a copied shape would silently assume single currency."}
+    },
+    {
+      "capability": "Settings / configuration",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Shared (Configuration)", "evidence": "settings table (key/value grouped); App/Services/SettingsService (333 LOC); App/Support/Configs/*; Api/SettingsController"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Shared. Unchanged."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None for the store. Creative owns the MEANING of its own keys."},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED", "statement": "Creative adds a creative.* settings group. A creative_settings table is duplicate infrastructure."},
+      "database_owner": {"classification": "CURRENT_FACT", "tables": ["settings"]},
+      "application_owner": {"classification": "CURRENT_FACT", "owner": "SettingsService"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "n/a"},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Non-financial tunables only (for example a revision limit or dispute window as a DEFAULT). Any value that determines a monetary outcome must live in a versioned Creative table so historical earnings remain reproducible, not in settings where it could be edited retroactively."}
+    },
+    {
+      "capability": "Audit",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Shared (Audit)", "evidence": "activity_logs table (generic admin audit log, actor/action/subject/metadata) + App/Models/ActivityLog; plus per-entity timelines: booking_activities, screen_provider_activities"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Shared (Audit)"},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None if activity_logs can express a Creative subject; otherwise Creative owns a Creative-scoped audit table."},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED (preferred)", "statement": "Reuse activity_logs rather than creating creative_activity_logs or a Creative timeline table."},
+      "database_owner": {"classification": "CURRENT_FACT", "tables": ["activity_logs"]},
+      "application_owner": {"classification": "RECOMMENDATION", "owner": "Creative handlers write audit entries inside the same transaction as the state change"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "n/a"},
+      "creative_impact": {"classification": "OPEN_DECISION", "statement": "Whether activity_logs supports a Creative subject polymorphically must be confirmed before the audit-trail phase (OD 10-OD-05). Financial operations in Creative must be auditable without exception."}
+    },
+    {
+      "capability": "Search",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "None. There is no search layer, no search index and no search service. Listing endpoints filter with simple where/orderBy/paginate."},
+      "target_domain_owner": {"classification": "OPEN_DECISION", "owner": "Undetermined"},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "Undetermined. Creative catalogue browsing is a read concern and must not become a second search subsystem."},
+      "shared": {"classification": "RECOMMENDATION", "value": "NOT APPLICABLE - no capability exists", "statement": "There is nothing to share or duplicate."},
+      "database_owner": {"classification": "RECOMMENDATION", "statement": "No search table. Indexes on Creative tables serve listing queries."},
+      "application_owner": {"classification": "OPEN_DECISION", "statement": "Whether a Creative catalogue needs anything beyond indexed filtering is a product decision."},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "None. Do not introduce a search engine for the first Creative release."},
+      "creative_impact": {"classification": "RECOMMENDATION", "statement": "Out of scope for the initial Creative release. Recorded so nobody 'helpfully' adds one."}
+    },
+    {
+      "capability": "Geography (reference data)",
+      "current_owner": {"classification": "CURRENT_FACT", "owner": "Shared (Geography)", "evidence": "countries, states, cities tables; Campaign/CountryDetectionService (64 LOC)"},
+      "target_domain_owner": {"classification": "RECOMMENDATION", "owner": "Shared. Unchanged."},
+      "creative_owner": {"classification": "RECOMMENDATION", "owner": "None"},
+      "shared": {"classification": "RECOMMENDATION", "value": "SHARED", "statement": "Creative references the same reference tables if it captures an address."},
+      "database_owner": {"classification": "CURRENT_FACT", "tables": ["countries", "states", "cities"]},
+      "application_owner": {"classification": "CURRENT_FACT", "owner": "Campaign/CountryDetectionService"},
+      "infrastructure_owner": {"classification": "RECOMMENDATION", "owner": "n/a"},
+      "creative_impact": {"classification": "OPEN_DECISION", "statement": "Conditional on whether Creative captures a creator address or KYC jurisdiction (OD-DB-04 / OD 10-OD-04)."}
+    }
+  ],
+  "ownership_conflicts_identified": [
+    {
+      "conflict": "The word 'Asset'",
+      "classification": "CURRENT_FACT",
+      "detail": "In this repository 'Asset' means advertising inventory (screens, screen_categories, coverage tables). A developer searching for Creative assets will find screens and booking_media first.",
+      "resolution": {"classification": "RECOMMENDATION", "statement": "Creative names its file aggregate CreativeFile. The term 'Asset' is not used for Creative work anywhere in code, schema or documentation."}
+    },
+    {
+      "conflict": "The word 'Review'",
+      "classification": "CURRENT_FACT",
+      "detail": "booking_media.review_status is an ADMIN MODERATION of client-uploaded advertisement files. A Creative client review of creator work is a different thing entirely.",
+      "resolution": {"classification": "RECOMMENDATION", "statement": "Creative uses CreativeReview / creative_reviews. Moderation is a separate concern and is not reused."}
+    },
+    {
+      "conflict": "The word 'Rating' / 'Testimonial'",
+      "classification": "CURRENT_FACT",
+      "detail": "testimonials is public marketing content with a rating column, no author binding and no soft delete.",
+      "resolution": {"classification": "RECOMMENDATION", "statement": "Creative reviews are never written to testimonials. See artifact 10, highest-risk list rank 2."}
+    },
+    {
+      "conflict": "'Partner' vs 'Creator'",
+      "classification": "CURRENT_FACT",
+      "detail": "partners is an affiliate organisation with referral and commission terms; a creator is an individual supplier of creative work.",
+      "resolution": {"classification": "RECOMMENDATION", "statement": "Separate aggregate. Do not model a creator as a partner 'because one already exists'."}
+    },
+    {
+      "conflict": "Loyalty points vs money",
+      "classification": "CURRENT_FACT",
+      "detail": "reward_accounts / reward_transactions are an integer points ledger tied to bookings. Creator earnings are money.",
+      "resolution": {"classification": "RECOMMENDATION", "statement": "Reuse the SHAPE (account + append-only entries + lifetime counters) with decimal(12,2) and a currency column. Never the integer representation."}
+    }
+  ],
+  "single_owner_assertions": {
+    "classification": "RECOMMENDATION",
+    "statement": "Capabilities Creative must NOT own, restated as a single-owner check for review: Authentication, Users, Media inventory, Storage disks, Payment gateway, Currency/FX, Notification delivery, Settings store, Audit store, Geography reference. If a Creative class writes to any of these stores directly, it has crossed the boundary.",
+    "capabilities_creative_does_own": [
+      "Creator identity-as-supplier (approval state, profile, portfolio)",
+      "CreativeService catalogue and rate",
+      "Brief",
+      "Proposal and its server-derived quote",
+      "Project and its frozen agreed terms",
+      "Revision rounds and limits",
+      "Delivery submission and acceptance",
+      "Client review",
+      "Creator earning, dispute and payout"
+    ]
+  },
+  "discrepancies_vs_existing_artifacts": [
+    {
+      "topic": "Phase 0.20 documentation claims app/Domain/Creative, app/Services/Creative, app/Repositories/Creative and app/Http/Controllers/Creative were CREATED (empty).",
+      "resolution": "False. Verified absent on 2026-09-26. Recorded as a documentation discrepancy in AGENTS.md section 8 and in docs/audit/creative-marketplace/. The absence is the reason the whole Creative capability column above reads NONE."
+    },
+    {
+      "topic": "Earlier artifacts state 74 tables / 94 foreign keys (AGENTS.md baseline).",
+      "resolution": "Measured 73 distinct tables and 96 foreign-key definitions (94 ->constrained() + 2 legacy ->foreign()) from the 112 migrations. Source wins; recorded as baseline drift, not a schema change."
+    }
+  ],
+  "safety_statement": {
+    "classification": "CURRENT_FACT",
+    "statement": "Producing this matrix changed no production code, no migration, no model, no route and no test. It asserts ownership; it does not move anything. Any relocation implied here is a separate, explicitly authorised task that must satisfy AGENTS.md section 15 (inventory -> classify -> identify consumers -> move -> update namespace -> update imports -> update bindings -> resolve consumers -> verify container -> run tests)."
+  }
+}

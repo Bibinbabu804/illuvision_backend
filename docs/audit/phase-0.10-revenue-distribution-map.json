@@ -1,0 +1,122 @@
+{
+  "phase": "0.10",
+  "name": "Revenue Distribution Map",
+  "generated_at": "2026-09-26T00:32:00+05:30",
+  "owner_before": "App\\Services\\RevenueDistributionService::processBookingScreens()",
+  "owner_after": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase -> App\\Services\\RevenueDistributionService",
+  "arithmetic_owner": "App\\Domain\\Financial\\Support\\RevenueAllocation",
+  "invariants": [
+    "Distribution is a WRITE-TIME SNAPSHOT. Values are frozen onto booking_screens at distribution time and are never recalculated.",
+    "Settlement reads the snapshot, never live pricing or live ownership.",
+    "The rounding order is unchanged: gross first, then each share from the rounded gross.",
+    "The two shares round independently, so platform_share + provider_share may differ from gross_revenue by up to 0.01. Preserved, not corrected."
+  ],
+  "inputs": {
+    "divisor": "total booking_screen rows for the booking",
+    "divisor_guard": "if totalScreens is 0 the whole operation is skipped — no division by zero, no rows written",
+    "gross_base": "final_amount when final_amount > 0, otherwise (subtotal ?? price ?? 0)",
+    "split_source": "App\\Services\\RevenueSplitResolverService::resolveForBookingScreen()"
+  },
+  "split_precedence": {
+    "description": "Highest priority first. Unchanged in Phase 0.10.",
+    "order": [
+      {
+        "rank": 1,
+        "source": "Direct Illuvision ownership (screen.owner_type = illuvision)",
+        "effect": "100% platform / 0% provider, regardless of any other rule"
+      },
+      {
+        "rank": 2,
+        "source": "Duration-based split override (screen_duration_split_overrides) matching the booking's total campaign duration",
+        "effect": "Override percentages win"
+      },
+      {
+        "rank": 3,
+        "source": "Screen static split override (screens.illuvision_percentage / screen_provider_percentage)",
+        "effect": "Used when no duration override matches"
+      },
+      {
+        "rank": 4,
+        "source": "Screen provider default (screen_providers.illuvision_percentage / screen_provider_percentage)",
+        "effect": "Provider-level default"
+      },
+      {
+        "rank": 5,
+        "source": "System default",
+        "effect": "10% platform / 90% provider"
+      }
+    ],
+    "changed_in_phase_0_10": false
+  },
+  "snapshots_written": {
+    "table": "booking_screens",
+    "columns": [
+      "owner_type",
+      "screen_provider_id",
+      "screen_provider_name",
+      "illuvision_percentage",
+      "screen_provider_percentage",
+      "gross_revenue",
+      "platform_share",
+      "provider_share",
+      "pricing_snapshot (json)"
+    ],
+    "immutable": true,
+    "recalculated_later": false
+  },
+  "worked_examples": [
+    {
+      "case": "Two screens, final_amount 1000, one provider-owned (20/80) and one Illuvision-owned",
+      "totalScreens": 2,
+      "gross": 500.00,
+      "provider_owned_screen": { "platform_share": 100.00, "provider_share": 400.00 },
+      "illuvision_owned_screen": { "platform_share": 500.00, "provider_share": 0.00 },
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_revenue_distribution_writes_snapshot_for_each_screen"
+    },
+    {
+      "case": "Three equal screens, final_amount 100, 33.33/33.33 split (pathological — demonstrates preserved drift)",
+      "totalScreens": 3,
+      "gross": 33.33,
+      "platform_share": 11.11,
+      "provider_share": 11.11,
+      "sum": 22.22,
+      "drift": -11.11,
+      "note": "Illustrative of the independent-rounding property. The realistic drift bound for a sane split is 0.01, not this exaggerated case.",
+      "enforced_by": "Tests\\Unit\\Domain\\Financial\\RevenueAllocationTest::test_rounding_drift_is_preserved_not_corrected"
+    },
+    {
+      "case": "Zero booking_screen rows",
+      "gross": null,
+      "rows_written": 0,
+      "enforced_by": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_distribution_is_skipped_for_zero_screen_bookings"
+    },
+    {
+      "case": "final_amount is 0",
+      "gross_base": "subtotal ?? price ?? 0",
+      "enforced_by": "Tests\\Unit\\Domain\\Financial\\RevenueAllocationTest::test_gross_per_screen_prefers_final_amount (zero final amount falls back)"
+    }
+  ],
+  "call_sites_rewired": [
+    {
+      "before": "App\\Http\\Controllers\\BookingController::storeCampaign() called $this->revenueDistributionService->processBookingScreens($booking) inline",
+      "after": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "note": "Still runs inside the controller's existing DB::transaction. The transaction boundary was NOT changed."
+    },
+    {
+      "before": "App\\Services\\ManualBookingService::recordOfflinePayment() called $this->revenueDistributionService->processBookingScreens($booking) inline",
+      "after": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "note": "Still inside the service's existing transaction."
+    },
+    {
+      "before": "App\\Services\\ReferralTrackingService backfill path",
+      "after": "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "note": "The revenue backfill now also goes through the use case."
+    }
+  ],
+  "known_defect": {
+    "location": "App\\Services\\RevenueDistributionService::getProviderRevenueStats()",
+    "symptom": "References the undefined variable $totalScreensInBookings",
+    "callers": 0,
+    "action": "NOT FIXED — recorded, not silently changed"
+  }
+}

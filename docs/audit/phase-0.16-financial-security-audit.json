@@ -1,0 +1,59 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "financial-security-audit",
+  "verdict": "Pricing and payment computation are sound; SEC-01 allows direct field tampering on the booking record",
+  "client_supplied_money": [
+    {
+      "path": "campaign booking",
+      "result": "SAFE",
+      "evidence": "CreateCampaignBookingUseCase lines 163-216 compute authoritativeSubtotal/Discount/Final from CampaignPricingService and store those. The client payload's subtotal, discount_amount and final_amount are documented as informational only and are never stored or charged."
+    },
+    {
+      "path": "payment order creation",
+      "result": "SAFE",
+      "evidence": "CreatePaymentOrderUseCase returns Money::toPaise($payment->amount) from the persisted Payment record; no amount is accepted from the request."
+    },
+    {
+      "path": "payment verification",
+      "result": "SAFE",
+      "evidence": "PaymentController::verify validates only razorpay_order_id, razorpay_payment_id and razorpay_signature. No amount field exists on the request, so there is no tampering vector, and the Razorpay signature binds order_id to payment_id."
+    },
+    {
+      "path": "booking update (PATCH/PUT)",
+      "result": "UNSAFE",
+      "evidence": "SEC-01. 'price' => 'sometimes|numeric|min:0' and 'status' => 'sometimes|string' are accepted and written straight through by RescheduleBookingUseCase line 135. A user without bookings.edit can set both."
+    }
+  ],
+  "integrity_checks_present": [
+    "Authoritative repricing at booking time (reconciles stale recommendations).",
+    "Razorpay signature verification via the official SDK utility.",
+    "Per-screen even split and unit_price arithmetic preserved.",
+    "Revenue distribution resolved server-side by RevenueSplitResolverService."
+  ],
+  "integrity_checks_absent": [
+    {
+      "gap": "no cross-check of the settled amount against the order amount at verification time",
+      "severity": "low",
+      "rationale": "Currently mitigated by Razorpay's guarantee that a payment belongs to its order and by the signature binding. A defensive amount assertion would be cheap hardening."
+    },
+    {
+      "gap": "status is an unconstrained string on booking update",
+      "severity": "critical",
+      "see": "SEC-01"
+    },
+    {
+      "gap": "'price' => 'min:0' with no upper bound or relation to the pricing engine",
+      "severity": "critical",
+      "see": "SEC-01"
+    }
+  ],
+  "accepted_debt": [
+    "Reschedule does not reprice or redistribute revenue. This changes financial output, so it is recorded rather than fixed.",
+    "Loyalty/referral side effects execute in Booking model events inside the caller's transaction."
+  ],
+  "immutability": "Payment and settlement rows are updated in place by design (status transitions), so there is no append-only financial ledger guarantee. 19 financial status-transition sites were identified as running outside an explicit DB::transaction; the highest-value ones are CommissionService:99 (paid), RefundService:86 (refunded) and ReferralTrackingService:183/208 (cancelled/refunded).",
+  "blocked": "No financial code was modified in Phase 0.16."
+}

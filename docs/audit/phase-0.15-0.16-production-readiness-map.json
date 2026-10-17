@@ -1,0 +1,60 @@
+{
+  "phases": "0.15-0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "artifact": "production-readiness-map",
+  "verdict": "PHASE 1 BLOCKED",
+  "dimensions": [
+    {
+      "dimension": "API contract stability",
+      "status": "GREEN",
+      "evidence": "385 routes; 0 added, 0 removed, 0 changed actions, 0 changed middleware."
+    },
+    {
+      "dimension": "Schema stability",
+      "status": "GREEN",
+      "evidence": "Fingerprint identical; 112/112 migrations applied, 0 pending."
+    },
+    {
+      "dimension": "Financial correctness",
+      "status": "GREEN",
+      "evidence": "Authoritative pricing; server-derived payment amounts; golden financial suites pass."
+    },
+    {
+      "dimension": "Concurrency",
+      "status": "AMBER",
+      "evidence": "Inventory locking and transaction ownership verified; TX-01 model-event side effects and TX-02 unserialised verify remain."
+    },
+    {
+      "dimension": "Authorization",
+      "status": "RED",
+      "evidence": "SEC-01, SEC-02, SEC-03."
+    },
+    {
+      "dimension": "Deployment safety",
+      "status": "RED",
+      "evidence": "DEP-01 APP_DEBUG enabled; no health check; no rollback runbook."
+    },
+    {
+      "dimension": "Observability",
+      "status": "RED",
+      "evidence": "OBS-01 no error tracking; OBS-02 no structured logs; OBS-03 LOG_LEVEL=debug; OBS-04 no correlation ids."
+    },
+    {
+      "dimension": "Recovery",
+      "status": "RED",
+      "evidence": "No version control, no backup/restore procedure."
+    },
+    {
+      "dimension": "Architecture",
+      "status": "AMBER",
+      "evidence": "10/13 rules satisfied and now test-enforced; DV-01 open; 18 locators characterised."
+    }
+  ],
+  "p0_count": 4,
+  "p1_count": 8,
+  "p2_count": 2,
+  "p3_count": 1,
+  "carried_debt": 16,
+  "exit_gate": "FAILED on 3 of 9 criteria."
+}

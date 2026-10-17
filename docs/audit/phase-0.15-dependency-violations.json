@@ -1,0 +1,30 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "dependency-violations",
+  "rule": "ARCHITECTURE_RULES.md Rule 11 - dependency direction",
+  "open_violations": [
+    {
+      "id": "DV-01",
+      "severity": "high",
+      "from": "app/Domain/Pricing/CampaignPricingEngine.php",
+      "to": "app/Services (7 classes)",
+      "detail": "Domain depends outward on 7 legacy Services: LoyaltyService, PricingRuleEngine, Pricing/DailyPricingCalculator, Pricing/FirstBookingDiscountPricingCalculator, Pricing/ReferralPricingCalculator, Pricing/ScreenPricingResolver, SettingsService",
+      "category": "C",
+      "why_not_fixed": "Removing this changes campaign pricing arithmetic and the deterministic-price guarantee. Requires value-object extraction plus a pricing-settings contract in a dedicated, behaviour-preserving phase.",
+      "enforced_by": "tests/Unit/Architecture/ArchitectureRuleTest.php::KNOWN_LAYER_IMPORT_DEBT (pinned)"
+    }
+  ],
+  "satisfied": [
+    "Rule 11: Domain -> Http/Console/Infrastructure/Application",
+    "Rule 11: Application -> Http/Console",
+    "Rule 12: no Model imports App\\Http"
+  ],
+  "conformance": "10/13 rules fully satisfied; open rules 2, 9, 11",
+  "verification": {
+    "command": "php artisan test tests/Unit/Architecture/ArchitectureRuleTest.php",
+    "result": "14 passed, 17 assertions, 0.29s"
+  }
+}

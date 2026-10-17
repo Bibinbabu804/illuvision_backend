@@ -1,0 +1,319 @@
+{
+  "phase": "0.13",
+  "name": "Legacy Service & Controller Migration Ledger",
+  "generated_at": "2026-09-26",
+  "format": "docs/audit/phase-0.13-0.14-architecture-decisions.md section on ledger schema; statuses restricted to audited|ready|migrated|delegating|deprecated|retained|removed|blocked|deferred",
+  "principle": "No component is marked migrated unless its actual callers have moved to the new boundary. No component is marked removed without verified zero callers and a verified replacement.",
+  "summary": {
+    "removed": 1,
+    "retained": 2,
+    "delegating": 1,
+    "migrated": 5
+  },
+  "entries": [
+    {
+      "component": "User::hasPermission authorization ownership",
+      "current_location": "app/Models/User.php",
+      "target_location": "app/Support/Authorization/RolePermissionChecker.php",
+      "responsibility": "Owns the 'does this user hold this permission' decision",
+      "domain": "Cross-cutting",
+      "callers_before": [
+        "User::hasPermission() -> app(PermissionMiddleware) -> userHasPermission()"
+      ],
+      "callers_after": [
+        "User::hasPermission() -> app(RolePermissionChecker) -> userHasPermission()",
+        "PermissionMiddleware -> injected RolePermissionChecker"
+      ],
+      "dependencies_before": [
+        "App\\Http\\Middleware\\PermissionMiddleware (Model -> Http violation)"
+      ],
+      "dependencies_after": [
+        "App\\Support\\Authorization\\RolePermissionChecker"
+      ],
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [
+        "tests/Feature/Reporting/ReportingExportAndAccessTest.php (existing, unchanged)",
+        "tests/Feature/AuthorizationHardeningTest.php (existing, unchanged)"
+      ],
+      "status": "migrated",
+      "rationale": "Eloquent model was service-locating the HTTP middleware layer, a Model->Http dependency the architecture rules disallow. The permission algorithm was extracted verbatim (same cache key role_permissions:{slug}, same 3600s TTL, same strict in_array against Role::grantedPermissions()). The middleware became a thin HTTP adapter. The pre-existing super-admin asymmetry between the middleware and the model helper was deliberately preserved and remains test-pinned."
+    },
+    {
+      "component": "BookingController::storeCampaign",
+      "current_location": "app/Http/Controllers/BookingController.php:59-357 (299 lines)",
+      "target_location": "app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php",
+      "responsibility": "Campaign booking creation: inventory locking, sold-out gate, duration/eligibility/pricing gates, booking + screen rows, revenue distribution, event dispatch",
+      "domain": "Booking",
+      "callers_before": [
+        "POST /api/bookings/campaign -> BookingController::storeCampaign (HTTP adapter holding 10 concerns inline)"
+      ],
+      "callers_after": [
+        "POST /api/bookings/campaign -> BookingController::storeCampaign (validation + envelope only) -> CreateCampaignBookingUseCase::execute"
+      ],
+      "dependencies_before": [
+        "DB, Booking, BookingScreen, Screen, BookingActivity, PricingDurationRule, Carbon, App\\Events\\...\\BookingCreated, Illuminate\\Validation\\Rule, app(LoyaltyService)"
+      ],
+      "dependencies_after": [
+        "InventoryService, CampaignPricingService, BookingCapacityService, DistributeBookingRevenueUseCase, RevenueSplitResolverService, LoyaltyService, DB, same models"
+      ],
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [
+        "tests/Feature/BookingChannelDurationSplitIntegrationTest.php",
+        "tests/Feature/Golden/GoldenBookingRegressionTest.php",
+        "tests/Feature/FinancialRegressionAndHardeningTest.php",
+        "tests/Feature/CampaignBookingPricingIntegrityTest.php"
+      ],
+      "status": "migrated",
+      "rationale": "Highest-value extraction in the codebase: 299 lines and ten responsibilities in one HTTP method. The four business rejections now raise BookingCreationException carrying the original message, HTTP 422 and error payload. This is observably identical because every rejection occurs before the first write in the transaction, so rolling back an empty transaction and committing an empty transaction differ only in releasing the inventory row locks taken at the top.",
+      "preserved": [
+        "DB::transaction boundary",
+        "inventory lock ordering (deterministic id order, first statement)",
+        "authoritative server-side pricing (client amounts never trusted)",
+        "per-screen even split and unit_price arithmetic incl. the past double-counting fix",
+        "BookingCreated dispatched inside the transaction, not after commit"
+      ]
+    },
+    {
+      "component": "BookingController::update (reschedule)",
+      "current_location": "app/Http/Controllers/BookingController.php:1171-1300 (130 lines)",
+      "target_location": "app/Application/Booking/UseCases/RescheduleBookingUseCase.php",
+      "responsibility": "Transactional booking reschedule: screen-set diffing, merged deterministic locking, self-excluding eligibility, pivot reconciliation",
+      "domain": "Booking",
+      "callers_before": [
+        "PUT /api/bookings/{booking} -> BookingController::update (130 lines inline)"
+      ],
+      "callers_after": [
+        "PUT /api/bookings/{booking} -> BookingController::update (validation + envelope only) -> RescheduleBookingUseCase::execute"
+      ],
+      "dependencies_before": [
+        "DB, Booking, BookingScreen, Screen, BookingActivity, InventoryService, BookingCapacityService"
+      ],
+      "dependencies_after": [
+        "InventoryService, BookingCapacityService, DB, same models"
+      ],
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [
+        "tests/Feature/BookingChannelsAndRescheduleHardeningTest.php",
+        "tests/Feature/Golden/GoldenBookingRegressionTest.php"
+      ],
+      "status": "migrated",
+      "rationale": "Grew from a six-line update() into a 130-line transactional reschedule with inventory locking. Relocated verbatim. The known gap that reschedule does not recompute pricing or re-run revenue distribution is pre-existing external behaviour and was deliberately NOT changed; it is recorded as high-severity debt.",
+      "preserved": [
+        "DB::transaction boundary",
+        "merged old+new screen lock set, deduplicated",
+        "self-excluding eligibility check",
+        "capacity check gated on capacity-consuming change AND status",
+        "pivot delete-then-upsert ordering"
+      ]
+    },
+    {
+      "component": "BookingController::checkConflicts",
+      "current_location": "app/Http/Controllers/BookingController.php:432-515 (84 lines)",
+      "target_location": "app/Application/Booking/Queries/CheckBookingAvailabilityQuery.php",
+      "responsibility": "Read-only availability conflict check: mobile fleet / intraday fixed-conflict / daily-capacity decision tree",
+      "domain": "Availability",
+      "callers_before": [
+        "POST /api/bookings/check-conflicts -> BookingController::checkConflicts"
+      ],
+      "callers_after": [
+        "POST /api/bookings/check-conflicts -> BookingController::checkConflicts -> CheckBookingAvailabilityQuery::execute"
+      ],
+      "dependencies_before": [
+        "Screen, Carbon, InventoryService, BookingCapacityService"
+      ],
+      "dependencies_after": [
+        "Screen, Carbon, InventoryService, BookingCapacityService"
+      ],
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [
+        "tests/Feature/AvailabilityApiAndPerformanceHardeningTest.php",
+        "tests/Feature/MobileFleetCoverageTest.php",
+        "tests/Feature/BookingEngineApiTest.php"
+      ],
+      "status": "migrated",
+      "rationale": "Read-only orchestration with no transaction and no writes, so it is modelled as a Query rather than a Use Case. Gives booking creation, rescheduling and conflict checking one stated place for the availability rules instead of each controller path calling checkEligibility slightly differently.",
+      "preserved": [
+        "branch order (fleet first, then intraday fixed-conflict, then daily-capacity)",
+        "isIntraday derivation incl. Minute/Hour plan override",
+        "daily-capacity result replaces rather than appends to the conflict list",
+        "null return for a missing screen, still surfaced as HTTP 404"
+      ]
+    },
+    {
+      "component": "CampaignPricingService dependency surface",
+      "current_location": "app/Services/CampaignPricingService.php:21-31 (8 constructor deps)",
+      "target_location": "app/Services/CampaignPricingService.php:constructor (1 dep)",
+      "responsibility": "Legacy compatibility wrapper delegating campaign pricing to the canonical Domain engine",
+      "domain": "Pricing",
+      "callers_before": [
+        "BookingController, ManualBookingService, PaymentService, BudgetRecommendationService, PricingEngine"
+      ],
+      "callers_after": [
+        "unchanged - all five callers still resolve CampaignPricingService"
+      ],
+      "dependencies_before": [
+        "PricingEngineInterface + 7 unused: ScreenPricingResolver, DailyPricingCalculator, ReferralPricingCalculator, FirstBookingDiscountPricingCalculator, PricingRuleEngine, LoyaltyService, SettingsService"
+      ],
+      "dependencies_after": [
+        "PricingEngineInterface"
+      ],
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [
+        "tests/Feature/Golden/GoldenPricingRegressionTest.php",
+        "tests/Feature/AdminPricingPlanMinuteTest.php",
+        "tests/Feature/Golden/GoldenBookingRegressionTest.php"
+      ],
+      "status": "delegating",
+      "rationale": "The seven removed properties were dead: the class only ever called $this->pricingEngine. It was a pass-through and remains one. Removing them stops the class from appearing to own pricing responsibilities it does not own, which is what obscured the real Domain->Services coupling. No calculation changed, because all seven were already being applied inside the engine."
+    },
+    {
+      "component": "Redundant service locators in controllers",
+      "current_location": "app/Http/Controllers/{Booking,AdminPayment,PartnerBooking}Controller.php",
+      "target_location": "constructor injection on the same controllers",
+      "responsibility": "Replaces app() resolution with declared constructor dependencies",
+      "domain": "Booking/Payment/Media",
+      "callers_before": [
+        "BookingController::uploadMedia -> app(MediaService)",
+        "BookingController::review -> app(BookingCapacityService)",
+        "AdminPaymentController::show -> app(PaymentService)",
+        "AdminPaymentController::rejectDirectPayment -> app(ReferralTrackingService)",
+        "PartnerBookingController::uploadMedia/deleteMedia -> app(MediaService) x2"
+      ],
+      "callers_after": [
+        "BookingController::uploadMedia -> $this->mediaService",
+        "BookingController::review -> $this->capacityService",
+        "AdminPaymentController::show -> $this->paymentService",
+        "AdminPaymentController::rejectDirectPayment -> $this->referralTrackingService",
+        "PartnerBookingController::uploadMedia/deleteMedia -> $this->mediaService"
+      ],
+      "dependencies_before": [
+        "app() service locator x6"
+      ],
+      "dependencies_after": [
+        "constructor-injected dependencies"
+      ],
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [
+        "tests/Feature/PartnerBookingPlatformTest.php",
+        "tests/Feature/BookingChannelDurationSplitIntegrationTest.php"
+      ],
+      "status": "migrated",
+      "rationale": "Four of the six were strictly redundant: the dependency was already a constructor property of the same class, so the container was being asked twice for the same singleton. Converting them makes the dependency visible to the container and to static analysis at zero behavioural risk."
+    },
+    {
+      "component": "Dead backup sources in the source tree",
+      "current_location": "app/Http/Controllers/BookingController.php.bak (1268 lines), routes/api.php.bak (5304 lines)",
+      "target_location": "removed",
+      "responsibility": "Superseded pre-hardening copies of a controller and the route table",
+      "domain": "Booking",
+      "callers_before": [
+        "nothing - PSR-4 cannot load a .bak file and no reference exists anywhere in the repository"
+      ],
+      "callers_after": [
+        "nothing"
+      ],
+      "dependencies_before": [
+        "n/a"
+      ],
+      "dependencies_after": "n/a",
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [
+        "php artisan test (557 passed, unchanged)",
+        "php artisan route:list (385 routes, unchanged)"
+      ],
+      "status": "removed",
+      "rationale": "Verified dead on five independent checks: (1) zero references in any .php/.json/.md/.yml outside the files themselves; (2) composer PSR-4 maps App\\ to app/ and only loads .php, so a .bak can never be autoloaded; (3) php -l confirmed they parse, so they are plausible-looking but unreachable; (4) every method present in the .bak also exists in the current controller, so nothing was lost; (5) the current controller is strictly newer and adds the inventory row-locking, authoritative server-side pricing and transaction coverage that the .bak predates. The stale route file was the higher hazard of the two. MD5 recorded in the production change log.",
+      "deletion_evidence": {
+        "zero_references": true,
+        "autoloadable": false,
+        "methods_lost": 0,
+        "md5": {
+          "app/Http/Controllers/BookingController.php.bak": "3cfe64e90fe9e8ff5b39bcf462e5535f",
+          "routes/api.php.bak": "7d9eb390fcfc9f6cb6a6499631395783"
+        }
+      }
+    },
+    {
+      "component": "BookingController::markManualPayment",
+      "current_location": "app/Http/Controllers/BookingController.php",
+      "target_location": "retained in place - deliberately NOT consolidated",
+      "responsibility": "Second, historically divergent offline-payment path",
+      "domain": "Payment",
+      "callers_before": [
+        "POST /bookings/{booking}/manual-payment -> inline Payment::create + status transition + event"
+      ],
+      "callers_after": [
+        "unchanged"
+      ],
+      "dependencies_before": [
+        "Payment, Booking, BookingActivity, App\\Events\\...\\PaymentReceived"
+      ],
+      "dependencies_after": [
+        "unchanged"
+      ],
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [
+        "existing offline payment tests unchanged"
+      ],
+      "status": "retained",
+      "rationale": "Initially flagged as a consolidation candidate because CreateOfflinePaymentUseCase already exists and its docblock names this method. On inspection that docblock records the OPPOSITE decision: markManualPayment is a deliberately divergent path that does not set booking.payment_mode, does not perform referral attribution, and returns a different envelope. Merging it would change externally observable behaviour, which the phase brief forbids. Recorded as deferred divergence debt instead."
+    },
+    {
+      "component": "Remaining large legacy services",
+      "current_location": "app/Services/*.php (48 further services)",
+      "target_location": "retained in place - classified",
+      "responsibility": "God services, orchestration services and read-model services that do not yet violate a stated boundary",
+      "domain": "Multiple",
+      "callers_before": [
+        "various controllers and use cases"
+      ],
+      "callers_after": [
+        "unchanged"
+      ],
+      "dependencies_before": [
+        "various"
+      ],
+      "dependencies_after": "various",
+      "api_contract_changed": false,
+      "database_schema_changed": false,
+      "financial_behavior_changed": false,
+      "transaction_boundary_changed": false,
+      "locking_changed": false,
+      "tests_added": [],
+      "status": "retained",
+      "rationale": "BudgetRecommendationService (1443), AssetImportService (565), ScreenProviderService (480), ScreenAnalyticsService (348) and ~44 others were inventoried and classified. None was migrated in this phase: the pre-implementation instruction is to refactor on demonstrated boundary violation, not on size alone. Each is recorded in the inventory with its responsibility, callers, database access and financial flag so a later phase can act on evidence rather than on line count. BudgetRecommendationService is the largest single class in the codebase and is the recommended next extraction target."
+    }
+  ]
+}

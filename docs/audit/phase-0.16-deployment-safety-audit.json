@@ -1,0 +1,59 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "deployment-safety-audit",
+  "verdict": "NOT READY - APP_DEBUG is enabled in the committed environment and there is no deployment documentation",
+  "findings": [
+    {
+      "id": "DEP-01",
+      "title": "APP_DEBUG enabled",
+      "severity": "critical",
+      "evidence": "php artisan about reports Debug Mode: ENABLED in the current environment.",
+      "impact": "In production this exposes stack traces, file paths, environment values and query SQL to any caller - and SEC-02 means some endpoints are reachable without authentication.",
+      "remediation": "APP_DEBUG=false and APP_ENV=production in the production environment."
+    },
+    {
+      "id": "DEP-02",
+      "title": ".env.testing committed with real database credentials and not git-ignored",
+      "severity": "high",
+      "evidence": ".env.testing contains db_illuvision_testing credentials in plaintext and is absent from .gitignore.",
+      "remediation": "Add to .gitignore, rotate the credential if it has ever been shared, and inject it in CI as a secret."
+    },
+    {
+      "id": "DEP-03",
+      "title": "55 environment keys gate behaviour",
+      "severity": "medium",
+      "evidence": ".env defines 55 keys.",
+      "impact": "No documented list of which keys are required in production versus optional, so a missing key silently falls back to a development default (for example LOG_CHANNEL defaulting to stack, QUEUE_CONNECTION)."
+    },
+    {
+      "id": "DEP-04",
+      "title": "No health-check endpoint",
+      "severity": "medium",
+      "see": "OBS-05"
+    },
+    {
+      "id": "DEP-05",
+      "title": "No documented rollback procedure",
+      "severity": "medium",
+      "impact": "112 migrations are applied; a failed release has no recorded reverse path."
+    }
+  ],
+  "verified_good": [
+    {
+      "check": "migrations",
+      "detail": "112 on disk, 112 applied, 0 pending, no pending drift."
+    },
+    {
+      "check": "schema fingerprint",
+      "detail": "Identical before and after this phase (sha256 393d6863...baa1a)."
+    },
+    {
+      "check": "route surface",
+      "detail": "385 routes, identical actions and middleware to the pre-remediation baseline."
+    }
+  ],
+  "changes_made": "None. Environment and deployment changes are outside the code-removal scope of this phase and require an explicit deployment decision."
+}

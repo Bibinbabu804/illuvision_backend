@@ -1,0 +1,30 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "route-preservation",
+  "routes": 385,
+  "differences": 0,
+  "verdict": "IDENTICAL",
+  "comparison": "HTTP method + full URI + resolved controller action + middleware stack, for all 385 routes, against docs/audit/routes-baseline.json",
+  "snapshots": {
+    "before": "/tmp/p017/routes.before.json",
+    "after_deletions": "/tmp/p017/routes.after.json",
+    "after_migration": "/tmp/p017/routes.after3.json"
+  },
+  "by_controller_namespace": {
+    "App\\Http\\Controllers": 71,
+    "App\\Http\\Controllers\\Api": 10,
+    "routes_served_by_Api_namespace": 19,
+    "note": "The 19 /api/v2/* routes remain anonymous (SEC-02). Unchanged by both phases."
+  },
+  "middleware_stacks_unchanged": true,
+  "closure_routes_unchanged": true,
+  "route_model_binding_unchanged": true,
+  "verified_three_times": [
+    "after the 16 deletions",
+    "after the Listeners -> Support/Events move",
+    "after the two Services -> Application/Asset moves"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "module": "Repositories",
+ "note": "Plan section 12: contracts and persistence implementations must stay explicitly distinct. Asset and Booking are extracted; 4 capabilities have no repository yet (P2 debt).",
+ "capabilities": [
+  {
+   "capability": "Campaign",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Asset",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 2,
+   "classes": [
+    "App\\Repositories\\Asset\\AssetRepository",
+    "App\\Repositories\\Asset\\AssetRepositoryInterface"
+   ]
+  },
+  {
+   "capability": "Booking",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 2,
+   "classes": [
+    "App\\Repositories\\Booking\\BookingRepository",
+    "App\\Repositories\\Booking\\BookingRepositoryInterface"
+   ]
+  },
+  {
+   "capability": "Pricing",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Payment",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Creative",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  }
+ ]
+}

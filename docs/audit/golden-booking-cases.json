@@ -1,0 +1,65 @@
+{
+  "phase": "0.3",
+  "name": "Golden Booking Cases",
+  "generated_at": "2026-09-25T21:50:00+05:30",
+  "channels": [
+    {
+      "channel": "Advertiser Channel",
+      "entry_point": "App\\Http\\Controllers\\BookingController@storeCampaign",
+      "route": "POST /api/bookings/campaign",
+      "auth": "auth:sanctum (user role)",
+      "locking_strategy": "InventoryService::lockScreensForBooking() inside DB::transaction()",
+      "pricing_engine": "CampaignPricingService::validateCampaignPricing",
+      "availability_engine": "BookingCapacityService::checkEligibility",
+      "initial_status": "payment_pending",
+      "source_tag": "website",
+      "snapshots_persisted": {
+        "booking": ["price", "subtotal", "discount_amount", "final_amount", "pricing_snapshot"],
+        "booking_screens": ["unit_price", "line_subtotal", "gross_revenue", "platform_share", "provider_share", "illuvision_percentage", "screen_provider_percentage", "settlement_status"]
+      }
+    },
+    {
+      "channel": "Partner Channel",
+      "entry_point": "App\\Http\\Controllers\\PartnerBookingController@store",
+      "service": "App\\Services\\ManualBookingService@createCampaignBooking",
+      "route": "POST /api/partner/bookings",
+      "auth": "auth:sanctum (partner role)",
+      "locking_strategy": "InventoryService::lockScreensForBooking() inside DB::transaction()",
+      "pricing_engine": "CampaignPricingService::validateCampaignPricing",
+      "availability_engine": "BookingCapacityService::checkEligibility",
+      "initial_status": "payment_pending",
+      "source_tag": "partner_portal",
+      "metadata": {
+        "created_by_partner_id": "auto-injected from authenticated partner",
+        "referral_code_id": "auto-resolved from active partner referral code"
+      }
+    },
+    {
+      "channel": "Admin Channel",
+      "entry_point": "App\\Http\\Controllers\\AdminManualBookingController@store",
+      "service": "App\\Services\\ManualBookingService@createCampaignBooking",
+      "route": "POST /api/admin/manual-bookings",
+      "auth": "auth:sanctum (admin role)",
+      "locking_strategy": "InventoryService::lockScreensForBooking() inside DB::transaction()",
+      "pricing_engine": "CampaignPricingService::validateCampaignPricing",
+      "availability_engine": "BookingCapacityService::checkEligibility",
+      "initial_status": "payment_pending",
+      "source_tag": "admin_manual",
+      "metadata": {
+        "client": "Found or created on the fly via findOrCreateClient",
+        "bypass_approval": "Supported if payment_mode is offline / settled"
+      }
+    },
+    {
+      "channel": "V2 API Channel",
+      "entry_point": "App\\Http\\Controllers\\Api\\BookingEngineController@store",
+      "route": "POST /api/v2/bookings",
+      "auth": "optional (guest or user)",
+      "locking_strategy": "InventoryService::lockScreensForBooking() inside DB::transaction()",
+      "pricing_engine": "PricingEngine::calculatePreview",
+      "availability_engine": "ConflictDetectionService::validateBookingConflicts",
+      "initial_status": "pending_approval",
+      "booking_reference": "Generated on create: ILL-YYYYMMDD-XXXX"
+    }
+  ]
+}

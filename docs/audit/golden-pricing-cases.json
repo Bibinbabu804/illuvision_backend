@@ -1,0 +1,138 @@
+{
+  "phase": "0.3",
+  "name": "Golden Pricing Cases",
+  "generated_at": "2026-09-25T21:50:00+05:30",
+  "canonical_authority": "App\\Services\\CampaignPricingService",
+  "divergent_authority": "App\\Services\\PricingEngine",
+  "scenarios": [
+    {
+      "case_id": "CASE-PRICING-001",
+      "title": "Single screen / one day",
+      "input": {
+        "screen_id": "fixedScreenIlluvision (Base: 1000 INR/day)",
+        "duration_days": 1,
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-01",
+        "daily_hours": "09:00 - 21:00"
+      },
+      "expected_output": {
+        "base_price": 1000.00,
+        "duration_discount": 0.00,
+        "combined_discount": 0.00,
+        "final_total": 1000.00
+      },
+      "rule_applied": "None (min duration for discount is 7 days)"
+    },
+    {
+      "case_id": "CASE-PRICING-002",
+      "title": "Single screen / seven days",
+      "input": {
+        "screen_id": "fixedScreenIlluvision (Base: 1000 INR/day)",
+        "duration_days": 7,
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-07"
+      },
+      "expected_output": {
+        "base_price": 7000.00,
+        "duration_discount": 350.00,
+        "combined_discount": 350.00,
+        "final_total": 6650.00
+      },
+      "rule_applied": "PricingDurationRule: 7-29 days -> 5% discount"
+    },
+    {
+      "case_id": "CASE-PRICING-003",
+      "title": "Single screen / thirty days",
+      "input": {
+        "screen_id": "fixedScreenIlluvision (Base: 1000 INR/day)",
+        "duration_days": 30,
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-30"
+      },
+      "expected_output": {
+        "base_price": 30000.00,
+        "duration_discount": 3000.00,
+        "combined_discount": 3000.00,
+        "final_total": 27000.00
+      },
+      "rule_applied": "PricingDurationRule: 30-365 days -> 10% discount"
+    },
+    {
+      "case_id": "CASE-PRICING-004",
+      "title": "Multiple screens pricing aggregation",
+      "input": {
+        "screen_ids": ["fixedScreenIlluvision", "fixedScreenProvider"],
+        "duration_days": 3,
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-03"
+      },
+      "expected_output": {
+        "screens_count": 2,
+        "base_price": 6000.00,
+        "final_total": 6000.00,
+        "per_screen_subtotal": 3000.00
+      },
+      "rule_applied": "Aggregation across multiple screen pricing plans"
+    },
+    {
+      "case_id": "CASE-PRICING-007",
+      "title": "Partner referral discount application",
+      "input": {
+        "screen_id": "fixedScreenIlluvision",
+        "duration_days": 1,
+        "referral_code": "GOLDEN2026 (10% percentage discount)"
+      },
+      "expected_output": {
+        "base_price": 1000.00,
+        "referral_discount": 100.00,
+        "final_total": 900.00
+      },
+      "rule_applied": "ReferralPricingCalculator: 10% on campaign total"
+    },
+    {
+      "case_id": "CASE-PRICING-010",
+      "title": "V2 automated multi-asset calculation",
+      "input": {
+        "asset_id": "fixedScreenIlluvision",
+        "quantity": 2,
+        "duration_days": 5
+      },
+      "expected_output": {
+        "gross_total": 10000.00,
+        "duration_discount": 0.00,
+        "final_total": 10000.00
+      },
+      "rule_applied": "PricingEngine::calculatePreview (unit_price * quantity * days)"
+    },
+    {
+      "case_id": "CASE-PRICING-011",
+      "title": "CampaignPricingService vs PricingEngine Divergence",
+      "input": {
+        "asset_id": "fixedScreenIlluvision (1000 INR/day)",
+        "duration_days": 30,
+        "scenario": "Identical asset and date interval"
+      },
+      "divergence_analysis": {
+        "v1_output": {
+          "engine": "CampaignPricingService",
+          "base_price": 30000.00,
+          "duration_discount": 3000.00,
+          "discount_source": "Database-backed PricingDurationRule model",
+          "surcharges": "Evaluates PricingPeakRule and PricingWeekendRule from DB",
+          "taxes": "Evaluates GST / TaxEngine",
+          "final_amount": 27000.00
+        },
+        "v2_output": {
+          "engine": "PricingEngine",
+          "gross_total": 30000.00,
+          "duration_discount": 3000.00,
+          "discount_source": "Hardcoded condition ($days >= 30 ? round($grossTotal * 0.10, 2) : 0.0)",
+          "surcharges": "Zero peak / weekend surcharge support",
+          "taxes": "Zero tax calculation",
+          "final_total": 27000.00
+        },
+        "critical_divergence_finding": "While 30-day single plan matches 27000 coincidental to the 10% threshold, v2 ignores all database pricing rules, peak hours, weekends, taxes, and referral discounts. The two engines will produce divergent totals whenever peak hours, weekend surcharges, referral codes, or custom duration tiers (e.g. 7 days 5%) are involved."
+      }
+    }
+  ]
+}

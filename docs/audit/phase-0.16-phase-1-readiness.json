@@ -1,0 +1,86 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "phase-1-readiness",
+  "decision": "PHASE 1 BLOCKED",
+  "decision_rationale": "The decision is BLOCKED rather than READY-WITH-DEBT because there are 4 P0 items, and they are the worst class of defect: unauthenticated or unauthorized access to financial data and financial writes. 'Controlled debt' is appropriate for known, bounded, accepted risk. It is not appropriate for anonymous settlement writes and arbitrary booking price tampering, which are exploitable now.",
+  "gate_criteria": [
+    {
+      "criterion": "No P0 security finding",
+      "status": "FAIL",
+      "evidence": "SEC-01, SEC-02, SEC-03 are P0 and exploitable today."
+    },
+    {
+      "criterion": "No P0 deployment finding",
+      "status": "FAIL",
+      "evidence": "DEP-01 APP_DEBUG is enabled."
+    },
+    {
+      "criterion": "API contract unchanged",
+      "status": "PASS",
+      "evidence": "385 routes, 0 changed actions, 0 changed middleware."
+    },
+    {
+      "criterion": "Schema unchanged",
+      "status": "PASS",
+      "evidence": "Fingerprint identical: 74 tables, sha256 393d6863...baa1a."
+    },
+    {
+      "criterion": "Financial computation unchanged",
+      "status": "PASS",
+      "evidence": "Authoritative pricing and server-derived payment amounts verified."
+    },
+    {
+      "criterion": "Authorization outcomes unchanged",
+      "status": "PASS (deliberately)",
+      "evidence": "No authorization was altered, including the known-vulnerable routes, because doing so is a contract change."
+    },
+    {
+      "criterion": "No new test failures",
+      "status": "PASS",
+      "evidence": "558 passed / 2 known pre-existing failures; the 2 are message-wording drift."
+    },
+    {
+      "criterion": "Architecture rules enforced by tests",
+      "status": "PASS",
+      "evidence": "14 architecture tests, 0.29s, debt pinned exactly."
+    },
+    {
+      "criterion": "No P0 data-integrity or recovery gap",
+      "status": "FAIL",
+      "evidence": "No version control and no backup/restore procedure (see recovery-readiness.md)."
+    }
+  ],
+  "p0_blockers": [
+    {
+      "id": "SEC-01",
+      "one_line": "Any authenticated user can set any booking's status and price via PATCH.",
+      "exploitability": "trivial - single request, no special privilege"
+    },
+    {
+      "id": "SEC-02",
+      "one_line": "19 /api/v2 routes are anonymous, including settlement writes and all payment/ledger reads.",
+      "exploitability": "trivial - no credential required"
+    },
+    {
+      "id": "SEC-03",
+      "one_line": "Any authenticated user can grant themselves any permission, approve/delete partners.",
+      "exploitability": "trivial - privilege escalation to full control"
+    },
+    {
+      "id": "DEP-01",
+      "one_line": "APP_DEBUG is enabled, which combined with SEC-02 exposes traces and SQL to anonymous callers.",
+      "exploitability": "trivial"
+    }
+  ],
+  "what_would_change_the_verdict": [
+    "Fix SEC-03 and SEC-01 first - both are small, surgical changes with disproportionate risk reduction.",
+    "Decide per-route whether each /api/v2 endpoint is intentionally public; gate the rest.",
+    "Set APP_DEBUG=false in production.",
+    "Initialise version control and document a backup/restore path.",
+    "Re-run this gate; it would then be PHASE 1 READY WITH CONTROLLED DEBT."
+  ],
+  "important_caveat": "All four P0 findings are PRE-EXISTING and were verified against the pre-remediation route baseline with identical middleware. They were found by this audit, not created by it. They are recorded rather than fixed because every fix changes an authorization outcome or the API contract, which the brief forbids as a side effect of hardening."
+}

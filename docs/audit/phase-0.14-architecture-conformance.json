@@ -1,0 +1,230 @@
+{
+  "phase": "0.14",
+  "name": "Architecture Conformance",
+  "generated_at": "2026-09-26",
+  "target_flow": "HTTP -> Application -> Domain -> Contracts -> Infrastructure -> Persistence/External",
+  "method": "Every class under app/ was parsed for use statements and grouped by layer, then each cross-layer edge was inspected for its actual purpose. Facade and SDK usage was grepped per layer. No dependency was classified as a violation without reading what it is used for.",
+  "counts": {
+    "approved-exception": 3,
+    "compliant": 12,
+    "deferred": 4,
+    "violation": 4
+  },
+  "layers_checked": [
+    "Domain",
+    "Application",
+    "Infrastructure",
+    "Http",
+    "Reporting",
+    "Models"
+  ],
+  "findings": [
+    {
+      "layer": "Domain",
+      "component": "app/Domain/Pricing/CampaignPricingEngine.php",
+      "dependency": "App\\Services\\LoyaltyService, SettingsService, PricingRuleEngine, Pricing\\{ScreenPricingResolver, DailyPricingCalculator, ReferralPricingCalculator, FirstBookingDiscountPricingCalculator} (7 imports)",
+      "rule": "Rule 2 (pure domain invariants) + Rule 11 (strict layer dependency direction): Domain must not depend on a concrete Infrastructure or legacy service layer",
+      "status": "violation",
+      "evidence": "Parsed from the file's use statements. The engine needs loyalty point-value conversion, DB-backed settings and five stateless calculators.",
+      "action": "Deferred to Phase 0.15. Correct end state is value-object parameters on the calculators plus a PricingSettingsProvider contract; that is a financial-determinism change requiring its own approved phase."
+    },
+    {
+      "layer": "Domain",
+      "component": "app/Domain/Pricing/CampaignPricingEngine.php",
+      "dependency": "App\\Models\\{ReferralCode, RewardAccount, Screen} (3 imports)",
+      "rule": "Domain should not depend on Active Record models",
+      "status": "violation",
+      "evidence": "The stateless pricing calculators accept Eloquent models as parameters, so relocating them to Domain would relocate the leak rather than remove it.",
+      "action": "Deferred together with the 7 service imports above; same root cause."
+    },
+    {
+      "layer": "Domain",
+      "component": "app/Domain/Payment/PaymentStatus.php",
+      "dependency": "App\\Models\\Payment",
+      "rule": "Domain value object should not reference the persistence model",
+      "status": "violation",
+      "evidence": "Inspecting the file: the status vocabulary is defined over Payment constants.",
+      "action": "Deferred: the status vocabulary is genuinely Payment-domain knowledge, but the reference direction should be inverted (Payment -> PaymentStatus, not PaymentStatus -> Payment)."
+    },
+    {
+      "layer": "Domain",
+      "component": "app/Domain/Payment/Contracts/PaymentRepositoryInterface.php",
+      "dependency": "App\\Models\\Payment, Refund",
+      "rule": "A repository contract may name its aggregate",
+      "status": "approved-exception",
+      "evidence": "Architecture Rule 6 permits repository boundaries where persistence isolation is justified. Naming the aggregate in a repository contract is intentional and does not leak persistence implementation.",
+      "action": "None. This is the designed pattern."
+    },
+    {
+      "layer": "Domain",
+      "component": "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php",
+      "dependency": "App\\Models\\PartnerCommission",
+      "rule": "A repository contract may name its aggregate",
+      "status": "approved-exception",
+      "evidence": "Architecture Rule 6 permits repository boundaries where persistence isolation is justified. Naming the aggregate in a repository contract is intentional and does not leak persistence implementation.",
+      "action": "None. This is the designed pattern."
+    },
+    {
+      "layer": "Domain",
+      "component": "app/Domain/Financial/Contracts/SettlementRepositoryInterface.php",
+      "dependency": "App\\Models\\Settlement",
+      "rule": "A repository contract may name its aggregate",
+      "status": "approved-exception",
+      "evidence": "Architecture Rule 6 permits repository boundaries where persistence isolation is justified. Naming the aggregate in a repository contract is intentional and does not leak persistence implementation.",
+      "action": "None. This is the designed pattern."
+    },
+    {
+      "layer": "Domain",
+      "component": "all 9 files under app/Domain",
+      "dependency": "No App\\Http, no Http::, no Mail::, no Storage::, no Guzzle, no Razorpay SDK",
+      "rule": "Domain must not depend on HTTP or external SDKs",
+      "status": "compliant",
+      "evidence": "grep -rnE 'App\\\\Http|Http::|Mail::|Storage::|Guzzle|Razorpay' app/Domain/ returned no matches.",
+      "action": "None."
+    },
+    {
+      "layer": "Domain",
+      "component": "all 9 files under app/Domain",
+      "dependency": "No app() or resolve() service locator",
+      "rule": "Domain must not use the service locator",
+      "status": "compliant",
+      "evidence": "grep -rnE '[^>a-zA-Z_$](app|resolve)\\(' app/Domain returned no matches (the only apparent hits were ReportPeriod::resolve in Application).",
+      "action": "None."
+    },
+    {
+      "layer": "Application",
+      "component": "17 classes under app/Application",
+      "dependency": "App\\Services\\* (1-5 imports each)",
+      "rule": "Application may orchestrate legacy services during the strangler migration",
+      "status": "deferred",
+      "evidence": "Every use case and reporting query that still depends on App\\Services was enumerated. This is the expected transitional state under Architecture Rule 7: wrap and delegate first, extract deeper domain behaviour later.",
+      "action": "Tracked as debt. The Application -> Services edges are the concrete work list for future extraction phases."
+    },
+    {
+      "layer": "Application",
+      "component": "all 32 files under app/Application",
+      "dependency": "No App\\Http import",
+      "rule": "Application must not depend on the HTTP layer",
+      "status": "compliant",
+      "evidence": "grep -rn 'App\\\\Http' app/Application/ returned no matches.",
+      "action": "None."
+    },
+    {
+      "layer": "Application",
+      "component": "all 32 files under app/Application",
+      "dependency": "No Http::, Mail::, Storage::, Guzzle, Razorpay",
+      "rule": "Application must not call external facades or SDKs directly",
+      "status": "compliant",
+      "evidence": "grep -rnE 'Http::|Mail::|Storage::|Guzzle|Razorpay' app/Application/ returned no matches. External access is behind Infrastructure contracts.",
+      "action": "None."
+    },
+    {
+      "layer": "Application",
+      "component": "app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php",
+      "dependency": "DB::transaction",
+      "rule": "Application owns the transaction boundary",
+      "status": "compliant",
+      "evidence": "The use case owns the campaign-booking transaction; the controller no longer contains DB::transaction for that flow.",
+      "action": "None."
+    },
+    {
+      "layer": "Infrastructure",
+      "component": "app/Infrastructure/** (14 files)",
+      "dependency": "Eloquent, Razorpay SDK, Google OAuth, HTTP client, Mail facade, Storage facade, GD",
+      "rule": "Infrastructure is the only layer permitted to know vendor and framework I/O",
+      "status": "compliant",
+      "evidence": "All Razorpay, Google, exchange-rate, mail, storage and GD usage is confined here. Verified by grep: the only Mail:: call site in app/ is LaravelMailAdapter; the only GD call sites are GdImageProcessor.",
+      "action": "None."
+    },
+    {
+      "layer": "Infrastructure",
+      "component": "app/Infrastructure/Notification/LaravelMailAdapter.php",
+      "dependency": "Illuminate\\Support\\Facades\\Mail",
+      "rule": "Facade must be confined to the adapter",
+      "status": "compliant",
+      "evidence": "grep -rnE '[^a-zA-Z_]Mail::(to|send|queue|raw|html)' app/ matched only this file.",
+      "action": "None."
+    },
+    {
+      "layer": "Http",
+      "component": "app/Http/Controllers/** (68 controllers)",
+      "dependency": "9 Storage:: call sites across 6 controllers",
+      "rule": "HTTP should delegate storage to the application/port layer",
+      "status": "deferred",
+      "evidence": "AuthorController (2), SuccessStoryController (2), GalleryController (2), ScreenController (1), ScreenProviderPortalController (1), JobApplicationController (1). Left in place by explicit user decision in Phase 0.12 to avoid touching unrelated features.",
+      "action": "Tracked as debt; the first integration item recommended for the next phase."
+    },
+    {
+      "layer": "Http",
+      "component": "app/Models/User.php (via PermissionMiddleware)",
+      "dependency": "App\\Http\\Middleware\\PermissionMiddleware",
+      "rule": "A model must not depend on the HTTP layer",
+      "status": "compliant",
+      "evidence": "RESOLVED in Phase 0.13. User::hasPermission() now resolves app/Support/Authorization/RolePermissionChecker. Verified: no App\\Http import remains in any model.",
+      "action": "None - resolved."
+    },
+    {
+      "layer": "Http",
+      "component": "app/Http/Middleware/PermissionMiddleware.php",
+      "dependency": "RolePermissionChecker, Request, Closure",
+      "rule": "Middleware should be a thin HTTP adapter over the authorization boundary",
+      "status": "compliant",
+      "evidence": "The middleware now injects RolePermissionChecker and delegates both userHasPermission and clearPermissionCache to it; the permission algorithm no longer lives in the transport layer.",
+      "action": "None - resolved."
+    },
+    {
+      "layer": "Http",
+      "component": "app/Http/Controllers/BookingController.php",
+      "dependency": "Razorpay SDK / Http:: client",
+      "rule": "HTTP must not talk to external SDKs (Architecture Rule 1)",
+      "status": "compliant",
+      "evidence": "No SDK or Http:: usage. Payment operations are reached through Application use cases.",
+      "action": "None."
+    },
+    {
+      "layer": "Http",
+      "component": "app/Http/Controllers/BookingController.php",
+      "dependency": "1414 lines, 31 public methods",
+      "rule": "Controllers should be thin HTTP adapters",
+      "status": "compliant",
+      "evidence": "Reduced from 1827 to 1414 lines in Phase 0.13 by extracting storeCampaign (299->50), update (130->15) and checkConflicts (84->19). Remaining methods are predominantly single-purpose reads and simple state transitions.",
+      "action": "Continue: the approval/media-review/session methods are the next extraction candidates."
+    },
+    {
+      "layer": "Reporting",
+      "component": "app/Application/Reporting/** (24 files)",
+      "dependency": "DB::table / Eloquent read-only",
+      "rule": "Reporting must perform no writes and no business-rule decisions",
+      "status": "compliant",
+      "evidence": "Zero write calls (create/update/delete/insert) under app/Application/Reporting. Reporting reads persisted revenue splits and the partner_commissions ledger rather than recomputing them.",
+      "action": "None."
+    },
+    {
+      "layer": "Reporting",
+      "component": "app/Application/Reporting/Queries/*",
+      "dependency": "App\\Services\\SettingsService, ReportService",
+      "rule": "Reporting should not depend on transactional services",
+      "status": "deferred",
+      "evidence": "Some queries read SettingsService for thresholds and a couple reference ReportService symbols. Read-only, so no mutation risk, but it is a residual coupling.",
+      "action": "Tracked as debt."
+    },
+    {
+      "layer": "Models",
+      "component": "app/Models/Booking.php",
+      "dependency": "app(LoyaltyService, SettingsService, ReferralTrackingService) x7 in updated/deleting model events and getLoyaltySummary()",
+      "rule": "A persistence model should not drive cross-domain financial side effects",
+      "status": "violation",
+      "evidence": "Model events reverse loyalty points and cancel/refund referral tracking on every status transition, resolved through the service locator because model events cannot be injected.",
+      "action": "Deferred to Phase 0.15 as the highest-priority item. The side effects are correct and covered; extracting them changes when they commit, which is a financial-semantics change."
+    },
+    {
+      "layer": "Models",
+      "component": "app/Models/Booking.php",
+      "dependency": "Static::booted() global scope and status hooks",
+      "rule": "Business rules should not live in model events",
+      "status": "deferred",
+      "evidence": "A global scope excludes payment_pending bookings from default queries, and status hooks drive loyalty/referral.",
+      "action": "Documented; the global scope is load-bearing for reporting and booking queries."
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "phase": "0.9",
+  "name": "Payment Idempotency Map",
+  "generated_at": "2026-09-26T00:15:00+05:30",
+  "position": "Phase 0.9 is a behaviour-preserving extraction. It deliberately ADDS NO idempotency mechanism, no idempotency key column, no unique constraint, and no request-deduplication store. This map records what already exists and what does not.",
+  "existing_mechanisms": [
+    {
+      "id": "IDEM-PAY-01",
+      "name": "Pending-payment reuse on order creation",
+      "location": "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase::execute()",
+      "mechanism": "findPendingForBooking($booking) — if a payment with payment_status = 'pending' exists for the booking, return it (is_existing = true) instead of creating a new gateway order.",
+      "scope": "Single booking, application-scoped, non-transactional",
+      "guarantee": "BEST_EFFORT",
+      "guarantee_detail": "The SELECT and the subsequent INSERT are not atomic. Two concurrent create-order requests for the same booking can both observe no pending payment and both create a gateway order. The gateway-side duplicate is then reconciled only by whichever payment reaches 'paid' first.",
+      "real_pessimistic_lock": false,
+      "changed_in_phase_0_9": false,
+      "enforced_by_test": "Tests\\Unit\\Application\\Payment\\CreatePaymentOrderUseCaseTest"
+    },
+    {
+      "id": "IDEM-PAY-02",
+      "name": "Duplicate payment verification guard",
+      "location": "App\\Services\\PaymentService::verifyPaymentSignature()",
+      "mechanism": "If the payment is already in a paid state, throw 'Payment already processed' and roll back.",
+      "scope": "Single payment, inside the verification transaction",
+      "guarantee": "BEST_EFFORT",
+      "guarantee_detail": "This is a read-then-write check with no row lock. Two concurrent verify calls for the same order can both observe an unpaid payment and both proceed. The gateway signature check is what actually prevents a double capture in practice.",
+      "real_pessimistic_lock": false,
+      "changed_in_phase_0_9": false,
+      "enforced_by_test": "Tests\\Feature\\Golden\\GoldenPaymentRegressionTest::test_duplicate_verification_request_is_rejected"
+    },
+    {
+      "id": "IDEM-PAY-03",
+      "name": "Transaction rollback on gateway failure (refund)",
+      "location": "App\\Services\\RefundService::initiateRefund()",
+      "mechanism": "The gateway call and all local writes share one DB::transaction. A gateway exception propagates and the local refund row, payment status change and PaymentLog are all discarded.",
+      "scope": "Single refund attempt",
+      "guarantee": "AT_MOST_ONCE_LOCAL_WRITE",
+      "guarantee_detail": "Local state is consistent, but a retry after an ambiguous gateway timeout can double-refund at the gateway. There is no gateway-side idempotency key.",
+      "real_pessimistic_lock": false,
+      "changed_in_phase_0_9": false,
+      "enforced_by_test": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_refund_failure_rolls_back_partial_refund_rows"
+    },
+    {
+      "id": "IDEM-PAY-04",
+      "name": "Duplicate partner-commission guard",
+      "location": "App\\Services\\ReferralTrackingService::createReferralTracking() via PartnerCommissionRepositoryInterface",
+      "mechanism": "Before creating a commission, take a lockForUpdate read keyed on referral_usage_id and skip creation if one already exists.",
+      "scope": "Single referral usage",
+      "guarantee": "STRONG",
+      "guarantee_detail": "This is the ONLY genuinely serialised financial write in the subsystem. The pessimistic lock makes the check-then-create atomic within the caller's transaction.",
+      "real_pessimistic_lock": true,
+      "lock_table": "partner_commissions",
+      "lock_call": "PartnerCommission::where('referral_usage_id', $x)->lockForUpdate()->first()",
+      "changed_in_phase_0_9": false,
+      "preservation_note": "The lock was moved behind PartnerCommissionRepositoryInterface but the lockForUpdate() call itself was NOT weakened. Verified by GoldenFinancialBoundaryTest::test_commission_repository_preserves_pessimistic_locking.",
+      "caveat": "The lock protects against concurrent commission creation, not against concurrent referral_usage creation. The caller is responsible for the surrounding transaction."
+    }
+  ],
+  "absent_mechanisms": [
+    {
+      "gap": "Gateway order creation has no idempotency key",
+      "impact": "A client retry after a network timeout can create a second Razorpay order for the same booking.",
+      "why_not_added": "Adding one changes externally observable gateway behaviour and requires a schema migration. Out of scope for an extraction phase."
+    },
+    {
+      "gap": "Payment verification has no row lock",
+      "impact": "Two concurrent verify calls can both pass the duplicate guard.",
+      "why_not_added": "Adding lockForUpdate() to the verification read would change lock ordering against the booking row and the inventory path, and could introduce new deadlock potential. Requires a dedicated concurrency phase."
+    },
+    {
+      "gap": "Offline payment recording has no uniqueness constraint",
+      "impact": "Concurrent admin offline recordings for one booking each insert a payment row.",
+      "why_not_added": "Requires a schema migration and a decision about which row wins. Out of scope."
+    },
+    {
+      "gap": "Refund has no gateway idempotency key",
+      "impact": "A retry after an ambiguous gateway timeout can double-refund.",
+      "why_not_added": "Requires a schema migration and gateway-contract discussion. Recorded for a future phase."
+    }
+  ],
+  "conclusion": "Phase 0.9 changed NO idempotency behaviour. It relocated two best-effort checks behind contracts and preserved the one strong lock verbatim. All four gaps above are recorded, not fixed."
+}

@@ -1,0 +1,143 @@
+{
+  "phase": "0.4",
+  "name": "Dependency-Aware Architecture Migration Order",
+  "generated_at": "2026-09-25T22:54:00+05:30",
+  "migration_principles": [
+    "Refactor implementation, not the external contract.",
+    "Strangler pattern: wrap and delegate before moving core logic.",
+    "Zero financial regressions: pin each financial transformation with golden assertion suites before modifying.",
+    "Isolate external SDKs behind Infrastructure Adapters first to eliminate remote mock flakiness.",
+    "Do not execute migrations in Phase 0.4. This is the sequenced roadmap for Phase 0.5+."
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "component": "Payment Gateway Adapter & Service Boundary",
+      "current_location": "App\\Services\\PaymentService (coupled with Razorpay\\Api\\Api SDK)",
+      "target_location": "App\\Infrastructure\\Payments\\RazorpayPaymentGatewayAdapter implementing App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+      "prerequisites": [
+        "Phase 0.3 Golden Payment Suite (tests/Feature/Golden/GoldenPaymentIntegrationTest.php passing)",
+        "Verified Razorpay HMAC-SHA256 signature verification offline fixtures"
+      ],
+      "protected_contracts": [
+        "POST /api/payments/create-order",
+        "POST /api/payments/verify"
+      ],
+      "risk": "LOW (Isolated adapter boundary with 100% deterministic offline tests)",
+      "rollback_strategy": "Feature flag or IoC binding fallback: re-bind PaymentGatewayInterface directly to legacy App\\Services\\PaymentService if adapter throws unexpected gateway exceptions."
+    },
+    {
+      "step": 2,
+      "component": "External Integration Adapters (Currency & Media Storage)",
+      "current_location": "App\\Services\\ExchangeRateService, App\\Helpers\\MediaHelper",
+      "target_location": "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient & App\\Infrastructure\\Storage\\LocalStorageService / S3StorageService",
+      "prerequisites": [
+        "Unit test coverage for currency conversion fallback (tests/Unit/Services/ExchangeRateServiceTest.php)",
+        "Asset file upload test fixtures"
+      ],
+      "protected_contracts": [
+        "Media upload endpoints",
+        "Multi-currency pricing quotes"
+      ],
+      "risk": "LOW (Pure infrastructural adapters with zero domain invariants)",
+      "rollback_strategy": "Maintain existing service method signatures and delegate to legacy helper methods if environment storage drivers fail."
+    },
+    {
+      "step": 3,
+      "component": "Pure Pricing Calculation Engine",
+      "current_location": "App\\Services\\CampaignPricingService",
+      "target_location": "App\\Domain\\Pricing\\CampaignPricingEngine (Pure domain service without dynamic circular container lookups)",
+      "prerequisites": [
+        "Decouple dynamic LoyaltyService runtime dependency (pass customer loyalty points as pure value parameter)",
+        "Phase 0.3 Golden Pricing Suite (tests/Feature/Golden/GoldenPricingContractTest.php passing)"
+      ],
+      "protected_contracts": [
+        "POST /api/bookings/calculate-price",
+        "POST /api/v2/pricing/calculate"
+      ],
+      "risk": "MEDIUM (Financial calculation core; pinned by exact penny-level golden fixtures)",
+      "rollback_strategy": "Legacy CampaignPricingService wraps CampaignPricingEngine. Keep original calculation formulas as fallback if rounding variance exceeds 0.001."
+    },
+    {
+      "step": 4,
+      "component": "Legacy Pricing Rule Engine Adapter",
+      "current_location": "App\\Services\\PricingRuleEngine & App\\Services\\PricingEngine",
+      "target_location": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "prerequisites": [
+        "Step 3 completed",
+        "Golden verification comparing output of PricingRuleEngine vs CampaignPricingEngine"
+      ],
+      "protected_contracts": [
+        "POST /api/pricing/engine/evaluate",
+        "POST /api/v2/campaigns/estimate"
+      ],
+      "risk": "MEDIUM (Ensures backward compatibility for dynamic screen pricing multipliers)",
+      "rollback_strategy": "Direct router delegation to legacy service if adapter mapping fails."
+    },
+    {
+      "step": 5,
+      "component": "Availability & Slot Capacity Engine",
+      "current_location": "App\\Services\\InventoryService & App\\Services\\BookingCapacityService",
+      "target_location": "App\\Domain\\Availability\\CapacityCalculationEngine & App\\Domain\\Availability\\ConflictDetectionService",
+      "prerequisites": [
+        "Phase 0.3 Golden Availability Suite (tests/Feature/Golden/GoldenAvailabilityContractTest.php passing)",
+        "Locking strategy verification (Pessimistic SELECT ... FOR UPDATE or Redis lock)"
+      ],
+      "protected_contracts": [
+        "POST /api/bookings/check-availability",
+        "GET /api/screens/{id}/availability"
+      ],
+      "risk": "HIGH (Concurrency sensitive; race conditions could cause double-bookings)",
+      "rollback_strategy": "Strict atomic transaction rollback. Revert to legacy line-sweep query if slot segment math yields overlapping seconds."
+    },
+    {
+      "step": 6,
+      "component": "Financial Settlement & Revenue Distribution",
+      "current_location": "App\\Services\\RevenueDistributionService, App\\Services\\SettlementService, App\\Services\\CommissionService",
+      "target_location": "App\\Domain\\Settlement\\RevenueDistributionEngine & App\\Domain\\Partner\\CommissionEngine",
+      "prerequisites": [
+        "Phase 0.3 Golden Financial Suite (tests/Feature/Golden/GoldenFinancialContractTest.php passing)",
+        "Verify 80/20 provider/platform split and partner commission tiers"
+      ],
+      "protected_contracts": [
+        "POST /api/settlements/calculate",
+        "GET /api/partners/{id}/commissions"
+      ],
+      "risk": "HIGH (Monetary payouts to physical media asset owners)",
+      "rollback_strategy": "Settlement runs in preview/dry-run mode first; verify ledger balance invariance before committing database balance updates."
+    },
+    {
+      "step": 7,
+      "component": "Application Booking Use Cases",
+      "current_location": "App\\Services\\ManualBookingService & App\\Http\\Controllers\\BookingController (inline logic)",
+      "target_location": "App\\Application\\Booking\\UseCases\\CreateCampaignBookingUseCase, CreatePartnerBookingUseCase, CreateAdminManualBookingUseCase",
+      "prerequisites": [
+        "Steps 1, 3, 5 completed (Payment, Pricing, Availability domains ready)",
+        "Phase 0.3 Golden Booking Suite (tests/Feature/Golden/GoldenBookingContractTest.php passing)"
+      ],
+      "protected_contracts": [
+        "POST /api/bookings/campaign",
+        "POST /api/partner/bookings",
+        "POST /api/admin/bookings/manual",
+        "POST /api/v2/bookings/estimate"
+      ],
+      "risk": "CRITICAL (Core commercial checkout flow)",
+      "rollback_strategy": "BookingController delegates to CreateCampaignBookingUseCase via try/catch block, falling back to legacy inline method if use case throws UnhandledDomainException."
+    },
+    {
+      "step": 8,
+      "component": "Controller Thinning & HTTP Layer Sanitization",
+      "current_location": "App\\Http\\Controllers\\BookingController, ScreenController, ScreenProviderPortalController",
+      "target_location": "Thinned Controllers delegating 100% of business logic to Application Use Cases & Form Requests",
+      "prerequisites": [
+        "Step 7 completed",
+        "All 385 routes re-verified against tests/Feature/Golden/"
+      ],
+      "protected_contracts": [
+        "All 385 registered routes in routes-baseline.json"
+      ],
+      "risk": "MEDIUM (Ensuring HTTP response schemas, status codes, and headers remain identical)",
+      "rollback_strategy": "Git branch revert of controller file; all underlying domain logic remains intact."
+    }
+  ]
+}

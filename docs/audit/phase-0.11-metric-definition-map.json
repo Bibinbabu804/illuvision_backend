@@ -1,0 +1,242 @@
+{
+  "phase": "0.11",
+  "name": "Metric Definition Map",
+  "generated_at": "2026-09-26T05:25:00+05:30",
+  "purpose": "Document all major metrics calculated in reporting services, including their definitions, sources, formulas, and semantics.",
+  "metrics": [
+    {
+      "metric": "total_revenue",
+      "definition": "Total revenue from all bookings (excluding cancelled) during the specified period",
+      "source_tables": ["bookings"],
+      "source_domains": ["booking", "payment"],
+      "formula": "SUM(final_amount) WHERE status != 'cancelled' AND created_at BETWEEN date_from AND date_to",
+      "filters": ["date_from", "date_to", "city_id", "screen_id", "pricing_plan_id"],
+      "date_semantics": "Based on booking.created_at timestamp",
+      "currency_semantics": "INR (Indian Rupees), stored as integer paise in database but converted to decimal rupees in application",
+      "status_semantics": "Excludes cancelled bookings only",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data, not from historical snapshots",
+      "calculation_locations": [
+        "App\\Services\\RevenueAnalyticsService::overview()",
+        "App\\Services\\ClientAnalyticsService::kpis()",
+        "App\\Services\\PaymentAnalyticsService::getKPIs()"
+      ],
+      "consistency_notes": "Used consistently across reporting and financial services"
+    },
+    {
+      "metric": "subtotal_revenue", 
+      "definition": "Total base price before discounts from all bookings (excluding cancelled) during the specified period",
+      "source_tables": ["bookings"],
+      "source_domains": ["booking"],
+      "formula": "SUM(subtotal) WHERE status != 'cancelled' AND created_at BETWEEN date_from AND date_to (falls back to SUM(price) if subtotal is null)",
+      "filters": ["date_from", "date_to"],
+      "date_semantics": "Based on booking.created_at timestamp",
+      "currency_semantics": "INR",
+      "status_semantics": "Excludes cancelled bookings only",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\RevenueAnalyticsService::overview()"
+      ],
+      "consistency_notes": "Only used in revenue analytics service"
+    },
+    {
+      "metric": "total_discounts",
+      "definition": "Total discount amount from all bookings (excluding cancelled) during the specified period", 
+      "source_tables": ["bookings"],
+      "source_domains": ["booking"],
+      "formula": "SUM(discount_amount) WHERE status != 'cancelled' AND created_at BETWEEN date_from AND date_to",
+      "filters": ["date_from", "date_to"],
+      "date_semantics": "Based on booking.created_at timestamp",
+      "currency_semantics": "INR",
+      "status_semantics": "Excludes cancelled bookings only",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\RevenueAnalyticsService::overview()"
+      ],
+      "consistency_notes": "Only used in revenue analytics service"
+    },
+    {
+      "metric": "referral_discounts",
+      "definition": "Total discount amount applied via referral codes from all bookings (excluding cancelled) during the specified period",
+      "source_tables": ["bookings"], 
+      "source_domains": ["booking", "referral"],
+      "formula": "SUM(referral_discount) WHERE status != 'cancelled' AND created_at BETWEEN date_from AND date_to",
+      "filters": ["date_from", "date_to"],
+      "date_semantics": "Based on booking.created_at timestamp",
+      "currency_semantics": "INR",
+      "status_semantics": "Excludes cancelled bookings only",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\RevenueAnalyticsService::overview()"
+      ],
+      "consistency_notes": "Only used in revenue analytics service"
+    },
+    {
+      "metric": "total_commissions",
+      "definition": "Total commission payouts to partners that have been paid during the specified period",
+      "source_tables": ["partner_commissions"],
+      "source_domains": ["financial"],
+      "formula": "SUM(amount) WHERE status = 'paid' AND created_at BETWEEN date_from AND date_to",
+      "filters": ["date_from", "date_to"],
+      "date_semantics": "Based on partner_commissions.created_at timestamp",
+      "currency_semantics": "INR", 
+      "status_semantics": "Only includes paid commissions",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\RevenueAnalyticsService::overview()",
+        "App\\Services\\PaymentAnalyticsService::getKPIs()"
+      ],
+      "consistency_notes": "Used consistently in revenue and payment analytics"
+    },
+    {
+      "metric": "net_revenue",
+      "definition": "Total revenue minus total commission payouts",
+      "source_tables": ["bookings", "partner_commissions"],
+      "source_domains": ["booking", "financial"],
+      "formula": "total_revenue - total_commissions",
+      "filters": ["date_from", "date_to"],
+      "date_semantics": "Based on booking.created_at for revenue, partner_commissions.created_at for commissions",
+      "currency_semantics": "INR",
+      "status_semantics": "Revenue excludes cancelled bookings, commissions only includes paid status",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\RevenueAnalyticsService::overview()"
+      ],
+      "consistency_notes": "Derived metric, consistency depends on underlying total_revenue and total_commissions"
+    },
+    {
+      "metric": "average_campaign_value",
+      "definition": "Average revenue per booking",
+      "source_tables": ["bookings"],
+      "source_domains": ["booking"],
+      "formula": "total_revenue / booking_count WHERE booking_count > 0",
+      "filters": ["date_from", "date_to"],
+      "date_semantics": "Based on booking.created_at timestamp",
+      "currency_semantics": "INR",
+      "status_semantics": "Based on bookings where status != 'cancelled'",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\RevenueAnalyticsService::overview()",
+        "App\\Services\\ClientAnalyticsService::kpis()"
+      ],
+      "consistency_notes": "Used consistently across services"
+    },
+    {
+      "metric": "booking_count",
+      "definition": "Total number of bookings (excluding cancelled) during the specified period",
+      "source_tables": ["bookings"],
+      "source_domains": ["booking"],
+      "formula": "COUNT(*) WHERE status != 'cancelled' AND created_at BETWEEN date_from AND date_to",
+      "filters": ["date_from", "date_to", "city_id", "screen_id", "pricing_plan_id", "status"],
+      "date_semantics": "Based on booking.created_at timestamp",
+      "currency_semantics": "N/A (count)",
+      "status_semantics": "Excludes cancelled bookings by default, but can be overridden by status filter",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\RevenueAnalyticsService::overview()",
+        "App\\Services\\BookingAnalyticsService::overview()",
+        "App\\Services\\ClientAnalyticsService::kpis()"
+      ],
+      "consistency_notes": "Definition varies slightly - some services exclude cancelled by default, others allow status filtering"
+    },
+    {
+      "metric": "occupancy_rate",
+      "definition": "Percentage of available screen slots that were occupied by active bookings",
+      "source_tables": ["screens", "bookings", "booking_screens"],
+      "source_domains": ["inventory", "booking"],
+      "formula": "(total_active_bookings / (total_screens * max_ads_per_day)) * 100",
+      "filters": ["date_from", "date_to"],
+      "date_semantics": "Based on booking.start_time and booking.end_time overlapping with date range",
+      "currency_semantics": "N/A (percentage)",
+      "status_semantics": "Uses active statuses: pending_approval, approved, scheduled, running, media_review_pending",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\ScreenAnalyticsService::overview()",
+        "App\\Services\\ScreenAnalyticsService::utilizationDistribution()",
+        "App\\Http\\Controllers\\DashBoardController::index()"
+      ],
+      "consistency_notes": "Used consistently across screen analytics and dashboard"
+    },
+    {
+      "metric": "redemption_rate",
+      "definition": "Percentage of total reward points issued that have been redeemed",
+      "source_tables": ["reward_accounts"],
+      "source_domains": ["loyalty"],
+      "formula": "(total_redeemed / total_issued) * 100 WHERE total_issued > 0",
+      "filters": ["date_from", "date_to"] for period metrics,
+      "date_semantics": "Lifetime totals not date-filtered; period metrics use transaction.created_at",
+      "currency_semantics": "N/A (ratio)",
+      "status_semantics": "Based on reward account balances and transaction types",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\ClientAnalyticsService::kpis()",
+        "App\\Services\\ReportService::getRewardReport()"
+      ],
+      "consistency_notes": "Used consistently in client analytics and rewards reporting"
+    },
+    {
+      "metric": "provider_revenue",
+      "definition": "Total revenue share due to screen providers",
+      "source_tables": ["booking_screens"],
+      "source_domains": ["financial", "inventory"],
+      "formula": "SUM(provider_share) WHERE booking.status IN ('approved', 'scheduled', 'running', 'completed') AND booking_screens.owner_type = 'screen_provider'",
+      "filters": ["date_from", "date_to", "screen_provider_id", "screen_id", "country_id", "city_id", "business_type", "settlement_status"],
+      "date_semantics": "Based on booking.end_time timestamp",
+      "currency_semantics": "INR",
+      "status_semantics": "Based on booking status (approved, scheduled, running, completed)",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\ReportService::getScreenProviderReport()",
+        "App\\Http\\Controllers\\DashBoardController::index()"
+      ],
+      "consistency_notes": "Used in screen provider reporting and dashboard"
+    },
+    {
+      "metric": "platform_revenue",
+      "definition": "Total revenue share retained by Illuvision (platform)",
+      "source_tables": ["booking_screens"],
+      "source_domains": ["financial", "inventory"],
+      "formula": "SUM(platform_share) WHERE booking.status IN ('approved', 'scheduled', 'running', 'completed') AND booking_screens.owner_type = 'screen_provider'",
+      "filters": ["date_from", "date_to", "screen_provider_id", "screen_id", "country_id", "city_id", "business_type", "settlement_status"],
+      "date_semantics": "Based on booking.end_time timestamp",
+      "currency_semantics": "INR",
+      "status_semantics": "Based on booking status (approved, scheduled, running, completed)",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\ReportService::getScreenProviderReport()",
+        "App\\Http\\Controllers\\DashBoardController::index()"
+      ],
+      "consistency_notes": "Used in screen provider reporting and dashboard"
+    },
+    {
+      "metric": "gross_revenue",
+      "definition": "Total revenue before platform/provider split",
+      "source_tables": ["booking_screens"],
+      "source_domains": ["financial", "inventory"],
+      "formula": "SUM(gross_revenue) WHERE booking.status IN ('approved', 'scheduled', 'running', 'completed') AND booking_screens.owner_type = 'screen_provider'",
+      "filters": ["date_from", "date_to", "screen_provider_id", "screen_id", "country_id", "city_id", "business_type", "settlement_status"],
+      "date_semantics": "Based on booking.end_time timestamp",
+      "currency_semantics": "INR",
+      "status_semantics": "Based on booking status (approved, scheduled, running, completed)",
+      "historical_snapshot_vs_recalculation": "Calculated on-demand from live data",
+      "calculation_locations": [
+        "App\\Services\\ReportService::getScreenProviderReport()"
+      ],
+      "consistency_notes": "Only used in screen provider reporting"
+    }
+  ],
+  "summary": {
+    "total_metrics_documentated": 12,
+    "financial_metrics": 8,
+    "operational_metrics": 4,
+    "inconsistencies_found": [
+      "booking_count definition varies between services (some exclude cancelled by default, others allow filtering)",
+      "date semantics vary: some use created_at, others use start_time/end_time or paid_at",
+      "status semantics vary: different services consider different sets of statuses as 'active'"
+    ],
+    "recommendations": [
+      "Standardize booking_count definition across all services",
+      "Document and potentially standardize date semantics for different types of metrics",
+      "Create a canonical metrics service that pre-calculates and stores key metrics for consistency"
+    ]
+  }
+}

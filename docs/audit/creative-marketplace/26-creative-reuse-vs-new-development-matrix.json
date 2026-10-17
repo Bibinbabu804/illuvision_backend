@@ -1,0 +1,910 @@
+{
+  "artifact": "26-creative-reuse-vs-new-development-matrix",
+  "generated": "2026-09-26",
+  "classification": "CURRENT IMPLEMENTATION columns are CURRENT_FACT, verified against app/, database/, config/ and routes/ on 2026-09-26. REUSE TYPE, TARGET COMPONENT, NEW DEVELOPMENT REQUIRED and RISK are RECOMMENDATION. Rows whose outcome depends on an undecided business rule are marked OPEN_DECISION and name the decision.",
+  "status": "PROPOSAL ONLY. No reuse decision here has been implemented. No shared component was modified.",
+  "purpose": "The consolidated, requirement-level answer to the single question a Creative implementer will ask most often: for this thing I need, what already exists, am I allowed to use it, and what must I build? Artifact 05 answers this per shared capability; artifact 10 answers it per existing table. This artifact answers it per Creative requirement, and it is the matrix referenced by the final report.",
+  "how_to_read": {
+    "DIRECT_REUSE": "Call it as-is. No Creative code, no wrapper, no change.",
+    "REUSE_THROUGH_CONTRACT": "Depends on an existing interface or table, not on its implementation. Creative code depends on the contract; the adapter is not Creative's to modify.",
+    "EXTEND": "The existing component gains Creative rows or Creative behaviour without changing what it already does for advertising.",
+    "WRAP": "A thin Creative-facing facade over an existing service, so Creative does not inherit that service's unrelated surface. Wrap and delegate - never re-implement (ARCHITECTURE_RULES Rule 7).",
+    "EXTRACT": "A genuine shared capability is currently embedded in a service that also does other things. Extracting it is a separate, explicitly authorised refactor with its own regression net - not something a Creative task does in passing.",
+    "NEW_IMPLEMENTATION": "Creative builds it. There is nothing suitable, and building something new is correct.",
+    "DO_NOT_REUSE": "The existing component looks superficially relevant and reusing it would be a defect. Named explicitly so nobody 'helpfully' reaches for it."
+  },
+  "reuse_type_summary": {
+    "classification": "RECOMMENDATION derived mechanically from the reuse_type column of the matrix below (counted, not estimated)",
+    "rows": 40,
+    "DIRECT_REUSE": 4,
+    "REUSE_THROUGH_CONTRACT": 13,
+    "EXTEND": 2,
+    "WRAP": 0,
+    "EXTRACT": 0,
+    "NEW_IMPLEMENTATION": 18,
+    "DO_NOT_REUSE": 2,
+    "OPEN_DECISION": 1,
+    "note": "WRAP and EXTRACT are defined in how_to_read but no requirement needs them: nothing in the current system is both Creative-relevant and awkwardly packaged, so no facade and no extraction refactor is justified. DO_NOT_REUSE counts only the requirement rows whose own reuse_type is DO_NOT_REUSE (RM-14, RM-37). The much larger set of components that must not be reached for is listed separately in do_not_reuse_register, which names 13 components across the 40 rows. An earlier version of this summary block carried estimated counts that did not match these rows; it has been replaced by this counted version.",
+    "headline": "Of 40 Creative requirements, 18 are new implementation, 13 are consumed through an existing contract or store, 4 are direct reuse, 2 extend an existing component, 2 are do-not-reuse, and 1 is blocked on an open decision. The dominant finding is that Creative reuses identity, the authorization vocabulary, the payment gateway CONTRACT, storage disks, image processing, FX, notifications, the audit table and the configuration store - and essentially nothing else of substance. Every one of those reuses is a contract, a store or a convention, never an existing aggregate."
+  },
+  "matrix": [
+    {
+      "id": "RM-01",
+      "creative_requirement": "A creator has a login",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "users + personal_access_tokens (Sanctum) + password_reset_tokens; single 'web' session guard; Google auth adapter exists",
+        "evidence": "config/auth.php, config/sanctum.php, app/Http/Controllers/Auth/"
+      },
+      "reuse_type": "DIRECT_REUSE",
+      "target_component": "Platform authentication. No Creative code.",
+      "new_development_required": "None.",
+      "dependencies": [
+        "users",
+        "personal_access_tokens"
+      ],
+      "risk": {
+        "level": "LOW",
+        "statement": "Risk is only the temptation to build a second identity. That is explicitly forbidden."
+      }
+    },
+    {
+      "id": "RM-02",
+      "creative_requirement": "A creator is a distinct commercial party (profile, approval state, portfolio owner)",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "No creator entity. Closest precedents: screen_providers (profile + status + approval actors + revenue split) and partners (organisation counterparty)"
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "App/Domain/Creative/Creator/Creator aggregate + creators table",
+      "new_development_required": "The aggregate, its status machine, the registration and approval handlers, and the table.",
+      "dependencies": [
+        "users (FK only)"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Modelling a creator as a partner or as a screen provider corrupts partner commission, referral attribution and provider settlement respectively. See artifact 21 ownership conflicts."
+      }
+    },
+    {
+      "id": "RM-03",
+      "creative_requirement": "A user may be both an advertiser and a creator",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "users.role is a single free-text VARCHAR with no FK to roles. It cannot express two roles."
+      },
+      "reuse_type": "OPEN_DECISION",
+      "target_component": "Undetermined",
+      "new_development_required": "Undetermined until decided.",
+      "dependencies": [
+        "users",
+        "roles"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "OD-DB-08. This is the only decision that blocks Phase C1. Guessing it means either a data migration later or a permanently misleading role value."
+      }
+    },
+    {
+      "id": "RM-04",
+      "creative_requirement": "Role and permission enforcement for creative routes",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "roles + role_permissions (~70 permissions seeded), App/Support/Authorization/RolePermissionChecker (single owner, slug-based, 3600s cache), App/Http/Middleware/PermissionMiddleware (401/403 + the super-admin bypass that exists only here)"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "RolePermissionChecker via PermissionMiddleware; creative.* permission rows",
+      "new_development_required": "One roles row (creator) and the creative.* role_permissions grants. No resolver code. CRITICAL COUPLING, verified 2026-09-26: RolePermissionChecker::permissionsForRole() resolves a SINGLE slug from the users.role column, so one user holds exactly one role. Setting users.role='creator' to grant creative.* permissions REMOVES every other permission that user had. For a user who is both advertiser and creator, a 'creator' role row alone is therefore insufficient and actively destructive. OD-DB-08 / OD-AUTH-01 is BLOCKING and must be answered before any role row is added. Options: (a) also grant creative.* to the existing buyer role, (b) derive creator capability from the existence of a creators row and keep creator permissions out of role_permissions, or (c) a role-join model, which is a platform authorization change requiring its own authorisation. Do not choose silently.",
+      "dependencies": [
+        "roles",
+        "role_permissions",
+        "PermissionMiddleware"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Code already writes/queries role values that are not seeded (partner, user, client), which silently resolve to an EMPTY permission set via the checker. A Creative role added in code but not seeded fails the same way, and fails silently. The Sec03PermissionVocabularyTest pattern is the guard."
+      }
+    },
+    {
+      "id": "RM-05",
+      "creative_requirement": "Resource-level authorization ('may this actor touch this project / file / earning')",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "Zero policies, zero gates. Authorization is middleware plus ad-hoc ownership checks inside controllers."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "app/Policies/Creative/* invoked from Creative controllers, with RolePermissionChecker still owning the permission algorithm",
+      "new_development_required": "6 policies (project, proposal, brief, file, earning, review) and the ownership resolution they depend on.",
+      "dependencies": [
+        "RolePermissionChecker (unchanged)"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "ARCHITECTURE_RULES Rule 12: authorization stays enforced at the route boundary and the algorithm keeps exactly one owner. Policies are the missing resource-level answer, not a replacement. Migrating existing routes to policies inside a Creative task would change authorization behaviour for 385 routes and is forbidden."
+      }
+    },
+    {
+      "id": "RM-06",
+      "creative_requirement": "A creator publishes a priced service in a catalogue with categories",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "screen_categories (ad taxonomy), categories (blog taxonomy), products (marketing catalogue). None is a purchasable service offering with a rate."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "creative_service_categories, creator_services, creative_service_category_map, creative_portfolio_items",
+      "new_development_required": "4 tables, the CreatorService aggregate, a RateCard value object, publish/unpublish handlers.",
+      "dependencies": [
+        "creators",
+        "creative_files (portfolio media)"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Reusing an existing taxonomy table corrupts advertising filtering and marketing navigation. The unique-composite pivot pattern from blog_tag_relations is the only thing worth copying."
+      }
+    },
+    {
+      "id": "RM-07",
+      "creative_requirement": "A client publishes a brief with attachments",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "contact_enquiries / product_enquiries capture leads, not briefs. No brief concept exists."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "creative_briefs + creative_brief_attachments + Brief aggregate + CreateBriefHandler",
+      "new_development_required": "2 tables, the aggregate, the handler, the submit/close transitions.",
+      "dependencies": [
+        "creator_services",
+        "creative_files",
+        "users"
+      ],
+      "risk": {
+        "level": "LOW",
+        "statement": "Genuinely greenfield. The risk is confidentiality: brief visibility must be explicit, and attachments must inherit it."
+      }
+    },
+    {
+      "id": "RM-08",
+      "creative_requirement": "A creator submits a proposal with a price",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "No proposal concept. Booking creation carries a price, but it is derived by the advertising pricing engine."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "creative_proposals + Proposal aggregate + a pure CreativeQuoteCalculator",
+      "new_development_required": "The table, the aggregate, the deterministic quote calculator, submit/withdraw handlers.",
+      "dependencies": [
+        "creative_briefs",
+        "creators"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "Two failure paths. (a) Reusing PricingService / CampaignPricingEngine: media-time pricing is not creative pricing. (b) Accepting a client-supplied amount: the top Creative security risk in the register."
+      }
+    },
+    {
+      "id": "RM-09",
+      "creative_requirement": "Commercial terms are frozen at acceptance and never recalculated",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "booking_pricing_breakdowns (immutable per-screen-per-day snapshot) and booking_screens (gross, both shares AND both percentages stored together)"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The snapshot DISCIPLINE only, re-implemented in creative_projects / ProposalQuote / creator_earnings",
+      "new_development_required": "The AgreedTerms value object and the storage of amount + percentages + FX rate together.",
+      "dependencies": [],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Copying a discipline is correct; copying booking_screens is impossible (FKs are booking_id and screen_id) and copying the advertising pricing engine would be wrong. The value is the rule 'persist the resolved split, not only the totals'."
+      }
+    },
+    {
+      "id": "RM-10",
+      "creative_requirement": "A client funds a creative project",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "App/Domain/Payment/Contracts/PaymentGatewayInterface (createOrder, verifySignature, fetchPayment, refund) + App/Infrastructure/Payments/RazorpayPaymentGateway + App/Services/PaymentService (221 LOC). The payment RECORD is advertising-bound: payments.booking_id is NOT NULL with CASCADE, and confirmation is coupled to a booking status transition."
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "PaymentGatewayInterface for the gateway call; NEW creative_fundings / creative_funding_logs for the record",
+      "new_development_required": "3 tables, the funding handler, the reconciliation rule, the append-only log discipline.",
+      "dependencies": [
+        "PaymentGatewayInterface (unchanged)",
+        "currency_rates (if multi-currency)"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "The most tempting and most dangerous reuse in the audit. Relaxing payments.booking_id would alter an existing financial table and every booking payment query. The rule is: reuse the CONTRACT, never the RECORD. There is also no payment webhook in this platform - Creative funding confirmed only by a client-initiated call is weaker, and whether to adopt a webhook is an OPEN_DECISION."
+      }
+    },
+    {
+      "id": "RM-11",
+      "creative_requirement": "Refund a cancelled creative project",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "refunds table + App/Services/RefundService (164 LOC, 2 DB::transaction), advertising-bound"
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "creative_refunds mirroring the refunds shape, with Creative-specific eligibility",
+      "new_development_required": "The table and the eligibility rules.",
+      "dependencies": [
+        "creative_fundings"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Creative refund eligibility (cancellation windows, who pays, partial refunds) is an OPEN_DECISION and must not be inferred from advertising behaviour. Financial history is corrected with compensating records, never rewritten."
+      }
+    },
+    {
+      "id": "RM-12",
+      "creative_requirement": "A creator submits work for client acceptance",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "booking_media holds client-uploaded campaign files with an admin moderation review_status. There is no creator-to-client delivery concept."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "creative_deliveries + creative_delivered_files + Delivery aggregate + submit/accept/reject handlers",
+      "new_development_required": "2 tables, the aggregate, 3 handlers.",
+      "dependencies": [
+        "creative_projects",
+        "creative_files"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "booking_media is a PATTERN, never a target: it has no owner column, no visibility column and no access check. Copying its file columns without its missing controls reproduces a file-access gap."
+      }
+    },
+    {
+      "id": "RM-13",
+      "creative_requirement": "A client requests changes and the creator responds, as an auditable round",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "booking_activities / screen_provider_activities are per-entity timelines; activity_logs is the generic audit log"
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "creative_revisions + Revision aggregate + RevisionLimitPolicy",
+      "new_development_required": "The table, the aggregate, the limit policy, the handler.",
+      "dependencies": [
+        "creative_deliveries",
+        "creative_files"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "The revision LIMIT is an OPEN_DECISION and the most likely place for an unrequested business rule to appear. It is a domain rule and must be tested without a database, and proven under concurrency."
+      }
+    },
+    {
+      "id": "RM-14",
+      "creative_requirement": "A client reviews the completed engagement",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "testimonials is PUBLIC MARKETING content with a rating column, no author binding and no soft delete. booking_media.review_status is admin moderation of advertisement files."
+      },
+      "reuse_type": "DO_NOT_REUSE",
+      "target_component": "creative_reviews + CreativeReview aggregate (immutable once written)",
+      "new_development_required": "The table, the aggregate, the handler, and the eligibility rules.",
+      "dependencies": [
+        "creative_projects",
+        "users",
+        "creators"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "Reusing testimonials would place commercial review data on a public, editable, unowned, un-soft-deleted marketing surface. 'Review' in this repository currently means advertisement moderation, which is a different thing entirely."
+      }
+    },
+    {
+      "id": "RM-15",
+      "creative_requirement": "A creator sees what they have earned",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "partner_commissions (lifecycle pending/approved/paid/cancel, whose pessimistic lock lives in EloquentPartnerCommissionRepository::findOrFailForUpdate() (called by CommissionService)); reward_transactions (append-only per-account ledger with lifetime counters)"
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "creator_earnings + Earning aggregate + accrual/approval handlers",
+      "new_development_required": "The table, the aggregate, the accrual rule, the handlers.",
+      "dependencies": [
+        "creative_projects"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "The accrual trigger is an OPEN_DECISION. The reusable assets are the LIFECYCLE and the LOCKING from partner_commissions, and the SHAPE from reward_transactions - with decimal(12,2) and a currency column, never integer points. Copying the columns without the lock discipline would allow double payment."
+      }
+    },
+    {
+      "id": "RM-16",
+      "creative_requirement": "A creator is paid",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "screen_provider_settlements (period + reference + generated/approved/paid + three actor FKs, NO currency column); App/Services/SettlementService (352 LOC, provider- and period-bound)"
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "creator_payouts + creator_payout_items + PayoutBatch aggregate + ProcessCreatorPayoutHandler",
+      "new_development_required": "2 tables, the aggregate, the handler, and possibly one job.",
+      "dependencies": [
+        "creator_earnings"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "Payout cadence, minimum, approval chain and provider are OPEN_DECISIONS, and no payout-processor adapter exists in this repository. The absence of a currency column on the existing settlement table means copying its shape would silently assume single currency. Reusing SettlementService wholesale would import provider-specific commercial logic."
+      }
+    },
+    {
+      "id": "RM-17",
+      "creative_requirement": "A commission rate applies to a creative engagement",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "screens / screen_providers carry illuvision_percentage decimal(5,2) default 10.00 and screen_provider_percentage default 90.00. partner_commissions carries affiliate commission rows. settings holds key/value configuration."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "A versioned Creative commission table IF a configurable rate is approved; otherwise a constant in the Creative domain with the rate recorded as OPEN_DECISION",
+      "new_development_required": "The rate model and the snapshot of the rate that produced each amount.",
+      "dependencies": [],
+      "risk": {
+        "level": "HIGH",
+        "statement": "The 10.00/90.00 defaults are provider commercial terms and must NOT be inherited. The rate must NOT live in settings, because an editable rate makes historical earnings irreproducible. No percentage may be invented in this audit."
+      }
+    },
+    {
+      "id": "RM-18",
+      "creative_requirement": "Store a file (portfolio image, brief attachment, project file, revision file, delivery file, source file)",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "config/filesystems.php disks (local, public with visibility=public, s3); App/Services/MediaService; App/Helpers/MediaHelper (compression via ImageProcessingContractInterface); App/Http/Controllers/FileController (upload/videoupload with NO FormRequest validation)"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The existing disks and the existing image-processing contract",
+      "new_development_required": "The file RECORD (creative_files) with owner + visibility, and the upload validation FileController lacks.",
+      "dependencies": [],
+      "risk": {
+        "level": "HIGH",
+        "statement": "A second storage architecture is forbidden, but the platform's path of least resistance is the public disk. Private Creative files require a new access mechanism, because no signed-URL mechanism exists anywhere in this repository."
+      }
+    },
+    {
+      "id": "RM-19",
+      "creative_requirement": "Serve a private file to an authorised actor only",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "No signed URLs, no visibility column, no file-access policy, no central file table. Files are addressed by stored path."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "CreativeFileGrantor + CreativeFilePolicy + an authorize-then-stream read path",
+      "new_development_required": "The whole access mechanism.",
+      "dependencies": [
+        "creative_files",
+        "app/Policies/Creative/CreativeFilePolicy"
+      ],
+      "risk": {
+        "level": "P0 CLASS",
+        "statement": "This is the highest-likelihood Creative security defect. A private file served from the public disk is an insecure direct object reference with no revocation and no audit."
+      }
+    },
+    {
+      "id": "RM-20",
+      "creative_requirement": "Notify a party about a Creative event",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "33 domain events + NotificationEventSubscriber (the only consumer; there are ZERO listener classes), App/Services/NotificationService (243 LOC), 28 Mailables all implementing ShouldQueue, notification_logs with a recipient_type discriminator whose current roles EXCLUDE creator"
+      },
+      "reuse_type": "EXTEND",
+      "target_component": "The existing dispatch path, new Creative Mailables, notification_logs recipient_type extended with 'creator'",
+      "new_development_required": "~13 domain events, their Mailables, and the Creative recipient mapping.",
+      "dependencies": [
+        "NotificationService",
+        "app/Mail",
+        "notification_logs"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "A parallel notification log or dispatch path would fragment history. Events must be dispatched after commit. Converting EXISTING synchronous notification behaviour to queued behaviour is a platform change requiring its own authorisation and is forbidden in a Creative task."
+      }
+    },
+    {
+      "id": "RM-21",
+      "creative_requirement": "Record who did what, for audit",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "activity_logs (generic admin audit log with actor/action/subject/metadata) plus per-entity timelines booking_activities and screen_provider_activities"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "activity_logs, with a creative.* action namespace",
+      "new_development_required": "Confirm activity_logs can express a Creative subject. If not, ONE Creative-scoped audit table - and no per-entity Creative timeline table ever.",
+      "dependencies": [],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "OPEN_DECISION. Creating creative_activity_logs or a Creative timeline table duplicates existing infrastructure; AGENTS.md section 19 forbids opportunistic debt resolution in either direction."
+      }
+    },
+    {
+      "id": "RM-22",
+      "creative_requirement": "Configure Creative tunables",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "settings table (grouped key/value) + SettingsService (333 LOC) + App/Support/Configs/*"
+      },
+      "reuse_type": "EXTEND",
+      "target_component": "A creative.* settings group - rows only",
+      "new_development_required": "The setting rows and their meaning.",
+      "dependencies": [],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "A creative_settings table is duplicate infrastructure. But any value that determines a MONETARY outcome must not live here, because settings are editable retroactively and would make historical earnings irreproducible."
+      }
+    },
+    {
+      "id": "RM-23",
+      "creative_requirement": "Express a value in a currency other than INR",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "currency_rates + Campaign/ExchangeRateService (317 LOC, uses the exchange-rate client adapter) + Campaign/CurrencyService + the scheduled currency:sync-rates command"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The existing FX infrastructure, IF Creative is ever multi-currency",
+      "new_development_required": "Currency columns on the Creative money tables and a stored FX rate per amount.",
+      "dependencies": [
+        "currency_rates"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "OPEN_DECISION OD-DB-07. A second FX implementation is forbidden. Note that the existing settlement table has no currency column, so there is no precedent to copy and a copied shape would silently assume single currency."
+      }
+    },
+    {
+      "id": "RM-24",
+      "creative_requirement": "Refer to a country, state or city",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "countries / states / cities + Campaign/CountryDetectionService"
+      },
+      "reuse_type": "DIRECT_REUSE",
+      "target_component": "The shared reference tables",
+      "new_development_required": "None.",
+      "dependencies": [],
+      "risk": {
+        "level": "NONE",
+        "statement": "Conditional only on whether Creative captures a creator address or KYC jurisdiction, which is an OPEN_DECISION."
+      }
+    },
+    {
+      "id": "RM-25",
+      "creative_requirement": "Report on Creative activity and earnings",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "Flat read services (ReportService 106 LOC, ClientAnalyticsService, ScreenAnalyticsService, BookingAnalyticsService, PaymentAnalyticsService, RevenueAnalyticsService) + DashBoardController. There is no query layer and no repository-backed read model."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "A Creative reporting query following the existing flat-service convention, reading canonical Creative records",
+      "new_development_required": "The query objects and any export adapter (maatwebsite/excel and phpoffice/phpword are already dependencies).",
+      "dependencies": [
+        "The Creative tables"
+      ],
+      "risk": {
+        "level": "HIGH",
+        "statement": "The defining sin of the reporting layer is RECALCULATING a quote, a split or an earning. Creative reports must consume the stored snapshot, and must never mutate state. Reusing the advertising analytics services would silently report advertising economics."
+      }
+    },
+    {
+      "id": "RM-26",
+      "creative_requirement": "Run long or retryable work outside the request (payout batch, funding reconciliation)",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "app/Support/Jobs and app/Jobs DO NOT EXIST and there are zero job classes. Queued work today happens through ShouldQueue Mailables. jobs / job_batches / failed_jobs tables exist."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "app/Support/Jobs/Creative/ - creation of the parent directory is itself a decision",
+      "new_development_required": "The directory decision, the job class, and the thin-job discipline (a job invokes a handler; it contains no business workflow).",
+      "dependencies": [
+        "The existing queue connection"
+      ],
+      "risk": {
+        "level": "LOW",
+        "statement": "A second queue system is forbidden. OPEN_DECISION: jobs or queued Mailables. Recommendation: jobs, because a payout batch is not an email."
+      }
+    },
+    {
+      "id": "RM-27",
+      "creative_requirement": "Prevent duplicate money operations and race conditions",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "No idempotency keys, no idempotency table, no request de-duplication, no optimistic locking. Pessimistic locking exists at exactly THREE call sites in app/: app/Services/InventoryService.php:48, app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php:31 (called by CommissionService) and app/Console/Commands/ExpirePendingBookings.php:56. CommissionService.php:19 mentions lockForUpdate only in a docblock."
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The pessimistic-locking discipline and unique-constraint-first idempotency",
+      "new_development_required": "The unique constraints, the lock placement in each Creative handler, and the concurrency tests that prove them.",
+      "dependencies": [
+        "DB::transaction",
+        "lockForUpdate",
+        "unique constraints"
+      ],
+      "risk": {
+        "level": "CRITICAL",
+        "statement": "The platform provides no duplicate-request protection, so Creative must supply its own. A double-paid earning or a duplicate accepted proposal is the worst outcome in this initiative. Constraints, not application checks."
+      }
+    },
+    {
+      "id": "RM-28",
+      "creative_requirement": "Public identifiers that are not guessable and not enumerable",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "Routes are overwhelmingly keyed by integer id. qr_codes uses a generated slug with a public short URL. There is no ULID/UUID convention for public identifiers."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "A public_id on every Creative table plus the Creative route parameter",
+      "new_development_required": "The identifier strategy, generation, and the index that supports lookup.",
+      "dependencies": [],
+      "risk": {
+        "level": "HIGH",
+        "statement": "OPEN_DECISION OD-DB-01. Integer ids in Creative routes would make every object enumerable and turn each endpoint into an IDOR candidate. This must be decided before the first Creative migration that needs a public_id."
+      }
+    },
+    {
+      "id": "RM-29",
+      "creative_requirement": "Keep Creative layer boundaries honest over time",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "ArchitectureRuleTest enforces layer rules via the PHP token stream and pins known violations exactly (7 Domain->Services imports). 6 Domain->Models files (9 edges) are tracked but NOT yet enforced. 11 service-locator call sites are tracked."
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The existing token-stream enforcement technique, extended with Creative cases",
+      "new_development_required": "CreativeBoundaryTest in Phase C1.",
+      "dependencies": [
+        "tests/Unit/Architecture/ArchitectureRuleTest.php"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "The existing tracked-but-unenforced violations are exactly the class of debt that a new feature copies if it is not fenced in from the first commit."
+      }
+    },
+    {
+      "id": "RM-30",
+      "creative_requirement": "Represent money safely",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "decimal(12,2) columns; App/Domain/Payment/Support/Money is a FLOAT-BASED conversion helper, not a money value object. AGENTS.md section 10 forbids introducing floating-point arithmetic for monetary values."
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The existing decimal column convention and rounding convention, followed exactly",
+      "new_development_required": "A Creative money value object ONLY if decided; extending the float-based helper is not an option.",
+      "dependencies": [],
+      "risk": {
+        "level": "HIGH",
+        "statement": "Money must be server-derived, decimal(12,2), with an explicit currency, and never a float in a layer-crossing signature. OPEN_DECISION: whether Creative introduces a Money value object or the shared one is upgraded - and that decision does not belong to a Creative feature."
+      }
+    },
+    {
+      "id": "RM-31",
+      "creative_requirement": "Protect a Creative engagement from concurrent acceptance",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "The protected booking shape exists in the advertising domain: check -> DB::transaction -> lockForUpdate -> re-check -> mutate -> commit, with real concurrency tests in BookingConcurrencyTest and GoldenConcurrencyVerificationTest"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The SHAPE of the protected transaction, proven by the existing concurrency test techniques",
+      "new_development_required": "The Creative critical section, the lock, the re-check, and the concurrency test.",
+      "dependencies": [
+        "DB::transaction",
+        "lockForUpdate"
+      ],
+      "risk": {
+        "level": "CRITICAL",
+        "statement": "ARCHITECTURE_RULES Rule 4 and AGENTS.md section 11: never move a lock out of a transaction, never reorder lock acquisition casually, never hold a row lock across a network call."
+      }
+    },
+    {
+      "id": "RM-32",
+      "creative_requirement": "Model a lifecycle with states",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "Statuses exist as DB ENUMs, PHP enums and VARCHARs across bookings, payments, booking_media, partner applications and provider enquiries. There is NO generic state-machine abstraction, no transition guard base class, and no state-machine package."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "Plain PHP enums + transition guards + policies, Creative-local",
+      "new_development_required": "9 enums, 9 transition guards, and the transition test matrix.",
+      "dependencies": [],
+      "risk": {
+        "level": "LOW",
+        "statement": "Do not introduce a state-machine framework or a new package for this. EXTRACT was considered and rejected: there is no shared abstraction to extract, only repeated idioms. Copying the idiom is correct; building a framework is not."
+      }
+    },
+    {
+      "id": "RM-33",
+      "creative_requirement": "Public catalogue browsing for clients",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "Mixed public and authenticated routes; many public read endpoints exist (marketing content, availability, pricing)"
+      },
+      "reuse_type": "DIRECT_REUSE",
+      "target_component": "The existing public-route convention and response envelope",
+      "new_development_required": "The Creative catalogue read endpoints only.",
+      "dependencies": [
+        "creator_services",
+        "creative_portfolio_items"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "The public surface must be chosen deliberately: a public catalogue is fine, a public brief or project is a data leak."
+      }
+    },
+    {
+      "id": "RM-34",
+      "creative_requirement": "Rate limiting on sensitive Creative endpoints",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "There is a BudgetRecommendationRateLimitTest, so rate limiting exists somewhere; the exact coverage must be verified in artifact 14 before Creative relies on it"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The existing throttle mechanism, applied to Creative routes additively",
+      "new_development_required": "Throttle declarations on Creative write endpoints and on any public surface.",
+      "dependencies": [
+        "bootstrap/app.php route configuration"
+      ],
+      "risk": {
+        "level": "LOW",
+        "statement": "Adding throttle to Creative routes only. Changing global throttle behaviour is a platform change."
+      }
+    },
+    {
+      "id": "RM-35",
+      "creative_requirement": "Search or filter the creative catalogue",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "There is NO search layer, index or service. Listing endpoints use simple where/orderBy/paginate."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "Indexed filtering and pagination on Creative tables only",
+      "new_development_required": "Indexes and query objects.",
+      "dependencies": [],
+      "risk": {
+        "level": "LOW",
+        "statement": "Out of scope for the first Creative release. Introducing a search engine would be scope creep with no requirement behind it."
+      }
+    },
+    {
+      "id": "RM-36",
+      "creative_requirement": "Reject a Creative payment or funding confirmation that arrives twice (webhook)",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "There is NO webhook endpoint anywhere in this platform. Verification is client-initiated at POST /api/payments/razorpay/verify. There is no signature-validation helper, no replay protection, and no webhook event store."
+      },
+      "reuse_type": "NEW_IMPLEMENTATION",
+      "target_component": "A webhook handler with signature validation, replay rejection, an event store and idempotent processing - IF Creative adopts webhooks",
+      "new_development_required": "The entire webhook capability, including its tests, before the route exists.",
+      "dependencies": [
+        "PaymentGatewayInterface",
+        "creative_fundings"
+      ],
+      "risk": {
+        "level": "P0 CLASS",
+        "statement": "OPEN_DECISION. A webhook endpoint without signature validation, replay protection and idempotency tests is worse than no webhook. Note also Rule 4: never hold a row lock across the verification call."
+      }
+    },
+    {
+      "id": "RM-37",
+      "creative_requirement": "Attach a creative deliverable to an advertising campaign",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "bookings / booking_media exist; nothing links a creative object to a campaign"
+      },
+      "reuse_type": "DO_NOT_REUSE",
+      "target_component": "None in the initial release. creative_projects deliberately has NO FK to bookings.",
+      "new_development_required": "Nothing now. If ever required, it is a separate cross-domain feature with its own decision record, contract and tests.",
+      "dependencies": [],
+      "risk": {
+        "level": "CRITICAL",
+        "statement": "A nullable FK from a Creative table into bookings would couple Creative to advertising pricing, availability, settlement and 20+ routes. This is the highest-consequence misuse available in the schema (artifact 10, rank 1)."
+      }
+    },
+    {
+      "id": "RM-38",
+      "creative_requirement": "A shareable public link to a portfolio or a brief",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "qr_codes generates a slug and a public short URL"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The slug pattern, if a share-link feature is ever required",
+      "new_development_required": "The share-link record and its revocation behaviour.",
+      "dependencies": [
+        "The public identifier strategy (OD-DB-01)"
+      ],
+      "risk": {
+        "level": "LOW",
+        "statement": "A share link is a public surface: it needs explicit revocation, and it must never expose a private file."
+      }
+    },
+    {
+      "id": "RM-39",
+      "creative_requirement": "Onboard a creator by invitation (as providers are onboarded)",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "password_setup_tokens + ScreenProviderService::inviteToPortal, accessed with raw DB::table() and no model"
+      },
+      "reuse_type": "REUSE_THROUGH_CONTRACT",
+      "target_component": "The existing invitation-token table, used exactly as the provider flow uses it",
+      "new_development_required": "Only if Creative uses an invite-first flow; otherwise nothing.",
+      "dependencies": [
+        "password_setup_tokens",
+        "users"
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Reuse as-is rather than extending: the table has no model, no timestamps and no explicit expiry semantics. Extending its responsibilities is riskier than calling it."
+      }
+    },
+    {
+      "id": "RM-40",
+      "creative_requirement": "Cache or rate-limit Creative reads",
+      "current_implementation": {
+        "classification": "CURRENT_FACT",
+        "detail": "cache / cache_locks tables and the array cache driver in tests; RolePermissionChecker already caches for 3600s"
+      },
+      "reuse_type": "DIRECT_REUSE",
+      "target_component": "The existing cache",
+      "new_development_required": "None.",
+      "dependencies": [],
+      "risk": {
+        "level": "MEDIUM",
+        "statement": "Never cache an authorization decision for a private file or a private brief without keying it on the actor. Caching a private-file read path is a data leak."
+      }
+    }
+  ],
+  "duplicate_infrastructure_watchlist": {
+    "classification": "RECOMMENDATION",
+    "statement": "Each of these already exists. Creating a second instance is a defect. This is the list to review in the Creative pull request.",
+    "items": [
+      "a creative_users / creator_accounts / creator_auth table (users exists)",
+      "a second permission resolver (RolePermissionChecker exists)",
+      "a second payment gateway interface or Razorpay client (PaymentGatewayInterface exists)",
+      "a creative currency or FX table or a second rate fetch (currency_rates exists)",
+      "a Creative storage disk, upload pipeline or image processor (filesystems.php + MediaHelper exist)",
+      "creative_activity_logs or a Creative timeline table (activity_logs exists)",
+      "a creative notification log or a second mail dispatch path (notification_logs + NotificationService exist)",
+      "a creative_settings table (settings exists)",
+      "creative_countries / states / cities (shared reference tables exist)",
+      "a Creative cache, queue, lock or session store (platform infrastructure exists)",
+      "a creative_policies or role-permission hierarchy (roles + role_permissions exist)",
+      "a state-machine framework or package (none exists; plain enums are the answer)",
+      "a search engine (none exists; none is required)"
+    ]
+  },
+  "do_not_reuse_register": {
+    "classification": "RECOMMENDATION",
+    "statement": "Named explicitly so they are not reached for by name similarity. Full reasoning in artifact 10.",
+    "items": [
+      {
+        "component": "bookings / booking_screens / booking_media",
+        "reason": "Advertising aggregate and its financial snapshot. Pattern yes, table never. Highest-consequence misuse in the schema."
+      },
+      {
+        "component": "payments",
+        "reason": "booking_id is NOT NULL with CASCADE and confirmation is coupled to a booking transition. Reuse the gateway contract, never the record."
+      },
+      {
+        "component": "testimonials",
+        "reason": "Public marketing ratings with no author binding and no soft delete. Never a commercial review surface."
+      },
+      {
+        "component": "screens / screen_categories / advertisement_categories",
+        "reason": "'Asset' in this repository means advertising inventory."
+      },
+      {
+        "component": "partners",
+        "reason": "An affiliate organisation, not an individual creative supplier."
+      },
+      {
+        "component": "reward_accounts / reward_transactions",
+        "reason": "Integer points ledger. Shape yes, representation never."
+      },
+      {
+        "component": "screen_providers / screen_provider_settlements",
+        "reason": "Shape yes (profile+approval, payout period), tables never."
+      },
+      {
+        "component": "pricing_plans and the pricing rule tables",
+        "reason": "Media-time pricing. Creative pricing is a different, small, deterministic calculation."
+      },
+      {
+        "component": "products",
+        "reason": "A marketing catalogue entry is not a purchasable service offering with a rate."
+      },
+      {
+        "component": "blogs / galleries / faqs / announcements",
+        "reason": "Marketing and CMS-like content."
+      },
+      {
+        "component": "SettlementService / CommissionService / RevenueDistributionService",
+        "reason": "Advertising-booking and provider bound. The LIFECYCLE and the LOCKING are reusable; the services are not."
+      },
+      {
+        "component": "FileController's upload handling",
+        "reason": "No FormRequest validation. Creative must not inherit an unvalidated upload path."
+      },
+      {
+        "component": "app/Application/",
+        "reason": "A layer being retired with 32 deferred classes. Adding to it creates immediate debt."
+      }
+    ]
+  },
+  "cross_references": {
+    "05-shared-capability-reuse-matrix.json": "Shared capability view of the same problem. Where the two differ in emphasis, this artifact's REUSE TYPE column is the operative one for implementation.",
+    "08-creative-database-current-schema-map.json": "Current table inventory with per-table reuse notes.",
+    "09-creative-database-target-schema-blueprint.json": "The authoritative Creative schema proposal this matrix's TARGET COMPONENT column refers to.",
+    "10-existing-table-reuse-analysis.json": "The table-level reuse decision record. This artifact is its requirement-level view.",
+    "12-payment-financial-reuse-analysis.md": "The financial separation in detail (RM-09 to RM-17, RM-30, RM-36).",
+    "13-authorization-audit.md": "The authorization model in detail (RM-04, RM-05, RM-15).",
+    "19-creative-security-risk-register.json": "The risk this matrix's RISK column summarises.",
+    "23-creative-do-not-touch-boundaries.md": "The enforcement companion to this matrix.",
+    "24-creative-implementation-sequence.md": "The order in which these rows are built."
+  },
+  "open_decisions_blocking_reuse": [
+    {
+      "id": "RM-03 / OD-DB-08",
+      "question": "Can a user be advertiser and creator simultaneously?",
+      "blocks": "The identity model, therefore C1 and C2."
+    },
+    {
+      "id": "RM-28 / OD-DB-01",
+      "question": "Public identifier strategy",
+      "blocks": "The first migration needing a public_id, and every Creative route."
+    },
+    {
+      "id": "RM-07 / OD-DB-02",
+      "question": "Is a brief bound to a creator service or open?",
+      "blocks": "creative_briefs nullability, the match table, and the notification strategy."
+    },
+    {
+      "id": "RM-08 / OD-DB-03",
+      "question": "One proposal per brief or many?",
+      "blocks": "The unique constraints that make acceptance race-free (RM-27)."
+    },
+    {
+      "id": "RM-10 / OD-DB-04",
+      "question": "Escrow or milestone funding?",
+      "blocks": "Whether funding needs tranches and a held balance."
+    },
+    {
+      "id": "RM-15 / OD-DB-05",
+      "question": "Earning accrual trigger and dispute window",
+      "blocks": "The earning status vocabulary and whether a settlement period is needed."
+    },
+    {
+      "id": "RM-16",
+      "question": "Payout cadence, minimum, approval chain, provider",
+      "blocks": "The payout batch design. No payout-processor adapter exists in the repository."
+    },
+    {
+      "id": "RM-17",
+      "question": "Commission basis and rate",
+      "blocks": "The rate model. No percentage may be invented."
+    },
+    {
+      "id": "RM-23 / OD-DB-07",
+      "question": "Multi-currency or INR only?",
+      "blocks": "Every currency column on Creative money tables."
+    },
+    {
+      "id": "RM-18 / RM-19",
+      "question": "Are Creative files private by default; retention and consent?",
+      "blocks": "The visibility semantics of the first creative_files row."
+    },
+    {
+      "id": "RM-21",
+      "question": "Can activity_logs express a Creative subject?",
+      "blocks": "Whether a Creative audit table is needed."
+    },
+    {
+      "id": "RM-26",
+      "question": "Create app/Support/Jobs/Creative/?",
+      "blocks": "How payout and reconciliation work is executed."
+    },
+    {
+      "id": "RM-36",
+      "question": "Does Creative adopt a payment webhook?",
+      "blocks": "Whether Creative funding can rely on client-initiated verification alone."
+    }
+  ],
+  "safety_statement": {
+    "classification": "CURRENT_FACT",
+    "statement": "No production code, migration, model, route, test or configuration file was modified in producing this matrix. Every REUSE TYPE is a proposal, not an implementation. No existing shared component was modified, extended or marked for modification."
+  }
+}

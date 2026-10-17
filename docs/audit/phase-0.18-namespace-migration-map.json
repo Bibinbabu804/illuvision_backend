@@ -1,0 +1,88 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "namespace-migration-map",
+  "policy": "A namespace move is only safe when every consumer is provably updated - including consumers that were in the SAME namespace and therefore had no import statement to rewrite.",
+  "migrations": [
+    {
+      "class": "App\\Listeners\\NotificationEventSubscriber",
+      "namespace": "App\\Listeners -> App\\Support\\Events",
+      "consumers": 1,
+      "consumer_files": [
+        "app/Providers/EventServiceProvider.php"
+      ],
+      "import_rewrites": 1,
+      "same_namespace_consumers": 0,
+      "risk": "VERY LOW",
+      "status": "DONE"
+    },
+    {
+      "class": "App\\Services\\AssetDiscoveryFilterService",
+      "namespace": "App\\Services -> App\\Application\\Asset\\Services",
+      "consumers": 2,
+      "consumer_files": [
+        "app/Services/AssetService.php"
+      ],
+      "import_rewrites": 0,
+      "same_namespace_consumers": 1,
+      "risk": "VERY LOW",
+      "status": "DONE"
+    },
+    {
+      "class": "App\\Services\\CoverageService",
+      "namespace": "App\\Services -> App\\Application\\Asset\\Services",
+      "consumers": 2,
+      "consumer_files": [
+        "app/Services/AssetService.php",
+        "app/Http/Controllers/Api/CoverageController.php"
+      ],
+      "import_rewrites": 1,
+      "same_namespace_consumers": 1,
+      "risk": "VERY LOW",
+      "status": "DONE"
+    }
+  ],
+  "namespaces_changed": 3,
+  "classes_moved": 3,
+  "stale_references": 0,
+  "break_caught_and_fixed": {
+    "class": "App\\Services\\AssetService",
+    "symptom": "BindingResolutionException: Target class [App\\Services\\CoverageService] does not exist.",
+    "cause": "AssetService type-hinted 'protected CoverageService $coverageService' and 'protected AssetDiscoveryFilterService $discoveryFilterService' from its own namespace, so no import statement existed to rewrite. The move silently broke its constructor.",
+    "fix": "Added the two missing use statements to app/Services/AssetService.php.",
+    "detection": "Found only by resolving the CONSUMER through the container. Resolving each migrated class in isolation had already passed, and grep for old FQCNs returned zero - both gave false assurance."
+  },
+  "lesson": "Verify namespace migrations by resolving every consumer through the container. Same-namespace consumers are invisible to a grep for import statements.",
+  "verification": [
+    "grep old FQCNs across app/ routes/ config/ tests/ database/ bootstrap/ resources/ -> 0 hits",
+    "composer dump-autoload -> clean",
+    "container resolution of each migrated class -> OK",
+    "container resolution of every consumer -> OK",
+    "full suite -> 571 passed, identical to baseline"
+  ],
+  "not_migrated": [
+    {
+      "namespace": "App\\Services -> App\\Application\\<Module>\\Services",
+      "classes": 45,
+      "reason": "18 are financial/booking/payment/settlement/availability hard stops; the rest are Eloquent-shaped or high-fan-in. Sequenced plan in phase-0.18-application-module-map.json."
+    },
+    {
+      "namespace": "App\\Events -> App\\Support\\Events",
+      "classes": 34,
+      "reason": "The events are domain-specific (Booking, Payment, Notification, Campaign). Rule 26 requires preserving domain ownership for domain-specific events; only the genuinely cross-cutting subscriber was moved."
+    },
+    {
+      "namespace": "App\\Observers -> App\\Support\\Events",
+      "classes": 1,
+      "reason": "AssetObserver observes the Screen model and belongs to the Asset/Screen domain, not cross-cutting Support."
+    },
+    {
+      "namespace": "App\\Helpers",
+      "classes": 1,
+      "reason": "MediaHelper is a static utility consumed by controllers AND Blade views; relocating a view-referenced static helper is low value and non-zero risk."
+    }
+  ],
+  "psr4": "App\\ is PSR-4 autoloaded from app/, so no composer.json change was required."
+}

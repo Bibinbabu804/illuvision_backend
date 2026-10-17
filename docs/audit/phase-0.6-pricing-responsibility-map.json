@@ -1,0 +1,153 @@
+{
+  "phase": "0.6",
+  "name": "Pricing Responsibility Map",
+  "generated_at": "2026-09-25T23:52:00+05:30",
+  "canonical_domain_engine": "App\\Domain\\Pricing\\CampaignPricingEngine",
+  "canonical_application_use_case": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+  "legacy_adapter": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+  "rules": [
+    {
+      "rule": "Base screen rate calculation",
+      "current_implementation": "Calculates base rate from PricingPlan durations matching campaign days and runtime hours",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate() -> PricingRuleEngine::calculate()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_001_single_screen_one_day",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Duration calculation & unit conversion",
+      "current_implementation": "Converts minute, hour, day, week, month values to normalized day fractions",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "convertMinDurationToDays()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::convertMinDurationToDays()",
+      "golden_test": "Tests\\Unit\\Domain\\Pricing\\CampaignPricingEngineTest::test_convert_min_duration_to_days_minute",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Minimum duration requirement validation",
+      "current_implementation": "Validates total campaign minutes against each screen's pricing plan minimum requirement",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "validateMinimumDuration()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::validateMinimumDuration()",
+      "golden_test": "Tests\\Feature\\MinutePricingEngineTest::test_minimum_duration_enforcement",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Peak pricing adjustment",
+      "current_implementation": "Applies peak surcharge percentage based on screen pricing plan peak configuration",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate() -> PricingRuleEngine::calculate()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_001_single_screen_one_day",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Weekend pricing adjustment",
+      "current_implementation": "Applies weekend surcharge percentage for Saturday and Sunday campaign days",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate() -> PricingRuleEngine::calculate()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_002_single_screen_seven_days",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Multi-screen volume discount",
+      "current_implementation": "Applies discount percentage when booking multiple screens under plan screen rules",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate() -> PricingRuleEngine::calculate()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_004_multiple_screens",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Duration threshold discount",
+      "current_implementation": "Applies discount percentage for long campaigns matching pricing plan duration tiers",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate() -> PricingRuleEngine::calculate()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_003_single_screen_thirty_days",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "First-booking discount",
+      "current_implementation": "Evaluates user booking count; applies first-booking percentage discount from system settings",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate() -> FirstBookingDiscountPricingCalculator::calculate()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_001_single_screen_one_day",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Referral discount & partner tracking",
+      "current_implementation": "Applies percentage or fixed discount from active referral code and captures partner attribution",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate() -> ReferralPricingCalculator::calculate()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_007_referral_discount",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Loyalty points redemption",
+      "current_implementation": "Converts customer loyalty points into currency discount using configured points-to-currency ratio",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate() -> LoyaltyService::calculateRedemptionValue()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\LoyaltyPointsBookingTest",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Financial precision and rounding",
+      "current_implementation": "Performs intermediate calculations with high precision and rounds final monetary fields to 2 decimal places",
+      "current_class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "current_method": "calculate()",
+      "target_domain_owner": "Domain\\Pricing\\CampaignPricingEngine",
+      "target_application_owner": "Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_path": "App\\Services\\CampaignPricingService::calculateCampaignPreview()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenFinancialRegressionTest::test_decimal_precision_boundaries",
+      "status": "MIGRATED_CANONICAL"
+    },
+    {
+      "rule": "Legacy multi-asset pricing & flat 10% volume discount",
+      "current_implementation": "Computes daily rate by dividing monthly rate by 30 or weekly rate by 7, applying 10% discount for >= 30 days",
+      "current_class": "App\\Services\\PricingEngine",
+      "current_method": "calculatePreview()",
+      "target_domain_owner": "Domain\\Pricing (Legacy)",
+      "target_application_owner": "Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "legacy_path": "POST /api/v2/pricing/calculate",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_010_v2_pricing_engine",
+      "status": "ISOLATED_BEHIND_ADAPTER"
+    },
+    {
+      "rule": "Pricing breakdown snapshot persistence",
+      "current_implementation": "Stores immutable snapshot of screen info, rules, day breakdowns, discounts, and partner attribution",
+      "current_class": "App\\Services\\CampaignPricingService",
+      "current_method": "storePricingBreakdowns()",
+      "target_domain_owner": "Domain\\Booking",
+      "target_application_owner": "Application\\Booking\\Services\\BookingCreationService",
+      "legacy_path": "App\\Services\\CampaignPricingService::storePricingBreakdowns()",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenBookingRegressionTest::test_advertiser_channel_booking_creation_and_snapshots",
+      "status": "PRESERVED_IN_SERVICE"
+    }
+  ]
+}

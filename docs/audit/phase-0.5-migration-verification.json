@@ -1,0 +1,45 @@
+{
+  "phase": "0.5",
+  "name": "Phase 0.5 Migration Verification & Test Suite Summary",
+  "generated_at": "2026-09-25T23:40:00+05:30",
+  "baseline": {
+    "total_tests": 378,
+    "passed": 371,
+    "failed": 2,
+    "skipped": 4,
+    "warnings": 1,
+    "failed_tests": [
+      "Tests\\Feature\\BookingConcurrencyTest > second booking rejected after first consumes last unit",
+      "Tests\\Feature\\CampaignBookingPricingIntegrityTest > booking rejected when units exceed fleet capacity"
+    ],
+    "failure_classification": "F — Pre-existing legacy test expectation variance (error message mismatch)"
+  },
+  "post_migration": {
+    "total_tests": 387,
+    "passed": 380,
+    "failed": 2,
+    "skipped": 4,
+    "warnings": 1,
+    "new_tests_added": 9,
+    "new_tests_passed": 9,
+    "regressions_detected": 0
+  },
+  "verification_categories": {
+    "api_contracts": "PASSED (8/8 in GoldenApiContractRegressionTest)",
+    "availability": "PASSED (5/5 in GoldenAvailabilityRegressionTest)",
+    "booking": "PASSED (4/4 in GoldenBookingRegressionTest)",
+    "concurrency_and_locks": "PASSED (3/3 in GoldenConcurrencyVerificationTest)",
+    "financial_calculations": "PASSED (3/3 in GoldenFinancialRegressionTest)",
+    "payment_and_hmac": "PASSED (4/4 in GoldenPaymentRegressionTest)",
+    "pricing_calculations": "PASSED (7/7 in GoldenPricingRegressionTest)",
+    "new_infrastructure_unit_tests": "PASSED (6/6 across Razorpay, Google OAuth, and ExchangeRate adapters)",
+    "new_application_use_case_tests": "PASSED (3/3 across CreatePaymentOrder and CalculateCampaignPrice use cases)"
+  },
+  "safety_verifications": {
+    "production_behavior_changed": false,
+    "api_contracts_changed": false,
+    "database_schema_changed": false,
+    "financial_rules_changed": false,
+    "concurrency_semantics_changed": false
+  }
+}

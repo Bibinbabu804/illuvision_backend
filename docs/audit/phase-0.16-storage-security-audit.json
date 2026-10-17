@@ -1,0 +1,35 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "storage-security-audit",
+  "storage_call_sites_in_controllers": 9,
+  "controllers_affected": 6,
+  "status": "deferred since Phase 0.13",
+  "findings": [
+    {
+      "id": "STOR-01",
+      "title": "User-influenced file paths",
+      "severity": "high",
+      "evidence": "FileController builds a destination path that incorporates request data before storing an upload.",
+      "impact": "If the path is not strictly normalised and confined to the intended directory, this permits path traversal and arbitrary file write. Must be verified per call site.",
+      "status": "NOT YET VERIFIED - requires a per-call-site path audit with a traversal payload."
+    },
+    {
+      "id": "STOR-02",
+      "title": "Unrestricted file types on upload",
+      "severity": "high",
+      "evidence": "POST /api/file-upload and /api/video-upload are authenticated with no permission gate, and no MIME/extension allowlist was confirmed.",
+      "impact": "Combined with SEC-07 this allows any authenticated user to upload arbitrary content."
+    },
+    {
+      "id": "STOR-03",
+      "title": "No confirmed malware scanning or image re-encoding",
+      "severity": "medium",
+      "impact": "Uploaded files are served back without evidence of content validation."
+    }
+  ],
+  "deferral_rationale": "These were deliberately left in place in Phase 0.13 because changing upload paths or validation changes the media contract. They are re-raised here as P1 debt with an explicit verification action rather than a silent fix.",
+  "verification_action_required": "For each of the 9 call sites, assert that (a) the resolved realpath stays inside the disk root, (b) the extension and MIME type are allowlisted, and (c) the stored name is server-generated rather than client-supplied."
+}

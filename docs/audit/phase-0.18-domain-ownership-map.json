@@ -1,0 +1,90 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "domain-ownership-map",
+  "method": "Ownership decided from each class's actual responsibility, not from its name. Rule 16 of ARCHITECTURE_RULES.md forbids choosing a target location purely from a class name.",
+  "existing_domain_modules": [
+    {
+      "module": "Financial",
+      "classes": [
+        "Financial/Contracts/PartnerCommissionRepositoryInterface",
+        "Financial/Contracts/SettlementRepositoryInterface",
+        "Financial/Support/RevenueAllocation"
+      ],
+      "owns": "partner commission allocation and settlement repository contracts",
+      "state": "COHERENT"
+    },
+    {
+      "module": "Payment",
+      "classes": [
+        "Payment/Contracts/PaymentGatewayInterface",
+        "Payment/Contracts/PaymentRepositoryInterface",
+        "Payment/PaymentStatus",
+        "Payment/Support/Money"
+      ],
+      "owns": "payment gateway/repository contracts, the live payment status vocabulary and a Money value object",
+      "state": "COHERENT - this is the one genuinely pure Domain module in the codebase"
+    },
+    {
+      "module": "Pricing",
+      "classes": [
+        "Pricing/CampaignPricingEngine",
+        "Pricing/Contracts/PricingEngineInterface"
+      ],
+      "owns": "campaign multi-asset pricing and the pricing engine contract",
+      "state": "PARTIAL - CampaignPricingEngine still reaches into Services\\PricingEngine and Eloquent (documented Rule 2 debt)"
+    }
+  ],
+  "domain_gaps": [
+    {
+      "module": "Campaign",
+      "currently_in": "Services (CampaignPricingService, ClientService, PricingService) + Models",
+      "why_not_migrated": "Campaign pricing is the highest-financial-risk path in the application. Moving it without a golden-pricing baseline risks changing arithmetic; Rule 7 forbids copying it and the brief forbids redesigning it."
+    },
+    {
+      "module": "Availability",
+      "currently_in": "Services (BookingCapacityService, InventoryService, ConflictDetectionService)",
+      "why_not_migrated": "InventoryService holds the lockForUpdate reservation inside the booking transaction. The brief requires lock order and transaction boundaries to be preserved exactly, so availability is explicitly out of bounds for a structural move."
+    },
+    {
+      "module": "Settlement",
+      "currently_in": "Services (SettlementService) + Domain/Financial contracts",
+      "why_not_migrated": "Settlement is a listed financial hard stop."
+    },
+    {
+      "module": "Asset",
+      "currently_in": "NOW migrated to Application/Asset/Services for the pure collaborators; the Eloquent-heavy AssetService, AssetImportService, ScreenDeletionService remain in Services",
+      "why_partial": "The two migrated classes depend only on AssetRepositoryInterface, so they are pure Application orchestration. The remaining Asset classes are Eloquent-shaped; relocating them would not clarify ownership."
+    },
+    {
+      "module": "Media",
+      "currently_in": "Services/MediaService + Infrastructure/Media (GdImageProcessor, LaravelStorageAdapter, ImageProcessingContractInterface, StorageContractInterface)",
+      "observation": "Media is already well separated at the integration boundary. The remaining MediaService is an Application-style orchestrator over the two Media contracts and is a good next migration candidate."
+    },
+    {
+      "module": "Provider",
+      "currently_in": "Services (ScreenProviderService, ScreenDeletionService)",
+      "why_not_migrated": "Eloquent-heavy (6 Models each); moving them would not improve ownership."
+    },
+    {
+      "module": "Partner",
+      "currently_in": "Services/PartnerService (324 lines, 3 Models)",
+      "why_not_migrated": "Eloquent-shaped; low value relocation."
+    },
+    {
+      "module": "Creative",
+      "currently_in": "Models and Http controllers only",
+      "observation": "No service or domain class exists; no ownership to migrate."
+    }
+  ],
+  "rule_2_status": {
+    "state": "RED (documented debt)",
+    "allowlisted": [
+      "App\\Domain\\Financial\\Support\\RevenueAllocation",
+      "App\\Domain\\Pricing\\CampaignPricingEngine"
+    ],
+    "note": "Phase 0.18 did not add, remove or worsen any Rule 2 violation. The allowlist is unchanged."
+  }
+}

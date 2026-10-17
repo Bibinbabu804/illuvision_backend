@@ -1,0 +1,239 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "Golden API Contract Fixtures for Illuvision Core Commercial Endpoints",
+    "generated_at": "2026-09-25T20:35:00+05:30"
+  },
+  "fixtures": [
+    {
+      "endpoint": "/api/campaigns/calculate",
+      "method": "POST",
+      "auth": "Public / Sanctum",
+      "controller": "App\\Http\\Controllers\\BookingController@calculateCampaignPricing",
+      "request_fixture": {
+        "screen_ids": [
+          1
+        ],
+        "quantities": {
+          "1": 1
+        },
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-05",
+        "daily_start_time": "09:00",
+        "daily_end_time": "21:00",
+        "referral_code_id": null,
+        "country_code": "IN"
+      },
+      "expected_status": 200,
+      "expected_response_structure": {
+        "status": true,
+        "message": "Campaign pricing calculated successfully",
+        "data": {
+          "aggregated": {
+            "base_price": "float",
+            "screen_count": "int",
+            "screen_discount": "float",
+            "duration_discount": "float",
+            "combined_discount": "float",
+            "peak_adjustment": "float",
+            "weekend_adjustment": "float",
+            "first_booking_discount": "float",
+            "referral_discount": "float",
+            "subtotal_before_discount": "float",
+            "total_discount": "float",
+            "final_amount": "float",
+            "gst_amount": "float",
+            "final_total": "float"
+          },
+          "screen_breakdowns": [
+            {
+              "screen_id": "int",
+              "screen_name": "string",
+              "daily_rates": "array"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "endpoint": "/api/bookings/campaign",
+      "method": "POST",
+      "auth": "Sanctum",
+      "controller": "App\\Http\\Controllers\\BookingController@storeCampaign",
+      "request_fixture": {
+        "campaign_title": "Q4 Brand Campaign",
+        "start_time": "2026-10-01 09:00:00",
+        "end_time": "2026-10-05 21:00:00",
+        "daily_start_time": "09:00",
+        "daily_end_time": "21:00",
+        "screen_ids": [
+          1
+        ],
+        "quantities": {
+          "1": 1
+        },
+        "total_screens": 1,
+        "ad_frequency": "Standard (10s every 2 mins)",
+        "advertisement_category_id": 1,
+        "referral_code_id": null,
+        "redeem_points": 0
+      },
+      "expected_status": 201,
+      "expected_response_structure": {
+        "status": true,
+        "message": "Campaign booking created successfully",
+        "data": {
+          "id": "int",
+          "booking_reference": "string",
+          "campaign_title": "string",
+          "status": "payment_pending",
+          "price": "float",
+          "final_amount": "float",
+          "currency_code": "string",
+          "total_screens": "int"
+        }
+      }
+    },
+    {
+      "endpoint": "/api/payments/razorpay/create-order",
+      "method": "POST",
+      "auth": "Sanctum",
+      "controller": "App\\Http\\Controllers\\PaymentController@createOrder",
+      "request_fixture": {
+        "booking_id": 1
+      },
+      "expected_status": 201,
+      "expected_response_structure": {
+        "status": true,
+        "message": "Razorpay order created successfully",
+        "data": {
+          "payment": {
+            "id": "int",
+            "booking_id": "int",
+            "razorpay_order_id": "string",
+            "amount": "float",
+            "currency": "INR",
+            "payment_status": "pending"
+          },
+          "razorpay_order_id": "string",
+          "amount": "int (paise)",
+          "currency": "INR"
+        }
+      }
+    },
+    {
+      "endpoint": "/api/payments/razorpay/verify",
+      "method": "POST",
+      "auth": "Sanctum",
+      "controller": "App\\Http\\Controllers\\PaymentController@verify",
+      "request_fixture": {
+        "razorpay_order_id": "order_test_123",
+        "razorpay_payment_id": "pay_test_456",
+        "razorpay_signature": "signature_hash_hex"
+      },
+      "expected_status": 200,
+      "expected_response_structure": {
+        "status": true,
+        "message": "Payment verified successfully. Booking is pending approval.",
+        "data": {
+          "payment": {
+            "id": "int",
+            "payment_status": "paid",
+            "paid_at": "string (datetime)"
+          },
+          "booking": {
+            "id": "int",
+            "status": "pending_approval"
+          },
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "endpoint": "/api/v2/pricing/calculate",
+      "method": "POST",
+      "auth": "Public",
+      "controller": "App\\Http\\Controllers\\Api\\PricingEngineController@calculate",
+      "request_fixture": {
+        "items": [
+          {
+            "asset_id": 1,
+            "quantity": 1
+          }
+        ],
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-05"
+      },
+      "expected_status": 200,
+      "expected_response_structure": {
+        "data": {
+          "summary": {
+            "start_date": "string",
+            "end_date": "string",
+            "total_days": "int",
+            "total_items": "int"
+          },
+          "line_items": [
+            {
+              "asset_id": "int",
+              "asset_name": "string",
+              "asset_type": "string",
+              "quantity": "int",
+              "unit_price_per_day": "float",
+              "days": "int",
+              "line_subtotal": "float"
+            }
+          ],
+          "pricing": {
+            "gross_total": "float",
+            "duration_discount": "float",
+            "final_total": "float"
+          }
+        }
+      }
+    },
+    {
+      "endpoint": "/api/v2/availability/check",
+      "method": "POST",
+      "auth": "Public",
+      "controller": "App\\Http\\Controllers\\Api\\AvailabilityEngineController@check",
+      "request_fixture": {
+        "items": [
+          {
+            "asset_id": 1,
+            "quantity": 1
+          }
+        ],
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-05"
+      },
+      "expected_status": 200,
+      "expected_response_structure": {
+        "is_eligible": "bool",
+        "has_conflicts": "bool",
+        "conflicts": "array",
+        "items": "array"
+      }
+    },
+    {
+      "endpoint": "/api/v2/finance/summary",
+      "method": "GET",
+      "auth": "Sanctum (permission:finance.view)",
+      "controller": "App\\Http\\Controllers\\Api\\FinanceController@summary",
+      "request_fixture": {},
+      "expected_status": 200,
+      "expected_response_structure": {
+        "status": true,
+        "message": "Financial overview fetched successfully.",
+        "data": {
+          "gross_revenue": "float",
+          "total_payments_received": "float",
+          "total_settlements_paid": "float",
+          "pending_settlements_payable": "float",
+          "platform_commission_earned": "float",
+          "refunds_issued": "float"
+        }
+      }
+    }
+  ]
+}

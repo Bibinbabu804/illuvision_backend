@@ -1,0 +1,62 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "container-binding-map",
+  "bindings_before": 35,
+  "bindings_after": 35,
+  "bindings_changed": 0,
+  "method": "Parsed every bind()/singleton()/scoped()/instance() call in app/Providers/*.php before and after, and resolved every migrated class plus every consumer through the container.",
+  "provider_bindings_still_valid": [
+    {
+      "binding": "App\\Repositories\\AssetRepositoryInterface",
+      "reason": "Unaffected: the interface did not move. The two migrated services now consume it from a different namespace, which Laravel resolves identically."
+    },
+    {
+      "binding": "App\\Repositories\\BookingRepositoryInterface",
+      "reason": "Unaffected."
+    },
+    {
+      "binding": "App\\Infrastructure\\Media\\Contracts\\StorageContractInterface -> LaravelStorageAdapter",
+      "reason": "Unaffected."
+    },
+    {
+      "binding": "App\\Infrastructure\\Media\\Contracts\\ImageProcessingContractInterface -> GdImageProcessor",
+      "reason": "Unaffected."
+    },
+    {
+      "binding": "App\\Infrastructure\\Notification\\Contracts\\MailContractInterface -> LaravelMailAdapter",
+      "reason": "Unaffected."
+    },
+    {
+      "binding": "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface -> ExchangeRateApiClient",
+      "reason": "Unaffected."
+    }
+  ],
+  "event_subscriber_registration": {
+    "provider": "app/Providers/EventServiceProvider.php",
+    "subscribe_before": [
+      "App\\Listeners\\NotificationEventSubscriber"
+    ],
+    "subscribe_after": [
+      "App\\Support\\Events\\NotificationEventSubscriber"
+    ],
+    "note": "Registration import updated; verified the new FQCN exists, the old FQCN no longer resolves, and the provider's $subscribe list holds the new class."
+  },
+  "migration_needed_for_moved_classes": "None. All three migrated classes use constructor injection of existing contracts or the framework Event Dispatcher, so no new binding was required.",
+  "binding_related_break_found_and_fixed": {
+    "class": "App\\Services\\AssetService",
+    "symptom": "BindingResolutionException: Target class [App\\Services\\CoverageService] does not exist.",
+    "cause": "Same-namespace type-hinted properties (App\\Services\\AssetService had 'protected CoverageService $coverageService' and 'protected AssetDiscoveryFilterService $discoveryFilterService') carry no import statement, so the namespace move silently broke the constructor.",
+    "fix": "Added the two missing use statements to app/Services/AssetService.php.",
+    "detection": "Only found by resolving the CONSUMER through the container. Resolving each migrated class in isolation had already passed."
+  },
+  "verification": [
+    "app(App\\Application\\Asset\\Services\\AssetDiscoveryFilterService) -> RESOLVED",
+    "app(App\\Application\\Asset\\Services\\CoverageService) -> RESOLVED",
+    "app(App\\Services\\AssetService) -> RESOLVED with constructor types AssetRepositoryInterface, Application\\Asset\\Services\\CoverageService, Application\\Asset\\Services\\AssetDiscoveryFilterService",
+    "app(App\\Support\\Events\\NotificationEventSubscriber) -> class exists and is registered in EventServiceProvider::$subscribe",
+    "full test suite -> 571 passed, 2 failed, 1 warning, 4 skipped, 5323 assertions (identical to baseline)"
+  ]
+}

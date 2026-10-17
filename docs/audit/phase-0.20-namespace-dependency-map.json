@@ -1,0 +1,1704 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "method": "namespace-to-namespace edge counts derived from every `use App\\...` import across app/, expanded through grouped/namespace imports",
+ "nodes": [
+  "Application",
+  "Console",
+  "Domain",
+  "Enums",
+  "Helpers",
+  "Http",
+  "Infrastructure",
+  "Mail",
+  "Models",
+  "Observers",
+  "Providers",
+  "Repositories",
+  "Services",
+  "Support"
+ ],
+ "edges": [
+  {
+   "from": "Services",
+   "to": "Models",
+   "import_count": 122,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Http",
+   "to": "Models",
+   "import_count": 117,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Http",
+   "to": "Services",
+   "import_count": 57,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Support",
+   "to": "Models",
+   "import_count": 49,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Http",
+   "to": "Http",
+   "import_count": 39,
+   "status": "ALLOWED_WITHIN_LAYER"
+  },
+  {
+   "from": "Application",
+   "to": "Application",
+   "import_count": 37,
+   "status": "ALLOWED_WITHIN_LAYER"
+  },
+  {
+   "from": "Mail",
+   "to": "Models",
+   "import_count": 33,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Support",
+   "to": "Support",
+   "import_count": 33,
+   "status": "ALLOWED_WITHIN_LAYER"
+  },
+  {
+   "from": "Application",
+   "to": "Models",
+   "import_count": 32,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Http",
+   "to": "Support",
+   "import_count": 30,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Application",
+   "to": "Services",
+   "import_count": 29,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Support",
+   "to": "Mail",
+   "import_count": 27,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Services",
+   "to": "Support",
+   "import_count": 19,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Http",
+   "to": "Application",
+   "import_count": 15,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Services",
+   "to": "Domain",
+   "import_count": 15,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Services",
+   "to": "Services",
+   "import_count": 14,
+   "status": "ALLOWED_WITHIN_LAYER"
+  },
+  {
+   "from": "Domain",
+   "to": "Models",
+   "import_count": 9,
+   "status": "PROHIBITED"
+  },
+  {
+   "from": "Providers",
+   "to": "Support",
+   "import_count": 7,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Support",
+   "to": "Services",
+   "import_count": 7,
+   "status": "PROHIBITED"
+  },
+  {
+   "from": "Domain",
+   "to": "Services",
+   "import_count": 7,
+   "status": "PROHIBITED"
+  },
+  {
+   "from": "Application",
+   "to": "Support",
+   "import_count": 6,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Infrastructure",
+   "to": "Models",
+   "import_count": 6,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Infrastructure",
+   "to": "Infrastructure",
+   "import_count": 5,
+   "status": "ALLOWED_WITHIN_LAYER"
+  },
+  {
+   "from": "Repositories",
+   "to": "Models",
+   "import_count": 4,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Infrastructure",
+   "to": "Domain",
+   "import_count": 4,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Services",
+   "to": "Infrastructure",
+   "import_count": 4,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Services",
+   "to": "Application",
+   "import_count": 4,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Console",
+   "to": "Models",
+   "import_count": 4,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Application",
+   "to": "Domain",
+   "import_count": 3,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Services",
+   "to": "Repositories",
+   "import_count": 3,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Repositories",
+   "to": "Repositories",
+   "import_count": 2,
+   "status": "ALLOWED_WITHIN_LAYER"
+  },
+  {
+   "from": "Http",
+   "to": "Enums",
+   "import_count": 2,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Http",
+   "to": "Domain",
+   "import_count": 2,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Http",
+   "to": "Infrastructure",
+   "import_count": 2,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Helpers",
+   "to": "Infrastructure",
+   "import_count": 2,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Services",
+   "to": "Enums",
+   "import_count": 2,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Console",
+   "to": "Services",
+   "import_count": 2,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Providers",
+   "to": "Services",
+   "import_count": 1,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Models",
+   "to": "Support",
+   "import_count": 1,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Models",
+   "to": "Enums",
+   "import_count": 1,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Models",
+   "to": "Domain",
+   "import_count": 1,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Http",
+   "to": "Mail",
+   "import_count": 1,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Domain",
+   "to": "Domain",
+   "import_count": 1,
+   "status": "ALLOWED_WITHIN_LAYER"
+  },
+  {
+   "from": "Observers",
+   "to": "Models",
+   "import_count": 1,
+   "status": "CONDITIONAL"
+  },
+  {
+   "from": "Console",
+   "to": "Support",
+   "import_count": 1,
+   "status": "CONDITIONAL"
+  }
+ ],
+ "prohibited_rules": [
+  {
+   "from": "Domain",
+   "to": "Application",
+   "rule": "Application/ is not part of the approved target structure."
+  },
+  {
+   "from": "Domain",
+   "to": "Console",
+   "rule": "Domain must not depend on Console."
+  },
+  {
+   "from": "Domain",
+   "to": "Http",
+   "rule": "Domain must not depend on Http."
+  },
+  {
+   "from": "Domain",
+   "to": "Infrastructure",
+   "rule": "Domain must not depend on Infrastructure."
+  },
+  {
+   "from": "Domain",
+   "to": "Models",
+   "rule": "Domain must not depend on the persistence layer (Models)."
+  },
+  {
+   "from": "Domain",
+   "to": "Services",
+   "rule": "Domain must not depend on Services (Rule 2)."
+  },
+  {
+   "from": "Infrastructure",
+   "to": "Console",
+   "rule": "Infrastructure must not depend on Console."
+  },
+  {
+   "from": "Infrastructure",
+   "to": "Http",
+   "rule": "Infrastructure must not depend on Http."
+  },
+  {
+   "from": "Repositories",
+   "to": "Http",
+   "rule": "Repository interfaces must not import Http."
+  },
+  {
+   "from": "Services",
+   "to": "Http",
+   "rule": "Services must not depend on Http."
+  },
+  {
+   "from": "Support",
+   "to": "Domain",
+   "rule": "Support must not depend on Domain."
+  },
+  {
+   "from": "Support",
+   "to": "Http",
+   "rule": "Support must not depend on Http."
+  },
+  {
+   "from": "Support",
+   "to": "Services",
+   "rule": "Support must not depend on Services."
+  }
+ ],
+ "per_class_internal_dependencies": {
+  "App\\Mail\\ProductEnquirySubmittedMail": [
+   "App\\Models\\ProductEnquiry"
+  ],
+  "App\\Mail\\BookingApprovedMail": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Mail\\RewardsExpiringSoonMail": [
+   "App\\Models\\User"
+  ],
+  "App\\Mail\\PartnerRejectedMail": [
+   "App\\Models\\Partner"
+  ],
+  "App\\Mail\\ReferralUsedMail": [
+   "App\\Models\\Booking",
+   "App\\Models\\ReferralCode"
+  ],
+  "App\\Mail\\ScreenProviderPortalInvitationMail": [
+   "App\\Models\\ScreenProvider"
+  ],
+  "App\\Mail\\PaymentRefundedMail": [
+   "App\\Models\\Payment"
+  ],
+  "App\\Mail\\ScreenProviderEnquirySubmittedMail": [
+   "App\\Models\\ScreenProviderEnquiry"
+  ],
+  "App\\Mail\\ScreenProviderRejectedMail": [
+   "App\\Models\\ScreenProvider"
+  ],
+  "App\\Mail\\PasswordResetMail": [
+   "App\\Models\\User"
+  ],
+  "App\\Mail\\ScreenProviderEnquiryAutoReplyMail": [
+   "App\\Models\\ScreenProviderEnquiry"
+  ],
+  "App\\Mail\\MediaApprovedMail": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingMedia"
+  ],
+  "App\\Mail\\BookingCreatedMail": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Mail\\RewardsBonusAwardedMail": [
+   "App\\Models\\User"
+  ],
+  "App\\Mail\\BookingCancelledMail": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Mail\\ContactEnquiryAutoReplyMail": [
+   "App\\Models\\ContactEnquiry"
+  ],
+  "App\\Mail\\ContactEnquirySubmittedMail": [
+   "App\\Models\\ContactEnquiry"
+  ],
+  "App\\Mail\\PartnerApprovedMail": [
+   "App\\Models\\Partner"
+  ],
+  "App\\Mail\\RewardsEarnedMail": [
+   "App\\Models\\Booking",
+   "App\\Models\\User"
+  ],
+  "App\\Mail\\BookingRejectedMail": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Mail\\CommissionGeneratedMail": [
+   "App\\Models\\PartnerCommission"
+  ],
+  "App\\Mail\\UserRegisteredMail": [
+   "App\\Models\\User"
+  ],
+  "App\\Mail\\PaymentFailedMail": [
+   "App\\Models\\Payment"
+  ],
+  "App\\Mail\\ScreenProviderApprovedMail": [
+   "App\\Models\\ScreenProvider"
+  ],
+  "App\\Mail\\PartnerCreatedMail": [
+   "App\\Models\\Partner"
+  ],
+  "App\\Mail\\PaymentReceivedMail": [
+   "App\\Models\\Payment"
+  ],
+  "App\\Mail\\RewardsRedeemedMail": [
+   "App\\Models\\Booking",
+   "App\\Models\\User"
+  ],
+  "App\\Mail\\MediaRejectedMail": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingMedia"
+  ],
+  "App\\Providers\\AppServiceProvider": [
+   "App\\Services\\SettingsService",
+   "App\\Support\\Configs\\BookingConfig",
+   "App\\Support\\Configs\\ConfigFactory",
+   "App\\Support\\Configs\\MediaConfig",
+   "App\\Support\\Configs\\NotificationConfig",
+   "App\\Support\\Configs\\PricingConfig",
+   "App\\Support\\Configs\\ReferralConfig"
+  ],
+  "App\\Providers\\EventServiceProvider": [
+   "App\\Support\\Events\\NotificationEventSubscriber"
+  ],
+  "App\\Enums\\AssetType": [],
+  "App\\Repositories\\Asset\\AssetRepositoryInterface": [
+   "App\\Models\\Screen"
+  ],
+  "App\\Repositories\\Asset\\AssetRepository": [
+   "App\\Models\\Screen",
+   "App\\Repositories\\Asset\\AssetRepositoryInterface"
+  ],
+  "App\\Repositories\\Booking\\BookingRepository": [
+   "App\\Models\\Booking",
+   "App\\Repositories\\Booking\\BookingRepositoryInterface"
+  ],
+  "App\\Repositories\\Booking\\BookingRepositoryInterface": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Models\\ScreenCategory": [],
+  "App\\Models\\JobPost": [],
+  "App\\Models\\BlogDescription": [],
+  "App\\Models\\NotificationLog": [],
+  "App\\Models\\Category": [],
+  "App\\Models\\Refund": [],
+  "App\\Models\\Booking": [],
+  "App\\Models\\Gallery": [],
+  "App\\Models\\Enquiry": [],
+  "App\\Models\\QrCode": [],
+  "App\\Models\\BookingActivity": [],
+  "App\\Models\\Product": [],
+  "App\\Models\\Country": [],
+  "App\\Models\\City": [],
+  "App\\Models\\BookingMedia": [],
+  "App\\Models\\PricingPlanDuration": [],
+  "App\\Models\\Partner": [],
+  "App\\Models\\ScreenProviderSettlement": [],
+  "App\\Models\\User": [
+   "App\\Support\\Authorization\\RolePermissionChecker"
+  ],
+  "App\\Models\\BookingPricingBreakdown": [],
+  "App\\Models\\Testimonial": [],
+  "App\\Models\\Role": [],
+  "App\\Models\\BlogTag": [],
+  "App\\Models\\ScreenDurationSplitOverride": [],
+  "App\\Models\\CurrencyRate": [],
+  "App\\Models\\PricingDurationRule": [],
+  "App\\Models\\Payment": [],
+  "App\\Models\\State": [],
+  "App\\Models\\ScreenProviderEnquiry": [],
+  "App\\Models\\JobCategory": [],
+  "App\\Models\\RewardAccount": [],
+  "App\\Models\\Screen": [
+   "App\\Domain\\Pricing\\Enums\\PricingUnit",
+   "App\\Enums\\AssetType"
+  ],
+  "App\\Models\\PaymentLog": [],
+  "App\\Models\\QrCodeScan": [],
+  "App\\Models\\Achievement": [],
+  "App\\Models\\Blog": [],
+  "App\\Models\\ActivityLog": [],
+  "App\\Models\\ReferralUsage": [],
+  "App\\Models\\CoverageCity": [],
+  "App\\Models\\ContactEnquiry": [],
+  "App\\Models\\RewardRedemption": [],
+  "App\\Models\\RolePermission": [],
+  "App\\Models\\PartnerCommission": [],
+  "App\\Models\\Announcement": [],
+  "App\\Models\\ScreenProviderActivity": [],
+  "App\\Models\\PricingWeekendRule": [],
+  "App\\Models\\Faq": [],
+  "App\\Models\\MobileAssetCoverageState": [],
+  "App\\Models\\PricingPeakRule": [],
+  "App\\Models\\ReferralCode": [],
+  "App\\Models\\PricingScreenRule": [],
+  "App\\Models\\MobileAssetCoverageCity": [],
+  "App\\Models\\ScreenProvider": [],
+  "App\\Models\\BookingScreen": [],
+  "App\\Models\\PricingPlan": [],
+  "App\\Models\\JobApplication": [],
+  "App\\Models\\Setting": [],
+  "App\\Models\\AdvertisementCategory": [],
+  "App\\Models\\PricingDiscountRule": [],
+  "App\\Models\\ProductEnquiry": [],
+  "App\\Models\\RewardTransaction": [],
+  "App\\Models\\SuccessStory": [],
+  "App\\Support\\BookingEligibilityResult": [],
+  "App\\Support\\DurationFormatter": [],
+  "App\\Support\\Exceptions\\UserConflictException": [
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Configs\\BookingConfig": [
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Support\\Configs\\MediaConfig": [
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Support\\Configs\\PricingConfig": [
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Support\\Configs\\NotificationConfig": [
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Support\\Configs\\ConfigFactory": [
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Support\\Configs\\ReferralConfig": [
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Support\\Events\\NotificationEventSubscriber": [
+   "App\\Mail\\BookingApprovedMail",
+   "App\\Mail\\BookingCancelledMail",
+   "App\\Mail\\BookingCreatedMail",
+   "App\\Mail\\BookingRejectedMail",
+   "App\\Mail\\CommissionGeneratedMail",
+   "App\\Mail\\ContactEnquiryAutoReplyMail",
+   "App\\Mail\\ContactEnquirySubmittedMail",
+   "App\\Mail\\MediaApprovedMail",
+   "App\\Mail\\MediaRejectedMail",
+   "App\\Mail\\PartnerApprovedMail",
+   "App\\Mail\\PartnerCreatedMail",
+   "App\\Mail\\PartnerRejectedMail",
+   "App\\Mail\\PaymentFailedMail",
+   "App\\Mail\\PaymentReceivedMail",
+   "App\\Mail\\PaymentRefundedMail",
+   "App\\Mail\\ProductEnquirySubmittedMail",
+   "App\\Mail\\ReferralUsedMail",
+   "App\\Mail\\RewardsBonusAwardedMail",
+   "App\\Mail\\RewardsEarnedMail",
+   "App\\Mail\\RewardsExpiringSoonMail",
+   "App\\Mail\\RewardsRedeemedMail",
+   "App\\Mail\\ScreenProviderApprovedMail",
+   "App\\Mail\\ScreenProviderEnquiryAutoReplyMail",
+   "App\\Mail\\ScreenProviderEnquirySubmittedMail",
+   "App\\Mail\\ScreenProviderPortalInvitationMail",
+   "App\\Mail\\ScreenProviderRejectedMail",
+   "App\\Mail\\UserRegisteredMail",
+   "App\\Services\\NotificationService",
+   "App\\Support\\Events\\Notifications\\BookingApproved",
+   "App\\Support\\Events\\Notifications\\BookingCancelled",
+   "App\\Support\\Events\\Notifications\\BookingCreated",
+   "App\\Support\\Events\\Notifications\\BookingRejected",
+   "App\\Support\\Events\\Notifications\\CommissionGenerated",
+   "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned",
+   "App\\Support\\Events\\Notifications\\ContactEnquiryClosed",
+   "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted",
+   "App\\Support\\Events\\Notifications\\MediaApproved",
+   "App\\Support\\Events\\Notifications\\MediaRejected",
+   "App\\Support\\Events\\Notifications\\MediaUploaded",
+   "App\\Support\\Events\\Notifications\\PartnerApproved",
+   "App\\Support\\Events\\Notifications\\PartnerCreated",
+   "App\\Support\\Events\\Notifications\\PartnerRejected",
+   "App\\Support\\Events\\Notifications\\PaymentFailed",
+   "App\\Support\\Events\\Notifications\\PaymentReceived",
+   "App\\Support\\Events\\Notifications\\PaymentRefunded",
+   "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted",
+   "App\\Support\\Events\\Notifications\\ProfileUpdated",
+   "App\\Support\\Events\\Notifications\\ReferralUsed",
+   "App\\Support\\Events\\Notifications\\RewardsBonusAwarded",
+   "App\\Support\\Events\\Notifications\\RewardsEarned",
+   "App\\Support\\Events\\Notifications\\RewardsExpiringSoon",
+   "App\\Support\\Events\\Notifications\\RewardsRedeemed",
+   "App\\Support\\Events\\Notifications\\ScreenProviderApproved",
+   "App\\Support\\Events\\Notifications\\ScreenProviderCreated",
+   "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted",
+   "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned",
+   "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed",
+   "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted",
+   "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation",
+   "App\\Support\\Events\\Notifications\\ScreenProviderRejected",
+   "App\\Support\\Events\\Notifications\\UserRegistered"
+  ],
+  "App\\Support\\Events\\Notifications\\BookingCreated": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Support\\Events\\Notifications\\ProfileUpdated": [
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Events\\Notifications\\RewardsExpiringSoon": [
+   "App\\Models\\RewardAccount",
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Events\\Notifications\\MediaApproved": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingMedia"
+  ],
+  "App\\Support\\Events\\Notifications\\CommissionGenerated": [
+   "App\\Models\\PartnerCommission"
+  ],
+  "App\\Support\\Events\\Notifications\\PartnerRejected": [
+   "App\\Models\\Partner"
+  ],
+  "App\\Support\\Events\\Notifications\\PaymentRefunded": [
+   "App\\Models\\Booking",
+   "App\\Models\\Payment"
+  ],
+  "App\\Support\\Events\\Notifications\\ScreenProviderCreated": [
+   "App\\Models\\ScreenProvider"
+  ],
+  "App\\Support\\Events\\Notifications\\RewardsRedeemed": [
+   "App\\Models\\Booking",
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Events\\Notifications\\BookingCancelled": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Support\\Events\\Notifications\\ContactEnquiryClosed": [
+   "App\\Models\\ContactEnquiry"
+  ],
+  "App\\Support\\Events\\Notifications\\BookingRejected": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation": [
+   "App\\Models\\ScreenProvider"
+  ],
+  "App\\Support\\Events\\Notifications\\RewardsEarned": [
+   "App\\Models\\Booking",
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Events\\Notifications\\PaymentFailed": [
+   "App\\Models\\Booking",
+   "App\\Models\\Payment"
+  ],
+  "App\\Support\\Events\\Notifications\\PaymentReceived": [
+   "App\\Models\\Booking",
+   "App\\Models\\Payment"
+  ],
+  "App\\Support\\Events\\Notifications\\ScreenProviderApproved": [
+   "App\\Models\\ScreenProvider"
+  ],
+  "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned": [
+   "App\\Models\\ScreenProviderEnquiry",
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted": [
+   "App\\Models\\ProductEnquiry"
+  ],
+  "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed": [
+   "App\\Models\\ScreenProviderEnquiry"
+  ],
+  "App\\Support\\Events\\Notifications\\MediaUploaded": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingMedia"
+  ],
+  "App\\Support\\Events\\Notifications\\PartnerCreated": [
+   "App\\Models\\Partner"
+  ],
+  "App\\Support\\Events\\Notifications\\MediaRejected": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingMedia"
+  ],
+  "App\\Support\\Events\\Notifications\\PartnerApproved": [
+   "App\\Models\\Partner"
+  ],
+  "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted": [
+   "App\\Models\\ScreenProviderEnquiry"
+  ],
+  "App\\Support\\Events\\Notifications\\RewardsBonusAwarded": [
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Events\\Notifications\\ReferralUsed": [
+   "App\\Models\\Booking",
+   "App\\Models\\ReferralCode",
+   "App\\Models\\ReferralUsage"
+  ],
+  "App\\Support\\Events\\Notifications\\UserRegistered": [
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Events\\Notifications\\BookingApproved": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned": [
+   "App\\Models\\ContactEnquiry",
+   "App\\Models\\User"
+  ],
+  "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted": [
+   "App\\Models\\ContactEnquiry"
+  ],
+  "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted": [
+   "App\\Models\\ScreenProviderEnquiry"
+  ],
+  "App\\Support\\Events\\Notifications\\ScreenProviderRejected": [
+   "App\\Models\\ScreenProvider"
+  ],
+  "App\\Support\\Authorization\\RolePermissionChecker": [
+   "App\\Models\\Role",
+   "App\\Models\\User"
+  ],
+  "App\\Http\\Middleware\\PermissionMiddleware": [
+   "App\\Models\\User",
+   "App\\Support\\Authorization\\RolePermissionChecker"
+  ],
+  "App\\Http\\Resources\\AssetResource": [],
+  "App\\Http\\Resources\\RoleResource": [
+   "App\\Models\\User"
+  ],
+  "App\\Http\\Resources\\PricingPlanResource": [],
+  "App\\Http\\Resources\\SettingsResource": [],
+  "App\\Http\\Resources\\UserResource": [
+   "App\\Models\\Role"
+  ],
+  "App\\Http\\Resources\\MapAssetResource": [],
+  "App\\Http\\Resources\\AdminUserResource": [
+   "App\\Models\\Role"
+  ],
+  "App\\Http\\Requests\\UpdateAssetRequest": [
+   "App\\Domain\\Pricing\\Enums\\PricingUnit",
+   "App\\Enums\\AssetType"
+  ],
+  "App\\Http\\Requests\\PricingPlanRequest": [],
+  "App\\Http\\Requests\\RoleRequest": [],
+  "App\\Http\\Requests\\CreateAssetRequest": [
+   "App\\Domain\\Pricing\\Enums\\PricingUnit",
+   "App\\Enums\\AssetType"
+  ],
+  "App\\Http\\Requests\\SettingsRequest": [],
+  "App\\Http\\Controllers\\EnquiryController": [
+   "App\\Models\\ContactEnquiry",
+   "App\\Models\\Enquiry"
+  ],
+  "App\\Http\\Controllers\\ReferralCodeController": [
+   "App\\Models\\Partner",
+   "App\\Models\\ReferralCode",
+   "App\\Models\\ReferralUsage",
+   "App\\Services\\Campaign\\ReferralService"
+  ],
+  "App\\Http\\Controllers\\BlogTagController": [
+   "App\\Models\\BlogTag"
+  ],
+  "App\\Http\\Controllers\\FileController": [],
+  "App\\Http\\Controllers\\JobPostController": [
+   "App\\Models\\JobPost"
+  ],
+  "App\\Http\\Controllers\\Controller": [],
+  "App\\Http\\Controllers\\JobCategoryController": [
+   "App\\Models\\JobCategory"
+  ],
+  "App\\Http\\Controllers\\TestimonialController": [
+   "App\\Models\\Testimonial"
+  ],
+  "App\\Http\\Controllers\\AdminScreenProviderEnquiryController": [
+   "App\\Models\\ScreenProviderEnquiry",
+   "App\\Models\\User",
+   "App\\Services\\ScreenProviderService",
+   "App\\Support\\Events\\Notifications\\ScreenProviderLeadAssigned",
+   "App\\Support\\Events\\Notifications\\ScreenProviderLeadClosed",
+   "App\\Support\\Events\\Notifications\\ScreenProviderLeadConverted"
+  ],
+  "App\\Http\\Controllers\\AdvertisementCategoryController": [
+   "App\\Models\\AdvertisementCategory",
+   "App\\Models\\Booking"
+  ],
+  "App\\Http\\Controllers\\ReferralAnalyticsController": [
+   "App\\Models\\Partner",
+   "App\\Models\\PartnerCommission",
+   "App\\Models\\ReferralCode",
+   "App\\Models\\ReferralUsage",
+   "App\\Services\\Campaign\\ReferralService",
+   "App\\Services\\CommissionService",
+   "App\\Support\\Events\\Notifications\\CommissionGenerated"
+  ],
+  "App\\Http\\Controllers\\AuthorController": [
+   "App\\Models\\User"
+  ],
+  "App\\Http\\Controllers\\DashBoardController": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\ContactEnquiry",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenProvider",
+   "App\\Models\\ScreenProviderSettlement",
+   "App\\Services\\Booking\\BookingAnalyticsService",
+   "App\\Services\\Campaign\\ScreenAnalyticsService",
+   "App\\Services\\Settlement\\RevenueAnalyticsService"
+  ],
+  "App\\Http\\Controllers\\BlogController": [
+   "App\\Models\\Blog",
+   "App\\Models\\BlogTag",
+   "App\\Models\\Category"
+  ],
+  "App\\Http\\Controllers\\SuccessStoryController": [
+   "App\\Models\\SuccessStory"
+  ],
+  "App\\Http\\Controllers\\AuthController": [
+   "App\\Http\\Resources\\UserResource",
+   "App\\Models\\User",
+   "App\\Support\\Events\\Notifications\\ProfileUpdated",
+   "App\\Support\\Events\\Notifications\\UserRegistered"
+  ],
+  "App\\Http\\Controllers\\ReportController": [
+   "App\\Application\\Reporting\\Exports\\Contracts\\ReportExporter",
+   "App\\Application\\Reporting\\ReportQueryRegistry"
+  ],
+  "App\\Http\\Controllers\\ScreenCategoryController": [
+   "App\\Models\\ScreenCategory"
+  ],
+  "App\\Http\\Controllers\\AdminScreenProviderController": [
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenProvider",
+   "App\\Models\\ScreenProviderSettlement",
+   "App\\Services\\RevenueDistributionService",
+   "App\\Services\\ScreenDeletionService",
+   "App\\Services\\ScreenProviderService",
+   "App\\Services\\SettlementService"
+  ],
+  "App\\Http\\Controllers\\PricingPlanController": [
+   "App\\Http\\Requests\\PricingPlanRequest",
+   "App\\Http\\Resources\\PricingPlanResource",
+   "App\\Models\\PricingPlan",
+   "App\\Services\\BookingPriceCalculator",
+   "App\\Services\\PricingService"
+  ],
+  "App\\Http\\Controllers\\ContactEnquiryController": [
+   "App\\Models\\ContactEnquiry",
+   "App\\Support\\Events\\Notifications\\ContactEnquirySubmitted"
+  ],
+  "App\\Http\\Controllers\\PartnerApprovalController": [
+   "App\\Models\\Partner",
+   "App\\Services\\PartnerService"
+  ],
+  "App\\Http\\Controllers\\ScreenController": [
+   "App\\Http\\Resources\\AssetResource",
+   "App\\Http\\Resources\\MapAssetResource",
+   "App\\Models\\ActivityLog",
+   "App\\Models\\City",
+   "App\\Models\\Country",
+   "App\\Models\\PricingDurationRule",
+   "App\\Models\\PricingPlan",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenDurationSplitOverride",
+   "App\\Models\\State",
+   "App\\Services\\AssetService",
+   "App\\Services\\ScreenDeletionService"
+  ],
+  "App\\Http\\Controllers\\PartnerPortalController": [
+   "App\\Models\\Partner",
+   "App\\Services\\PartnerService"
+  ],
+  "App\\Http\\Controllers\\AdminSettlementController": [
+   "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+   "App\\Models\\ScreenProvider",
+   "App\\Models\\ScreenProviderSettlement",
+   "App\\Services\\SettlementService"
+  ],
+  "App\\Http\\Controllers\\AdminManualBookingController": [
+   "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+   "App\\Models\\Booking",
+   "App\\Services\\ManualBookingService",
+   "App\\Services\\MediaService",
+   "App\\Support\\Configs\\BookingConfig",
+   "App\\Support\\Events\\Notifications\\BookingApproved",
+   "App\\Support\\Events\\Notifications\\BookingCreated",
+   "App\\Support\\Events\\Notifications\\MediaUploaded",
+   "App\\Support\\Events\\Notifications\\PaymentReceived"
+  ],
+  "App\\Http\\Controllers\\ProductEnquiryController": [
+   "App\\Models\\Product",
+   "App\\Models\\ProductEnquiry",
+   "App\\Support\\Events\\Notifications\\ProductEnquirySubmitted"
+  ],
+  "App\\Http\\Controllers\\PartnerClientController": [
+   "App\\Models\\Booking",
+   "App\\Models\\Partner",
+   "App\\Models\\User",
+   "App\\Services\\ManualBookingService"
+  ],
+  "App\\Http\\Controllers\\AdminProductController": [
+   "App\\Models\\Product"
+  ],
+  "App\\Http\\Controllers\\GalleryController": [
+   "App\\Models\\Gallery"
+  ],
+  "App\\Http\\Controllers\\ProductController": [
+   "App\\Models\\Product"
+  ],
+  "App\\Http\\Controllers\\AchievementController": [
+   "App\\Models\\Achievement"
+  ],
+  "App\\Http\\Controllers\\ScreenProviderPortalController": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenProvider",
+   "App\\Models\\ScreenProviderSettlement",
+   "App\\Services\\RevenueDistributionService",
+   "App\\Services\\ScreenProviderService",
+   "App\\Services\\SettlementService"
+  ],
+  "App\\Http\\Controllers\\AdminPaymentController": [
+   "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+   "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+   "App\\Models\\Payment",
+   "App\\Models\\PaymentLog",
+   "App\\Models\\Refund",
+   "App\\Services\\Campaign\\ReferralTrackingService",
+   "App\\Services\\PaymentService",
+   "App\\Services\\Payment\\PaymentAnalyticsService",
+   "App\\Services\\RefundService",
+   "App\\Support\\Events\\Notifications\\PaymentRefunded"
+  ],
+  "App\\Http\\Controllers\\ScreenProviderEnquiryController": [
+   "App\\Models\\ScreenProviderEnquiry",
+   "App\\Support\\Events\\Notifications\\ScreenProviderEnquirySubmitted"
+  ],
+  "App\\Http\\Controllers\\JobApplicationController": [
+   "App\\Models\\JobApplication"
+  ],
+  "App\\Http\\Controllers\\PartnerController": [
+   "App\\Models\\Partner",
+   "App\\Models\\PartnerCommission",
+   "App\\Models\\ReferralCode",
+   "App\\Models\\ReferralUsage",
+   "App\\Services\\Campaign\\ReferralService",
+   "App\\Services\\PartnerService",
+   "App\\Support\\Events\\Notifications\\PartnerCreated"
+  ],
+  "App\\Http\\Controllers\\PartnerBookingController": [
+   "App\\Models\\Booking",
+   "App\\Models\\Partner",
+   "App\\Models\\User",
+   "App\\Services\\ManualBookingService",
+   "App\\Services\\MediaService"
+  ],
+  "App\\Http\\Controllers\\AdminProductEnquiryController": [
+   "App\\Models\\ProductEnquiry"
+  ],
+  "App\\Http\\Controllers\\PaymentController": [
+   "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+   "App\\Application\\Payment\\UseCases\\GetPaymentStatusUseCase",
+   "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+   "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+   "App\\Models\\Booking",
+   "App\\Support\\Events\\Notifications\\PaymentFailed",
+   "App\\Support\\Events\\Notifications\\PaymentReceived",
+   "App\\Support\\Events\\Notifications\\PaymentRefunded"
+  ],
+  "App\\Http\\Controllers\\CategoryController": [
+   "App\\Models\\Category"
+  ],
+  "App\\Http\\Controllers\\FaqController": [
+   "App\\Models\\Faq"
+  ],
+  "App\\Http\\Controllers\\AnnouncementController": [
+   "App\\Models\\Announcement"
+  ],
+  "App\\Http\\Controllers\\QrCodeController": [
+   "App\\Models\\QrCode",
+   "App\\Models\\QrCodeScan"
+  ],
+  "App\\Http\\Controllers\\PartnerApplicationController": [
+   "App\\Models\\Partner",
+   "App\\Services\\PartnerService"
+  ],
+  "App\\Http\\Controllers\\AdminContactEnquiryController": [
+   "App\\Models\\ContactEnquiry",
+   "App\\Models\\User",
+   "App\\Support\\Events\\Notifications\\ContactEnquiryAssigned",
+   "App\\Support\\Events\\Notifications\\ContactEnquiryClosed"
+  ],
+  "App\\Http\\Controllers\\AssetImportController": [
+   "App\\Services\\AssetImportService"
+  ],
+  "App\\Http\\Controllers\\BookingController": [
+   "App\\Application\\Booking\\Exceptions\\BookingCreationException",
+   "App\\Application\\Booking\\Queries\\CheckBookingAvailabilityQuery",
+   "App\\Application\\Booking\\UseCases\\CreateCampaignBookingUseCase",
+   "App\\Application\\Booking\\UseCases\\RescheduleBookingUseCase",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingActivity",
+   "App\\Models\\BookingMedia",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Payment",
+   "App\\Models\\Screen",
+   "App\\Services\\BookingCapacityService",
+   "App\\Services\\CampaignPricingService",
+   "App\\Services\\InventoryService",
+   "App\\Services\\MediaService",
+   "App\\Services\\RevenueSplitResolverService",
+   "App\\Support\\Configs\\BookingConfig",
+   "App\\Support\\Events\\Notifications\\BookingApproved",
+   "App\\Support\\Events\\Notifications\\BookingCreated",
+   "App\\Support\\Events\\Notifications\\BookingRejected",
+   "App\\Support\\Events\\Notifications\\MediaApproved",
+   "App\\Support\\Events\\Notifications\\MediaRejected",
+   "App\\Support\\Events\\Notifications\\MediaUploaded",
+   "App\\Support\\Events\\Notifications\\PaymentReceived"
+  ],
+  "App\\Http\\Controllers\\Auth\\ForgotPasswordController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+   "App\\Mail\\PasswordResetMail",
+   "App\\Models\\User"
+  ],
+  "App\\Http\\Controllers\\Auth\\ResetPasswordController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Resources\\UserResource",
+   "App\\Models\\User"
+  ],
+  "App\\Http\\Controllers\\Auth\\GoogleAuthController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Resources\\UserResource",
+   "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+   "App\\Models\\User"
+  ],
+  "App\\Http\\Controllers\\Api\\PermissionController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Middleware\\PermissionMiddleware",
+   "App\\Models\\ActivityLog",
+   "App\\Models\\Role",
+   "App\\Models\\RolePermission"
+  ],
+  "App\\Http\\Controllers\\Api\\RecommendationEngineController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Resources\\AssetResource",
+   "App\\Services\\Campaign\\RecommendationService"
+  ],
+  "App\\Http\\Controllers\\Api\\CurrencyController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Services\\Campaign\\CurrencyService"
+  ],
+  "App\\Http\\Controllers\\Api\\AdminUserController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Resources\\AdminUserResource",
+   "App\\Models\\ActivityLog",
+   "App\\Models\\Role",
+   "App\\Models\\User"
+  ],
+  "App\\Http\\Controllers\\Api\\BudgetRecommendationController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Models\\City",
+   "App\\Models\\State",
+   "App\\Services\\Campaign\\BudgetRecommendationService"
+  ],
+  "App\\Http\\Controllers\\Api\\AvailabilityEngineController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Services\\BookingCapacityService"
+  ],
+  "App\\Http\\Controllers\\Api\\PricingEngineController": [
+   "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+   "App\\Http\\Controllers\\Controller"
+  ],
+  "App\\Http\\Controllers\\Api\\RoleController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Middleware\\PermissionMiddleware",
+   "App\\Http\\Requests\\RoleRequest",
+   "App\\Http\\Resources\\RoleResource",
+   "App\\Models\\ActivityLog",
+   "App\\Models\\Role",
+   "App\\Models\\RolePermission"
+  ],
+  "App\\Http\\Controllers\\Api\\AdminCurrencyController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Services\\Campaign\\CurrencyService"
+  ],
+  "App\\Http\\Controllers\\Api\\FinanceController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Services\\FinanceService"
+  ],
+  "App\\Http\\Controllers\\Api\\BookingEngineController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Screen",
+   "App\\Services\\BookingWorkflowService",
+   "App\\Services\\ConflictDetectionService",
+   "App\\Services\\InventoryService",
+   "App\\Services\\PricingEngine"
+  ],
+  "App\\Http\\Controllers\\Api\\ProfileController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Models\\RewardAccount",
+   "App\\Models\\RewardTransaction",
+   "App\\Services\\ProfileService",
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Http\\Controllers\\Api\\ClientController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Services\\Campaign\\ClientAnalyticsService",
+   "App\\Services\\Campaign\\ClientService"
+  ],
+  "App\\Http\\Controllers\\Api\\AssetController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Requests\\CreateAssetRequest",
+   "App\\Http\\Requests\\UpdateAssetRequest",
+   "App\\Http\\Resources\\AssetResource",
+   "App\\Services\\AssetService"
+  ],
+  "App\\Http\\Controllers\\Api\\AdminRewardsController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Models\\RewardAccount",
+   "App\\Models\\RewardTransaction",
+   "App\\Models\\User",
+   "App\\Services\\Campaign\\LoyaltyService"
+  ],
+  "App\\Http\\Controllers\\Api\\SettingsController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Requests\\SettingsRequest",
+   "App\\Http\\Resources\\SettingsResource",
+   "App\\Models\\Setting",
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Http\\Controllers\\Api\\CoverageController": [
+   "App\\Http\\Controllers\\Controller",
+   "App\\Http\\Resources\\AssetResource",
+   "App\\Services\\Campaign\\CoverageService"
+  ],
+  "App\\Application\\Reporting\\ReportQueryRegistry": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Queries\\BookingReportQuery",
+   "App\\Application\\Reporting\\Queries\\CampaignReportQuery",
+   "App\\Application\\Reporting\\Queries\\CategoryReportQuery",
+   "App\\Application\\Reporting\\Queries\\CityReportQuery",
+   "App\\Application\\Reporting\\Queries\\OverviewQuery",
+   "App\\Application\\Reporting\\Queries\\ReferralReportQuery",
+   "App\\Application\\Reporting\\Queries\\RevenueReportQuery",
+   "App\\Application\\Reporting\\Queries\\RewardReportQuery",
+   "App\\Application\\Reporting\\Queries\\ScreenProviderReportQuery",
+   "App\\Application\\Reporting\\Queries\\ScreenReportQuery"
+  ],
+  "App\\Application\\Reporting\\Contracts\\ReportQuery": [],
+  "App\\Application\\Reporting\\Queries\\CityReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Services\\Campaign\\ScreenAnalyticsService",
+   "App\\Services\\Settlement\\RevenueAnalyticsService"
+  ],
+  "App\\Application\\Reporting\\Queries\\CategoryReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Models\\Booking"
+  ],
+  "App\\Application\\Reporting\\Queries\\RevenueReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Services\\Settlement\\RevenueAnalyticsService"
+  ],
+  "App\\Application\\Reporting\\Queries\\ScreenReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Services\\Campaign\\ScreenAnalyticsService"
+  ],
+  "App\\Application\\Reporting\\Queries\\BookingReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Services\\Booking\\BookingAnalyticsService"
+  ],
+  "App\\Application\\Reporting\\Queries\\OverviewQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\GrowthRate",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Services\\Booking\\BookingAnalyticsService",
+   "App\\Services\\Campaign\\ScreenAnalyticsService",
+   "App\\Services\\Settlement\\RevenueAnalyticsService"
+  ],
+  "App\\Application\\Reporting\\Queries\\ScreenProviderReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Models\\Booking"
+  ],
+  "App\\Application\\Reporting\\Queries\\CampaignReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\DurationLabelFormatter",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Services\\Booking\\BookingAnalyticsService",
+   "App\\Services\\Campaign\\ScreenAnalyticsService"
+  ],
+  "App\\Application\\Reporting\\Queries\\RewardReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\ReportPeriod",
+   "App\\Models\\Booking",
+   "App\\Models\\RewardAccount",
+   "App\\Models\\RewardTransaction"
+  ],
+  "App\\Application\\Reporting\\Queries\\ReferralReportQuery": [
+   "App\\Application\\Reporting\\Contracts\\ReportQuery",
+   "App\\Application\\Reporting\\Support\\ReportPeriod"
+  ],
+  "App\\Application\\Reporting\\Exports\\CsvReportExporter": [
+   "App\\Application\\Reporting\\Exports\\Contracts\\ReportExporter",
+   "App\\Support\\DurationFormatter"
+  ],
+  "App\\Application\\Reporting\\Exports\\Contracts\\ReportExporter": [],
+  "App\\Application\\Reporting\\Support\\ReportPeriod": [],
+  "App\\Application\\Reporting\\Support\\GrowthRate": [],
+  "App\\Application\\Reporting\\Support\\DurationLabelFormatter": [
+   "App\\Support\\DurationFormatter"
+  ],
+  "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase": [
+   "App\\Models\\Booking",
+   "App\\Models\\ReferralCode",
+   "App\\Services\\Campaign\\ReferralService",
+   "App\\Services\\Campaign\\ReferralTrackingService",
+   "App\\Support\\Events\\Notifications\\CommissionGenerated",
+   "App\\Support\\Events\\Notifications\\ReferralUsed"
+  ],
+  "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase": [
+   "App\\Models\\Booking",
+   "App\\Services\\RevenueDistributionService"
+  ],
+  "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase": [
+   "App\\Models\\User",
+   "App\\Services\\SettlementService"
+  ],
+  "App\\Application\\Booking\\Queries\\CheckBookingAvailabilityQuery": [
+   "App\\Models\\Screen",
+   "App\\Services\\BookingCapacityService",
+   "App\\Services\\InventoryService"
+  ],
+  "App\\Application\\Booking\\Exceptions\\BookingCreationException": [],
+  "App\\Application\\Booking\\UseCases\\CreateCampaignBookingUseCase": [
+   "App\\Application\\Booking\\Exceptions\\BookingCreationException",
+   "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingActivity",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\PricingDurationRule",
+   "App\\Models\\Screen",
+   "App\\Models\\User",
+   "App\\Services\\BookingCapacityService",
+   "App\\Services\\CampaignPricingService",
+   "App\\Services\\Campaign\\LoyaltyService",
+   "App\\Services\\InventoryService",
+   "App\\Services\\RevenueSplitResolverService",
+   "App\\Support\\Events\\Notifications\\BookingCreated"
+  ],
+  "App\\Application\\Booking\\UseCases\\RescheduleBookingUseCase": [
+   "App\\Application\\Booking\\Exceptions\\BookingCreationException",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingActivity",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Screen",
+   "App\\Models\\User",
+   "App\\Services\\BookingCapacityService",
+   "App\\Services\\InventoryService"
+  ],
+  "App\\Application\\Payment\\UseCases\\PaymentStatusProjector": [
+   "App\\Models\\Booking",
+   "App\\Models\\Payment"
+  ],
+  "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase": [
+   "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+   "App\\Domain\\Payment\\Support\\Money",
+   "App\\Models\\Booking",
+   "App\\Models\\Payment",
+   "App\\Services\\PaymentService"
+  ],
+  "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase": [
+   "App\\Models\\Booking",
+   "App\\Models\\Payment",
+   "App\\Models\\User",
+   "App\\Services\\ManualBookingService",
+   "App\\Support\\Events\\Notifications\\PaymentReceived"
+  ],
+  "App\\Application\\Payment\\UseCases\\GetPaymentStatusUseCase": [
+   "App\\Models\\Payment"
+  ],
+  "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase": [
+   "App\\Models\\Payment",
+   "App\\Services\\PaymentService"
+  ],
+  "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase": [
+   "App\\Models\\Payment",
+   "App\\Models\\Refund",
+   "App\\Services\\PaymentService",
+   "App\\Services\\RefundService"
+  ],
+  "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter": [
+   "App\\Services\\PricingEngine"
+  ],
+  "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase": [
+   "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface"
+  ],
+  "App\\Infrastructure\\Payments\\Persistence\\EloquentPaymentRepository": [
+   "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+   "App\\Models\\Booking",
+   "App\\Models\\Payment"
+  ],
+  "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway": [
+   "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface"
+  ],
+  "App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository": [
+   "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Screen"
+  ],
+  "App\\Infrastructure\\Financial\\Persistence\\EloquentPartnerCommissionRepository": [
+   "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+   "App\\Models\\PartnerCommission"
+  ],
+  "App\\Infrastructure\\Auth\\GoogleOAuthAdapter": [
+   "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface"
+  ],
+  "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface": [],
+  "App\\Infrastructure\\Storage\\LaravelStorageAdapter": [
+   "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface"
+  ],
+  "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface": [],
+  "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient": [
+   "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface"
+  ],
+  "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface": [],
+  "App\\Infrastructure\\Notifications\\LaravelMailAdapter": [
+   "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface"
+  ],
+  "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface": [],
+  "App\\Infrastructure\\Media\\GdImageProcessor": [
+   "App\\Infrastructure\\Media\\Contracts\\ImageProcessingContractInterface"
+  ],
+  "App\\Infrastructure\\Media\\Contracts\\ImageProcessingContractInterface": [],
+  "App\\Domain\\Asset\\Events\\AssetCreated": [
+   "App\\Models\\Screen"
+  ],
+  "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface": [
+   "App\\Models\\BookingScreen"
+  ],
+  "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface": [
+   "App\\Models\\PartnerCommission"
+  ],
+  "App\\Domain\\Financial\\Support\\RevenueAllocation": [],
+  "App\\Domain\\Booking\\Enums\\BookingStatus": [],
+  "App\\Domain\\Booking\\Exceptions\\InvalidBookingStateException": [],
+  "App\\Domain\\Payment\\PaymentStatus": [
+   "App\\Models\\Payment"
+  ],
+  "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface": [],
+  "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface": [
+   "App\\Models\\Booking",
+   "App\\Models\\Payment"
+  ],
+  "App\\Domain\\Payment\\Support\\Money": [],
+  "App\\Domain\\Availability\\Exceptions\\FleetCapacityExceededException": [],
+  "App\\Domain\\Pricing\\CampaignPricingEngine": [
+   "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+   "App\\Models\\ReferralCode",
+   "App\\Models\\RewardAccount",
+   "App\\Models\\Screen",
+   "App\\Services\\Campaign\\LoyaltyService",
+   "App\\Services\\PricingRuleEngine",
+   "App\\Services\\Pricing\\DailyPricingCalculator",
+   "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+   "App\\Services\\Pricing\\ReferralPricingCalculator",
+   "App\\Services\\Pricing\\ScreenPricingResolver",
+   "App\\Services\\SettingsService"
+  ],
+  "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface": [],
+  "App\\Domain\\Pricing\\Enums\\PricingUnit": [],
+  "App\\Domain\\Pricing\\Exceptions\\PricingException": [],
+  "App\\Observers\\AssetObserver": [
+   "App\\Models\\Screen"
+  ],
+  "App\\Helpers\\MediaHelper": [
+   "App\\Infrastructure\\Media\\Contracts\\ImageProcessingContractInterface",
+   "App\\Infrastructure\\Media\\GdImageProcessor"
+  ],
+  "App\\Services\\SettingsService": [
+   "App\\Models\\Setting"
+  ],
+  "App\\Services\\BookingWorkflowService": [
+   "App\\Domain\\Booking\\Enums\\BookingStatus",
+   "App\\Domain\\Booking\\Exceptions\\InvalidBookingStateException",
+   "App\\Models\\Booking"
+  ],
+  "App\\Services\\NotificationService": [
+   "App\\Infrastructure\\Notifications\\Contracts\\MailContractInterface",
+   "App\\Models\\NotificationLog",
+   "App\\Support\\Configs\\NotificationConfig"
+  ],
+  "App\\Services\\ScreenDeletionService": [
+   "App\\Models\\ActivityLog",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenProvider",
+   "App\\Models\\ScreenProviderActivity"
+  ],
+  "App\\Services\\PaymentService": [
+   "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+   "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+   "App\\Domain\\Payment\\Support\\Money",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingPricingBreakdown",
+   "App\\Models\\Payment",
+   "App\\Services\\Campaign\\ReferralTrackingService"
+  ],
+  "App\\Services\\BookingPriceCalculator": [
+   "App\\Models\\PricingPlan"
+  ],
+  "App\\Services\\FinanceService": [
+   "App\\Models\\ActivityLog",
+   "App\\Models\\Booking",
+   "App\\Models\\Payment",
+   "App\\Models\\Refund",
+   "App\\Models\\ScreenProviderSettlement",
+   "App\\Services\\Settlement\\RevenueAnalyticsService"
+  ],
+  "App\\Services\\ManualBookingService": [
+   "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+   "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+   "App\\Domain\\Pricing\\Exceptions\\PricingException",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingActivity",
+   "App\\Models\\BookingMedia",
+   "App\\Models\\BookingPricingBreakdown",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Payment",
+   "App\\Models\\Screen",
+   "App\\Models\\User",
+   "App\\Support\\Events\\Notifications\\PaymentReceived"
+  ],
+  "App\\Services\\RevenueDistributionService": [
+   "App\\Domain\\Financial\\Support\\RevenueAllocation",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenProviderActivity"
+  ],
+  "App\\Services\\BookingCapacityService": [
+   "App\\Models\\Screen",
+   "App\\Support\\BookingEligibilityResult",
+   "App\\Support\\Configs\\BookingConfig"
+  ],
+  "App\\Services\\CampaignPricingService": [
+   "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingPricingBreakdown"
+  ],
+  "App\\Services\\AssetImportService": [
+   "App\\Models\\City",
+   "App\\Models\\Country",
+   "App\\Models\\PricingPlan",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenCategory",
+   "App\\Models\\ScreenProvider",
+   "App\\Models\\State"
+  ],
+  "App\\Services\\FirstBookingDiscountService": [
+   "App\\Models\\Booking",
+   "App\\Models\\User"
+  ],
+  "App\\Services\\InventoryService": [
+   "App\\Enums\\AssetType",
+   "App\\Models\\Screen"
+  ],
+  "App\\Services\\SettlementService": [
+   "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+   "App\\Models\\Booking",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenProvider",
+   "App\\Models\\ScreenProviderActivity",
+   "App\\Models\\ScreenProviderSettlement",
+   "App\\Models\\User"
+  ],
+  "App\\Services\\MediaService": [
+   "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+   "App\\Support\\Configs\\BookingConfig",
+   "App\\Support\\Configs\\MediaConfig"
+  ],
+  "App\\Services\\RefundService": [
+   "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+   "App\\Domain\\Payment\\Support\\Money",
+   "App\\Models\\Payment",
+   "App\\Models\\PaymentLog",
+   "App\\Models\\Refund"
+  ],
+  "App\\Services\\CommissionService": [
+   "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+   "App\\Models\\PartnerCommission",
+   "App\\Models\\ReferralUsage",
+   "App\\Support\\Events\\Notifications\\CommissionGenerated"
+  ],
+  "App\\Services\\ConflictDetectionService": [
+   "App\\Domain\\Availability\\Exceptions\\FleetCapacityExceededException"
+  ],
+  "App\\Services\\AssetService": [
+   "App\\Models\\Screen",
+   "App\\Repositories\\Asset\\AssetRepositoryInterface",
+   "App\\Services\\Campaign\\AssetDiscoveryFilterService",
+   "App\\Services\\Campaign\\CoverageService"
+  ],
+  "App\\Services\\ProfileService": [
+   "App\\Infrastructure\\Storage\\Contracts\\StorageContractInterface",
+   "App\\Models\\Booking",
+   "App\\Models\\User",
+   "App\\Services\\Campaign\\ClientAnalyticsService",
+   "App\\Services\\Campaign\\ClientService"
+  ],
+  "App\\Services\\RevenueSplitResolverService": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingPricingBreakdown",
+   "App\\Models\\BookingScreen",
+   "App\\Models\\PricingDurationRule",
+   "App\\Models\\PricingPlan",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenDurationSplitOverride"
+  ],
+  "App\\Services\\PartnerService": [
+   "App\\Models\\Partner",
+   "App\\Models\\ReferralCode",
+   "App\\Models\\User",
+   "App\\Support\\Events\\Notifications\\PartnerApproved",
+   "App\\Support\\Events\\Notifications\\PartnerRejected"
+  ],
+  "App\\Services\\PricingRuleEngine": [
+   "App\\Models\\PricingDurationRule",
+   "App\\Models\\PricingPeakRule",
+   "App\\Models\\PricingPlan",
+   "App\\Models\\PricingScreenRule",
+   "App\\Models\\PricingWeekendRule",
+   "App\\Services\\Pricing\\DailyPricingCalculator"
+  ],
+  "App\\Services\\PricingEngine": [
+   "App\\Models\\Screen"
+  ],
+  "App\\Services\\ReportService": [
+   "App\\Application\\Reporting\\ReportQueryRegistry"
+  ],
+  "App\\Services\\PricingService": [
+   "App\\Models\\PricingPlan",
+   "App\\Services\\Campaign\\ExchangeRateService"
+  ],
+  "App\\Services\\ScreenProviderService": [
+   "App\\Models\\ActivityLog",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenProvider",
+   "App\\Models\\ScreenProviderActivity",
+   "App\\Models\\ScreenProviderEnquiry",
+   "App\\Models\\User",
+   "App\\Support\\Events\\Notifications\\ScreenProviderApproved",
+   "App\\Support\\Events\\Notifications\\ScreenProviderCreated",
+   "App\\Support\\Events\\Notifications\\ScreenProviderPortalInvitation",
+   "App\\Support\\Events\\Notifications\\ScreenProviderRejected",
+   "App\\Support\\Exceptions\\UserConflictException"
+  ],
+  "App\\Services\\Settlement\\RevenueAnalyticsService": [
+   "App\\Models\\Booking",
+   "App\\Models\\Payment"
+  ],
+  "App\\Services\\Booking\\BookingAnalyticsService": [
+   "App\\Models\\Booking"
+  ],
+  "App\\Services\\Payment\\PaymentAnalyticsService": [
+   "App\\Models\\Booking",
+   "App\\Models\\PartnerCommission",
+   "App\\Models\\Payment",
+   "App\\Models\\ReferralUsage",
+   "App\\Models\\Refund"
+  ],
+  "App\\Services\\Campaign\\BudgetRecommendationService": [
+   "App\\Enums\\AssetType",
+   "App\\Models\\City",
+   "App\\Models\\Screen",
+   "App\\Models\\ScreenCategory",
+   "App\\Models\\State",
+   "App\\Services\\CampaignPricingService",
+   "App\\Services\\InventoryService",
+   "App\\Services\\Pricing\\ScreenPricingResolver"
+  ],
+  "App\\Services\\Campaign\\ReferralTrackingService": [
+   "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+   "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+   "App\\Models\\Booking",
+   "App\\Models\\PartnerCommission",
+   "App\\Models\\ReferralCode",
+   "App\\Models\\ReferralUsage",
+   "App\\Services\\Campaign\\ReferralService",
+   "App\\Support\\Events\\Notifications\\ReferralUsed"
+  ],
+  "App\\Services\\Campaign\\AssetDiscoveryFilterService": [
+   "App\\Repositories\\Asset\\AssetRepositoryInterface"
+  ],
+  "App\\Services\\Campaign\\ScreenAnalyticsService": [
+   "App\\Models\\Booking",
+   "App\\Models\\Screen",
+   "App\\Support\\Configs\\BookingConfig"
+  ],
+  "App\\Services\\Campaign\\CoverageService": [
+   "App\\Repositories\\Asset\\AssetRepositoryInterface"
+  ],
+  "App\\Services\\Campaign\\ClientAnalyticsService": [
+   "App\\Models\\Booking",
+   "App\\Models\\ReferralUsage",
+   "App\\Models\\User"
+  ],
+  "App\\Services\\Campaign\\LoyaltyService": [
+   "App\\Models\\Booking",
+   "App\\Models\\RewardAccount",
+   "App\\Models\\RewardRedemption",
+   "App\\Models\\RewardTransaction",
+   "App\\Models\\User",
+   "App\\Services\\SettingsService",
+   "App\\Support\\Events\\Notifications\\RewardsBonusAwarded",
+   "App\\Support\\Events\\Notifications\\RewardsEarned",
+   "App\\Support\\Events\\Notifications\\RewardsRedeemed"
+  ],
+  "App\\Services\\Campaign\\CurrencyService": [],
+  "App\\Services\\Campaign\\CountryDetectionService": [],
+  "App\\Services\\Campaign\\ClientService": [
+   "App\\Models\\Booking",
+   "App\\Models\\Payment",
+   "App\\Models\\ReferralUsage",
+   "App\\Models\\User"
+  ],
+  "App\\Services\\Campaign\\ExchangeRateService": [
+   "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+   "App\\Models\\CurrencyRate"
+  ],
+  "App\\Services\\Campaign\\ReferralService": [
+   "App\\Models\\PartnerCommission",
+   "App\\Models\\ReferralCode",
+   "App\\Models\\ReferralUsage"
+  ],
+  "App\\Services\\Campaign\\RecommendationService": [
+   "App\\Models\\Screen"
+  ],
+  "App\\Services\\Pricing\\DailyPricingCalculator": [
+   "App\\Models\\PricingPlan",
+   "App\\Models\\PricingPlanDuration"
+  ],
+  "App\\Services\\Pricing\\ReferralPricingCalculator": [
+   "App\\Models\\ReferralCode"
+  ],
+  "App\\Services\\Pricing\\ScreenPricingResolver": [
+   "App\\Domain\\Pricing\\Exceptions\\PricingException",
+   "App\\Models\\PricingPlan",
+   "App\\Models\\Screen"
+  ],
+  "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator": [
+   "App\\Models\\User",
+   "App\\Services\\FirstBookingDiscountService"
+  ],
+  "App\\Console\\Commands\\ExpireRewardPoints": [
+   "App\\Models\\RewardAccount",
+   "App\\Models\\RewardTransaction",
+   "App\\Services\\SettingsService",
+   "App\\Support\\Events\\Notifications\\RewardsExpiringSoon"
+  ],
+  "App\\Console\\Commands\\SyncExchangeRates": [
+   "App\\Services\\Campaign\\ExchangeRateService"
+  ],
+  "App\\Console\\Commands\\ExpirePendingBookings": [
+   "App\\Models\\Booking",
+   "App\\Models\\BookingActivity"
+  ]
+ }
+}

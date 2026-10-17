@@ -1,0 +1,427 @@
+{
+  "phase": "0.4",
+  "name": "Canonical Marketplace Domain Boundary Map",
+  "generated_at": "2026-09-25T22:52:00+05:30",
+  "total_domains": 12,
+  "domains": [
+    {
+      "domain": "Campaign",
+      "purpose": "Campaign planning, objectives, advertiser categorization, and high-level campaign metadata.",
+      "entities": ["App\\Models\\AdvertisementCategory", "App\\Models\\HoldBooking"],
+      "business_rules": [
+        "Advertisement category must be active for booking selection",
+        "Campaign time boundaries must satisfy start_time < end_time",
+        "Hold booking reservation TTL and release"
+      ],
+      "services": [],
+      "controllers": [
+        "App\\Http\\Controllers\\AdvertisementCategoryController",
+        "App\\Http\\Controllers\\CampaignController"
+      ],
+      "events": [],
+      "jobs": [],
+      "policies": [],
+      "tables": ["advertisement_categories", "hold_bookings"],
+      "external_integrations": [],
+      "dependencies": ["Asset", "Pricing"],
+      "target_layer": "Domain\\Campaign"
+    },
+    {
+      "domain": "Media",
+      "purpose": "Client ad creative uploads, review lifecycle, aspect ratio/resolution verification, and creative approval/rejection.",
+      "entities": ["App\\Models\\BookingMedia"],
+      "business_rules": [
+        "All uploaded media must be approved before booking can transition to running/scheduled",
+        "Media dimensions must match screen resolution specs",
+        "Rejection requires admin reason"
+      ],
+      "services": ["App\\Services\\MediaService"],
+      "controllers": [
+        "App\\Http\\Controllers\\BookingMediaController",
+        "App\\Http\\Controllers\\AdminMediaReviewController"
+      ],
+      "events": [
+        "App\\Events\\Notifications\\MediaUploaded",
+        "App\\Events\\Notifications\\MediaApproved",
+        "App\\Events\\Notifications\\MediaRejected"
+      ],
+      "jobs": [],
+      "policies": [],
+      "tables": ["booking_media"],
+      "external_integrations": ["Local/S3 Filesystem Storage"],
+      "dependencies": ["Booking", "Asset", "Creative"],
+      "target_layer": "Domain\\Media"
+    },
+    {
+      "domain": "Asset",
+      "purpose": "Physical billboard and digital display screen inventory, mobile fleets, technical specifications, geographical hierarchy, and operational states.",
+      "entities": [
+        "App\\Models\\Screen",
+        "App\\Models\\ScreenCategory",
+        "App\\Models\\Country",
+        "App\\Models\\State",
+        "App\\Models\\City",
+        "App\\Models\\MobileFleetCoverage"
+      ],
+      "business_rules": [
+        "Screen code generation formatting (SCR-XXXX)",
+        "Operational status check (status='active' AND booking_status='available')",
+        "Fleet size constraints (min 1, default 1 for fixed assets)",
+        "Mobile fleet geographic coverage boundary synchronization",
+        "Safe screen soft-deletion preventing active campaign cancellation"
+      ],
+      "services": [
+        "App\\Services\\InventoryService",
+        "App\\Services\\ScreenDeletionService",
+        "App\\Services\\LocationService"
+      ],
+      "controllers": [
+        "App\\Http\\Controllers\\ScreenController",
+        "App\\Http\\Controllers\\ScreenCategoryController",
+        "App\\Http\\Controllers\\LocationController",
+        "App\\Http\\Controllers\\MapController"
+      ],
+      "events": ["App\\Events\\AssetCreated"],
+      "jobs": ["App\\Jobs\\GenerateAssetCodeJob"],
+      "policies": ["App\\Policies\\AssetPolicy"],
+      "tables": [
+        "screens",
+        "screen_categories",
+        "countries",
+        "states",
+        "cities",
+        "mobile_fleet_coverages"
+      ],
+      "external_integrations": ["Google Maps / Geocoding APIs"],
+      "dependencies": ["Provider", "Pricing"],
+      "target_layer": "Domain\\Asset"
+    },
+    {
+      "domain": "Provider",
+      "purpose": "Third-party screen provider onboarding, contracts, commercial revenue percentage splits, provider portal access, and payout details.",
+      "entities": [
+        "App\\Models\\ScreenProvider",
+        "App\\Models\\ScreenProviderInvitation",
+        "App\\Models\\ScreenProviderActivity"
+      ],
+      "business_rules": [
+        "Provider revenue split percentage validation (illuvision_pct + provider_pct = 100)",
+        "Provider invitation token expiration (24h default)",
+        "Provider portal screen management isolation (providers can only access their own screens)",
+        "Provider account approval required before screen activation"
+      ],
+      "services": ["App\\Services\\ScreenProviderInvitationService"],
+      "controllers": [
+        "App\\Http\\Controllers\\ScreenProviderPortalController",
+        "App\\Http\\Controllers\\AdminScreenProviderController"
+      ],
+      "events": [
+        "App\\Events\\Notifications\\ScreenProviderInvited",
+        "App\\Events\\Notifications\\ScreenProviderApproved"
+      ],
+      "jobs": [],
+      "policies": [],
+      "tables": [
+        "screen_providers",
+        "screen_provider_invitations",
+        "screen_provider_activities"
+      ],
+      "external_integrations": ["SMTP Mailer"],
+      "dependencies": ["Asset", "Settlement"],
+      "target_layer": "Domain\\Provider"
+    },
+    {
+      "domain": "Partner",
+      "purpose": "Advertising agency partner network, managed client accounts, referral code attribution, and tiered commission rights.",
+      "entities": [
+        "App\\Models\\Partner",
+        "App\\Models\\PartnerClient",
+        "App\\Models\\ReferralCode",
+        "App\\Models\\ReferralUsage",
+        "App\\Models\\PartnerCommission"
+      ],
+      "business_rules": [
+        "Partner account must be approved to create client campaigns",
+        "Referral discount formula calculation on campaign subtotal",
+        "Partner commission formula calculated strictly on Illuvision platform revenue share",
+        "Referral code usage limit and date validity checks"
+      ],
+      "services": [
+        "App\\Services\\CommissionService",
+        "App\\Services\\ReferralTrackingService"
+      ],
+      "controllers": [
+        "App\\Http\\Controllers\\PartnerController",
+        "App\\Http\\Controllers\\PartnerBookingController",
+        "App\\Http\\Controllers\\PartnerClientController",
+        "App\\Http\\Controllers\\ReferralCodeController"
+      ],
+      "events": [
+        "App\\Events\\Notifications\\ReferralUsed",
+        "App\\Events\\Notifications\\CommissionGenerated"
+      ],
+      "jobs": [],
+      "policies": ["App\\Policies\\PartnerBookingPolicy"],
+      "tables": [
+        "partners",
+        "partner_clients",
+        "referral_codes",
+        "referral_usages",
+        "partner_commissions"
+      ],
+      "external_integrations": [],
+      "dependencies": ["Booking", "Pricing", "Settlement"],
+      "target_layer": "Domain\\Partner"
+    },
+    {
+      "domain": "Pricing",
+      "purpose": "Server-authoritative monetary rate calculation, duration discounts, screen quantity tiers, peak hours, weekend surcharges, currency conversion, and taxes.",
+      "entities": [
+        "App\\Models\\PricingPlan",
+        "App\\Models\\PricingDurationRule",
+        "App\\Models\\PricingScreenRule",
+        "App\\Models\\PricingPeakRule",
+        "App\\Models\\PricingWeekendRule",
+        "App\\Models\\CurrencyRate",
+        "App\\Models\\ScreenDurationSplitOverride"
+      ],
+      "business_rules": [
+        "Base price unit calculation (minute, hour, day, week, month)",
+        "Minimum duration threshold validation per pricing plan",
+        "Duration discount rule sorting and evaluation",
+        "Screen quantity tiered discount rule evaluation",
+        "Peak hour percentage charge evaluation against operational hours",
+        "Weekend multiplier surcharge evaluation",
+        "Currency conversion rate caching and calculation",
+        "Referral discount cap at campaign subtotal"
+      ],
+      "services": [
+        "App\\Services\\CampaignPricingService",
+        "App\\Services\\PricingEngine",
+        "App\\Services\\PricingRuleEngine",
+        "App\\Services\\ScreenPricingResolver",
+        "App\\Services\\DailyPricingCalculator",
+        "App\\Services\\DurationDiscountCalculator",
+        "App\\Services\\ScreenDiscountCalculator",
+        "App\\Services\\PeakPricingCalculator",
+        "App\\Services\\WeekendPricingCalculator",
+        "App\\Services\\ReferralPricingCalculator",
+        "App\\Services\\TaxEngine",
+        "App\\Services\\ExchangeRateService",
+        "App\\Services\\CurrencyService"
+      ],
+      "controllers": [
+        "App\\Http\\Controllers\\PricingPlanController",
+        "App\\Http\\Controllers\\PricingController",
+        "App\\Http\\Controllers\\Api\\PricingEngineController"
+      ],
+      "events": [],
+      "jobs": [],
+      "policies": [],
+      "tables": [
+        "pricing_plans",
+        "pricing_duration_rules",
+        "pricing_screen_rules",
+        "pricing_peak_rules",
+        "pricing_weekend_rules",
+        "currency_rates",
+        "screen_duration_split_overrides"
+      ],
+      "external_integrations": ["ExchangeRate-API"],
+      "dependencies": ["Asset", "Partner"],
+      "target_layer": "Domain\\Pricing"
+    },
+    {
+      "domain": "Availability",
+      "purpose": "Atomic inventory slot allocation, daily ad quota loop tracking, physical time-interval collision detection, and mobile fleet line sweep concurrency.",
+      "entities": [
+        "App\\Models\\Screen",
+        "App\\Models\\BookingScreen",
+        "App\\Models\\HoldBooking"
+      ],
+      "business_rules": [
+        "Exclusive row locks on screens table during booking transaction",
+        "Max ads per day quota (loop frequency) enforcement",
+        "Fixed screen intraday minute/hourly interval collision detection",
+        "Mobile fleet concurrent line sweep algorithm",
+        "Cancelled, expired, or failed bookings release inventory capacity"
+      ],
+      "services": [
+        "App\\Services\\BookingCapacityService",
+        "App\\Services\\InventoryService",
+        "App\\Services\\ConflictDetectionService"
+      ],
+      "controllers": [
+        "App\\Http\\Controllers\\Api\\AvailabilityEngineController",
+        "App\\Http\\Controllers\\AvailabilityController"
+      ],
+      "events": [],
+      "jobs": [],
+      "policies": [],
+      "tables": ["screens", "booking_screens", "hold_bookings"],
+      "external_integrations": [],
+      "dependencies": ["Asset", "Booking"],
+      "target_layer": "Domain\\Availability"
+    },
+    {
+      "domain": "Booking",
+      "purpose": "Commercial booking lifecycle orchestration, channel-specific adapters (Advertiser, Partner, Admin, V2), pricing & availability enforcement, snapshotting, and status workflow transitions.",
+      "entities": [
+        "App\\Models\\Booking",
+        "App\\Models\\BookingScreen",
+        "App\\Models\\BookingActivity",
+        "App\\Models\\BookingPricingBreakdown"
+      ],
+      "business_rules": [
+        "Atomic booking creation inside database transaction with inventory locks",
+        "Server-side re-validation of pricing and capacity before write",
+        "Immutability of pricing snapshot and revenue split snapshot upon creation",
+        "Booking lifecycle status machine (draft -> payment_pending -> pending_approval -> approved -> scheduled -> running -> completed)",
+        "Automatic pending booking expiration command"
+      ],
+      "services": [
+        "App\\Services\\ManualBookingService",
+        "App\\Services\\BookingWorkflowService"
+      ],
+      "controllers": [
+        "App\\Http\\Controllers\\BookingController",
+        "App\\Http\\Controllers\\PartnerBookingController",
+        "App\\Http\\Controllers\\AdminManualBookingController",
+        "App\\Http\\Controllers\\Api\\BookingEngineController"
+      ],
+      "events": [
+        "App\\Events\\Notifications\\BookingCreated",
+        "App\\Events\\Notifications\\BookingApproved",
+        "App\\Events\\Notifications\\BookingCancelled",
+        "App\\Events\\Notifications\\BookingCompleted"
+      ],
+      "jobs": [],
+      "policies": [],
+      "tables": [
+        "bookings",
+        "booking_screens",
+        "booking_activities",
+        "booking_pricing_breakdowns"
+      ],
+      "external_integrations": [],
+      "dependencies": ["Asset", "Pricing", "Availability", "Payment", "Provider", "Partner"],
+      "target_layer": "Domain\\Booking"
+    },
+    {
+      "domain": "Payment",
+      "purpose": "Payment gateway orchestration, Razorpay order generation, cryptographic signature verification, payment status transitions, idempotency, and refunds.",
+      "entities": [
+        "App\\Models\\Payment",
+        "App\\Models\\PaymentLog",
+        "App\\Models\\Refund"
+      ],
+      "business_rules": [
+        "Paise conversion round-trip accuracy (final_amount * 100)",
+        "HMAC-SHA256 signature verification matching Razorpay secret",
+        "Payment verification idempotency (duplicate verify on paid order rejected)",
+        "Payment status transition from pending to paid or failed",
+        "Cascading booking status transition to pending_approval on payment confirmation",
+        "Refund processing limits (refund_amount <= payment_amount)"
+      ],
+      "services": ["App\\Services\\PaymentService"],
+      "controllers": [
+        "App\\Http\\Controllers\\PaymentController",
+        "App\\Http\\Controllers\\AdminPaymentController"
+      ],
+      "events": [
+        "App\\Events\\Notifications\\PaymentReceived",
+        "App\\Events\\Notifications\\PaymentFailed",
+        "App\\Events\\Notifications\\PaymentRefunded"
+      ],
+      "jobs": [],
+      "policies": [],
+      "tables": ["payments", "payment_logs", "refunds"],
+      "external_integrations": ["Razorpay Payment Gateway API & Webhook SDK"],
+      "dependencies": ["Booking", "Partner", "Settlement"],
+      "target_layer": "Domain\\Payment"
+    },
+    {
+      "domain": "Settlement",
+      "purpose": "Screen provider earnings settlement, partner commission settlement, ledger accounting entries, payout requests, and financial audit logs.",
+      "entities": [
+        "App\\Models\\ScreenProviderSettlement",
+        "App\\Models\\PartnerCommission",
+        "App\\Models\\AccountingLedgerEntry",
+        "App\\Models\\PayoutRequest"
+      ],
+      "business_rules": [
+        "Revenue split resolution hierarchy: Duration Override > Screen Static Split > Provider Contract Split > Platform Default",
+        "Settlement net balance formula: gross_share - deductions - tax_withheld",
+        "Settlement status workflow: pending -> processing -> settled",
+        "Provider earnings snapshotted at booking creation cannot be mutated by later provider percentage changes"
+      ],
+      "services": [
+        "App\\Services\\SettlementService",
+        "App\\Services\\RevenueDistributionService",
+        "App\\Services\\RevenueSplitResolverService"
+      ],
+      "controllers": [
+        "App\\Http\\Controllers\\SettlementController",
+        "App\\Http\\Controllers\\FinanceController",
+        "App\\Http\\Controllers\\AdminFinanceController"
+      ],
+      "events": ["App\\Events\\Notifications\\SettlementProcessed"],
+      "jobs": [],
+      "policies": [],
+      "tables": [
+        "screen_provider_settlements",
+        "partner_commissions",
+        "accounting_ledger_entries",
+        "payout_requests"
+      ],
+      "external_integrations": ["Bank / Payout APIs"],
+      "dependencies": ["Provider", "Partner", "Booking"],
+      "target_layer": "Domain\\Settlement"
+    },
+    {
+      "domain": "Reporting",
+      "purpose": "Read-only analytics aggregation, advertiser performance metrics, screen provider analytics, revenue trends, and multi-strategy budget recommendation.",
+      "entities": [],
+      "business_rules": [
+        "Read-only query aggregation with strict zero-mutation guarantees",
+        "Multi-strategy budget allocation (time expansion vs screen coverage vs balanced)",
+        "Rate-limiting on intensive recommendation calculations"
+      ],
+      "services": [
+        "App\\Services\\ReportService",
+        "App\\Services\\BudgetRecommendationService"
+      ],
+      "controllers": [
+        "App\\Http\\Controllers\\ReportController",
+        "App\\Http\\Controllers\\Api\\BudgetRecommendationController",
+        "App\\Http\\Controllers\\AdminDashboardController"
+      ],
+      "events": [],
+      "jobs": [],
+      "policies": [],
+      "tables": ["Query-only across core tables"],
+      "external_integrations": [],
+      "dependencies": ["Booking", "Asset", "Pricing", "Payment"],
+      "target_layer": "Domain\\Reporting"
+    },
+    {
+      "domain": "Creative",
+      "purpose": "Media asset processing, GD image transformation, WebP conversion, thumbnail generation, and filesystem storage abstraction.",
+      "entities": [],
+      "business_rules": [
+        "Automatic WebP conversion for uploaded creatives",
+        "Thumbnail generation maintaining aspect ratio",
+        "Filesystem path isolation in public disk"
+      ],
+      "services": ["App\\Helpers\\MediaHelper"],
+      "controllers": [],
+      "events": [],
+      "jobs": [],
+      "policies": [],
+      "tables": [],
+      "external_integrations": ["PHP GD Library", "Local Filesystem Storage"],
+      "dependencies": [],
+      "target_layer": "Domain\\Creative"
+    }
+  ]
+}

@@ -1,0 +1,320 @@
+{
+  "phase": "0.14",
+  "name": "Directory Conformance",
+  "generated_at": "2026-09-26",
+  "principle": "Classes were not moved for cosmetic organisation. A relocation is only justified when the current location actively misleads about responsibility or actively couples layers.",
+  "note": "app/DTOs and app/Jobs were removed in Phase 0.13 because their last member became dead; they were not emptied for tidiness while still holding live classes.",
+  "target_structure_comparison": {
+    "target_from_brief": {
+      "Domain": [
+        "Campaign",
+        "Media",
+        "Asset",
+        "Provider",
+        "Partner",
+        "Pricing",
+        "Availability",
+        "Booking",
+        "Payment",
+        "Settlement",
+        "Financial",
+        "Reporting",
+        "Creative"
+      ],
+      "Application": [
+        "Campaign",
+        "Booking",
+        "Pricing",
+        "Availability",
+        "Payment",
+        "Financial",
+        "Reporting",
+        "Auth",
+        "Integrations"
+      ],
+      "Infrastructure": [
+        "Payments",
+        "Auth",
+        "ExchangeRates",
+        "Storage",
+        "Media",
+        "Notifications",
+        "ExternalServices"
+      ],
+      "Http": [
+        "Controllers",
+        "Requests",
+        "Resources"
+      ],
+      "Support": [
+        "Events",
+        "Jobs",
+        "Exceptions"
+      ]
+    },
+    "actual": {
+      "Domain": [
+        "Financial",
+        "Payment",
+        "Pricing"
+      ],
+      "Application": [
+        "Booking",
+        "Financial",
+        "Payment",
+        "Pricing",
+        "Reporting"
+      ],
+      "Infrastructure": [
+        "Auth",
+        "ExchangeRates",
+        "Financial",
+        "Media",
+        "Notification",
+        "Payments"
+      ],
+      "Http": [
+        "Controllers"
+      ],
+      "Support": [
+        "Authorization",
+        "Bookings",
+        "Configs"
+      ],
+      "other_legacy": [
+        "Services (51)",
+        "Models (62)",
+        "Mail (28)",
+        "Events (34)",
+        "Listeners (1)",
+        "Helpers (1)",
+        "Providers (2)"
+      ]
+    },
+    "assessment": "The brief's target tree lists 13 Domain modules and 9 Application modules; 3 and 5 exist respectively. The brief explicitly says not to force every class into the tree and to use actual responsibility to determine ownership, so this is reported as a genuine gap rather than remediated by sweeping file moves. The 11 business domains that have no Domain or Application module (Campaign, Media, Asset, Provider, Partner, Availability, Booking, Settlement, Reporting, Creative, and loyalty) are owned by app/Services instead."
+  },
+  "areas": [
+    {
+      "area": "Domain",
+      "path": "app/Domain",
+      "php_files": 9,
+      "subdirectories": [
+        "Financial",
+        "Payment",
+        "Pricing"
+      ]
+    },
+    {
+      "area": "Application",
+      "path": "app/Application",
+      "php_files": 32,
+      "subdirectories": [
+        "Booking",
+        "Financial",
+        "Payment",
+        "Pricing",
+        "Reporting"
+      ]
+    },
+    {
+      "area": "Infrastructure",
+      "path": "app/Infrastructure",
+      "php_files": 14,
+      "subdirectories": [
+        "Auth",
+        "ExchangeRates",
+        "Financial",
+        "Media",
+        "Notification",
+        "Payments"
+      ]
+    },
+    {
+      "area": "Http",
+      "path": "app/Http",
+      "php_files": 81,
+      "subdirectories": [
+        "Controllers",
+        "Middleware",
+        "Requests",
+        "Resources"
+      ]
+    },
+    {
+      "area": "Support",
+      "path": "app/Support",
+      "php_files": 9,
+      "subdirectories": [
+        "Authorization",
+        "Configs"
+      ]
+    },
+    {
+      "area": "Services",
+      "path": "app/Services",
+      "php_files": 51,
+      "subdirectories": [
+        "Pricing"
+      ]
+    },
+    {
+      "area": "Models",
+      "path": "app/Models",
+      "php_files": 62,
+      "subdirectories": []
+    },
+    {
+      "area": "Mail",
+      "path": "app/Mail",
+      "php_files": 28,
+      "subdirectories": []
+    },
+    {
+      "area": "Events",
+      "path": "app/Events",
+      "php_files": 34,
+      "subdirectories": [
+        "Notifications"
+      ]
+    },
+    {
+      "area": "Listeners",
+      "path": "app/Listeners",
+      "php_files": 1,
+      "subdirectories": []
+    },
+    {
+      "area": "Helpers",
+      "path": "app/Helpers",
+      "php_files": 1,
+      "subdirectories": []
+    },
+    {
+      "area": "Providers",
+      "path": "app/Providers",
+      "php_files": 2,
+      "subdirectories": []
+    },
+    {
+      "area": "Console",
+      "path": "app/Console",
+      "php_files": 3,
+      "subdirectories": [
+        "Commands"
+      ]
+    },
+    {
+      "area": "Exceptions",
+      "path": "app/Exceptions",
+      "php_files": 6,
+      "subdirectories": []
+    },
+    {
+      "area": "Policies",
+      "path": "app/Policies",
+      "php_files": 2,
+      "subdirectories": []
+    }
+  ],
+  "misplaced_or_deferred": [
+    {
+      "class": "BookingController",
+      "location": "app/Http/Controllers/BookingController.php",
+      "responsibility": "HTTP adapter",
+      "expected_area": "Http",
+      "actual_area": "Http",
+      "status": "compliant",
+      "note": "1414 lines after Phase 0.13 extraction; still the largest controller but now a genuine adapter for its top three operations."
+    },
+    {
+      "class": "CampaignPricingEngine",
+      "location": "app/Domain/Pricing/CampaignPricingEngine.php",
+      "responsibility": "canonical campaign pricing calculation",
+      "expected_area": "Domain",
+      "actual_area": "Domain",
+      "status": "compliant",
+      "note": "Correctly placed; its 10 outgoing legacy-service imports are a coupling problem, not a placement problem."
+    },
+    {
+      "class": "LoyaltyService / SettingsService / PricingRuleEngine",
+      "location": "app/Services/",
+      "responsibility": "loyalty accounting, settings, pricing rule evaluation",
+      "expected_area": "Domain or Application",
+      "actual_area": "Services",
+      "status": "deferred",
+      "note": "`app/Services` is a pre-boundary flat namespace holding 51 classes across every domain. Relocating them is a large mechanical change with no behavioural benefit on its own; it belongs with the extraction of each service, not as a separate sweeping move."
+    },
+    {
+      "class": "Reporting queries",
+      "location": "app/Application/Reporting/Queries/",
+      "responsibility": "read-model queries",
+      "expected_area": "Application",
+      "actual_area": "Application",
+      "status": "compliant",
+      "note": "Phase 0.11. Ten queries behind ReportQuery, resolved by ReportQueryRegistry."
+    },
+    {
+      "class": "Booking use cases",
+      "location": "app/Application/Booking/{UseCases,Queries,Exceptions}/",
+      "responsibility": "campaign booking creation, reschedule, availability check",
+      "expected_area": "Application",
+      "actual_area": "Application",
+      "status": "compliant",
+      "note": "Created in Phase 0.13."
+    },
+    {
+      "class": "RolePermissionChecker",
+      "location": "app/Support/Authorization/RolePermissionChecker.php",
+      "responsibility": "role-permission decision",
+      "expected_area": "Support or a Policy namespace",
+      "actual_area": "Support",
+      "status": "compliant",
+      "note": "Created in Phase 0.13. Support is the right home: it is framework-level policy resolution, not a domain rule."
+    },
+    {
+      "class": "LaravelMailAdapter / LaravelStorageAdapter / GdImageProcessor",
+      "location": "app/Infrastructure/{Notification,Media}/",
+      "responsibility": "vendor/framework adapters",
+      "expected_area": "Infrastructure",
+      "actual_area": "Infrastructure",
+      "status": "compliant",
+      "note": "Phase 0.12."
+    },
+    {
+      "class": "MediaHelper",
+      "location": "app/Helpers/MediaHelper.php",
+      "responsibility": "static image compression with a quality ladder",
+      "expected_area": "Application or a dedicated Media namespace",
+      "actual_area": "Helpers",
+      "status": "deferred",
+      "note": "The only class in app/Helpers. It contains genuine application policy (the 70KB budget and the 80->20 quality ladder), not a generic utility. The encoder is already behind a port; the policy and the filesystem writes remain in a static helper."
+    },
+    {
+      "class": "Mail mailable classes",
+      "location": "app/Mail/ (28 files)",
+      "responsibility": "message rendering",
+      "expected_area": "Http or Infrastructure",
+      "actual_area": "Mail",
+      "status": "compliant",
+      "note": "Framework convention, consistent with the mail port boundary established in Phase 0.12."
+    },
+    {
+      "class": "Policies",
+      "location": "app/Policies/ (2 files)",
+      "responsibility": "authorization policies",
+      "expected_area": "Policies",
+      "actual_area": "Policies",
+      "status": "deferred",
+      "note": "Both are confirmed dead because the application contains no Gate:: or authorize() call. Authorization is currently enforced by the `permission` middleware plus inline checks. Retained as the conventional extension point."
+    },
+    {
+      "class": "Models",
+      "location": "app/Models/ (62 files)",
+      "responsibility": "Active Record persistence",
+      "expected_area": "Persistence",
+      "actual_area": "Models",
+      "status": "deferred",
+      "note": "Standard Laravel location. `app/Models` is the persistence layer in practice; the architecture treats it as such rather than relocating it."
+    }
+  ]
+}

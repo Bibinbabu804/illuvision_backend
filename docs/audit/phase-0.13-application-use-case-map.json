@@ -1,0 +1,527 @@
+{
+  "phase": "0.13",
+  "name": "Application Use-Case Map",
+  "generated_at": "2026-09-26",
+  "note": "This is the canonical application-layer inventory. 'status: retained - NOT consolidated' entries are deliberate: they record operations that reach the same business outcome through a different channel with materially different behaviour, which the phase brief forbids normalising.",
+  "counts": {
+    "migrated": 16,
+    "retained": 11,
+    "deferred": 1
+  },
+  "use_cases": [
+    {
+      "use_case": "CreatePaymentOrderUseCase",
+      "current_entry_points": [
+        "POST /api/payments/create-order"
+      ],
+      "domain": "Payment",
+      "controller": "PaymentController",
+      "service": "PaymentService",
+      "dependencies": [
+        "Razorpay adapter",
+        "CampaignPricingService"
+      ],
+      "transaction_boundary": "network call outside DB transaction",
+      "authorization": "auth:sanctum",
+      "events": [
+        "PaymentInitiated"
+      ],
+      "status": "migrated (Phase 0.9)"
+    },
+    {
+      "use_case": "VerifyPaymentUseCase",
+      "current_entry_points": [
+        "POST /api/payments/verify",
+        "POST /api/payments/verify-v2"
+      ],
+      "domain": "Payment",
+      "controller": "PaymentController",
+      "service": "PaymentService",
+      "dependencies": [
+        "Razorpay adapter",
+        "BookingCapacityService",
+        "InventoryService"
+      ],
+      "transaction_boundary": "DB::transaction wraps booking finalisation",
+      "authorization": "auth:sanctum",
+      "events": [
+        "PaymentReceived",
+        "BookingCreated"
+      ],
+      "status": "migrated (Phase 0.9)"
+    },
+    {
+      "use_case": "RefundPaymentUseCase",
+      "current_entry_points": [
+        "POST /api/payments/{payment}/refund",
+        "POST /api/admin/payments/{payment}/refund"
+      ],
+      "domain": "Payment",
+      "controller": "PaymentController, AdminPaymentController",
+      "service": "RefundService",
+      "dependencies": [
+        "Razorpay adapter",
+        "PaymentService"
+      ],
+      "transaction_boundary": "network call isolated from locks",
+      "authorization": "permission:payments.* / bookings.*",
+      "events": [
+        "PaymentRefunded"
+      ],
+      "status": "migrated (Phase 0.9)"
+    },
+    {
+      "use_case": "GetPaymentStatusUseCase",
+      "current_entry_points": [
+        "GET /api/payments/{payment}/status"
+      ],
+      "domain": "Payment",
+      "controller": "PaymentController",
+      "service": "PaymentStatusProjector",
+      "dependencies": [
+        "Payment model"
+      ],
+      "transaction_boundary": "none",
+      "authorization": "auth:sanctum",
+      "events": [],
+      "status": "migrated (Phase 0.9)"
+    },
+    {
+      "use_case": "CreateOfflinePaymentUseCase",
+      "current_entry_points": [
+        "admin manual-booking offline payment mode"
+      ],
+      "domain": "Payment",
+      "controller": "AdminManualBookingController",
+      "service": "ManualBookingService",
+      "dependencies": [
+        "ManualBookingService::recordOfflinePayment"
+      ],
+      "transaction_boundary": "inside ManualBookingService transaction",
+      "authorization": "permission:bookings.create",
+      "events": [
+        "PaymentReceived"
+      ],
+      "status": "migrated (Phase 0.9)"
+    },
+    {
+      "use_case": "CalculateCampaignPriceUseCase",
+      "current_entry_points": [
+        "POST /api/campaigns/calculate (public)"
+      ],
+      "domain": "Pricing",
+      "controller": "BookingController",
+      "service": "PricingEngineInterface -> CampaignPricingEngine",
+      "dependencies": [
+        "CampaignPricingEngine",
+        "Pricing calculators",
+        "SettingsService",
+        "LoyaltyService"
+      ],
+      "transaction_boundary": "none - read only",
+      "authorization": "none (public endpoint)",
+      "events": [],
+      "status": "migrated (Phase 0.6)"
+    },
+    {
+      "use_case": "DistributeBookingRevenueUseCase",
+      "current_entry_points": [
+        "called by CreateCampaignBookingUseCase"
+      ],
+      "domain": "Financial",
+      "controller": "BookingController (via use case)",
+      "service": "RevenueDistributionService",
+      "dependencies": [
+        "RevenueSplitResolverService",
+        "CommissionService"
+      ],
+      "transaction_boundary": "inside the caller's transaction",
+      "authorization": "inherited from caller",
+      "events": [],
+      "status": "migrated (Phase 0.10)"
+    },
+    {
+      "use_case": "GenerateProviderSettlementUseCase",
+      "current_entry_points": [
+        "admin settlement generation"
+      ],
+      "domain": "Financial",
+      "controller": "AdminSettlementController",
+      "service": "SettlementService",
+      "dependencies": [
+        "SettlementService",
+        "CommissionService",
+        "RevenueSplitResolverService"
+      ],
+      "transaction_boundary": "DB::transaction",
+      "authorization": "permission:settlements.*",
+      "events": [],
+      "status": "migrated (Phase 0.10)"
+    },
+    {
+      "use_case": "RecordReferralAttributionUseCase",
+      "current_entry_points": [
+        "payment verification, admin payment approval"
+      ],
+      "domain": "Referral",
+      "controller": "AdminPaymentController",
+      "service": "ReferralTrackingService",
+      "dependencies": [
+        "ReferralTrackingService"
+      ],
+      "transaction_boundary": "inside the caller's transaction",
+      "authorization": "inherited from caller",
+      "events": [],
+      "status": "migrated (Phase 0.10)"
+    },
+    {
+      "use_case": "CreateCampaignBookingUseCase",
+      "current_entry_points": [
+        "POST /api/bookings/campaign"
+      ],
+      "domain": "Booking",
+      "controller": "BookingController",
+      "service": "none (orchestrates)",
+      "dependencies": [
+        "InventoryService",
+        "CampaignPricingService",
+        "BookingCapacityService",
+        "DistributeBookingRevenueUseCase",
+        "RevenueSplitResolverService",
+        "LoyaltyService",
+        "DB"
+      ],
+      "transaction_boundary": "DB::transaction - inventory row locks taken first, booking + screens + revenue distribution + breakdowns written inside",
+      "authorization": "auth:sanctum + route permission",
+      "events": [
+        "BookingCreated"
+      ],
+      "status": "migrated (Phase 0.13)"
+    },
+    {
+      "use_case": "RescheduleBookingUseCase",
+      "current_entry_points": [
+        "PUT /api/bookings/{booking}"
+      ],
+      "domain": "Booking",
+      "controller": "BookingController",
+      "service": "none (orchestrates)",
+      "dependencies": [
+        "InventoryService",
+        "BookingCapacityService",
+        "DB"
+      ],
+      "transaction_boundary": "DB::transaction - merged old+new screen lock set first",
+      "authorization": "auth:sanctum + route permission",
+      "events": [],
+      "status": "migrated (Phase 0.13)"
+    },
+    {
+      "use_case": "CheckBookingAvailabilityQuery",
+      "current_entry_points": [
+        "POST /api/bookings/check-conflicts"
+      ],
+      "domain": "Availability",
+      "controller": "BookingController",
+      "service": "none (reads)",
+      "dependencies": [
+        "InventoryService",
+        "BookingCapacityService",
+        "Screen"
+      ],
+      "transaction_boundary": "none - read only query",
+      "authorization": "auth:sanctum",
+      "events": [],
+      "status": "migrated (Phase 0.13)"
+    },
+    {
+      "use_case": "Single-screen booking creation (inline)",
+      "current_entry_points": [
+        "POST /api/bookings (apiResource store)"
+      ],
+      "domain": "Booking",
+      "controller": "BookingController",
+      "service": "none (inline)",
+      "dependencies": [
+        "InventoryService",
+        "BookingCapacityService"
+      ],
+      "transaction_boundary": "DB::transaction with inventory lock",
+      "authorization": "auth:sanctum",
+      "events": [
+        "BookingCreated"
+      ],
+      "status": "retained - NOT consolidated with CreateCampaignBookingUseCase: the legacy single-screen channel trusts the client-supplied price and produces no pricing snapshot, so unifying it would change financial behaviour"
+    },
+    {
+      "use_case": "Manual booking creation",
+      "current_entry_points": [
+        "POST /api/admin/manual-bookings"
+      ],
+      "domain": "Booking",
+      "controller": "AdminManualBookingController",
+      "service": "ManualBookingService",
+      "dependencies": [
+        "BookingCapacityService",
+        "InventoryService",
+        "LoyaltyService",
+        "SettingsService",
+        "ReferralTrackingService"
+      ],
+      "transaction_boundary": "DB::transaction",
+      "authorization": "permission:bookings.create",
+      "events": [
+        "BookingCreated"
+      ],
+      "status": "retained"
+    },
+    {
+      "use_case": "Partner booking creation",
+      "current_entry_points": [
+        "POST /api/partner/bookings"
+      ],
+      "domain": "Booking",
+      "controller": "PartnerBookingController",
+      "service": "ManualBookingService",
+      "dependencies": [
+        "ManualBookingService",
+        "MediaService"
+      ],
+      "transaction_boundary": "delegated to ManualBookingService",
+      "authorization": "partner ownership check",
+      "events": "BookingCreated",
+      "status": "retained"
+    },
+    {
+      "use_case": "Booking approval workflow",
+      "current_entry_points": [
+        "POST /bookings/{booking}/approve|reject"
+      ],
+      "domain": "Booking",
+      "controller": "BookingController",
+      "service": "none (inline)",
+      "dependencies": [
+        "BookingActivity",
+        "events"
+      ],
+      "transaction_boundary": "NO transaction - 2-3 writes plus an event are not atomic",
+      "authorization": "permission:bookings.approve",
+      "events": [
+        "BookingApproved",
+        "BookingRejected"
+      ],
+      "status": "retained - documented: missing transaction is pre-existing behaviour"
+    },
+    {
+      "use_case": "Media review workflow",
+      "current_entry_points": [
+        "POST /bookings/{booking}/media/{media}/approve|reject"
+      ],
+      "domain": "Media",
+      "controller": "BookingController",
+      "service": "none (inline)",
+      "dependencies": [
+        "BookingMedia",
+        "BookingActivity",
+        "events"
+      ],
+      "transaction_boundary": "NO transaction",
+      "authorization": "inline parent-ownership check only",
+      "events": [
+        "MediaApproved",
+        "MediaRejected"
+      ],
+      "status": "retained - documented: no owner check on deleteMedia; not changed because it would alter authorization behaviour"
+    },
+    {
+      "use_case": "Session lifecycle",
+      "current_entry_points": [
+        "POST /bookings/{booking}/start-session|end-session|extend-session"
+      ],
+      "domain": "Booking",
+      "controller": "BookingController",
+      "service": "none (inline)",
+      "dependencies": [
+        "Booking",
+        "BookingActivity"
+      ],
+      "transaction_boundary": "NO transaction; extend-session has no status guard",
+      "authorization": "permission:bookings.edit",
+      "events": [],
+      "status": "retained - documented"
+    },
+    {
+      "use_case": "Manual payment marking",
+      "current_entry_points": [
+        "POST /bookings/{booking}/manual-payment"
+      ],
+      "domain": "Payment",
+      "controller": "BookingController",
+      "service": "none (inline)",
+      "dependencies": [
+        "Payment",
+        "Booking",
+        "BookingActivity"
+      ],
+      "transaction_boundary": "NO transaction across 3 writes",
+      "authorization": "permission:bookings.edit",
+      "events": [
+        "PaymentReceived"
+      ],
+      "status": "retained - deliberately NOT merged into CreateOfflinePaymentUseCase (documented divergence)"
+    },
+    {
+      "use_case": "Reporting queries (10)",
+      "current_entry_points": [
+        "GET /api/reports/*",
+        "GET /api/reports/export"
+      ],
+      "domain": "Reporting",
+      "controller": "ReportController",
+      "service": "ReportService (facade)",
+      "dependencies": [
+        "DB::table read-only"
+      ],
+      "transaction_boundary": "none - read only",
+      "authorization": "permission:reports.view per route",
+      "events": [],
+      "status": "migrated (Phase 0.11)"
+    },
+    {
+      "use_case": "Campaign pricing validation",
+      "current_entry_points": [
+        "POST /api/campaigns/validate (public)"
+      ],
+      "domain": "Pricing",
+      "controller": "BookingController",
+      "service": "CampaignPricingService",
+      "dependencies": [
+        "CampaignPricingEngine"
+      ],
+      "transaction_boundary": "none - read only",
+      "authorization": "none (public endpoint)",
+      "events": [],
+      "status": "retained"
+    },
+    {
+      "use_case": "Media upload (booking)",
+      "current_entry_points": [
+        "POST /bookings/{booking}/media",
+        "POST /api/partner/bookings/{booking}/media"
+      ],
+      "domain": "Media",
+      "controller": "BookingController, PartnerBookingController",
+      "service": "MediaService",
+      "dependencies": [
+        "StorageContractInterface"
+      ],
+      "transaction_boundary": "storage write only",
+      "authorization": "inline owner check + route permission",
+      "events": [
+        "MediaUploaded"
+      ],
+      "status": "migrated (Phase 0.12/0.13)"
+    },
+    {
+      "use_case": "Avatar replacement",
+      "current_entry_points": [
+        "POST /api/profile/avatar (or profile update)"
+      ],
+      "domain": "Auth",
+      "controller": "Api/ProfileController",
+      "service": "ProfileService",
+      "dependencies": [
+        "StorageContractInterface"
+      ],
+      "transaction_boundary": "storage write only",
+      "authorization": "auth:sanctum",
+      "events": [],
+      "status": "migrated (Phase 0.12)"
+    },
+    {
+      "use_case": "Password reset mail",
+      "current_entry_points": [
+        "POST /api/forgot-password"
+      ],
+      "domain": "Auth",
+      "controller": "ForgotPasswordController",
+      "service": "none (uses MailContractInterface)",
+      "dependencies": [
+        "MailContractInterface",
+        "SettingsService"
+      ],
+      "transaction_boundary": "none",
+      "authorization": "public",
+      "events": [],
+      "status": "migrated (Phase 0.12/0.13)"
+    },
+    {
+      "use_case": "Budget recommendation",
+      "current_entry_points": [
+        "GET /api/budget-recommendations/*"
+      ],
+      "domain": "Campaign/Media",
+      "controller": "Api/BudgetRecommendationController",
+      "service": "BudgetRecommendationService",
+      "dependencies": [
+        "CampaignPricingService",
+        "PricingRuleEngine",
+        "SettingsService",
+        "BookingConfig"
+      ],
+      "transaction_boundary": "none - read only",
+      "authorization": "auth:sanctum + rate limiting",
+      "events": [],
+      "status": "retained - largest un-migrated class (1443 lines)"
+    },
+    {
+      "use_case": "Asset import",
+      "current_entry_points": [
+        "POST /api/assets/import"
+      ],
+      "domain": "Asset",
+      "controller": "AssetController",
+      "service": "AssetImportService",
+      "dependencies": [
+        "DB::transaction",
+        "Eloquent"
+      ],
+      "transaction_boundary": "DB::transaction",
+      "authorization": "permission:assets.*",
+      "events": [],
+      "status": "retained"
+    },
+    {
+      "use_case": "Screen deletion",
+      "current_entry_points": [
+        "DELETE /api/screens/{screen}"
+      ],
+      "domain": "Asset",
+      "controller": "ScreenController",
+      "service": "ScreenDeletionService",
+      "dependencies": [
+        "Eloquent referential guards"
+      ],
+      "transaction_boundary": "DB::transaction",
+      "authorization": "permission:screens.delete",
+      "events": [],
+      "status": "retained"
+    },
+    {
+      "use_case": "Settlement lifecycle transitions",
+      "current_entry_points": [
+        "admin settlement state changes"
+      ],
+      "domain": "Settlement",
+      "controller": "AdminSettlementController",
+      "service": "SettlementService",
+      "dependencies": [
+        "Settlement model"
+      ],
+      "transaction_boundary": "per-operation",
+      "authorization": "permission:settlements.*",
+      "events": [],
+      "status": "deferred (Phase 0.10) - lifecycle transition rules deliberately not extracted"
+    }
+  ]
+}

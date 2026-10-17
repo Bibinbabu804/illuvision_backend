@@ -1,0 +1,237 @@
+{
+  "phase": "0.12",
+  "name": "Notification Idempotency Map",
+  "generated_at": "2026-09-26T06:25:00+05:30",
+  "purpose": "Document notification idempotency mechanisms to ensure exactly-once delivery semantics where required",
+  "idempotency_mechanisms": [
+    {
+      "mechanism": "Database-backed deduplication",
+      "description": "Stores notification metadata with unique identifiers to prevent duplicate processing",
+      "implementation_details": [
+        "notification_logs table with columns: id, notification_type, recipient_id, external_reference, sent_at, status",
+        "Before sending notification, check if record exists with same notification_type, recipient_id, and external_reference",
+        "If record exists and status is 'sent', skip sending",
+        "If record exists and status is 'failed', may retry based on retry policy"
+      ],
+      "scope": "Global",
+      "technology": "MySQL database with unique indexes",
+      "examples": [
+        {
+          "notification_type": "email",
+          "recipient_id": "user_id",
+          "external_reference": "booking_id_or_payment_id",
+          "example": "Booking confirmation emails deduplicated by booking ID"
+        },
+        {
+          "notification_type": "email", 
+          "recipient_id": "user_id",
+          "external_reference": "payment_id",
+          "example": "Payment receipt emails deduplicated by payment ID"
+        }
+      ],
+      "strengths": [
+        "Survives application restarts",
+        "Works across distributed systems",
+        "Persistent record for auditing"
+      ],
+      "weaknesses": [
+        "Database overhead for checking",
+        "Requires cleanup/archiving strategy",
+        "Potential bottleneck under high volume"
+      ]
+    },
+    {
+      "mechanism": "Idempotency keys",
+      "description": "Leverages external service built-in idempotency mechanisms",
+      "implementation_details": [
+        "Generate unique idempotency key for each notification request",
+        "Send idempotency key to external service in request headers",
+        "External service ignores requests with duplicate idempotency keys",
+        "Key typically based on business entity ID + timestamp or UUID"
+      ],
+      "scope": "Per-external-service",
+      "technology": "HTTP headers or API parameters",
+      "examples": [
+        {
+          "service": "Razorpay",
+          "key_name": "Idempotency-Key",
+          "key_format": "uuidv4 or business_entity_id:timestamp",
+          "example": "Payment requests use payment_id as idempotency key"
+        },
+        {
+          "service": "Twilio",
+          "key_name": "Idempotency-Key",
+          "key_format": "uuidv4",
+          "example": "SMS requests use randomly generated UUID"
+        }
+      ],
+      "strengths": [
+        "Offloads deduplication to external service",
+        "Minimal application overhead",
+        "Standardized approach"
+      ],
+      "weaknesses": [
+        "Only works for external services that support it",
+        "Requires key management",
+        "No persistence of sent notifications in application"
+      ]
+    },
+    {
+      "mechanism": "Job deduplication",
+      "description": "Queue system prevents duplicate job processing",
+      "implementation_details": [
+        "Before queuing job, check for recent similar jobs in queue",
+        "If similar job exists and is pending/processing, skip queuing",
+        "Implementation varies by queue system (Redis, database, etc.)",
+        "Often based on job class and payload hash"
+      ],
+      "scope": "Per-job-type",
+      "technology": "Queue system specific",
+      "examples": [
+        {
+          "job": "SendEmailJob",
+          "deduplication_key": "SendEmailJob:[recipient]:[template]:[reference]",
+          "example": "Prevents queuing multiple identical emails"
+        }
+      ],
+      "strengths": [
+        "Prevents queue buildup",
+        "Reduces wasted processing",
+        "Works well with retry mechanisms"
+      ],
+      "weaknesses": [
+        "Only effective for queued notifications",
+        "Doesn't prevent duplicates if job already processed",
+        "Queue-specific implementation"
+      ]
+    },
+    {
+      "mechanism": "Application-level deduplication cache",
+      "description": "In-memory cache to prevent duplicate notifications within request lifecycle",
+      "implementation_details": [
+        "Static cache or request-scoped service",
+        "Stores recently sent notification identifiers",
+        "Checked before attempting to send notification",
+        "Typically short-lived (request duration)"
+      ],
+      "scope": "Request-local or process-local",
+      "technology": "PHP static variables or request-scoped services",
+      "examples": [
+        {
+          "scope": "Request",
+          "purpose": "Prevent duplicate emails within same web request",
+          "example": "Controller and observer both trying to send same notification"
+        }
+      ],
+      "strengths": [
+        "Very low overhead",
+        "Simple to implement",
+        "Effective for rapid-fire duplicates"
+      ],
+      "weaknesses": [
+        "Does not survive request boundaries",
+        "Not effective for distributed systems",
+        "Lost on application restart"
+      ]
+    }
+  ],
+  "current_usage": {
+    "database_backed": [
+      "Email notification sending via NotificationService",
+      "Some SMS notification paths",
+      "In-app notification creation"
+    ],
+    "idempotency_keys": [
+      "Razorpay payment requests",
+      "Some webhook processing"
+    ],
+    "job_deduplication": [
+      "SendEmailJob (basic implementation)",
+      "SendSmsJob (basic implementation)"
+    ],
+    "application_cache": [
+      "Some controller-level deduplication",
+      "Observer-level deduplication in some cases"
+    ]
+  },
+  "idempotency_matrix": {
+    "notification_type": [
+      "Booking Confirmation",
+      "Payment Receipt",
+      "Refund Notification",
+      "Referral Notification",
+      "Reward Notification",
+      "Password Reset",
+      "Welcome Email",
+      "SMS Alerts",
+      "In-App Notifications"
+    ],
+    "mechanism": [
+      "database_backed",
+      "idempotency_keys", 
+      "job_deduplication",
+      "application_cache",
+      "none",
+      "multiple"
+    ],
+    "details": [
+      {
+        "notification": "Booking Confirmation",
+        "mechanisms": ["database_backed", "job_deduplication"],
+        "notes": "Email via NotificationService (db-backed), queued SendEmailJob (job dedup)"
+      },
+      {
+        "notification": "Payment Receipt",
+        "mechanisms": ["database_backed"],
+        "notes": "Email via NotificationService"
+      },
+      {
+        "notification": "Refund Notification",
+        "mechanisms": ["database_backed"],
+        "notes": "Email via NotificationService"
+      },
+      {
+        "notification": "Referral Notification",
+        "mechanisms": ["database_backed"],
+        "notes": "Email via NotificationService"
+      },
+      {
+        "notification": "Reward Notification",
+        "mechanisms": ["database_backed", "application_cache"],
+        "notes": "Email with some request-scoped dedup"
+      },
+      {
+        "notification": "Password Reset",
+        "mechanisms": ["database_backed"],
+        "notes": "Email via NotificationService"
+      },
+      {
+        "notification": "Welcome Email",
+        "mechanisms": ["database_backed"],
+        "notes": "Email via NotificationService"
+      },
+      {
+        "notification": "SMS Alerts",
+        "mechanisms": ["job_deduplication", "idempotency_keys"],
+        "notes": "Queued SendSmsJob + Twilio idempotency keys"
+      },
+      {
+        "notification": "In-App Notifications",
+        "mechanisms": ["none"],
+        "notes": "Stored directly in database, duplicates possible if triggered multiple times"
+      }
+    ]
+  },
+  "summary": {
+    "strongest_mechanism": "database_backed",
+    "weakest_mechanism": "application_cache",
+    "coverage": "High for email notifications, variable for other types",
+    "recommendations": [
+      "Standardize on database-backed deduplication for all critical notifications",
+      "Ensure queued notifications use job deduplication",
+      "Leverage external service idempotency keys where available",
+      "Remove application-cache-only mechanisms for notifications requiring durability",
+      "Consider implementing a notification outbox pattern for guaranteed delivery"
+    ]
+  }
+}

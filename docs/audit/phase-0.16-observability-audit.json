@@ -1,0 +1,50 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "observability-audit",
+  "verdict": "WEAK - no error tracking and no structured logging",
+  "findings": [
+    {
+      "id": "OBS-01",
+      "title": "No error tracking service",
+      "severity": "high",
+      "evidence": "sentry/sentry-laravel is absent from composer.json (0 matches).",
+      "impact": "Unhandled exceptions in production produce no alert and no aggregated diagnostic context."
+    },
+    {
+      "id": "OBS-02",
+      "title": "No structured JSON log channel",
+      "severity": "high",
+      "evidence": "config/logging.php has no 'json' channel; the stack defaults to LOG_STACK=single.",
+      "impact": "Logs are unstructured single files, which makes aggregation, querying and retention management difficult."
+    },
+    {
+      "id": "OBS-03",
+      "title": "LOG_LEVEL=debug",
+      "severity": "medium",
+      "evidence": ".env sets LOG_CHANNEL=stack, LOG_LEVEL=debug.",
+      "impact": "Debug-level logging in a request path is verbose, increases disk usage and may log more detail than intended. Must be info/warning in production."
+    },
+    {
+      "id": "OBS-04",
+      "title": "No request-correlation or trace identifiers",
+      "severity": "medium",
+      "evidence": "No middleware attaches a request id to the log context.",
+      "impact": "A single user action that fans out across use cases, events, listeners and notifications cannot be reconstructed from logs."
+    },
+    {
+      "id": "OBS-05",
+      "title": "No health-check endpoint",
+      "severity": "medium",
+      "evidence": "No /up or equivalent health route exposing DB/queue/cache reachability.",
+      "impact": "An orchestrator cannot distinguish an application failure from a dependency failure."
+    }
+  ],
+  "present": [
+    "Laravel's default log stack, daily/single/stderr channels available via env.",
+    "ActivityLog model and listeners exist for domain-level audit trails (a genuine strength, though distinct from operational observability)."
+  ],
+  "changes_made": "None. Adding a logging channel or a dependency changes deployment surface, so it is recommended rather than applied."
+}

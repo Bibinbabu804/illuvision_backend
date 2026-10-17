@@ -1,0 +1,83 @@
+{
+  "phase": "0.4",
+  "name": "External Integration Boundary Map",
+  "generated_at": "2026-09-25T22:52:00+05:30",
+  "integrations": [
+    {
+      "name": "Razorpay Payment Gateway",
+      "purpose": "Order creation, card/UPI/netbanking payment collection, webhook verification, and automated refunds",
+      "current_callers": ["App\\Services\\PaymentService", "App\\Http\\Controllers\\PaymentController"],
+      "current_sdk": "razorpay/razorpay (^2.9)",
+      "current_mechanism": "Direct new Razorpay\\Api\\Api(key, secret) in PaymentService constructor",
+      "target_interface": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+      "target_adapter": "App\\Infrastructure\\Payments\\RazorpayPaymentGatewayAdapter",
+      "failure_modes": [
+        "Network timeout during order creation",
+        "Invalid signature during client return/webhook verification",
+        "Duplicate webhook delivery for already paid booking",
+        "Insufficient balance for refund"
+      ],
+      "retry_behavior": "Idempotent retry for pending orders; duplicate verify rejected with 422",
+      "test_strategy": "Offline HMAC-SHA256 signature calculation, container mocking of gateway adapter"
+    },
+    {
+      "name": "Google OAuth Token Verification",
+      "purpose": "Decodes and validates Google JWT ID token to authenticate/register users",
+      "current_callers": ["App\\Http\\Controllers\\Auth\\GoogleAuthController"],
+      "current_sdk": "Illuminate\\Support\\Facades\\Http (raw HTTP GET)",
+      "current_mechanism": "Inline Http::get('https://oauth2.googleapis.com/tokeninfo', ['id_token' => ...])",
+      "target_interface": "App\\Domain\\Identity\\Contracts\\OAuthTokenVerifierInterface",
+      "target_adapter": "App\\Infrastructure\\Identity\\GoogleTokenVerifierAdapter",
+      "failure_modes": [
+        "Invalid or expired JWT token",
+        "Google API endpoint unreachable",
+        "Email mismatch"
+      ],
+      "retry_behavior": "Fail immediately with 422 ValidationException",
+      "test_strategy": "Http::fake() with deterministic Google user payload"
+    },
+    {
+      "name": "ExchangeRate-API",
+      "purpose": "Fetches current currency exchange rates against INR for multi-currency display",
+      "current_callers": ["App\\Services\\ExchangeRateService"],
+      "current_sdk": "Illuminate\\Support\\Facades\\Http (raw HTTP GET)",
+      "current_mechanism": "Http::get('https://api.exchangerate-api.com/v4/latest/INR')",
+      "target_interface": "App\\Domain\\Pricing\\Contracts\\ExchangeRateProviderInterface",
+      "target_adapter": "App\\Infrastructure\\ExchangeRates\\ExternalExchangeRateAdapter",
+      "failure_modes": [
+        "External API rate-limit or downtime",
+        "Malformed JSON response"
+      ],
+      "retry_behavior": "Automatic fallback to cached rates (12h TTL) and hardcoded baseline rates array",
+      "test_strategy": "Unit tests using deterministic baseline rates and cache mocking"
+    },
+    {
+      "name": "Media Storage & Image Processing",
+      "purpose": "Saves uploaded creatives and thumbnails, executes WebP compression and dimension validation",
+      "current_callers": ["App\\Helpers\\MediaHelper", "App\\Services\\MediaService"],
+      "current_sdk": "PHP GD extension (imagecreatefromjpeg, imagewebp) and Storage facade",
+      "current_mechanism": "Direct low-level GD functions and storage_path('app/public')",
+      "target_interface": "App\\Domain\\Creative\\Contracts\\MediaProcessorInterface & App\\Domain\\Media\\Contracts\\MediaStorageInterface",
+      "target_adapter": "App\\Infrastructure\\Storage\\LocalMediaStorageAdapter & CloudS3MediaStorageAdapter",
+      "failure_modes": [
+        "Corrupted image stream",
+        "Out of memory during large image resize",
+        "Disk write permissions"
+      ],
+      "retry_behavior": "Fail upload request cleanly with descriptive 422 error",
+      "test_strategy": "UploadedFile::fake()->image() in memory"
+    },
+    {
+      "name": "SMTP Mailer",
+      "purpose": "Dispatches transactional notifications (booking confirmation, provider invitation, payment receipt, status updates)",
+      "current_callers": ["App\\Services\\NotificationService", "App\\Listeners\\NotificationEventSubscriber"],
+      "current_sdk": "Illuminate\\Support\\Facades\\Mail",
+      "current_mechanism": "28 Mailables in app/Mail/ called synchronously or via sync queue",
+      "target_interface": "App\\Domain\\Support\\Contracts\\NotificationGatewayInterface",
+      "target_adapter": "App\\Infrastructure\\Notifications\\LaravelMailNotificationAdapter",
+      "failure_modes": ["SMTP connection timeout", "Invalid recipient email"],
+      "retry_behavior": "Logged in notification_logs table with status='failed'",
+      "test_strategy": "Mail::fake() and Event::fake()"
+    }
+  ]
+}

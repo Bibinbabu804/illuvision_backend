@@ -1,0 +1,181 @@
+{
+  "version": "0.2",
+  "generated_at": "2026-09-25T20:56:00+05:30",
+  "total_integrations": 5,
+  "integrations": [
+    {
+      "integration_name": "Razorpay Payment Gateway",
+      "sdk_or_protocol": "Razorpay\\Api\\Api (Official PHP SDK)",
+      "configuration_keys": [
+        "services.razorpay.key",
+        "services.razorpay.secret"
+      ],
+      "callers": [
+        {
+          "class": "App\\Services\\PaymentService",
+          "methods": [
+            "__construct()",
+            "createOrder()",
+            "verifySignature()",
+            "fetchPayment()",
+            "refund()"
+          ],
+          "file_path": "app/Services/PaymentService.php"
+        },
+        {
+          "class": "App\\Http\\Controllers\\PaymentController",
+          "methods": [
+            "createOrder()",
+            "verify()",
+            "refund()"
+          ],
+          "file_path": "app/Http/Controllers/PaymentController.php"
+        },
+        {
+          "class": "App\\Http\\Controllers\\AdminPaymentController",
+          "methods": [
+            "refund()",
+            "reconcile()"
+          ],
+          "file_path": "app/Http/Controllers/AdminPaymentController.php"
+        }
+      ],
+      "failure_handling": "SDK throws Razorpay\\Api\\Errors\\Error. Caught via generic \\Exception in controllers, returns HTTP 422 or 500, logs error message to laravel.log.",
+      "retry_and_timeout": "No automated retry policy. Client must retry or re-initiate order. Signature verification failure transitions booking to payment_failed.",
+      "idempotency": "createOrder checks for existing pending payment before creating a new order. verifySignature is protected by DB transaction checking if already verified.",
+      "side_effects": "Creates/updates payments records, creates payment_logs, updates booking status to pending_approval or payment_failed, records referral_usages and partner_commissions, dispatches PaymentReceived or PaymentFailed events.",
+      "risk": "CRITICAL"
+    },
+    {
+      "integration_name": "Google OAuth 2.0 (Token Info API)",
+      "sdk_or_protocol": "HTTP GET via Illuminate\\Support\\Facades\\Http",
+      "configuration_keys": [
+        "services.google.client_id (implicit via tokeninfo endpoint)"
+      ],
+      "callers": [
+        {
+          "class": "App\\Http\\Controllers\\Auth\\GoogleAuthController",
+          "methods": [
+            "__invoke()"
+          ],
+          "file_path": "app/Http/Controllers/Auth/GoogleAuthController.php"
+        }
+      ],
+      "failure_handling": "If Google endpoint returns non-200 or missing email, throws ValidationException with 'Invalid Google token.' returning HTTP 422.",
+      "retry_and_timeout": "Default Laravel Http timeout (30s). No retry.",
+      "idempotency": "Idempotent. Re-authenticating existing user updates avatar and google_id.",
+      "side_effects": "Creates or updates users record, generates Sanctum personal access token.",
+      "risk": "HIGH"
+    },
+    {
+      "integration_name": "ExchangeRate-API",
+      "sdk_or_protocol": "HTTP GET via Illuminate\\Support\\Facades\\Http",
+      "configuration_keys": [
+        "services.exchangerate.api_key (optional; currently uses free tier URL)"
+      ],
+      "callers": [
+        {
+          "class": "App\\Services\\ExchangeRateService",
+          "methods": [
+            "syncRatesFromApi()"
+          ],
+          "file_path": "app/Services/ExchangeRateService.php"
+        },
+        {
+          "class": "App\\Console\\Commands\\SyncExchangeRates",
+          "methods": [
+            "handle()"
+          ],
+          "file_path": "app/Console/Commands/SyncExchangeRates.php"
+        }
+      ],
+      "failure_handling": "If HTTP request fails, logs error to laravel.log and falls back to hardcoded baselineRates array in ExchangeRateService.",
+      "retry_and_timeout": "Executed via background scheduler twice daily (01:00, 13:00). Never called in live user request flow.",
+      "idempotency": "Idempotent. Upserts currency_rates table.",
+      "side_effects": "Updates currency_rates table, updates currency_rates:all cache key.",
+      "risk": "MEDIUM"
+    },
+    {
+      "integration_name": "Local / GD Filesystem Storage",
+      "sdk_or_protocol": "Raw PHP GD library (imagewebp, imagecreatefromstring) + filesystem (mkdir, copy, file_put_contents)",
+      "configuration_keys": [
+        "filesystems.disks.public.root"
+      ],
+      "callers": [
+        {
+          "class": "App\\Helpers\\MediaHelper",
+          "methods": [
+            "compressUploadedImage()"
+          ],
+          "file_path": "app/Helpers/MediaHelper.php"
+        },
+        {
+          "class": "App\\Services\\MediaService",
+          "methods": [
+            "uploadMedia()",
+            "validateMedia()"
+          ],
+          "file_path": "app/Services/MediaService.php"
+        },
+        {
+          "class": "App\\Http\\Controllers\\ScreenController",
+          "methods": [
+            "store()",
+            "update()"
+          ],
+          "file_path": "app/Http/Controllers/ScreenController.php"
+        },
+        {
+          "class": "App\\Http\\Controllers\\BookingController",
+          "methods": [
+            "uploadMedia()"
+          ],
+          "file_path": "app/Http/Controllers/BookingController.php"
+        },
+        {
+          "class": "App\\Http\\Controllers\\PartnerBookingController",
+          "methods": [
+            "uploadMedia()"
+          ],
+          "file_path": "app/Http/Controllers/PartnerBookingController.php"
+        }
+      ],
+      "failure_handling": "If GD extension is not loaded or file is not an image, copies original file as-is without compression.",
+      "retry_and_timeout": "Synchronous file write. No retry.",
+      "idempotency": "Generates randomized filenames with time() and Str::random(10).",
+      "side_effects": "Writes binary file to storage/app/public/... and returns relative path.",
+      "risk": "HIGH"
+    },
+    {
+      "integration_name": "Transactional Email (SMTP / Mail Transport)",
+      "sdk_or_protocol": "Laravel Mail Facade (Mail::to) & Mailable Classes",
+      "configuration_keys": [
+        "mail.default",
+        "mail.mailers.smtp.*"
+      ],
+      "callers": [
+        {
+          "class": "App\\Services\\NotificationService",
+          "methods": [
+            "send()",
+            "dispatchEmail()"
+          ],
+          "file_path": "app/Services/NotificationService.php"
+        },
+        {
+          "class": "App\\Listeners\\NotificationEventSubscriber",
+          "methods": [
+            "subscribe()",
+            "handle*()"
+          ],
+          "file_path": "app/Listeners/NotificationEventSubscriber.php"
+        }
+      ],
+      "failure_handling": "Catches \\Exception, logs failure to notification_logs with status='failed' and exception message. Does not crash calling business operation.",
+      "retry_and_timeout": "Queueable mailables inherit queue worker retry settings.",
+      "idempotency": "NotificationEventSubscriber implements deduplicate() method checking static memory array to prevent duplicate dispatches during single lifecycle request.",
+      "side_effects": "Inserts notification_logs record, queues mailable in jobs table.",
+      "risk": "MEDIUM"
+    }
+  ]
+}

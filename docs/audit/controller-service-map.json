@@ -1,0 +1,6117 @@
+{
+  "version": "0.2",
+  "generated_at": "2026-09-25T20:56:00+05:30",
+  "total_controllers": 69,
+  "controllers": {
+    "App\\Http\\Controllers\\EnquiryController": {
+      "class": "App\\Http\\Controllers\\EnquiryController",
+      "name": "EnquiryController",
+      "file_path": "app/Http/Controllers/EnquiryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 4,
+      "methods": {
+        "index": {
+          "route_uri": "api/enquiries",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ContactEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/enquiries",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Enquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/enquiries/{enquiry}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/enquiries/{enquiry}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ReferralCodeController": {
+      "class": "App\\Http\\Controllers\\ReferralCodeController",
+      "name": "ReferralCodeController",
+      "file_path": "app/Http/Controllers/ReferralCodeController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ReferralService",
+          "var": "referralService"
+        }
+      ],
+      "methods_count": 6,
+      "methods": {
+        "index": {
+          "route_uri": "api/referral-codes",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ReferralCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/referral-codes",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ReferralCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/referral-codes/{referral_code}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/referral-codes/{referral_code}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/referral-codes/{referral_code}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "validate": {
+          "route_uri": "api/referral-codes/validate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ReferralCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\BlogTagController": {
+      "class": "App\\Http\\Controllers\\BlogTagController",
+      "name": "BlogTagController",
+      "file_path": "app/Http/Controllers/BlogTagController.php",
+      "constructor_dependencies": [],
+      "methods_count": 4,
+      "methods": {
+        "index": {
+          "route_uri": "api/blog-tags",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BlogTag"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/blog-tags",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BlogTag"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/blog-tags/{blog_tag}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/blog-tags/{blog_tag}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\FileController": {
+      "class": "App\\Http\\Controllers\\FileController",
+      "name": "FileController",
+      "file_path": "app/Http/Controllers/FileController.php",
+      "constructor_dependencies": [],
+      "methods_count": 2,
+      "methods": {
+        "upload": {
+          "route_uri": "api/file-upload",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": [
+            "Local / GD Filesystem Storage"
+          ]
+        },
+        "videoupload": {
+          "route_uri": "api/video-upload",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\JobPostController": {
+      "class": "App\\Http\\Controllers\\JobPostController",
+      "name": "JobPostController",
+      "file_path": "app/Http/Controllers/JobPostController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/jobs",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "JobPost"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/jobs",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "JobPost"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/jobs/{jobPost}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/jobs/{jobPost}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/jobs/{jobPost}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Controller": {
+      "class": "App\\Http\\Controllers\\Controller",
+      "name": "Controller",
+      "file_path": "app/Http/Controllers/Controller.php",
+      "constructor_dependencies": [],
+      "methods_count": 0,
+      "methods": {}
+    },
+    "App\\Http\\Controllers\\JobCategoryController": {
+      "class": "App\\Http\\Controllers\\JobCategoryController",
+      "name": "JobCategoryController",
+      "file_path": "app/Http/Controllers/JobCategoryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 4,
+      "methods": {
+        "index": {
+          "route_uri": "api/job-categories",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "JobCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "JobCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\TestimonialController": {
+      "class": "App\\Http\\Controllers\\TestimonialController",
+      "name": "TestimonialController",
+      "file_path": "app/Http/Controllers/TestimonialController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/testimonials",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Testimonial"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/testimonials",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Testimonial"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/testimonials/{testimonial}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/testimonials/{testimonial}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/testimonials/{testimonial}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdminScreenProviderEnquiryController": {
+      "class": "App\\Http\\Controllers\\AdminScreenProviderEnquiryController",
+      "name": "AdminScreenProviderEnquiryController",
+      "file_path": "app/Http/Controllers/AdminScreenProviderEnquiryController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ScreenProviderService",
+          "var": "screenProviderService"
+        }
+      ],
+      "methods_count": 8,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/screen-provider-enquiries",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProviderEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/admin/screen-provider-enquiries/{screenProviderEnquiry}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/admin/screen-provider-enquiries/{screenProviderEnquiry}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "assign": {
+          "route_uri": "api/admin/screen-provider-enquiries/{screenProviderEnquiry}/assign",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "status": {
+          "route_uri": "api/admin/screen-provider-enquiries/{screenProviderEnquiry}/status",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "notes": {
+          "route_uri": "api/admin/screen-provider-enquiries/{screenProviderEnquiry}/notes",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "approve": {
+          "route_uri": "api/admin/screen-provider-enquiries/{screenProviderEnquiry}/approve",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "reject": {
+          "route_uri": "api/admin/screen-provider-enquiries/{screenProviderEnquiry}/reject",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdvertisementCategoryController": {
+      "class": "App\\Http\\Controllers\\AdvertisementCategoryController",
+      "name": "AdvertisementCategoryController",
+      "file_path": "app/Http/Controllers/AdvertisementCategoryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/advertisement-categories",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "AdvertisementCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/advertisement-categories",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "AdvertisementCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/advertisement-categories/{advertisement_category}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "AdvertisementCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/advertisement-categories/{advertisement_category}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "AdvertisementCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/advertisement-categories/{advertisement_category}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "AdvertisementCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ReferralAnalyticsController": {
+      "class": "App\\Http\\Controllers\\ReferralAnalyticsController",
+      "name": "ReferralAnalyticsController",
+      "file_path": "app/Http/Controllers/ReferralAnalyticsController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ReferralService",
+          "var": "referralService"
+        },
+        {
+          "type": "CommissionService",
+          "var": "commissionService"
+        }
+      ],
+      "methods_count": 9,
+      "methods": {
+        "overview": {
+          "route_uri": "api/referral-analytics/overview",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "commissionSummary": {
+          "route_uri": "api/referral-analytics/commission-summary",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "commissions": {
+          "route_uri": "api/referral-analytics/commissions",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "commissionDetail": {
+          "route_uri": "api/referral-analytics/commissions/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "approve": {
+          "route_uri": "api/referral-analytics/commissions/{id}/approve",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "CommissionGenerated"
+          ],
+          "integrations": []
+        },
+        "markPaid": {
+          "route_uri": "api/referral-analytics/commissions/{id}/mark-paid",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "CommissionGenerated"
+          ],
+          "integrations": []
+        },
+        "markCancelled": {
+          "route_uri": "api/referral-analytics/commissions/{id}/mark-cancelled",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "topPartners": {
+          "route_uri": "api/referral-analytics/top-partners",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "topCodes": {
+          "route_uri": "api/referral-analytics/top-codes",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ReferralCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AuthorController": {
+      "class": "App\\Http\\Controllers\\AuthorController",
+      "name": "AuthorController",
+      "file_path": "app/Http/Controllers/AuthorController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/authors",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/authors",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/authors/{author}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/authors/{author}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/authors/{author}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\DashBoardController": {
+      "class": "App\\Http\\Controllers\\DashBoardController",
+      "name": "DashBoardController",
+      "file_path": "app/Http/Controllers/DashBoardController.php",
+      "constructor_dependencies": [
+        {
+          "type": "BookingAnalyticsService",
+          "var": "bookingAnalytics"
+        },
+        {
+          "type": "ScreenAnalyticsService",
+          "var": "screenAnalytics"
+        },
+        {
+          "type": "RevenueAnalyticsService",
+          "var": "revenueAnalytics"
+        }
+      ],
+      "methods_count": 1,
+      "methods": {
+        "index": {
+          "route_uri": "api/dashboard",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "ScreenProviderSettlement",
+            "RewardAccount",
+            "Screen",
+            "ContactEnquiry",
+            "ScreenProvider",
+            "BookingScreen",
+            "RewardTransaction"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\BlogController": {
+      "class": "App\\Http\\Controllers\\BlogController",
+      "name": "BlogController",
+      "file_path": "app/Http/Controllers/BlogController.php",
+      "constructor_dependencies": [],
+      "methods_count": 10,
+      "methods": {
+        "index": {
+          "route_uri": "api/blogs",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Blog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "featured": {
+          "route_uri": "api/blogs/featured",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Blog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/blogs/{blog}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "related": {
+          "route_uri": "api/blogs/{blog}/related",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Blog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "categories": {
+          "route_uri": "api/blogs/categories",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Category"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "tags": {
+          "route_uri": "api/blogs/tags",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BlogTag"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/blogs",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Blog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/blogs/{blog}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateCount": {
+          "route_uri": "api/blogs/{blog}/update-count",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\SuccessStoryController": {
+      "class": "App\\Http\\Controllers\\SuccessStoryController",
+      "name": "SuccessStoryController",
+      "file_path": "app/Http/Controllers/SuccessStoryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/success-stories",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "SuccessStory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/success-stories",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "SuccessStory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/success-stories/{success_story}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/success-stories/{success_story}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/success-stories/{success_story}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AuthController": {
+      "class": "App\\Http\\Controllers\\AuthController",
+      "name": "AuthController",
+      "file_path": "app/Http/Controllers/AuthController.php",
+      "constructor_dependencies": [],
+      "methods_count": 6,
+      "methods": {
+        "register": {
+          "route_uri": "api/register",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "UserRegistered"
+          ],
+          "integrations": []
+        },
+        "login": {
+          "route_uri": "api/login",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "logout": {
+          "route_uri": "api/logout",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "me": {
+          "route_uri": "api/me",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "profile": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "ProfileUpdated"
+          ],
+          "integrations": []
+        },
+        "changePassword": {
+          "route_uri": "api/change-password",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ReportController": {
+      "class": "App\\Http\\Controllers\\ReportController",
+      "name": "ReportController",
+      "file_path": "app/Http/Controllers/ReportController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ReportService",
+          "var": "reportService"
+        }
+      ],
+      "methods_count": 11,
+      "methods": {
+        "overview": {
+          "route_uri": "api/reports/overview",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "revenue": {
+          "route_uri": "api/reports/revenue",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "bookings": {
+          "route_uri": "api/reports/bookings",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "screens": {
+          "route_uri": "api/reports/screens",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "cities": {
+          "route_uri": "api/reports/cities",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "campaigns": {
+          "route_uri": "api/reports/campaigns",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "screenProviders": {
+          "route_uri": "api/reports/screen-providers",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "categories": {
+          "route_uri": "api/reports/categories",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "referrals": {
+          "route_uri": "api/reports/referrals",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "rewards": {
+          "route_uri": "api/reports/rewards",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "export": {
+          "route_uri": "api/reports/export",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ScreenCategoryController": {
+      "class": "App\\Http\\Controllers\\ScreenCategoryController",
+      "name": "ScreenCategoryController",
+      "file_path": "app/Http/Controllers/ScreenCategoryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 2,
+      "methods": {
+        "index": {
+          "route_uri": "api/screen-categories",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/screen-categories",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenCategory"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdminScreenProviderController": {
+      "class": "App\\Http\\Controllers\\AdminScreenProviderController",
+      "name": "AdminScreenProviderController",
+      "file_path": "app/Http/Controllers/AdminScreenProviderController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ScreenProviderService",
+          "var": "screenProviderService"
+        },
+        {
+          "type": "RevenueDistributionService",
+          "var": "revenueDistributionService"
+        },
+        {
+          "type": "SettlementService",
+          "var": "settlementService"
+        },
+        {
+          "type": "ScreenDeletionService",
+          "var": "screenDeletionService"
+        }
+      ],
+      "methods_count": 15,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/screen-providers",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProvider"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/admin/screen-providers",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProvider"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProvider"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProvider"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateRevenueSplit": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/revenue-split",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "screens": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/screens",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "activity": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/activity",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "addNote": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/notes",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "settlements": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/settlements",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProviderSettlement"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "allProviders": {
+          "route_uri": "api/admin/screen-providers/all",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProvider"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "revenue": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/revenue",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "screenRevenue": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/screen-revenue",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "bookingHistory": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/booking-history",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "sendPortalInvitation": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/send-invitation",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "deleteScreens": {
+          "route_uri": "api/admin/screen-providers/{screenProvider}/delete-screens",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\PricingPlanController": {
+      "class": "App\\Http\\Controllers\\PricingPlanController",
+      "name": "PricingPlanController",
+      "file_path": "app/Http/Controllers/PricingPlanController.php",
+      "constructor_dependencies": [
+        {
+          "type": "PricingService",
+          "var": "pricingService"
+        },
+        {
+          "type": "BookingPriceCalculator",
+          "var": "calculator"
+        }
+      ],
+      "methods_count": 6,
+      "methods": {
+        "index": {
+          "route_uri": "api/pricing-plans",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "PricingPlan"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/pricing-plans",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/pricing-plans/{pricingPlan}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/pricing-plans/{pricingPlan}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/pricing-plans/{pricingPlan}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "preview": {
+          "route_uri": "api/pricing-plans/{pricingPlan}/preview",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "PricingPlan"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ContactEnquiryController": {
+      "class": "App\\Http\\Controllers\\ContactEnquiryController",
+      "name": "ContactEnquiryController",
+      "file_path": "app/Http/Controllers/ContactEnquiryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 1,
+      "methods": {
+        "store": {
+          "route_uri": "api/contact-enquiries",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ContactEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\PartnerApprovalController": {
+      "class": "App\\Http\\Controllers\\PartnerApprovalController",
+      "name": "PartnerApprovalController",
+      "file_path": "app/Http/Controllers/PartnerApprovalController.php",
+      "constructor_dependencies": [
+        {
+          "type": "PartnerService",
+          "var": "partnerService"
+        }
+      ],
+      "methods_count": 4,
+      "methods": {
+        "approve": {
+          "route_uri": "api/partners/{partner}/approve",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "reject": {
+          "route_uri": "api/partners/{partner}/reject",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "markUnderReview": {
+          "route_uri": "api/partners/{partner}/mark-under-review",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "apply": {
+          "route_uri": "api/partner-applications",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ScreenController": {
+      "class": "App\\Http\\Controllers\\ScreenController",
+      "name": "ScreenController",
+      "file_path": "app/Http/Controllers/ScreenController.php",
+      "constructor_dependencies": [
+        {
+          "type": "AssetService",
+          "var": "assetService"
+        },
+        {
+          "type": "ScreenDeletionService",
+          "var": "deletionService"
+        }
+      ],
+      "methods_count": 16,
+      "methods": {
+        "index": {
+          "route_uri": "api/screens",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "mapIndex": {
+          "route_uri": "api/screens/map",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/screens",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Screen"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/screens/{screen}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/screens/{screen}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Screen",
+            "ActivityLog"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/screens/{screen}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "bulkDestroy": {
+          "route_uri": "api/admin/screens/bulk-delete",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "countries": {
+          "route_uri": "api/countries",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Country"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "statesByCountry": {
+          "route_uri": "api/countries/{country}/states",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "State"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "citiesByState": {
+          "route_uri": "api/states/{state}/cities",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "City"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "citiesByCountry": {
+          "route_uri": "api/countries/{country}/cities",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "City"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "storeCountry": {
+          "route_uri": "api/countries",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Country"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "storeState": {
+          "route_uri": "api/states",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "State"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "storeCity": {
+          "route_uri": "api/countries/{country}/cities",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "City"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "screenTypes": {
+          "route_uri": "api/screen-types",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "export": {
+          "route_uri": "api/admin/assets/export",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenCategory",
+            "Country",
+            "City",
+            "State",
+            "ScreenProvider",
+            "PricingPlan"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\PartnerPortalController": {
+      "class": "App\\Http\\Controllers\\PartnerPortalController",
+      "name": "PartnerPortalController",
+      "file_path": "app/Http/Controllers/PartnerPortalController.php",
+      "constructor_dependencies": [
+        {
+          "type": "PartnerService",
+          "var": "partnerService"
+        }
+      ],
+      "methods_count": 8,
+      "methods": {
+        "dashboard": {
+          "route_uri": "api/partner/dashboard",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "referralCode": {
+          "route_uri": "api/partner/referral-code",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "bookings": {
+          "route_uri": "api/partner/bookings",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "commissions": {
+          "route_uri": "api/partner/commissions",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateProfile": {
+          "route_uri": "api/partner/profile",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "setupPassword": {
+          "route_uri": "api/partner/setup-password",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "reports": {
+          "route_uri": "api/partner/reports",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "Payment"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "exportReport": {
+          "route_uri": "api/partner/reports/export",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdminSettlementController": {
+      "class": "App\\Http\\Controllers\\AdminSettlementController",
+      "name": "AdminSettlementController",
+      "file_path": "app/Http/Controllers/AdminSettlementController.php",
+      "constructor_dependencies": [
+        {
+          "type": "SettlementService",
+          "var": "settlementService"
+        }
+      ],
+      "methods_count": 7,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/settlements",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProviderSettlement"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/admin/settlements/{settlement}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProviderSettlement"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "generate": {
+          "route_uri": "api/admin/settlements/generate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/admin/settlements/{settlement}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "approve": {
+          "route_uri": "api/admin/settlements/{settlement}/approve",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "markPaid": {
+          "route_uri": "api/admin/settlements/{settlement}/mark-paid",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "cancel": {
+          "route_uri": "api/admin/settlements/{settlement}/cancel",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdminManualBookingController": {
+      "class": "App\\Http\\Controllers\\AdminManualBookingController",
+      "name": "AdminManualBookingController",
+      "file_path": "app/Http/Controllers/AdminManualBookingController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ManualBookingService",
+          "var": "manualBookingService"
+        },
+        {
+          "type": "MediaService",
+          "var": "mediaService"
+        }
+      ],
+      "methods_count": 7,
+      "methods": {
+        "searchClients": {
+          "route_uri": "api/admin/manual-bookings/search-clients",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "calculate": {
+          "route_uri": "api/admin/manual-bookings/calculate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/admin/manual-bookings",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "BookingCreated"
+          ],
+          "integrations": [
+            "Razorpay API"
+          ]
+        },
+        "show": {
+          "route_uri": "api/admin/manual-bookings/{booking}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "payment": {
+          "route_uri": "api/admin/manual-bookings/{booking}/payment",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "approve": {
+          "route_uri": "api/admin/manual-bookings/{booking}/approve",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity",
+            "BookingMedia"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "BookingApproved"
+          ],
+          "integrations": []
+        },
+        "uploadMedia": {
+          "route_uri": "api/admin/manual-bookings/{booking}/media",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "MediaUploaded"
+          ],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ProductEnquiryController": {
+      "class": "App\\Http\\Controllers\\ProductEnquiryController",
+      "name": "ProductEnquiryController",
+      "file_path": "app/Http/Controllers/ProductEnquiryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 1,
+      "methods": {
+        "store": {
+          "route_uri": "api/product-enquiries",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ProductEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\PartnerClientController": {
+      "class": "App\\Http\\Controllers\\PartnerClientController",
+      "name": "PartnerClientController",
+      "file_path": "app/Http/Controllers/PartnerClientController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ManualBookingService",
+          "var": "delegatedBookingEngine"
+        }
+      ],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/partner/clients",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "search": {
+          "route_uri": "api/partner/clients/search",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/partner/clients",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/partner/clients/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "User",
+            "Payment"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/partner/clients/{id}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdminProductController": {
+      "class": "App\\Http\\Controllers\\AdminProductController",
+      "name": "AdminProductController",
+      "file_path": "app/Http/Controllers/AdminProductController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/products",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Product"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/admin/products",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Product"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/admin/products/{product}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/admin/products/{product}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/admin/products/{product}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\GalleryController": {
+      "class": "App\\Http\\Controllers\\GalleryController",
+      "name": "GalleryController",
+      "file_path": "app/Http/Controllers/GalleryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/gallery",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Gallery"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/gallery",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Gallery"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/gallery/{gallery}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/gallery/{gallery}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/gallery/{gallery}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ProductController": {
+      "class": "App\\Http\\Controllers\\ProductController",
+      "name": "ProductController",
+      "file_path": "app/Http/Controllers/ProductController.php",
+      "constructor_dependencies": [],
+      "methods_count": 2,
+      "methods": {
+        "index": {
+          "route_uri": "api/products",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Product"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Product"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AchievementController": {
+      "class": "App\\Http\\Controllers\\AchievementController",
+      "name": "AchievementController",
+      "file_path": "app/Http/Controllers/AchievementController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/achievements",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Achievement"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/achievements",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Achievement"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/achievements/{achievement}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/achievements/{achievement}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/achievements/{achievement}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ScreenProviderPortalController": {
+      "class": "App\\Http\\Controllers\\ScreenProviderPortalController",
+      "name": "ScreenProviderPortalController",
+      "file_path": "app/Http/Controllers/ScreenProviderPortalController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ScreenProviderService",
+          "var": "screenProviderService"
+        },
+        {
+          "type": "RevenueDistributionService",
+          "var": "revenueDistributionService"
+        },
+        {
+          "type": "SettlementService",
+          "var": "settlementService"
+        }
+      ],
+      "methods_count": 14,
+      "methods": {
+        "dashboard": {
+          "route_uri": "api/screen-provider/dashboard",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "ScreenProviderSettlement",
+            "Screen",
+            "BookingScreen"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "screens": {
+          "route_uri": "api/screen-provider/screens",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "Screen",
+            "BookingScreen"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "storeScreen": {
+          "route_uri": "api/screen-provider/screens",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Screen",
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateScreen": {
+          "route_uri": "api/screen-provider/screens/{screen}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Screen",
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "screenDetails": {
+          "route_uri": "api/screen-provider/screens/{screen}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingScreen"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "campaigns": {
+          "route_uri": "api/screen-provider/campaigns",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "campaignDetails": {
+          "route_uri": "api/screen-provider/campaigns/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "revenue": {
+          "route_uri": "api/screen-provider/revenue",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "Screen",
+            "BookingScreen"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "settlements": {
+          "route_uri": "api/screen-provider/settlements",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProviderSettlement"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "notifications": {
+          "route_uri": "api/screen-provider/notifications",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "NotificationLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": [
+            "SMTP / Email"
+          ]
+        },
+        "submitEnquiry": {
+          "route_uri": "api/screen-provider/enquiries",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ContactEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "enquiryHistory": {
+          "route_uri": "api/screen-provider/enquiries",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ContactEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateProfile": {
+          "route_uri": "api/screen-provider/profile",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "setupPassword": {
+          "route_uri": "api/screen-provider/setup-password",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdminPaymentController": {
+      "class": "App\\Http\\Controllers\\AdminPaymentController",
+      "name": "AdminPaymentController",
+      "file_path": "app/Http/Controllers/AdminPaymentController.php",
+      "constructor_dependencies": [
+        {
+          "type": "PaymentAnalyticsService",
+          "var": "paymentAnalyticsService"
+        },
+        {
+          "type": "RefundService",
+          "var": "refundService"
+        }
+      ],
+      "methods_count": 9,
+      "methods": {
+        "index": {
+          "route_uri": "api/payments",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Payment"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": [
+            "Razorpay API"
+          ]
+        },
+        "show": {
+          "route_uri": "api/payments/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [
+            "PaymentService"
+          ],
+          "repositories_called": [],
+          "models_called": [
+            "Payment"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": [
+            "Razorpay API"
+          ]
+        },
+        "analytics": {
+          "route_uri": "api/payments/analytics",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "refunds": {
+          "route_uri": "api/payments/refunds",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "timeline": {
+          "route_uri": "api/payments/{id}/timeline",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Payment",
+            "PaymentLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "initiateRefund": {
+          "route_uri": "api/payments/{id}/refund",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Payment"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "PaymentRefunded"
+          ],
+          "integrations": []
+        },
+        "directPayments": {
+          "route_uri": "api/admin/payments/direct-verification-queue",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Payment"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "approveDirectPayment": {
+          "route_uri": "api/admin/payments/{id}/approve-direct",
+          "http_method": "POST",
+          "services_called": [
+            "ReferralTrackingService"
+          ],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity",
+            "Payment",
+            "PaymentLog"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "rejectDirectPayment": {
+          "route_uri": "api/admin/payments/{id}/reject-direct",
+          "http_method": "POST",
+          "services_called": [
+            "ReferralTrackingService"
+          ],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity",
+            "Payment",
+            "PaymentLog"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\ScreenProviderEnquiryController": {
+      "class": "App\\Http\\Controllers\\ScreenProviderEnquiryController",
+      "name": "ScreenProviderEnquiryController",
+      "file_path": "app/Http/Controllers/ScreenProviderEnquiryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 1,
+      "methods": {
+        "store": {
+          "route_uri": "api/screen-provider-enquiries",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ScreenProviderEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\JobApplicationController": {
+      "class": "App\\Http\\Controllers\\JobApplicationController",
+      "name": "JobApplicationController",
+      "file_path": "app/Http/Controllers/JobApplicationController.php",
+      "constructor_dependencies": [],
+      "methods_count": 4,
+      "methods": {
+        "index": {
+          "route_uri": "api/job-applications",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "JobApplication"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/job-applications",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "JobApplication"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/job-applications/{jobApplication}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/job-applications/{jobApplication}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\PartnerController": {
+      "class": "App\\Http\\Controllers\\PartnerController",
+      "name": "PartnerController",
+      "file_path": "app/Http/Controllers/PartnerController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ReferralService",
+          "var": "referralService"
+        },
+        {
+          "type": "PartnerService",
+          "var": "partnerService"
+        }
+      ],
+      "methods_count": 12,
+      "methods": {
+        "index": {
+          "route_uri": "api/partners",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "allPartners": {
+          "route_uri": "api/partners/all",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/partners",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "PartnerCreated"
+          ],
+          "integrations": []
+        },
+        "createWithOnboarding": {
+          "route_uri": "api/partners/create-with-onboarding",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/partners/{partner}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ReferralUsage"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/partners/{partner}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/partners/{partner}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateStatus": {
+          "route_uri": "api/partners/{partner}/status",
+          "http_method": "PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "timeline": {
+          "route_uri": "api/partners/{partner}/timeline",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "bookings": {
+          "route_uri": "api/partners/{partner}/bookings",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "commissions": {
+          "route_uri": "api/partners/{partner}/commissions",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "kpis": {
+          "route_uri": "api/partners/kpis",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner",
+            "ReferralUsage",
+            "PartnerCommission",
+            "ReferralCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\PartnerBookingController": {
+      "class": "App\\Http\\Controllers\\PartnerBookingController",
+      "name": "PartnerBookingController",
+      "file_path": "app/Http/Controllers/PartnerBookingController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ManualBookingService",
+          "var": "delegatedBookingEngine"
+        }
+      ],
+      "methods_count": 9,
+      "methods": {
+        "index": {
+          "route_uri": "api/partner/campaigns",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "clients": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "storeClient": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "calculate": {
+          "route_uri": "api/partner/bookings/calculate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/partner/bookings",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": [
+            "Razorpay API"
+          ]
+        },
+        "show": {
+          "route_uri": "api/partner/bookings/{booking}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "uploadMedia": {
+          "route_uri": "api/partner/bookings/{booking}/media",
+          "http_method": "POST",
+          "services_called": [
+            "MediaService"
+          ],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity",
+            "BookingMedia"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "deleteMedia": {
+          "route_uri": "api/partner/bookings/{booking}/media/{media}",
+          "http_method": "DELETE",
+          "services_called": [
+            "MediaService"
+          ],
+          "repositories_called": [],
+          "models_called": [
+            "BookingActivity"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "timeline": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdminProductEnquiryController": {
+      "class": "App\\Http\\Controllers\\AdminProductEnquiryController",
+      "name": "AdminProductEnquiryController",
+      "file_path": "app/Http/Controllers/AdminProductEnquiryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 4,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/product-enquiries",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ProductEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/admin/product-enquiries/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/admin/product-enquiries/{id}",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/admin/product-enquiries/{id}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\PaymentController": {
+      "class": "App\\Http\\Controllers\\PaymentController",
+      "name": "PaymentController",
+      "file_path": "app/Http/Controllers/PaymentController.php",
+      "constructor_dependencies": [
+        {
+          "type": "PaymentService",
+          "var": "paymentService"
+        }
+      ],
+      "methods_count": 4,
+      "methods": {
+        "createOrder": {
+          "route_uri": "api/payments/razorpay/create-order",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": [
+            "Razorpay API"
+          ]
+        },
+        "verify": {
+          "route_uri": "api/payments/razorpay/verify",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "PaymentReceived",
+            "PaymentFailed"
+          ],
+          "integrations": [
+            "Razorpay API"
+          ]
+        },
+        "paymentStatus": {
+          "route_uri": "api/bookings/{bookingId}/payment-status",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": [
+            "Razorpay API"
+          ]
+        },
+        "refund": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Payment"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "PaymentRefunded"
+          ],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\CategoryController": {
+      "class": "App\\Http\\Controllers\\CategoryController",
+      "name": "CategoryController",
+      "file_path": "app/Http/Controllers/CategoryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 4,
+      "methods": {
+        "index": {
+          "route_uri": "api/categories",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Category"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/categories",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Category"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/categories/{category}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/categories/{category}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\FaqController": {
+      "class": "App\\Http\\Controllers\\FaqController",
+      "name": "FaqController",
+      "file_path": "app/Http/Controllers/FaqController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/faqs",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Faq"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/faqs",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Faq"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/faqs/{faq}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/faqs/{faq}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/faqs/{faq}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AnnouncementController": {
+      "class": "App\\Http\\Controllers\\AnnouncementController",
+      "name": "AnnouncementController",
+      "file_path": "app/Http/Controllers/AnnouncementController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/announcements",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Announcement"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/announcements",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Announcement"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/announcements/{announcement}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/announcements/{announcement}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/announcements/{announcement}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\QrCodeController": {
+      "class": "App\\Http\\Controllers\\QrCodeController",
+      "name": "QrCodeController",
+      "file_path": "app/Http/Controllers/QrCodeController.php",
+      "constructor_dependencies": [],
+      "methods_count": 7,
+      "methods": {
+        "index": {
+          "route_uri": "api/qr-codes",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "QrCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/qr-codes",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "QrCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/qr-codes/{qr_code}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "QrCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/qr-codes/{qr_code}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "QrCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/qr-codes/{qr_code}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "QrCode"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "redirect": {
+          "route_uri": "qr/{slug}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "QrCode",
+            "QrCodeScan"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "analytics": {
+          "route_uri": "api/qr-codes/{id}/analytics",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "QrCode",
+            "QrCodeScan"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\PartnerApplicationController": {
+      "class": "App\\Http\\Controllers\\PartnerApplicationController",
+      "name": "PartnerApplicationController",
+      "file_path": "app/Http/Controllers/PartnerApplicationController.php",
+      "constructor_dependencies": [
+        {
+          "type": "PartnerService",
+          "var": "partnerService"
+        }
+      ],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/partner-applications",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/partner-applications/{partner}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "cities": {
+          "route_uri": "api/partner-applications/cities",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "addNote": {
+          "route_uri": "api/partner-applications/{partner}/notes",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "stats": {
+          "route_uri": "api/partner-applications/stats",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Partner"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AdminContactEnquiryController": {
+      "class": "App\\Http\\Controllers\\AdminContactEnquiryController",
+      "name": "AdminContactEnquiryController",
+      "file_path": "app/Http/Controllers/AdminContactEnquiryController.php",
+      "constructor_dependencies": [],
+      "methods_count": 6,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/contact-enquiries",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ContactEnquiry"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/admin/contact-enquiries/{contactEnquiry}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/admin/contact-enquiries/{contactEnquiry}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "assign": {
+          "route_uri": "api/admin/contact-enquiries/{contactEnquiry}/assign",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "status": {
+          "route_uri": "api/admin/contact-enquiries/{contactEnquiry}/status",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "notes": {
+          "route_uri": "api/admin/contact-enquiries/{contactEnquiry}/notes",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\AssetImportController": {
+      "class": "App\\Http\\Controllers\\AssetImportController",
+      "name": "AssetImportController",
+      "file_path": "app/Http/Controllers/AssetImportController.php",
+      "constructor_dependencies": [
+        {
+          "type": "AssetImportService",
+          "var": "importService"
+        }
+      ],
+      "methods_count": 3,
+      "methods": {
+        "downloadTemplate": {
+          "route_uri": "api/admin/assets/import/template",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "validateImport": {
+          "route_uri": "api/admin/assets/import/validate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "confirmImport": {
+          "route_uri": "api/admin/assets/import/confirm",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\BookingController": {
+      "class": "App\\Http\\Controllers\\BookingController",
+      "name": "BookingController",
+      "file_path": "app/Http/Controllers/BookingController.php",
+      "constructor_dependencies": [
+        {
+          "type": "MediaService",
+          "var": "mediaService"
+        },
+        {
+          "type": "BookingCapacityService",
+          "var": "capacityService"
+        },
+        {
+          "type": "CampaignPricingService",
+          "var": "campaignPricingService"
+        },
+        {
+          "type": "BookingConfig",
+          "var": "bookingConfig"
+        },
+        {
+          "type": "RevenueDistributionService",
+          "var": "revenueDistributionService"
+        },
+        {
+          "type": "InventoryService",
+          "var": "inventoryService"
+        },
+        {
+          "type": "RevenueSplitResolverService",
+          "var": "splitResolver"
+        }
+      ],
+      "methods_count": 30,
+      "methods": {
+        "storeCampaign": {
+          "route_uri": "api/bookings/campaign",
+          "http_method": "POST",
+          "services_called": [
+            "LoyaltyService"
+          ],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity",
+            "PricingDurationRule",
+            "Screen",
+            "BookingScreen"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [
+            "BookingCreated"
+          ],
+          "integrations": []
+        },
+        "uploadMedia": {
+          "route_uri": "api/bookings/{booking}/media",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BookingMedia"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "MediaUploaded"
+          ],
+          "integrations": []
+        },
+        "deleteMedia": {
+          "route_uri": "api/bookings/{booking}/media/{media}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "preview": {
+          "route_uri": "api/bookings/preview",
+          "http_method": "POST",
+          "services_called": [
+            "BookingPriceCalculator"
+          ],
+          "repositories_called": [],
+          "models_called": [
+            "Screen",
+            "PricingPlan"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "calculateCampaignPricing": {
+          "route_uri": "api/campaigns/calculate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "validateCampaignPricing": {
+          "route_uri": "api/campaigns/validate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "approve": {
+          "route_uri": "api/bookings/{booking}/approve",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity",
+            "BookingMedia"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "BookingApproved"
+          ],
+          "integrations": []
+        },
+        "reject": {
+          "route_uri": "api/bookings/{booking}/reject",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "BookingRejected"
+          ],
+          "integrations": []
+        },
+        "campaignDetails": {
+          "route_uri": "api/bookings/{booking}/campaign",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "myBookings": {
+          "route_uri": "api/my-bookings",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "checkConflicts": {
+          "route_uri": "api/bookings/check-conflicts",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Screen"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "calendar": {
+          "route_uri": "api/bookings/calendar",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "occupancy": {
+          "route_uri": "api/bookings/occupancy",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "Screen"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "kpis": {
+          "route_uri": "api/bookings/kpis",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "Screen"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "index": {
+          "route_uri": "api/bookings",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/bookings/{booking}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "addNote": {
+          "route_uri": "api/bookings/{booking}/notes",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BookingActivity"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "startSession": {
+          "route_uri": "api/bookings/{booking}/start-session",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "endSession": {
+          "route_uri": "api/bookings/{booking}/end-session",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "extendSession": {
+          "route_uri": "api/bookings/{booking}/extend-session",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BookingActivity"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "markManualPayment": {
+          "route_uri": "api/bookings/{booking}/manual-payment",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity",
+            "Payment"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "PaymentReceived"
+          ],
+          "integrations": []
+        },
+        "resendConfirmation": {
+          "route_uri": "api/bookings/{booking}/resend-confirmation",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BookingActivity"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "BookingCreated"
+          ],
+          "integrations": []
+        },
+        "timeline": {
+          "route_uri": "api/bookings/{booking}/timeline",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/bookings",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity",
+            "Screen",
+            "BookingScreen"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "BookingCreated"
+          ],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/bookings/{booking}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BookingActivity",
+            "Screen",
+            "BookingScreen"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/bookings/{booking}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "approveMedia": {
+          "route_uri": "api/bookings/{booking}/media/{media}/approve",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BookingActivity",
+            "BookingMedia"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "MediaApproved"
+          ],
+          "integrations": []
+        },
+        "rejectMedia": {
+          "route_uri": "api/bookings/{booking}/media/{media}/reject",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "BookingActivity",
+            "BookingMedia"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [
+            "MediaRejected"
+          ],
+          "integrations": []
+        },
+        "review": {
+          "route_uri": "api/bookings/{booking}/review",
+          "http_method": "GET|HEAD",
+          "services_called": [
+            "BookingCapacityService"
+          ],
+          "repositories_called": [],
+          "models_called": [
+            "BookingMedia"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "markMediaReview": {
+          "route_uri": "api/bookings/{booking}/mark-media-review",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "BookingActivity"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Auth\\ForgotPasswordController": {
+      "class": "App\\Http\\Controllers\\Auth\\ForgotPasswordController",
+      "name": "ForgotPasswordController",
+      "file_path": "app/Http/Controllers/Auth/ForgotPasswordController.php",
+      "constructor_dependencies": [],
+      "methods_count": 1,
+      "methods": {
+        "__invoke": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [
+            "Mail::to"
+          ],
+          "integrations": [
+            "SMTP / Email"
+          ]
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Auth\\ResetPasswordController": {
+      "class": "App\\Http\\Controllers\\Auth\\ResetPasswordController",
+      "name": "ResetPasswordController",
+      "file_path": "app/Http/Controllers/Auth/ResetPasswordController.php",
+      "constructor_dependencies": [],
+      "methods_count": 1,
+      "methods": {
+        "__invoke": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Auth\\GoogleAuthController": {
+      "class": "App\\Http\\Controllers\\Auth\\GoogleAuthController",
+      "name": "GoogleAuthController",
+      "file_path": "app/Http/Controllers/Auth/GoogleAuthController.php",
+      "constructor_dependencies": [],
+      "methods_count": 1,
+      "methods": {
+        "__invoke": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": [
+            "Google OAuth API"
+          ]
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\PermissionController": {
+      "class": "App\\Http\\Controllers\\Api\\PermissionController",
+      "name": "PermissionController",
+      "file_path": "app/Http/Controllers/Api/PermissionController.php",
+      "constructor_dependencies": [],
+      "methods_count": 3,
+      "methods": {
+        "index": {
+          "route_uri": "api/permissions",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Role"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "listKeys": {
+          "route_uri": "api/permissions/keys",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateRolePermissions": {
+          "route_uri": "api/roles/{role}/permissions",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ActivityLog",
+            "RolePermission"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\RecommendationEngineController": {
+      "class": "App\\Http\\Controllers\\Api\\RecommendationEngineController",
+      "name": "RecommendationEngineController",
+      "file_path": "app/Http/Controllers/Api/RecommendationEngineController.php",
+      "constructor_dependencies": [
+        {
+          "type": "RecommendationService",
+          "var": "recommendationService"
+        }
+      ],
+      "methods_count": 1,
+      "methods": {
+        "index": {
+          "route_uri": "api/v2/recommendations",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\CurrencyController": {
+      "class": "App\\Http\\Controllers\\Api\\CurrencyController",
+      "name": "CurrencyController",
+      "file_path": "app/Http/Controllers/Api/CurrencyController.php",
+      "constructor_dependencies": [
+        {
+          "type": "CurrencyService",
+          "var": "currencyService"
+        }
+      ],
+      "methods_count": 4,
+      "methods": {
+        "context": {
+          "route_uri": "api/currency/context",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "currencies": {
+          "route_uri": "api/currencies",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "rates": {
+          "route_uri": "api/currency/rates",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "convert": {
+          "route_uri": "api/currency/convert",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\AdminUserController": {
+      "class": "App\\Http\\Controllers\\Api\\AdminUserController",
+      "name": "AdminUserController",
+      "file_path": "app/Http/Controllers/Api/AdminUserController.php",
+      "constructor_dependencies": [],
+      "methods_count": 7,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/users",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/admin/users/{user}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/admin/users",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User",
+            "Role",
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/admin/users/{user}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Role",
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateStatus": {
+          "route_uri": "api/admin/users/{user}/status",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "resetPassword": {
+          "route_uri": "api/admin/users/{user}/reset-password",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "activity": {
+          "route_uri": "api/admin/users/{user}/activity",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\BudgetRecommendationController": {
+      "class": "App\\Http\\Controllers\\Api\\BudgetRecommendationController",
+      "name": "BudgetRecommendationController",
+      "file_path": "app/Http/Controllers/Api/BudgetRecommendationController.php",
+      "constructor_dependencies": [
+        {
+          "type": "BudgetRecommendationService",
+          "var": "recommendationService"
+        }
+      ],
+      "methods_count": 1,
+      "methods": {
+        "calculate": {
+          "route_uri": "api/recommendations/calculate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "City",
+            "State"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\AvailabilityEngineController": {
+      "class": "App\\Http\\Controllers\\Api\\AvailabilityEngineController",
+      "name": "AvailabilityEngineController",
+      "file_path": "app/Http/Controllers/Api/AvailabilityEngineController.php",
+      "constructor_dependencies": [
+        {
+          "type": "BookingCapacityService",
+          "var": "capacityService"
+        }
+      ],
+      "methods_count": 1,
+      "methods": {
+        "check": {
+          "route_uri": "api/v2/availability/check",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\CampaignPricingController": {
+      "class": "App\\Http\\Controllers\\Api\\CampaignPricingController",
+      "name": "CampaignPricingController",
+      "file_path": "app/Http/Controllers/Api/CampaignPricingController.php",
+      "constructor_dependencies": [],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\PricingEngineController": {
+      "class": "App\\Http\\Controllers\\Api\\PricingEngineController",
+      "name": "PricingEngineController",
+      "file_path": "app/Http/Controllers/Api/PricingEngineController.php",
+      "constructor_dependencies": [
+        {
+          "type": "PricingEngine",
+          "var": "pricingEngine"
+        }
+      ],
+      "methods_count": 1,
+      "methods": {
+        "calculate": {
+          "route_uri": "api/v2/pricing/calculate",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\RoleController": {
+      "class": "App\\Http\\Controllers\\Api\\RoleController",
+      "name": "RoleController",
+      "file_path": "app/Http/Controllers/Api/RoleController.php",
+      "constructor_dependencies": [],
+      "methods_count": 7,
+      "methods": {
+        "index": {
+          "route_uri": "api/roles",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Role"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/roles/{role}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/roles",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Role",
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/roles/{role}",
+          "http_method": "PUT|PATCH",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/roles/{role}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "ActivityLog"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "clone": {
+          "route_uri": "api/roles/{role}/clone",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Role",
+            "ActivityLog",
+            "RolePermission"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "permissions": {
+          "route_uri": null,
+          "http_method": null,
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\AdminCurrencyController": {
+      "class": "App\\Http\\Controllers\\Api\\AdminCurrencyController",
+      "name": "AdminCurrencyController",
+      "file_path": "app/Http/Controllers/Api/AdminCurrencyController.php",
+      "constructor_dependencies": [
+        {
+          "type": "CurrencyService",
+          "var": "currencyService"
+        }
+      ],
+      "methods_count": 2,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/currency-rates",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "sync": {
+          "route_uri": "api/admin/currency-rates/sync",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\FinanceController": {
+      "class": "App\\Http\\Controllers\\Api\\FinanceController",
+      "name": "FinanceController",
+      "file_path": "app/Http/Controllers/Api/FinanceController.php",
+      "constructor_dependencies": [
+        {
+          "type": "FinanceService",
+          "var": "financeService"
+        }
+      ],
+      "methods_count": 5,
+      "methods": {
+        "summary": {
+          "route_uri": "api/v2/finance/summary",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "payments": {
+          "route_uri": "api/v2/finance/payments",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "settlements": {
+          "route_uri": "api/v2/finance/settlements",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "batchSettlements": {
+          "route_uri": "api/v2/finance/settlements/batch",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "ledger": {
+          "route_uri": "api/v2/finance/ledger",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\BookingEngineController": {
+      "class": "App\\Http\\Controllers\\Api\\BookingEngineController",
+      "name": "BookingEngineController",
+      "file_path": "app/Http/Controllers/Api/BookingEngineController.php",
+      "constructor_dependencies": [
+        {
+          "type": "BookingWorkflowService",
+          "var": "workflowService"
+        },
+        {
+          "type": "ConflictDetectionService",
+          "var": "conflictService"
+        },
+        {
+          "type": "PricingEngine",
+          "var": "pricingEngine"
+        },
+        {
+          "type": "InventoryService",
+          "var": "inventoryService"
+        }
+      ],
+      "methods_count": 4,
+      "methods": {
+        "index": {
+          "route_uri": "api/v2/bookings",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/v2/bookings",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking",
+            "Screen",
+            "BookingScreen"
+          ],
+          "has_transactions": true,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/v2/bookings/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "transition": {
+          "route_uri": "api/v2/bookings/{id}/transition",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Booking"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\ProfileController": {
+      "class": "App\\Http\\Controllers\\Api\\ProfileController",
+      "name": "ProfileController",
+      "file_path": "app/Http/Controllers/Api/ProfileController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ProfileService",
+          "var": "profileService"
+        },
+        {
+          "type": "SettingsService",
+          "var": "settingsService"
+        }
+      ],
+      "methods_count": 8,
+      "methods": {
+        "dashboard": {
+          "route_uri": "api/profile/dashboard",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "rewards": {
+          "route_uri": "api/profile/rewards",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "RewardAccount",
+            "RewardTransaction"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": true,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "rewardTransactions": {
+          "route_uri": "api/profile/rewards/transactions",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "RewardAccount",
+            "RewardTransaction"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "campaigns": {
+          "route_uri": "api/profile/campaigns",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "history": {
+          "route_uri": "api/profile/history",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/profile/campaigns/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "uploadAvatar": {
+          "route_uri": "api/profile/avatar",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "activity": {
+          "route_uri": "api/profile/activity",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\ClientController": {
+      "class": "App\\Http\\Controllers\\Api\\ClientController",
+      "name": "ClientController",
+      "file_path": "app/Http/Controllers/Api/ClientController.php",
+      "constructor_dependencies": [
+        {
+          "type": "ClientService",
+          "var": "clientService"
+        },
+        {
+          "type": "ClientAnalyticsService",
+          "var": "clientAnalyticsService"
+        }
+      ],
+      "methods_count": 8,
+      "methods": {
+        "index": {
+          "route_uri": "api/clients",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "kpis": {
+          "route_uri": "api/clients/kpis",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/clients/{client}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "bookings": {
+          "route_uri": "api/clients/{id}/bookings",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "payments": {
+          "route_uri": "api/clients/{id}/payments",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "analytics": {
+          "route_uri": "api/clients/{id}/analytics",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "referral": {
+          "route_uri": "api/clients/{id}/referral",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "timeline": {
+          "route_uri": "api/clients/{id}/timeline",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\AssetController": {
+      "class": "App\\Http\\Controllers\\Api\\AssetController",
+      "name": "AssetController",
+      "file_path": "app/Http/Controllers/Api/AssetController.php",
+      "constructor_dependencies": [
+        {
+          "type": "AssetService",
+          "var": "assetService"
+        }
+      ],
+      "methods_count": 5,
+      "methods": {
+        "index": {
+          "route_uri": "api/v2/assets",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "store": {
+          "route_uri": "api/v2/assets",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/v2/assets/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "update": {
+          "route_uri": "api/v2/assets/{id}",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "destroy": {
+          "route_uri": "api/v2/assets/{id}",
+          "http_method": "DELETE",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\AdminRewardsController": {
+      "class": "App\\Http\\Controllers\\Api\\AdminRewardsController",
+      "name": "AdminRewardsController",
+      "file_path": "app/Http/Controllers/Api/AdminRewardsController.php",
+      "constructor_dependencies": [
+        {
+          "type": "LoyaltyService",
+          "var": "loyaltyService"
+        }
+      ],
+      "methods_count": 3,
+      "methods": {
+        "index": {
+          "route_uri": "api/admin/rewards",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "show": {
+          "route_uri": "api/admin/rewards/{id}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User",
+            "RewardAccount",
+            "RewardTransaction"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "adjust": {
+          "route_uri": "api/admin/rewards/adjust",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "User",
+            "RewardAccount"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\SettingsController": {
+      "class": "App\\Http\\Controllers\\Api\\SettingsController",
+      "name": "SettingsController",
+      "file_path": "app/Http/Controllers/Api/SettingsController.php",
+      "constructor_dependencies": [
+        {
+          "type": "SettingsService",
+          "var": "settingsService"
+        }
+      ],
+      "methods_count": 17,
+      "methods": {
+        "publicBookingConfig": {
+          "route_uri": "api/settings/public-booking-config",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "getGeneral": {
+          "route_uri": "api/settings/general",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateGeneral": {
+          "route_uri": "api/settings/general",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "getBooking": {
+          "route_uri": "api/settings/booking",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateBooking": {
+          "route_uri": "api/settings/booking",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "getMedia": {
+          "route_uri": "api/settings/media",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateMedia": {
+          "route_uri": "api/settings/media",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "getPricing": {
+          "route_uri": "api/settings/pricing",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updatePricing": {
+          "route_uri": "api/settings/pricing",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "getFirstBookingDiscount": {
+          "route_uri": "api/settings/first-booking-discount",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateFirstBookingDiscount": {
+          "route_uri": "api/settings/first-booking-discount",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "getLoyalty": {
+          "route_uri": "api/settings/loyalty",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateLoyalty": {
+          "route_uri": "api/settings/loyalty",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "getReferral": {
+          "route_uri": "api/settings/referral",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateReferral": {
+          "route_uri": "api/settings/referral",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "getNotifications": {
+          "route_uri": "api/settings/notifications",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "updateNotifications": {
+          "route_uri": "api/settings/notifications",
+          "http_method": "PUT",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [
+            "Setting"
+          ],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    },
+    "App\\Http\\Controllers\\Api\\CoverageController": {
+      "class": "App\\Http\\Controllers\\Api\\CoverageController",
+      "name": "CoverageController",
+      "file_path": "app/Http/Controllers/Api/CoverageController.php",
+      "constructor_dependencies": [
+        {
+          "type": "CoverageService",
+          "var": "coverageService"
+        }
+      ],
+      "methods_count": 2,
+      "methods": {
+        "sync": {
+          "route_uri": "api/v2/assets/{id}/coverage",
+          "http_method": "POST",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        },
+        "byCity": {
+          "route_uri": "api/v2/coverage/cities/{cityId}",
+          "http_method": "GET|HEAD",
+          "services_called": [],
+          "repositories_called": [],
+          "models_called": [],
+          "has_transactions": false,
+          "has_locks": false,
+          "has_direct_db": false,
+          "events_triggered": [],
+          "integrations": []
+        }
+      }
+    }
+  }
+}

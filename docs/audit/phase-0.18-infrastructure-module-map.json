@@ -1,0 +1,80 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "infrastructure-module-map",
+  "finding": "Phase 0.18 found the infrastructure layer to be ALREADY CONFORMANT. No migration work was required.",
+  "method": "Swept all 48 Services plus Models and Http for external HTTP calls, SDK usage and file-system writes outside the Laravel Storage/Image facades. Result: ZERO Services make external HTTP calls. Every external integration already sits behind a contract in app/Infrastructure.",
+  "modules": [
+    {
+      "module": "Auth",
+      "contracts": [
+        "Contracts/GoogleIdentityProviderInterface"
+      ],
+      "adapters": [
+        "GoogleOAuthAdapter"
+      ],
+      "state": "CONFORMANT"
+    },
+    {
+      "module": "ExchangeRates",
+      "contracts": [
+        "Contracts/ExchangeRateApiClientInterface"
+      ],
+      "adapters": [
+        "ExchangeRateApiClient"
+      ],
+      "state": "CONFORMANT",
+      "note": "Services\\ExchangeRateService resolves the contract, never the concrete client (constructor: ?ExchangeRateApiClientInterface $apiClient = null, resolved via app()). Contract injection is therefore already correct."
+    },
+    {
+      "module": "Media",
+      "contracts": [
+        "Contracts/ImageProcessingContractInterface",
+        "Contracts/StorageContractInterface"
+      ],
+      "adapters": [
+        "GdImageProcessor",
+        "LaravelStorageAdapter"
+      ],
+      "state": "CONFORMANT"
+    },
+    {
+      "module": "Notification",
+      "contracts": [
+        "Contracts/MailContractInterface"
+      ],
+      "adapters": [
+        "LaravelMailAdapter"
+      ],
+      "state": "CONFORMANT"
+    },
+    {
+      "module": "Payments",
+      "adapters": [
+        "Razorpay/RazorpayPaymentGateway"
+      ],
+      "persistence": [
+        "Persistence/EloquentPaymentRepository"
+      ],
+      "contracts": [],
+      "state": "PARTIAL",
+      "note": "RazorpayPaymentGateway implements the Domain contract App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface, but the adapter lives in the Payments subtree rather than directly under Payments/. Cosmetic only; not moved because payment is a hard stop."
+    },
+    {
+      "module": "Financial",
+      "persistence": [
+        "Persistence/EloquentPartnerCommissionRepository",
+        "Persistence/EloquentSettlementRepository"
+      ],
+      "contracts": [],
+      "state": "CONFORMANT",
+      "note": "Both implement the Domain contracts PartnerCommissionRepositoryInterface and SettlementRepositoryInterface."
+    }
+  ],
+  "infrastructure_classes": 14,
+  "already_conformant": 14,
+  "migrated": 0,
+  "conclusion": "The Phase 0.12 infrastructure work already delivered contracts-plus-adapters for every external dependency. Phase 0.18 correctly left this layer alone rather than performing cosmetic churn."
+}

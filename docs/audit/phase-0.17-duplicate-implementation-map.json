@@ -1,0 +1,75 @@
+{
+  "phase": "0.17",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy code and controller retirement",
+  "artifact": "duplicate-implementation-map",
+  "policy": "Duplicates are classified, not automatically consolidated. Rule 7 forbids copying business logic, and the brief forbids redesigning pricing, booking, payment or settlement.",
+  "duplicates": [
+    {
+      "id": "DUP-01",
+      "concern": "pricing",
+      "implementation_a": "App\\Domain\\Pricing\\CampaignPricingEngine + App\\Services\\Pricing\\DailyPricingCalculator",
+      "implementation_b": "App\\Services\\PricingEngine + App\\Services\\PricingRuleEngine",
+      "current_callers": "CampaignPricingEngine is the campaign path; PricingEngine/PricingRuleEngine serve /v2/pricing/calculate and the minute-pricing screens.",
+      "behavior_difference": "Different scopes: campaign multi-asset aggregation versus per-screen/per-duration rule evaluation.",
+      "financial_difference": "Both are live. Campaign booking golden suites pin CampaignPricingEngine arithmetic; PricingEngine is pinned by MinutePricingEngineTest.",
+      "authorization_difference": "None identified.",
+      "migration_risk": "HIGH - consolidating two live pricing engines risks changing campaign pricing arithmetic.",
+      "decision": "KEEP DISTINCT"
+    },
+    {
+      "id": "DUP-02",
+      "concern": "availability",
+      "implementation_a": "App\\Services\\BookingCapacityService (eligibility, capacity-consuming statuses)",
+      "implementation_b": "App\\Services\\InventoryService (lockForUpdate reservation)",
+      "current_callers": "BookingCapacityService by RescheduleBookingUseCase; InventoryService by CreateCampaignBookingUseCase.",
+      "behavior_difference": "Deliberate separation: an availability CHECK is not a transactional inventory LOCK.",
+      "financial_difference": "InventoryService holds the row lock; the brief requires lockForUpdate stays inside the transaction.",
+      "migration_risk": "HIGH - merging them would move lock semantics.",
+      "decision": "KEEP DISTINCT",
+      "note": "This is the distinction section 0.18.5 explicitly requires preserving."
+    },
+    {
+      "id": "DUP-03",
+      "concern": "booking creation",
+      "implementation_a": "App\\Application\\Booking\\UseCases\\CreateCampaignBookingUseCase",
+      "implementation_b": "App\\Services\\ManualBookingService::createBooking",
+      "behavior_difference": "Campaign derives authoritative amounts from CampaignPricingService; manual booking is a multi-channel flow with its own finance/audit/commission side effects.",
+      "financial_difference": "Different financial side-effect sets.",
+      "migration_risk": "HIGH",
+      "decision": "KEEP DISTINCT",
+      "note": "Carried forward unchanged from the Phase 0.13 decision."
+    },
+    {
+      "id": "DUP-04",
+      "concern": "payment",
+      "implementation_a": "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+      "implementation_b": "App\\Services\\ManualBookingService::markManualPayment",
+      "behavior_difference": "Different status vocabularies, receipt requirements and settlement triggers.",
+      "financial_difference": "Yes.",
+      "migration_risk": "HIGH",
+      "decision": "KEEP DISTINCT"
+    },
+    {
+      "id": "DUP-05",
+      "concern": "model vs query-builder access",
+      "implementation_a": "App\\Models\\CoverageCity, MobileAssetCoverageCity, MobileAssetCoverageState",
+      "implementation_b": "Query-builder access in App\\Http\\Controllers\\Api\\CoverageController",
+      "behavior_difference": "None; the models are unused wrappers.",
+      "financial_difference": "None.",
+      "migration_risk": "LOW technically, but the tables hold live data (3/28/8 rows).",
+      "decision": "DEFER",
+      "note": "The duplication is real but the tables are live, so deleting the unused model wrappers is not justified until the Asset/Coverage boundary is settled in Phase 0.18 ownership work."
+    },
+    {
+      "id": "DUP-06",
+      "concern": "pricing (resolved by deletion)",
+      "implementation_a": "App\\Services\\Pricing\\{Peak,Weekend,CampaignDiscount}Calculator",
+      "implementation_b": "App\\Models\\PricingPeakRule / PricingWeekendRule / CampaignPricingEngine",
+      "decision": "DEAD - DELETE",
+      "note": "Three unused calculators deleted; the surviving owner is now explicit."
+    }
+  ],
+  "no_automatic_consolidation": "No duplicate was merged. Every live pair differs in financial behaviour or lock semantics, so consolidation would violate the financial hard stops."
+}

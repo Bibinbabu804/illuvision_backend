@@ -1,0 +1,249 @@
+[
+  {
+    "component": "ReportService::getOverview",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/OverviewQuery.php",
+    "responsibility": "Get the overview dashboard data with all KPI metrics.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::overview"
+    ],
+    "dependencies_before": [
+      "App\\Services\\RevenueAnalyticsService",
+      "App\\Services\\BookingAnalyticsService",
+      "App\\Services\\ScreenAnalyticsService"
+    ],
+    "dependencies_after": [
+      "App\\Services\\RevenueAnalyticsService",
+      "App\\Services\\BookingAnalyticsService",
+      "App\\Services\\ScreenAnalyticsService"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/DashboardKpiReportTest.php",
+      "tests/Feature/Reporting/ReportingExportAndAccessTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "The pre-implementation ledger predicted Domain metric helpers (BookingMetrics / ScreenMetrics / ReferralMetrics / LoyaltyMetrics). None of those classes exist in the codebase, so no dependency on them was introduced. Financial figures continue to be read from persisted booking_screens revenue splits and the partner_commissions ledger."
+  },
+  {
+    "component": "ReportService::getRevenueReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/RevenueReportQuery.php",
+    "responsibility": "Get revenue analytics with charts and breakdowns.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::revenue"
+    ],
+    "dependencies_before": [
+      "App\\Services\\RevenueAnalyticsService"
+    ],
+    "dependencies_after": [
+      "App\\Services\\RevenueAnalyticsService"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/DashboardKpiReportTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "Delegates to the existing canonical analytics read model."
+  },
+  {
+    "component": "ReportService::getBookingReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/BookingReportQuery.php",
+    "responsibility": "Get booking analytics with status breakdown and trends.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::bookings"
+    ],
+    "dependencies_before": [
+      "App\\Services\\BookingAnalyticsService"
+    ],
+    "dependencies_after": [
+      "App\\Services\\BookingAnalyticsService"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/CampaignCategoryReportTest.php",
+      "tests/Feature/Reporting/ReportingExportAndAccessTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "The pre-implementation ledger predicted Domain metric helpers (BookingMetrics / ScreenMetrics / ReferralMetrics / LoyaltyMetrics). None of those classes exist in the codebase, so no dependency on them was introduced. Financial figures continue to be read from persisted booking_screens revenue splits and the partner_commissions ledger."
+  },
+  {
+    "component": "ReportService::getScreenReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/ScreenReportQuery.php",
+    "responsibility": "Get screen performance report.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::screens"
+    ],
+    "dependencies_before": [
+      "App\\Services\\ScreenAnalyticsService"
+    ],
+    "dependencies_after": [
+      "App\\Services\\ScreenAnalyticsService"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/CampaignCategoryReportTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "The pre-implementation ledger predicted Domain metric helpers (BookingMetrics / ScreenMetrics / ReferralMetrics / LoyaltyMetrics). None of those classes exist in the codebase, so no dependency on them was introduced. Financial figures continue to be read from persisted booking_screens revenue splits and the partner_commissions ledger."
+  },
+  {
+    "component": "ReportService::getScreenProviderReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/ScreenProviderReportQuery.php",
+    "responsibility": "Get screen provider financial report with provider, screen, and booking breakdowns.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::screenProviders"
+    ],
+    "dependencies_before": [
+      "Direct DB queries"
+    ],
+    "dependencies_after": [
+      "App\\Services\\ScreenAnalyticsService"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/ScreenProviderFinancialReportTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "Delegates to the existing canonical analytics read model."
+  },
+  {
+    "component": "ReportService::getCityReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/CityReportQuery.php",
+    "responsibility": "Get city performance report.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::cities"
+    ],
+    "dependencies_before": [
+      "App\\Services\\ScreenAnalyticsService",
+      "App\\Services\\RevenueAnalyticsService"
+    ],
+    "dependencies_after": [
+      "App\\Services\\ScreenAnalyticsService",
+      "App\\Services\\RevenueAnalyticsService"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/CampaignCategoryReportTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "Delegates to the existing canonical analytics read model."
+  },
+  {
+    "component": "ReportService::getCampaignReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/CampaignReportQuery.php",
+    "responsibility": "Get campaign analytics report.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::campaigns"
+    ],
+    "dependencies_before": [
+      "App\\Services\\ScreenAnalyticsService",
+      "App\\Services\\BookingAnalyticsService"
+    ],
+    "dependencies_after": [
+      "App\\Services\\ScreenAnalyticsService"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/CampaignCategoryReportTest.php",
+      "tests/Feature/CampaignDurationConsistencyTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "Delegates to the existing canonical analytics read model."
+  },
+  {
+    "component": "ReportService::getReferralReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/ReferralReportQuery.php",
+    "responsibility": "Get referral and partner analytics report.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::referrals"
+    ],
+    "dependencies_before": [
+      "Direct DB queries",
+      "App\\Services\\RevenueAnalyticsService (for referralImpact)"
+    ],
+    "dependencies_after": [],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/ReferralRewardReportTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "The pre-implementation ledger predicted Domain metric helpers (BookingMetrics / ScreenMetrics / ReferralMetrics / LoyaltyMetrics). None of those classes exist in the codebase, so no dependency on them was introduced. Financial figures continue to be read from persisted booking_screens revenue splits and the partner_commissions ledger."
+  },
+  {
+    "component": "ReportService::getCategoryReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/CategoryReportQuery.php",
+    "responsibility": "Get advertisement category report.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::categories"
+    ],
+    "dependencies_before": [
+      "Direct DB queries"
+    ],
+    "dependencies_after": [],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/CampaignCategoryReportTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "The pre-implementation ledger predicted Domain metric helpers (BookingMetrics / ScreenMetrics / ReferralMetrics / LoyaltyMetrics). None of those classes exist in the codebase, so no dependency on them was introduced. Financial figures continue to be read from persisted booking_screens revenue splits and the partner_commissions ledger."
+  },
+  {
+    "component": "ReportService::getRewardReport",
+    "current_location": "app/Services/ReportService.php (backward-compatible facade)",
+    "target_location": "app/Application/Reporting/Queries/RewardReportQuery.php",
+    "responsibility": "Get rewards & loyalty program analytics report.",
+    "callers": [
+      "App\\Http\\Controllers\\ReportController::rewards"
+    ],
+    "dependencies_before": [
+      "Direct DB queries",
+      "App\\Models\\RewardAccount",
+      "App\\Models\\RewardTransaction"
+    ],
+    "dependencies_after": [],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Reporting/ReferralRewardReportTest.php"
+    ],
+    "status": "implemented",
+    "dependencies_after_note": "The pre-implementation ledger predicted Domain metric helpers (BookingMetrics / ScreenMetrics / ReferralMetrics / LoyaltyMetrics). None of those classes exist in the codebase, so no dependency on them was introduced. Financial figures continue to be read from persisted booking_screens revenue splits and the partner_commissions ledger."
+  }
+]

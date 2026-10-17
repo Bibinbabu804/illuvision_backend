@@ -1,0 +1,197 @@
+{
+  "phase": "0.11",
+  "name": "Reporting Dependency Diff",
+  "generated_at": "2026-09-26T05:45:00+05:30",
+  "purpose": "Record dependency-edge changes introduced by the Reporting boundary extraction, together with the edges that were deliberately NOT created.",
+  "summary": {
+    "edges_added": 0,
+    "edges_removed": 0,
+    "files_created": 0,
+    "files_modified": 0,
+    "files_deleted": 0,
+    "net_dependency_direction": "Analysis only - no changes made yet",
+    "note": "This document analyzes current dependencies to inform the extraction process. Actual changes will be made in subsequent steps."
+  },
+  "current_dependencies": [
+    {
+      "from": "App\\Http\\Controllers\\ReportController",
+      "to": "App\\Services\\ReportService",
+      "type": "controller_to_service",
+      "status": "CURRENT",
+      "note": "Controller delegates to ReportService - this is correct layered architecture"
+    },
+    {
+      "from": "App\\Services\\ReportService",
+      "to": "App\\Services\\RevenueAnalyticsService",
+      "type": "service_to_service",
+      "status": "CURRENT",
+      "note": "ReportService delegates to RevenueAnalyticsService for financial data - correct approach"
+    },
+    {
+      "from": "App\\Services\\ReportService",
+      "to": "App\\Services\\BookingAnalyticsService",
+      "type": "service_to_service",
+      "status": "CURRENT",
+      "note": "ReportService delegates to BookingAnalyticsService for booking data - correct approach"
+    },
+    {
+      "from": "App\\Services\\ReportService",
+      "to": "App\\Services\\ScreenAnalyticsService",
+      "type": "service_to_service",
+      "status": "CURRENT",
+      "note": "ReportService delegates to ScreenAnalyticsService for screen data - correct approach"
+    },
+    {
+      "from": "App\\Services\\RevenueAnalyticsService",
+      "to": "App\\Models\\Booking",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for financial calculations - acceptable in service layer"
+    },
+    {
+      "from": "App\\Services\\RevenueAnalyticsService",
+      "to": "App\\Models\\Payment",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Indirect usage through partner_commissions table - acceptable"
+    },
+    {
+      "from": "App\\Services\\RevenueAnalyticsService",
+      "to": "Illuminate\\Support\\Facades\\DB",
+      "type": "service_to_facade",
+      "status": "CURRENT",
+      "note": "Direct DB facade usage for partner_commissions query - acceptable but could be encapsulated"
+    },
+    {
+      "from": "App\\Services\\BookingAnalyticsService",
+      "to": "App\\Models\\Booking",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for booking analytics - acceptable in service layer"
+    },
+    {
+      "from": "App\\Services\\ScreenAnalyticsService",
+      "to": "App\\Models\\Booking",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for screen performance calculations - acceptable"
+    },
+    {
+      "from": "App\\Services\\ScreenAnalyticsService",
+      "to": "App\\Models\\Screen",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for screen data - acceptable"
+    },
+    {
+      "from": "App\\Services\\PaymentAnalyticsService",
+      "to": "App\\Models\\Payment",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for payment analytics - correct placement"
+    },
+    {
+      "from": "App\\Services\\PaymentAnalyticsService",
+      "to": "App\\Models\\Refund",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for refund analytics - correct placement"
+    },
+    {
+      "from": "App\\Services\\PaymentAnalyticsService",
+      "to": "App\\Models\\ReferralUsage",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for referral analytics - correct placement"
+    },
+    {
+      "from": "App\\Services\\PaymentAnalyticsService",
+      "to": "App\\Models\\PartnerCommission",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for commission analytics - correct placement"
+    },
+    {
+      "from": "App\\Services\\ClientAnalyticsService",
+      "to": "App\\Models\\Booking",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for client analytics - acceptable"
+    },
+    {
+      "from": "App\\Services\\ClientAnalyticsService",
+      "to": "App\\Models\\User",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for client data - acceptable"
+    },
+    {
+      "from": "App\\Services\\ClientAnalyticsService",
+      "to": "App\\Models\\ReferralUsage",
+      "type": "service_to_model",
+      "status": "CURRENT",
+      "note": "Direct model usage for referral data - acceptable"
+    },
+    {
+      "from": "App\\Http\\Controllers\\DashBoardController",
+      "to": "App\\Services\\BookingAnalyticsService",
+      "type": "controller_to_service",
+      "status": "CURRENT",
+      "note": "Controller delegates to BookingAnalyticsService - correct approach"
+    },
+    {
+      "from": "App\\Http\\Controllers\\DashBoardController",
+      "to": "App\\Services\\ScreenAnalyticsService",
+      "type": "controller_to_service",
+      "status": "CURRENT",
+      "note": "Controller delegates to ScreenAnalyticsService - correct approach"
+    },
+    {
+      "from": "App\\Http\\Controllers\\DashBoardController",
+      "to": "App\\Services\\RevenueAnalyticsService",
+      "type": "controller_to_service",
+      "status": "CURRENT",
+      "note": "Controller delegates to RevenueAnalyticsService - correct approach"
+    },
+    {
+      "from": "App\\Http\\Controllers\\PartnerPortalController",
+      "to": "App\\Services\\PartnerService",
+      "type": "controller_to_service",
+      "status": "CURRENT",
+      "note": "Controller delegates to PartnerService - correct approach"
+    }
+  ],
+  "potential_improvements": [
+    {
+      "from": "App\\Services\\ReportService::getScreenProviderReport",
+      "to": "Direct DB queries",
+      "type": "service_to_db",
+      "status": "CURRENT",
+      "improvement": "Consider extracting these queries to canonical financial services if they represent universally used calculations",
+      "rationale": "While the queries are correct, centralizing complex financial queries improves maintainability and consistency"
+    },
+    {
+      "from": "App\\Services\\RevenueAnalyticsService",
+      "to": "Illuminate\\Support\\Facades\\DB",
+      "type": "service_to_facade",
+      "status": "CURRENT",
+      "improvement": "Consider encapsulating DB queries in repository classes for better testability",
+      "rationale": "Direct DB facade usage makes unit testing more difficult"
+    }
+  ],
+  "accepted_violations": [
+    {
+      "from": "App\\Services\\ReportService",
+      "to": "Multiple analytics services",
+      "type": "service_aggregating_services",
+      "status": "ACCEPTED",
+      "rationale": "ReportService appropriately aggregates data from multiple specialized services to provide comprehensive reports. This is the correct use of a reporting service.",
+      "planned_resolution": "None - this is correct architecture"
+    }
+  ],
+  "verification": {
+    "controller_to_service_layering": "confirmed - all controllers delegate to services",
+    "service_to_model_usage": "confirmed - services use models directly for data access which is acceptable in Laravel",
+    "no_domain_to_infrastructure_leaks": "verified - no direct HTTP, Mail, Storage usage found in reporting services"
+  }
+}

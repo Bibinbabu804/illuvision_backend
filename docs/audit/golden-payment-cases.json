@@ -1,0 +1,62 @@
+{
+  "phase": "0.3",
+  "name": "Golden Payment Cases",
+  "generated_at": "2026-09-25T21:50:00+05:30",
+  "canonical_authority": "App\\Services\\PaymentService",
+  "controller": "App\\Http\\Controllers\\PaymentController",
+  "gateway": "Razorpay (PHP SDK)",
+  "scenarios": [
+    {
+      "case_id": "CASE-PAY-001",
+      "title": "Razorpay order creation and paise conversion",
+      "input": {
+        "booking_final_amount": 2000.00
+      },
+      "expected_output": {
+        "amount_in_paise": 200000,
+        "currency": "INR",
+        "order_id_prefix": "order_",
+        "payment_status": "pending"
+      },
+      "idempotency_behavior": "If a pending payment row already exists on the booking, createOrder returns HTTP 200 with message 'Existing pending payment found' rather than creating a duplicate Razorpay order."
+    },
+    {
+      "case_id": "CASE-PAY-002",
+      "title": "HMAC-SHA256 signature verification",
+      "mechanism": "Local cryptographic verification via hash_hmac('sha256', order_id . '|' . payment_id, secret)",
+      "network_call": false,
+      "valid_signature_transition": {
+        "payment_status": "paid",
+        "paid_at": "timestamp",
+        "booking_status": "pending_approval",
+        "events_dispatched": ["App\\Events\\Notifications\\PaymentReceived"]
+      }
+    },
+    {
+      "case_id": "CASE-PAY-003",
+      "title": "Invalid signature verification and transaction rollback",
+      "input": {
+        "invalid_signature": "bad_sig_999"
+      },
+      "observed_behavior": {
+        "exception_thrown": "Payment signature verification failed.",
+        "http_response": 422,
+        "database_state": "Because the exception is thrown inside DB::transaction(), the update of payment to 'failed' is rolled back by MySQL, leaving the payment and booking in 'pending' status."
+      },
+      "architectural_finding": "The current implementation intended to record payment_status='failed', but threw an exception within the same uncommitted transaction, causing MySQL to revert the mutation."
+    },
+    {
+      "case_id": "CASE-PAY-004",
+      "title": "Duplicate payment verification idempotency",
+      "input": {
+        "scenario": "Submitting verification for an order already marked as paid"
+      },
+      "observed_behavior": {
+        "exception_thrown": "Payment already verified for this order.",
+        "http_response": 422,
+        "duplicate_records_created": 0,
+        "duplicate_commissions_created": 0
+      }
+    }
+  ]
+}

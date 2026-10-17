@@ -1,0 +1,41 @@
+{
+  "phases": "0.15-0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "artifact": "architecture-hardening-map",
+  "delivered": [
+    {
+      "item": "tests/Unit/Architecture/ArchitectureRuleTest.php",
+      "change": "NEW",
+      "detail": "14 cases / 17 assertions / 0.29s enforcing Rules 2, 11 and 12."
+    }
+  ],
+  "not_delivered": [
+    {
+      "item": "Remove the 18 service locators",
+      "reason": "All are Category B (characterisation required) or C (behaviour-sensitive). Removing the 8 in Models/Booking.php would change loyalty/referral side-effect timing inside the caller's transaction."
+    },
+    {
+      "item": "Decouple Domain\\Pricing\\CampaignPricingEngine from 7 Services classes",
+      "reason": "Changes campaign pricing arithmetic; needs value-object extraction in a dedicated phase."
+    },
+    {
+      "item": "Split BookingController (1414 lines)",
+      "reason": "Changes response envelopes and is not behaviour-preserving at this size."
+    },
+    {
+      "item": "Consolidate 62 Application facade call sites",
+      "reason": "Reporting read paths; a larger refactor than this phase's mandate."
+    },
+    {
+      "item": "Delete the 5 remaining confirmed-dead classes",
+      "reason": "No characterisation test exists for them yet."
+    }
+  ],
+  "net_effect": "Architecture conformance is unchanged at 10/13 rules, but it is now EXECUTABLY ENFORCED and the debt is pinned so it cannot silently grow. That is the deliverable this phase could honestly make.",
+  "debt_register": {
+    "preexisting_items": 16,
+    "new_items": 16,
+    "see": "docs/audit/phase-0.16-debt-triage.json"
+  }
+}

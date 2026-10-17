@@ -1,0 +1,115 @@
+{
+  "phase": "0.3",
+  "name": "Contract Drift Matrix",
+  "generated_at": "2026-09-25T21:50:00+05:30",
+  "routes": [
+    {
+      "route": "POST /api/campaigns/calculate",
+      "controller_action": "BookingController@calculateCampaignPricing",
+      "expected_status": 200,
+      "auth": "Optional",
+      "golden_test": "GoldenApiContractRegressionTest::test_campaign_pricing_calculate_contract_success_and_validation",
+      "drift_monitored_fields": ["status", "message", "data.campaign_summary", "data.per_screen", "data.aggregated.final_amount"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/v2/pricing/calculate",
+      "controller_action": "Api\\PricingEngineController@calculate",
+      "expected_status": 200,
+      "auth": "Public",
+      "golden_test": "GoldenApiContractRegressionTest::test_v2_pricing_calculate_contract_success_and_validation",
+      "drift_monitored_fields": ["data.summary.total_days", "data.line_items", "data.pricing.final_total"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/v2/availability/check",
+      "controller_action": "Api\\AvailabilityEngineController@check",
+      "expected_status": 200,
+      "auth": "Public",
+      "golden_test": "GoldenApiContractRegressionTest::test_v2_availability_check_contract",
+      "drift_monitored_fields": ["success", "available", "eligible", "conflicts", "screens"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/bookings/campaign",
+      "controller_action": "BookingController@storeCampaign",
+      "expected_status": 201,
+      "auth": "Sanctum User",
+      "golden_test": "GoldenApiContractRegressionTest::test_advertiser_campaign_booking_contract_and_auth",
+      "drift_monitored_fields": ["status", "message", "data.id", "data.campaign_title", "data.status", "data.final_amount"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/partner/bookings/calculate",
+      "controller_action": "PartnerBookingController@calculate",
+      "expected_status": 200,
+      "auth": "Sanctum Partner",
+      "golden_test": "GoldenApiContractRegressionTest::test_partner_calculate_contract_and_auth",
+      "drift_monitored_fields": ["status", "data.campaign_summary", "data.aggregated"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/partner/bookings",
+      "controller_action": "PartnerBookingController@store",
+      "expected_status": 201,
+      "auth": "Sanctum Partner",
+      "golden_test": "GoldenBookingRegressionTest::test_partner_channel_booking_creation",
+      "drift_monitored_fields": ["status", "data.booking.id", "data.booking.status"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/admin/manual-bookings",
+      "controller_action": "AdminManualBookingController@store",
+      "expected_status": 201,
+      "auth": "Sanctum Admin",
+      "golden_test": "GoldenBookingRegressionTest::test_admin_manual_booking_creation",
+      "drift_monitored_fields": ["status", "data.id", "data.status"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/v2/bookings",
+      "controller_action": "Api\\BookingEngineController@store",
+      "expected_status": 201,
+      "auth": "Public / Optional",
+      "golden_test": "GoldenBookingRegressionTest::test_v2_api_booking_creation",
+      "drift_monitored_fields": ["message", "data.id", "data.booking_reference", "data.status"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/payments/razorpay/create-order",
+      "controller_action": "PaymentController@createOrder",
+      "expected_status": 201,
+      "auth": "Sanctum Booking Owner",
+      "golden_test": "GoldenApiContractRegressionTest::test_payment_order_create_contract_and_auth",
+      "drift_monitored_fields": ["status", "data.razorpay_order_id", "data.amount", "data.currency"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/payments/razorpay/verify",
+      "controller_action": "PaymentController@verify",
+      "expected_status": 200,
+      "auth": "Public / Webhook",
+      "golden_test": "GoldenPaymentRegressionTest::test_verify_and_confirm_payment_successful_state_transition",
+      "drift_monitored_fields": ["status", "data.status", "data.payment.payment_status", "data.booking.status"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "GET /api/bookings/{id}/payment-status",
+      "controller_action": "PaymentController@paymentStatus",
+      "expected_status": 200,
+      "auth": "Sanctum User",
+      "golden_test": "GoldenApiContractRegressionTest::test_payment_status_endpoint_contract",
+      "drift_monitored_fields": ["status", "data.booking_id", "data.booking_status", "data.payment"],
+      "coverage": "FULL"
+    },
+    {
+      "route": "POST /api/auth/google",
+      "controller_action": "Auth\\GoogleAuthController",
+      "expected_status": 200,
+      "auth": "Public",
+      "golden_test": "GoldenApiContractRegressionTest::test_google_auth_contract_with_mocked_tokeninfo",
+      "drift_monitored_fields": ["status", "data.token", "data.user.id", "data.user.email"],
+      "coverage": "FULL"
+    }
+  ]
+}

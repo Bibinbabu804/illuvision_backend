@@ -1,0 +1,927 @@
+{
+  "artifact": "16-transaction-concurrency-analysis",
+  "generated": "2026-09-26",
+  "classification": "CURRENT_FACT for the inventory sections (every line re-verified from source on the measurement date). RECOMMENDATION for every Creative operation design. OPEN_DECISION wherever the required semantics are not determinable from evidence.",
+  "status": "READ-ONLY AUDIT. No code, migration, route, test or config file was created, modified or deleted. No Creative class, table, route or test exists (0/0/0/0/0). Every Creative design below is a proposal for a later, separately authorised task.",
+  "method": "grep -rn over app/ for DB::transaction, lockForUpdate, sharedLock, afterCommit, ShouldHandleEventsAfterCommit, ShouldBeUnique, ShouldBeQueued, WithoutOverlapping; targeted reads of every file listed; php artisan route:list for route parity. Prior docs/audit/creative-marketplace artifacts were treated as evidence, not truth — conflicts are recorded under 'discrepancies_vs_existing_artifacts'.",
+  "scope": "Transaction boundaries, row locks and duplicate-request protection in illuvision/core-backend, and what that means for a Creative Marketplace bounded context that does not yet exist.",
+  "classification_legend": {
+    "CURRENT_FACT": "Verified from source code on the measurement date, with file:line.",
+    "ARCHITECTURE_DOCUMENT": "Stated in AGENTS.md or docs/architecture/ARCHITECTURE_RULES.md.",
+    "INFERENCE": "Reasonably inferred from the implementation or from relationships between facts.",
+    "RECOMMENDATION": "Proposed target design. Not implemented.",
+    "OPEN_DECISION": "Cannot be determined from available evidence. What is missing is stated explicitly."
+  },
+  "measurement_baseline": {
+    "classification": "CURRENT_FACT",
+    "routes_total": 385,
+    "routes_measurement": "php artisan route:list -> 'Showing [385] routes'. Re-verified 2026-09-26.",
+    "migrations": 112,
+    "migrations_measurement": "ls database/migrations | wc -l -> 112. Re-verified 2026-09-26.",
+    "models": 62,
+    "services_in_app_services": 48,
+    "policies": 0,
+    "listener_classes": 0,
+    "tests_not_rerun": "The full suite was NOT executed by this audit. The brief's baseline (673 passed / 2 failed pre-existing message drift / 1 warning / 4 skipped) is recorded as REPORTED, not as a re-verified CURRENT_FACT. Nothing in this audit changes any test."
+  },
+  "inventory_transaction_usage": {
+    "classification": "CURRENT_FACT",
+    "summary": {
+      "files_containing_the_string_DB_transaction": 26,
+      "files_containing_a_real_DB_transaction_call": 23,
+      "real_DB_transaction_call_sites": 41,
+      "files_under_app_Services_with_a_real_call": 14,
+      "counting_note": "Line numbers below are exact and were produced by a script that skips lines beginning with '*', '//' or '/*', so a docblock mention is never counted as a call site.",
+      "docblock_only_mentions": 3,
+      "docblock_only_files": [
+        "app/Application/Booking/Exceptions/BookingCreationException.php:16, :23",
+        "app/Application/Financial/UseCases/DistributeBookingRevenueUseCase.php:37",
+        "app/Services/Campaign/ReferralTrackingService.php:22 — notable: this file states 'This service does NOT manage its own database transactions. The caller (PaymentService) is responsible for wrapping calls in DB::transaction()'. That is correct discipline and is why its only match is a comment."
+      ]
+    },
+    "by_file": [
+      {
+        "file": "app/Services/ScreenProviderService.php",
+        "call_sites": 5,
+        "lines": [
+          37,
+          146,
+          219,
+          271,
+          344
+        ],
+        "domain": "Provider onboarding (advertising)",
+        "creative_relevance": "PATTERN ONLY — approval transaction that mutates two aggregates (screen_providers + users.password_setup_tokens) and dispatches 3 events inside the transaction (:123-125, :248, :260, :290-294)."
+      },
+      {
+        "file": "app/Services/Campaign/LoyaltyService.php",
+        "call_sites": 5,
+        "lines": [
+          69,
+          122,
+          178,
+          257,
+          321
+        ],
+        "domain": "Loyalty points (advertising)",
+        "creative_relevance": "NONE"
+      },
+      {
+        "file": "app/Services/CommissionService.php",
+        "call_sites": 3,
+        "lines": [
+          40,
+          63,
+          111
+        ],
+        "domain": "Partner commission (shared financial)",
+        "creative_relevance": "HIGH — the only existing pessimistic-lock + state-guard financial lifecycle. This is the structural template for creator earnings."
+      },
+      {
+        "file": "app/Services/SettlementService.php",
+        "call_sites": 2,
+        "lines": [
+          79,
+          221
+        ],
+        "domain": "Provider settlement (shared financial)",
+        "creative_relevance": "HIGH — generate() and generateForPeriod() are transaction-wrapped, but approveSettlement() and markAsPaid() are NOT. See non_conforming_paths."
+      },
+      {
+        "file": "app/Services/RefundService.php",
+        "call_sites": 2,
+        "lines": [
+          51,
+          110
+        ],
+        "domain": "Refund (shared financial)",
+        "creative_relevance": "PATTERN TO REJECT — initiateRefund() calls the Razorpay gateway INSIDE DB::transaction at :51, a direct Rule 4 violation."
+      },
+      {
+        "file": "app/Services/PricingService.php",
+        "call_sites": 2,
+        "lines": [
+          70,
+          108
+        ],
+        "domain": "Ad pricing",
+        "creative_relevance": "NONE — prices advertising media time"
+      },
+      {
+        "file": "app/Services/PaymentService.php",
+        "call_sites": 2,
+        "lines": [
+          103,
+          189
+        ],
+        "domain": "Payment (shared financial)",
+        "creative_relevance": "HIGH — verifyAndConfirmPayment() is the closest existing analogue to Creative funding confirmation, including its single ad-hoc duplicate guard."
+      },
+      {
+        "file": "app/Services/PartnerService.php",
+        "call_sites": 2,
+        "lines": [
+          22,
+          146
+        ],
+        "domain": "Partner onboarding (shared)",
+        "creative_relevance": "PATTERN ONLY"
+      },
+      {
+        "file": "app/Services/ManualBookingService.php",
+        "call_sites": 2,
+        "lines": [
+          144,
+          579
+        ],
+        "domain": "Booking (advertising)",
+        "creative_relevance": "LOW as code; HIGH as an anti-pattern — recordOfflinePayment() dispatches PaymentReceived INSIDE the transaction at :642."
+      },
+      {
+        "file": "app/Services/Campaign/ReferralTrackingService.php",
+        "call_sites": 0,
+        "lines": [],
+        "domain": "Referral attribution (shared)",
+        "creative_relevance": "LOW — will be dragged in if the booking payment path is reused for Creative funding.",
+        "note": "Comment-only match at :22. This class deliberately manages no transaction of its own; PaymentService wraps it."
+      },
+      {
+        "file": "app/Http/Controllers/ScreenController.php",
+        "call_sites": 2,
+        "lines": [
+          194,
+          314
+        ],
+        "domain": "Asset administration",
+        "creative_relevance": "NONE"
+      },
+      {
+        "file": "app/Http/Controllers/AdminPaymentController.php",
+        "call_sites": 2,
+        "lines": [
+          266,
+          330
+        ],
+        "domain": "Payment administration",
+        "creative_relevance": "PATTERN ONLY"
+      },
+      {
+        "file": "app/Services/ScreenDeletionService.php",
+        "call_sites": 1,
+        "lines": [
+          140
+        ],
+        "domain": "Asset administration",
+        "creative_relevance": "NONE"
+      },
+      {
+        "file": "app/Services/RevenueDistributionService.php",
+        "call_sites": 1,
+        "lines": [
+          62
+        ],
+        "domain": "Revenue split (shared financial)",
+        "creative_relevance": "MEDIUM — writes booking_screens; must not be touched by Creative"
+      },
+      {
+        "file": "app/Services/FinanceService.php",
+        "call_sites": 1,
+        "lines": [
+          115
+        ],
+        "domain": "Finance",
+        "creative_relevance": "LOW"
+      },
+      {
+        "file": "app/Services/CampaignPricingService.php",
+        "call_sites": 1,
+        "lines": [
+          157
+        ],
+        "domain": "Ad pricing",
+        "creative_relevance": "NONE"
+      },
+      {
+        "file": "app/Services/AssetImportService.php",
+        "call_sites": 1,
+        "lines": [
+          463
+        ],
+        "domain": "Asset import",
+        "creative_relevance": "NONE"
+      },
+      {
+        "file": "app/Http/Controllers/ScreenProviderPortalController.php",
+        "call_sites": 1,
+        "lines": [
+          815
+        ],
+        "domain": "Provider portal",
+        "creative_relevance": "NONE"
+      },
+      {
+        "file": "app/Http/Controllers/BookingController.php",
+        "call_sites": 1,
+        "lines": [
+          1124
+        ],
+        "domain": "Booking HTTP",
+        "creative_relevance": "PATTERN ONLY — transaction in the controller, lock immediately inside"
+      },
+      {
+        "file": "app/Http/Controllers/Api/BookingEngineController.php",
+        "call_sites": 1,
+        "lines": [
+          65
+        ],
+        "domain": "Booking HTTP",
+        "creative_relevance": "PATTERN ONLY — the ONLY site that performs the check BOTH outside and inside the lock"
+      },
+      {
+        "file": "app/Console/Commands/ExpireRewardPoints.php",
+        "call_sites": 1,
+        "lines": [
+          57
+        ],
+        "domain": "Loyalty scheduler",
+        "creative_relevance": "NONE"
+      },
+      {
+        "file": "app/Console/Commands/ExpirePendingBookings.php",
+        "call_sites": 1,
+        "lines": [
+          51
+        ],
+        "domain": "Booking scheduler",
+        "creative_relevance": "PATTERN ONLY — the best existing example of lock -> re-read -> mutate"
+      },
+      {
+        "file": "app/Application/Booking/UseCases/RescheduleBookingUseCase.php",
+        "call_sites": 1,
+        "lines": [
+          63
+        ],
+        "domain": "Booking application",
+        "creative_relevance": "PATTERN ONLY — locks the UNION of old and new screen ids, in deterministic order"
+      },
+      {
+        "file": "app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php",
+        "call_sites": 1,
+        "lines": [
+          71
+        ],
+        "domain": "Booking application",
+        "creative_relevance": "PATTERN ONLY — the documented canonical booking boundary"
+      }
+    ]
+  },
+  "lock_usage": {
+    "classification": "CURRENT_FACT",
+    "summary": {
+      "distinct_lockForUpdate_call_sites_in_app": 3,
+      "services_using_lockForUpdate": 2,
+      "services": [
+        "app/Services/CommissionService.php (via repository)",
+        "app/Services/InventoryService.php"
+      ],
+      "sharedLock_usages": 0,
+      "pessimistic_locking_elsewhere": "NONE. There is no advisory lock, no GET_LOCK, no SELECT ... LOCK IN SHARE MODE and no application-level mutex anywhere in app/."
+    },
+    "sites": [
+      {
+        "site": "app/Services/InventoryService.php:45-49",
+        "code": "Screen::query()->whereIn('id', $screenIds)->orderBy('id')->lockForUpdate()->get()",
+        "what_it_protects": "The `screens` rows (ad inventory / mobile fleet capacity) for exactly the screen ids the request is about to validate. Serialises concurrent bookings for the same assets so the availability reads that follow always observe the first transaction's committed booking rows.",
+        "ordering_discipline": "orderBy('id') — deterministic ascending id order, documented at :30-31 as the deadlock-avoidance rule.",
+        "transaction_requirement": "The method's own docblock (:33-34) states the lock is held until the transaction commits or rolls back and MUST be called inside a database transaction. Callers: app/Http/Controllers/Api/BookingEngineController.php:67, app/Http/Controllers/BookingController.php:1125, app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php:78, app/Application/Booking/UseCases/RescheduleBookingUseCase.php:81, app/Services/ManualBookingService.php:146. All five are inside a DB::transaction — the contract holds today.",
+        "creative_relevance": "NOT REUSABLE for Creative. It locks `screens` rows, which Creative has no relationship to. What is reusable is the SHAPE, not the class."
+      },
+      {
+        "site": "app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php:31",
+        "code": "PartnerCommission::where('id', $commissionId)->lockForUpdate()->firstOrFail()",
+        "what_it_protects": "A single `partner_commissions` row during a state transition. The secondary lock is the `referral_usages` row reached through the relationship (CommissionService.php:98-100 and :123-125), so the lock order is commission row FIRST, then referral usage.",
+        "ordering_discipline": "Documented as unchanged behaviour in CommissionService.php:18-24 (Phase 0.10 relocation). Changing this order is a deadlock-introducing change.",
+        "transaction_requirement": "Callers: app/Services/CommissionService.php:41 (approve), :64 (markAsPaid), :112 (markAsCancelled) — all inside DB::transaction.",
+        "creative_relevance": "PATTERN ONLY. It is the single best existing template for a Creative earning-approval lock: fetch-for-update, assert the expected current status, throw otherwise, mutate, commit."
+      },
+      {
+        "site": "app/Console/Commands/ExpirePendingBookings.php:53-57",
+        "code": "Booking::withoutGlobalScopes()->where('id', $booking->id)->where('status', Booking::STATUS_PAYMENT_PENDING)->lockForUpdate()->first()",
+        "what_it_protects": "The `bookings` row against a concurrent payment verification. The inline comment at :52 states the intent explicitly: 'Row lock within transaction to avoid race condition with payment verification'.",
+        "ordering_discipline": "Single row, no ordering concern. Wrapped in chunkById(100) at :46 for memory safety, with a per-booking try/catch at :81 so one failure cannot abort the sweep.",
+        "transaction_requirement": "DB::transaction at :51 wraps the lock, the re-read and the mutation together.",
+        "creative_relevance": "PATTERN ONLY — and specifically the lock -> re-read-the-predicate -> mutate pattern, which is the correct shape for a Creative TTL / expiry job and for a status-guarded Creative transition."
+      }
+    ],
+    "notable_non_use": {
+      "classification": "CURRENT_FACT",
+      "statement": "SettlementService::approveSettlement() and SettlementService::markAsPaid() perform financial state transitions with NO transaction and NO lock. They rely on an in-memory guard (canBeApproved() / canBePaid()) read before the update.",
+      "evidence": "app/Services/SettlementService.php:143 (approveSettlement) and :176 (markAsPaid); DB::transaction appears only at :79 and :221, and neither method takes a row lock. The in-memory guards are canBeApproved() (called at :145) and canBePaid() (called at :178), defined in app/Models/ScreenProviderSettlement.php:117 and :122.",
+      "creative_implication": "A Creative earnings approve/release flow MUST NOT copy this shape. This is recorded as a live concurrency weakness of the existing settlement path, not fixed by this audit (AGENTS.md section 18)."
+    }
+  },
+  "canonical_booking_shape": {
+    "definition": "check -> DB::transaction -> lockForUpdate -> re-check -> mutate -> commit",
+    "definition_source": "AGENTS.md section 11, which names this shape 'the protected shape' and states: agents must not move lockForUpdate() outside a transaction, change lock acquisition order casually, remove a re-check inside the transaction, merge availability and reservation logic without explicit verification, or alter transaction boundaries during a cosmetic refactor.",
+    "classification": "ARCHITECTURE_DOCUMENT"
+  },
+  "conformance_analysis": {
+    "classification": "CURRENT_FACT + INFERENCE",
+    "where_it_IS_followed": [
+      {
+        "site": "app/Http/Controllers/Api/BookingEngineController.php:55, 65-71",
+        "verdict": "FULL MATCH — the only complete instance in the repository.",
+        "detail": "validateBookingConflicts() runs OUTSIDE the transaction at :55 (fail fast, good UX), then DB::transaction at :65, lockScreensForBooking at :67, and validateBookingConflicts() is re-run at :70-71 with the literal comment 'Re-validate inside the exclusive lock'."
+      },
+      {
+        "site": "app/Application/Booking/UseCases/CreateCampaignBookingUseCase.php:71-78, 122-129",
+        "verdict": "MATCH, without the outside pre-check.",
+        "detail": "DB::transaction at :71, lockScreensForBooking at :78 with the comment 'BEFORE any availability/capacity read', sold-out re-check at :81-89, unified eligibility re-check at :122-129. The class docblock at :38-39 records the lock-first ordering as a preserved behavioural contract."
+      },
+      {
+        "site": "app/Services/ManualBookingService.php:144-146, 153-162, 202-210",
+        "verdict": "MATCH, without the outside pre-check.",
+        "detail": "DB::transaction at :144, lock at :146 (comment '0. Atomic inventory row locking'), sold-out re-check at :153-162, eligibility re-check at :202-210. Two throws instead of returns; the message and 422 status are preserved."
+      },
+      {
+        "site": "app/Application/Booking/UseCases/RescheduleBookingUseCase.php:63-100",
+        "verdict": "MATCH, with a lock set that is wider than the naive one.",
+        "detail": "Locks the union of existing and target screen ids at :79-82, then computes $needsCapacityCheck at :98-100 so the (expensive) re-check runs only when a capacity-relevant field actually changed. This is the correct precedent for a Creative transition that touches a different set of resources before and after."
+      },
+      {
+        "site": "app/Console/Commands/ExpirePendingBookings.php:51-76",
+        "verdict": "MATCH, and the cleanest example of the re-check step.",
+        "detail": "DB::transaction at :51, lockForUpdate at :56, then the STATUS PREDICATE IS RE-READ at :55/:59 by re-querying with the expected status and returning false if the row no longer matches. The mutation at :63-65 therefore cannot act on a row that a concurrent verification already moved."
+      },
+      {
+        "site": "app/Services/CommissionService.php:40-55, 63-103, 111-128",
+        "verdict": "MATCH for a state machine (no 'availability' dimension).",
+        "detail": "DB::transaction, findOrFailForUpdate, assert the expected status (:43-45, :66-72, :114-116), mutate, commit. markAsPaid is additionally idempotent-ish: an already-`paid` commission returns unchanged at :66-68 rather than throwing."
+      }
+    ],
+    "where_it_is_NOT_followed": [
+      {
+        "site": "app/Services/SettlementService.php:143-155 (approveSettlement), :176-190 (markAsPaid)",
+        "missing": [
+          "DB::transaction",
+          "lockForUpdate",
+          "re-check under lock"
+        ],
+        "risk": "Two concurrent approve calls both evaluate canBeApproved() on the same stale in-memory instance and both write approved_by/approved_at; the second overwrites the first approver. A concurrent approve and markAsPaid can interleave so that 'paid' is written by an approver who never saw the approved state. This is a real concurrency defect in a financial path.",
+        "disposition": "RECORDED, NOT FIXED. AGENTS.md section 18 forbids opportunistic fixing; section 10 makes settlement financial-critical."
+      },
+      {
+        "site": "app/Http/Controllers/BookingController.php:1147-1157 (store, legacy single-screen)",
+        "missing": [
+          "outside pre-check (acceptable)",
+          "note that the lock is taken on a single screen id only"
+        ],
+        "risk": "LOW. The lock set is correct for the operation, but the transaction boundary is declared in an HTTP controller, which is a Rule 1 / Rule 11 shape smell. The campaign path was moved to CreateCampaignBookingUseCase; this legacy path was not.",
+        "disposition": "RECORDED, NOT FIXED."
+      },
+      {
+        "site": "app/Services/ManualBookingService.php:579-646 (recordOfflinePayment)",
+        "missing": [
+          "lockForUpdate on the booking row",
+          "after-commit dispatch"
+        ],
+        "risk": "MEDIUM. The booking row is read into memory before the transaction and updated inside it without a lock, so two concurrent offline-payment recordings can both pass any status guard. Worse, event(new PaymentReceived(...)) is dispatched at :642 INSIDE the transaction closure — a rollback after that point would have already notified the client and the admin that a payment was received. The identical method's counterpart in PaymentController.php:95 dispatches AFTER the use case returns, i.e. after commit. The codebase is therefore internally inconsistent, and the failure mode (notify for a rolled-back payment) is exactly the one a payout-bearing Creative flow must avoid.",
+        "disposition": "RECORDED, NOT FIXED. CreateCampaignBookingUseCase.php:48-50 records the same choice for BookingCreated as 'pre-existing behaviour and is intentionally not fixed here'."
+      },
+      {
+        "site": "All 20 lock-free financial write paths",
+        "missing": [
+          "row-level locking on partner_commissions generation",
+          "row-level locking on payments rows"
+        ],
+        "risk": "LOW-MEDIUM. partner_commissions and payments rely on read-modify-write without a lock, so a concurrent generate() can create duplicate commission rows for the same referral usage. There is no unique constraint on referral_usages to prevent it either.",
+        "disposition": "RECORDED, NOT FIXED."
+      }
+    ],
+    "summary": {
+      "classification": "INFERENCE",
+      "statement": "Lock discipline in this repository is concentrated and competent where it exists — InventoryService, CommissionService, the two booking use cases and ExpirePendingBookings all follow the AGENTS.md section 11 shape — and simply ABSENT everywhere else. 24 of 26 transaction files take no row lock at all. The Creative build must treat 'there is a lock' as something to be designed per aggregate, not as an inherited default."
+    }
+  },
+  "absence_of_protection_mechanisms": {
+    "optimistic_locking": {
+      "classification": "CURRENT_FACT",
+      "verdict": "ABSENT",
+      "evidence": "grep -rni 'lock_version|->version|optimistic' over app/ and database/migrations/ -> 0 matches. No table has a version column. No model overrides the Eloquent `usesUniqueIds`/`$incrementing` optimistic path. AGENTS.md section 5 records 11 service-locator call sites and 6 Domain->Models files, but no optimistic-locking strategy exists in the project at all.",
+      "creative_implication": "RECOMMENDATION: Creative must not rely on optimistic locking unless it introduces the column convention explicitly, because there is no precedent, no test and no enforcement. Pessimistic locking has the only proven precedent (3 sites)."
+    },
+    "idempotency_keys": {
+      "classification": "CURRENT_FACT",
+      "verdict": "ABSENT as a mechanism",
+      "evidence": "grep -rni 'idempot' over app/, routes/, database/, config/ -> exactly 1 match, and it is an unrelated English word in a seeder comment: database/seeders/PricingPlanSeeder.php:365 ('Keep things simple, clean, and idempotent'). There is no Idempotency-Key header read, no idempotency_keys table, no request-fingerprint store.",
+      "creative_implication": "RECOMMENDATION: a Creative-scoped idempotency mechanism is NEW work. See 'creative_critical_operations' below for the cheap correct option (natural-key unique constraints) versus a full key store."
+    },
+    "ad_hoc_duplicate_guards": {
+      "classification": "CURRENT_FACT",
+      "verdict": "THREE ad-hoc guards exist; none is a general mechanism",
+      "guards": [
+        {
+          "guard": "if ($payment->payment_status === 'paid') throw new \\Exception('Payment already verified for this order.');",
+          "site": "app/Services/PaymentService.php:105-107",
+          "scope": "One hard-coded message inside one method. Not reusable, not keyed, not observable, and it throws rather than returning the prior result — so a legitimate client retry receives a 422 rather than an idempotent success."
+        },
+        {
+          "guard": "if ($commission->status === PartnerCommission::STATUS_PAID) { return $commission; }",
+          "site": "app/Services/CommissionService.php:66-68",
+          "scope": "Correct idempotent-RETURN shape, but only for that one terminal transition."
+        },
+        {
+          "guard": "if (!$locked) { return false; }",
+          "site": "app/Console/Commands/ExpirePendingBookings.php:59-61",
+          "scope": "Correct shape, but it is a race guard, not a duplicate-request guard."
+        }
+      ],
+      "database_level_backstops": {
+        "classification": "CURRENT_FACT",
+        "statement": "The gateway identifiers that SHOULD be the backstop are indexed but not unique: payments.razorpay_order_id (index, not unique), refunds.razorpay_refund_id and refunds.refund_reference (indexed, not unique). partner_commissions has NO status index and no natural-key constraint. A duplicate refund or a duplicate commission row is therefore representable at the database level.",
+        "evidence": "database/migrations (payments index list), artifact 08 table entries for payments/refunds/partner_commissions, re-derived 2026-09-26."
+      }
+    },
+    "request_deduplication": {
+      "classification": "CURRENT_FACT",
+      "verdict": "ABSENT",
+      "evidence": "No request-fingerprint table, no nonce, no replay window. The only per-process dedup in the repository is the static array in NotificationEventSubscriber (see 18-event-notification-analysis.json), which is in-memory and dies with the process.",
+      "creative_implication": "A double-clicked 'Accept proposal' or 'Request payout' button will execute twice. Every Creative money or lifecycle transition listed below must therefore carry either a unique constraint or an explicit status-guarded, lock-protected transition."
+    },
+    "webhook_idempotency": {
+      "classification": "CURRENT_FACT",
+      "verdict": "NOT APPLICABLE — there are no webhooks",
+      "evidence": "grep -rni 'webhook' over app/ and routes/ -> 0 matches. There is no inbound webhook route of any kind. Payment confirmation is entirely client-initiated: POST /api/payments/razorpay/verify (routes/api.php:303) -> PaymentController::verify (:80) -> VerifyPaymentUseCase -> PaymentService::verifyAndConfirmPayment (app/Services/PaymentService.php:100).",
+      "creative_implication": "RECOMMENDATION: if Creative funding introduces a gateway webhook (strongly recommended — see 'payment reconciliation' below), the idempotency semantics must be designed from scratch. OPEN_DECISION: there is no existing contract to copy and none may be invented here.",
+      "open_decision_ref": "OD-TC-07"
+    },
+    "after_commit_hooks": {
+      "classification": "CURRENT_FACT",
+      "verdict": "ABSENT",
+      "evidence": "grep -rn 'afterCommit|ShouldHandleEventsAfterCommit' over app/ -> 0 matches. Not one event class implements ShouldHandleEventsAfterCommit. There is no outbox table, no DB::afterCommit() callback and no transactional outbox pattern anywhere in app/ or database/migrations/.",
+      "observed_behaviour_instead": "Events are dispatched at one of three points, all of them synchronous on the request thread: (a) INSIDE the transaction — ManualBookingService.php:642, CreateCampaignBookingUseCase.php:327; (b) AFTER the transaction returns — PaymentController.php:95, :105, :147, BookingController.php:144, :350, :385, :1066, :1239, :1279; (c) outside any transaction — ReferralAnalyticsController.php:84, :112, the enquiry controllers.",
+      "creative_implication": "RECOMMENDATION: Creative domain events should be dispatched after commit, by the consuming use case, not inside the aggregate mutation. The two in-transaction sites above are the failure mode to avoid: a rollback after dispatch notifies parties about work that did not happen."
+    },
+    "queue_job_uniqueness_traits": {
+      "classification": "CURRENT_FACT",
+      "verdict": "ABSENT",
+      "evidence": "grep -rn 'ShouldBeUnique|ShouldBeQueued|WithoutOverlapping|ShouldBeUniqueUntilProcessing' over app/ -> 0 matches. The only ShouldQueue implementors in the repository are the 28 classes in app/Mail.",
+      "creative_implication": "app/Jobs and app/Support/Jobs do not exist. Any Creative job therefore cannot use WithoutOverlapping or ShouldBeUnique because there is no precedent and no worker deployment guarantee. See 18-event-notification-analysis.json for the queue recommendation and its blocked decision."
+    },
+    "concurrent_reentrancy_guards": {
+      "classification": "CURRENT_FACT",
+      "verdict": "ABSENT",
+      "evidence": "Only one Cache lock consumer exists and it is unrelated to business transitions (Laravel's cache_locks table backs the cache driver). No business operation takes a named lock.",
+      "creative_implication": "RECOMMENDATION: for a Creative transition that must be exactly-once but has no natural unique key (for example 'accrue the earning for this project'), a Cache::lock keyed on the natural key is the cheapest available mechanism in this stack. This is a NEW pattern for the repository and is marked as such."
+    }
+  },
+  "creative_critical_operations": {
+    "classification": "RECOMMENDATION throughout. Each entry states what the design MUST provide, and what breaks if it does not. No entry is implemented.",
+    "design_ground_rules": [
+      "RECOMMENDATION: the lock set for a Creative transition must be the natural-key resource row, taken FIRST inside the transaction, then the status predicate re-read under that lock, then the mutation — the exact shape of ExpirePendingBookings.php:51-76.",
+      "RECOMMENDATION: lock ordering must be deterministic and total (ascending id, or a documented fixed order across tables) to avoid deadlock. Cite InventoryService.php:30-31.",
+      "RECOMMENDATION: natural uniqueness must be expressed as a DATABASE constraint, never as an application check. This is stronger than anything the current codebase does and is the single most valuable control Creative can add.",
+      "RECOMMENDATION: no external call (gateway, mail, image processing, file scan) may occur while a row lock is held. Cite Rule 4 and the RefundService.php:51 violation to reject.",
+      "RECOMMENDATION: financial writes must be idempotent-RETURN, not idempotent-throw, so a legitimate client retry observes success rather than a 422. This is an improvement over PaymentService.php:105-107 and is deliberately not applied there."
+    ],
+    "operations": [
+      {
+        "operation": "Proposal acceptance",
+        "why_concurrency_critical": "It is the commitment point: it converts a quote into an obligation and must create exactly one project.",
+        "required_transaction_boundary": "RECOMMENDATION: ONE transaction covering (a) lock the brief row, (b) re-read the proposal row and assert status == 'submitted' AND the brief is still awardable, (c) mark the proposal accepted, (d) auto-decline siblings IF exclusivity is confirmed, (e) insert the creative_projects row with the frozen AgreedTerms snapshot, (f) write the activity_logs row. Nothing external.",
+        "required_row_locks": [
+          "creative_briefs row (the contention point — every competing acceptance targets the same brief)",
+          "the winning creative_proposals row (status assertion under lock)"
+        ],
+        "required_unique_constraints": [
+          "UNIQUE creative_projects.proposal_id — this single constraint is the hard, database-level guarantee of exactly-once acceptance. Two racing transactions can both believe they won; only one insert survives.",
+          "UNIQUE creative_proposals.public_id and .reference (per artifact 09)"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: accept the request, but return the ALREADY-CREATED project with HTTP 200 rather than re-deriving it. To do that, look up by proposal_id first; if found, return it. This is a read-then-write, so it is not sufficient alone — the UNIQUE(proposal_id) constraint is the actual guarantee.",
+        "risk_if_implemented_without_them": "P0. Two creators' proposals are both accepted within milliseconds, two projects are created for one brief, and if the earning/commission pipeline is wired to acceptance the platform pays twice against one obligation. Locking the brief without the unique constraint is NOT sufficient, because the second transaction blocks on the lock and then re-reads — which is why the unique constraint is the backstop, not the lock.",
+        "open_decisions": [
+          "OD-TC-01 (exclusivity: can a brief receive multiple proposals, and does acceptance auto-decline the siblings?)",
+          "OD-TC-02 (is the quoted amount server-derived or client/creator-proposed at acceptance time?)"
+        ]
+      },
+      {
+        "operation": "Creative project creation",
+        "why_concurrency_critical": "It materialises the frozen AgreedTerms snapshot — the financial fact that every later earning derives from.",
+        "required_transaction_boundary": "RECOMMENDATION: MUST be the SAME transaction as proposal acceptance, not a follow-up step. A separate transaction creates a window in which a proposal is accepted with no project, and a crash leaves the brief awarded and nothing running.",
+        "required_row_locks": [
+          "Inherited from acceptance. A standalone 'create project' admin path must lock the brief and the proposal rows itself."
+        ],
+        "required_unique_constraints": [
+          "UNIQUE creative_projects.proposal_id (see above)",
+          "UNIQUE creative_projects.public_id / .reference"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: covered by UNIQUE(proposal_id). Additionally assert that a project does not already exist for the brief before locking.",
+        "risk_if_implemented_without_them": "P0. Two projects for one accepted proposal; the earnings ledger then carries two rows against one obligation. Also: if the split is recomputed later from a settings value instead of the snapshot, the amount silently changes (AGENTS.md section 10 immutability violation).",
+        "open_decisions": [
+          "OD-TC-03 (is funding a precondition of project creation, or a separate step after it?)"
+        ]
+      },
+      {
+        "operation": "Payment / funding confirmation",
+        "why_concurrency_critical": "It is money moving state, it is client-initiated (so it is attacker-triggered and replayable), and there is no webhook to reconcile it.",
+        "required_transaction_boundary": "RECOMMENDATION: TWO transactions with the network call BETWEEN them, never inside. (1) transaction A: create the creative_fundings row in a pending state with the gateway order id and the server-computed amount. (2) NETWORK CALL outside any transaction and outside any lock. (3) transaction B: lock the creative_fundings row, re-read status, assert pending, verify the signature via PaymentGatewayInterface, mark confirmed, and transition the project. This is the Rule 4 shape; it is deliberately NOT the RefundService.php:51 shape.",
+        "required_row_locks": [
+          "the creative_fundings row (found by gateway_order_id, locked for update)",
+          "the creative_projects row when the transition is a project state change"
+        ],
+        "required_unique_constraints": [
+          "UNIQUE creative_fundings.gateway_order_id (nullable-unique) — directly fixes the payments.razorpay_order_id defect",
+          "UNIQUE creative_fundings.reference",
+          "UNIQUE creative_projects.proposal_id remains the acceptance backstop"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: status-guarded idempotent return. If the locked row is already confirmed, return it unchanged and do NOT re-verify or re-transition. The existing precedent throws (PaymentService.php:105-107); for Creative, returning is correct because a client retry after a dropped response is the normal case, not an attack.",
+        "risk_if_implemented_without_them": "P0. Double-funded projects; a creator earning created twice for one payment; a client able to replay a captured signature to re-confirm a funding row. Because verification is entirely client-initiated with no webhook, an attacker who captures one valid (order_id, payment_id, signature) triple can replay it — the only real defence is a status-guarded, lock-protected transition plus a unique constraint on the gateway order id.",
+        "open_decisions": [
+          "OD-TC-04 (escrow / milestone tranches vs a single up-front funding?)",
+          "OD-TC-07 (is a gateway webhook in scope, and if so what is its idempotency contract? It cannot be derived from this repository and must not be invented here.)"
+        ]
+      },
+      {
+        "operation": "Revision round submission",
+        "why_concurrency_critical": "Round numbers are allocated by a read-then-write counter, which is the classic lost-update shape.",
+        "required_transaction_boundary": "RECOMMENDATION: ONE transaction — lock the project row, re-read the entitlement (rounds used vs rounds included in the frozen AgreedTerms), allocate round = used + 1, insert the revision, transition the project.",
+        "required_row_locks": [
+          "the creative_projects row — the counter lives at project granularity, so this is the serialisation point"
+        ],
+        "required_unique_constraints": [
+          "UNIQUE (project_id, round) on creative_revisions — the hard backstop, exactly as artifact 09 already specifies",
+          "UNIQUE creative_revisions.public_id"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: rely on UNIQUE(project_id, round) plus the locked read. Do not attempt to dedup on client content — two legitimate identical requests are possible and must both be recorded.",
+        "risk_if_implemented_without_them": "P1. Two concurrent submissions both compute round N; one insert fails with a raw integrity error (a 500 rather than a 409) or, worse, both are written with the same round number and the revision history becomes unauditable — which directly undermines the money argument that a round beyond the included allowance is a chargeable change order.",
+        "open_decisions": [
+          "OD-TC-05 (how many rounds are included, who owns that number, and does exceeding it require a paid change order?)"
+        ]
+      },
+      {
+        "operation": "Delivery submission",
+        "why_concurrency_critical": "Lower risk than acceptance, but the sequence number has the same lost-update shape and the delivery is the evidence a payout dispute will be argued over.",
+        "required_transaction_boundary": "RECOMMENDATION: ONE transaction — lock the project, assert the project is in a state that permits submission, allocate sequence, insert the delivery and its file rows, transition the project to delivered/in_review. Image processing and any file scan happen BEFORE the transaction, never inside it (Rule 4).",
+        "required_row_locks": [
+          "the creative_projects row"
+        ],
+        "required_unique_constraints": [
+          "UNIQUE (project_id, sequence) on creative_deliveries",
+          "UNIQUE (delivery_id, file_id, role) on creative_delivered_files"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: status guard. A project that has already moved past 'awaiting delivery' must reject a new submission with 409, not silently create a second delivery.",
+        "risk_if_implemented_without_them": "P2 for money, P1 for auditability. Duplicate sequence numbers make it impossible to prove which file was the final delivery — which is precisely the evidence a rejected-then-reversed earning would be contested on.",
+        "open_decisions": [
+          "OD-TC-06 (on rejection, is a NEW delivery created (append-only) or is the old one revised in place? Recommendation: append-only, matching the AGENTS.md section 10 immutability discipline, but this is a product decision.)"
+        ]
+      },
+      {
+        "operation": "Delivery acceptance (the client accepts the work)",
+        "why_concurrency_critical": "This is a candidate EARNING TRIGGER. Two acceptances would mean two earnings.",
+        "required_transaction_boundary": "RECOMMENDATION: ONE transaction — lock the delivery row, re-read status, assert it is awaiting review, assert the caller is the brief's client, mark accepted, transition the project, and IF the trigger rule is 'accrue on acceptance' create the earning row in the SAME transaction. Accrual and acceptance must be atomic: an accepted delivery with no earning is an unaudited revenue event.",
+        "required_row_locks": [
+          "the creative_deliveries row",
+          "the creative_projects row"
+        ],
+        "required_unique_constraints": [
+          "UNIQUE (project_id, earning_type) on creator_earnings — per artifact 09, this is what makes earning creation exactly-once per type per project",
+          "UNIQUE creative_deliveries (project_id, sequence)"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: status-guarded idempotent return — a second acceptance of an already-accepted delivery returns the existing earning instead of creating another.",
+        "risk_if_implemented_without_them": "P0. Double-accrued earnings become the creator's payable balance. AGENTS.md section 10 makes financial history immutable, so the duplicate cannot be deleted — it must be reversed with a compensating record, and if the payout already went out, the money is gone.",
+        "open_decisions": [
+          "OD-TC-08 (which event accrues the earning: delivery acceptance, project completion, review submission, or the end of a dispute window? Cannot be decided here.)",
+          "OD-TC-09 (is the platform commission computed on the quoted amount or on the amount net of third-party costs and tax?)"
+        ]
+      },
+      {
+        "operation": "Review submission",
+        "why_concurrency_critical": "A review is immutable once written, so the ONLY defence against a duplicate is a constraint, not a state machine.",
+        "required_transaction_boundary": "RECOMMENDATION: ONE transaction — assert the caller was a party to the project, insert the review, write the activity log. No lock is strictly required if the unique constraint exists, but the project row should be locked to keep the read of project state consistent.",
+        "required_row_locks": [
+          "the creative_projects row (for a consistent read of project state; not for serialisation)"
+        ],
+        "required_unique_constraints": [
+          "UNIQUE (project_id, reviewer_user_id) on creative_reviews — the ONLY protection, and it is sufficient",
+          "UNIQUE creative_reviews.public_id"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: the unique constraint, surfaced to the API as a 409. Do NOT add a state machine to a review — immutability is the design, exactly as artifact 06 proposes.",
+        "risk_if_implemented_without_them": "P1. A client can post N reviews for one project and, if reviews feed any ranking or a commission tier, that is a review-manipulation vector with a money consequence. Note that testimonials.rating exists in the current schema with NO author binding (artifact 08) and must not be reused for this reason.",
+        "open_decisions": [
+          "OD-TC-10 (is a review required for completion or optional? one per project or one per delivery? is it public on the creator's profile?)",
+          "OD-TC-11 (does a rating ever affect money? If yes, review immutability becomes a financial invariant and no edit path may ever exist.)"
+        ]
+      },
+      {
+        "operation": "Earning creation (accrual)",
+        "why_concurrency_critical": "It writes a financial fact. It is the operation that AGENTS.md section 10 governs most strictly.",
+        "required_transaction_boundary": "RECOMMENDATION: accrual MUST be in the same transaction as the business event that triggers it (delivery acceptance or project completion), never a separate 'accrual job' that races the trigger. The amounts are computed by a pure domain service from the frozen AgreedTerms snapshot and stored with the rates alongside them, mirroring booking_screens (gross_revenue, platform_share, provider_share, illuvision_percentage, screen_provider_percentage).",
+        "required_row_locks": [
+          "the triggering row (delivery or project) to prevent the trigger firing twice",
+          "the creative_projects row for the same reason"
+        ],
+        "required_unique_constraints": [
+          "UNIQUE (project_id, earning_type) — exactly-once accrual per type per project",
+          "UNIQUE creator_earnings.public_id"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: rely on the unique constraint. A catch of the integrity error and a re-read of the existing row is acceptable; silently proceeding is not.",
+        "risk_if_implemented_without_them": "P0. The creator's payable balance is inflated, and because financial history is immutable the over-accrual can only be corrected by a reversing entry. If the payout cadence is short, the money may already be out.",
+        "open_decisions": [
+          "OD-TC-08 (accrual trigger)",
+          "OD-TC-09 (commission basis)",
+          "OD-TC-12 (is tax in scope, and is there a third-party cost component? These change the split formula and therefore the snapshot columns.)",
+          "OD-TC-13 (multi-currency or INR only? currency_rates are overwritten in place with no history, so a rate used at accrual time cannot be re-derived later unless it is snapshotted.)"
+        ]
+      },
+      {
+        "operation": "Commission calculation",
+        "why_concurrency_critical": "It derives the platform's own revenue from the same event as the creator's earnings, so an asymmetry between the two is a direct loss to one side.",
+        "required_transaction_boundary": "RECOMMENDATION: inside the accrual transaction, from the same frozen snapshot, with NO independent calculation path. A second, independent commission calculation is the exact duplication Rule 7 prohibits. The existing analogue RevenueAllocation::split (app/Domain/Financial/Support/RevenueAllocation) is the only pure financial function in the repository and is the correct template — but note it takes and returns float, which AGENTS.md section 10 forbids for new monetary code. Creative needs a money value object with allocation semantics, not a copy.",
+        "required_row_locks": [
+          "Inherited from accrual. A standalone recalculation command must lock the project row and must be forbidden from overwriting an existing earning."
+        ],
+        "required_unique_constraints": [
+          "UNIQUE (project_id, earning_type) covers this if the platform share is stored on the same earning row (recommended) rather than on a separate commission table"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: platform share and creator net should live on the SAME earning row as a single computed triple (gross, platform, net + both rates), so they cannot drift apart. Two separately written rows can and will drift under a concurrent retry.",
+        "risk_if_implemented_without_them": "P1-P0 depending on cadence. A rounding asymmetry means the two shares do not sum to the gross, which is an unauditable financial record. RevenueAllocation's sequential round() approach is the existing precedent and it does sum correctly, but on floats.",
+        "open_decisions": [
+          "OD-TC-09 (commission basis: gross or net)",
+          "OD-TC-14 (is the split percentage snapshotted per earning, or read from settings at payout time? AGENTS.md section 10 requires the snapshot. The existing screen_providers.illuvision_percentage default of 10.00 is an advertising constant, not a Creative rate, and must not be inherited.)"
+        ]
+      },
+      {
+        "operation": "Payout request and payout processing",
+        "why_concurrency_critical": "It is the only operation that moves money OUT, and it is the classic double-payment shape.",
+        "required_transaction_boundary": "RECOMMENDATION, two distinct operations with different transaction shapes. (a) PAYOUT REQUEST: one transaction — lock the creator row, sum the eligible approved earnings inside the transaction, insert the creator_payouts row in 'requested', and mark the covered earnings as 'released_pending' or similar. (b) PAYOUT PROCESSING: one transaction — lock the creator_payouts row, re-read status, assert 'approved' and assert approved_by != requested_by, mark 'paid' with the gateway/reference metadata, and mark the member earnings paid. The actual gateway disbursement call, if there is one, must be OUTSIDE both transactions and outside every lock.",
+        "required_row_locks": [
+          "the creator row (the request sum is a read-aggregate and needs a serialisation point)",
+          "each creator_payouts row during processing",
+          "each creator_earnings row being consumed"
+        ],
+        "required_unique_constraints": [
+          "UNIQUE creator_payout_items.earning_id — per artifact 09 this single constraint is the hard guarantee against paying one earning twice, and it is the most important constraint in the Creative financial design",
+          "UNIQUE creator_payouts.reference_number",
+          "UNIQUE creator_payouts.public_id"
+        ],
+        "duplicate_request_protection": "RECOMMENDATION: (a) is naturally protected by UNIQUE(earning_id) — a second request that tries to include an already-claimed earning fails loudly. (b) is protected by a status-guarded idempotent return: an already-'paid' payout returns unchanged, mirroring CommissionService.php:66-68 which is the correct existing precedent.",
+        "risk_if_implemented_without_them": "P0. Double payment of a creator's balance, with the money already gone. This is the single highest-severity operation in the Creative build.",
+        "open_decisions": [
+          "OD-TC-15 (is there an actual gateway disbursement, or is a payout a recorded manual bank transfer? The existing partner_commissions markAsPaid() takes optional payout metadata and performs NO gateway call (CommissionService.php:61-103), which suggests manual. Creative must decide explicitly and must not assume a Razorpay payout API exists.)",
+          "OD-TC-16 (payout cadence and minimum threshold; whether a settlement period exists at all, which determines whether the SettlementService period pattern is reused or a separate mechanism is built)"
+        ]
+      }
+    ]
+  },
+  "hard_rules": {
+    "classification": "ARCHITECTURE_DOCUMENT — restated verbatim in substance from AGENTS.md and docs/architecture/ARCHITECTURE_RULES.md. These bind the Creative build before any design choice is made.",
+    "rules": [
+      {
+        "id": "HR-01",
+        "rule": "Never hold a row lock across a network call.",
+        "source": "AGENTS.md section 11; ARCHITECTURE_RULES.md Rule 4 ('External network operations must be isolated outside database row locks to prevent connection pool exhaustion and lock timeouts').",
+        "creative_application": "Funding confirmation and payout processing must be split into transaction A / network / transaction B. The existing RefundService::initiateRefund() at :51 violates this and is a shape to REJECT, not copy."
+      },
+      {
+        "id": "HR-02",
+        "rule": "Never introduce floating-point arithmetic for monetary values.",
+        "source": "AGENTS.md section 10.",
+        "creative_application": "A Creative money value object is required. App\\Domain\\Payment\\Support\\Money is a conversion helper only (toPaise/toRupees/normalise) with no add/multiply/allocate/split, and its own signatures take float. RevenueAllocation::split is pure but float-based. Neither may be copied as a computation model."
+      },
+      {
+        "id": "HR-03",
+        "rule": "Financial history is immutable. Fix forward with compensating records; never rewrite a stored financial fact.",
+        "source": "AGENTS.md section 10.",
+        "creative_application": "Earnings, payouts and fundings are append-only with reversing entries. No UPDATE that changes a computed amount. This is why the status-guarded retry in every operation above returns rather than overwrites."
+      },
+      {
+        "id": "HR-04",
+        "rule": "Financial workflows must maintain explicit database transaction boundaries.",
+        "source": "ARCHITECTURE_RULES.md Rule 4; AGENTS.md section 10 required sequence.",
+        "creative_application": "Before changing any Creative financial code: identify current behaviour -> inspect the golden/financial tests that pin it -> inspect the transaction boundary -> inspect persistence and rounding at the point of write -> make the minimal change -> run the financial regression suite (the six suites listed in AGENTS.md section 10)."
+      },
+      {
+        "id": "HR-05",
+        "rule": "Do not change transaction boundaries across an existing domain. Booking is concurrency-sensitive; transaction and lock placement are protected.",
+        "source": "AGENTS.md sections 11 and 19; ARCHITECTURE_RULES.md Rule 5 (stable external contracts) and Rule 11 (strict dependency direction).",
+        "creative_application": "Creative must not modify the transaction or lock placement of bookings, payments, commissions or settlements in order to serve a Creative flow. If a Creative flow appears to need it, that is a STOP-and-report condition (AGENTS.md section 13, step 11)."
+      },
+      {
+        "id": "HR-06",
+        "rule": "Lock acquisition order is a protected property; casual reordering risks deadlock.",
+        "source": "AGENTS.md section 11.",
+        "creative_application": "If Creative ever locks rows across more than one table, the order must be total and documented before the first implementation, and pinned by a concurrency test in the style of tests/Feature/Golden/GoldenConcurrencyVerificationTest.php."
+      },
+      {
+        "id": "HR-07",
+        "rule": "A re-check inside the transaction must not be removed or merged away.",
+        "source": "AGENTS.md section 11.",
+        "creative_application": "The re-read-status-under-lock step is mandatory in every Creative transition, per the shape at ExpirePendingBookings.php:51-76."
+      },
+      {
+        "id": "HR-08",
+        "rule": "A payment workflow must not hard-wire a Creative transition onto the booking path.",
+        "source": "AGENTS.md section 19; ARCHITECTURE_RULES.md Rule 7 (zero business logic duplication — wrap and delegate, never copy).",
+        "creative_application": "PaymentService::verifyAndConfirmPayment() transitions the BOOKING status and creates partner referral commissions inside its transaction. A Creative funding service must sit on PaymentGatewayInterface independently. Reusing it would create booking rows and partner commissions for creative work."
+      },
+      {
+        "id": "HR-09",
+        "rule": "Do not resolve existing debt opportunistically while building a new feature.",
+        "source": "AGENTS.md sections 18 and 19.",
+        "creative_application": "The SettlementService lock gap, the RefundService gateway-inside-transaction call, the payments.razorpay_order_id non-unique index and the ManualBookingService in-transaction dispatch are all RECORDED by this audit and NOT FIXED. Fixing them requires its own authorisation and its own regression run."
+      },
+      {
+        "id": "HR-10",
+        "rule": "Do not introduce a new architectural layer to avoid a decision.",
+        "source": "AGENTS.md section 20.",
+        "creative_application": "Whether Creative locks/retries live in app/Services/Creative, app/Application/Creative or a new layer is a decision to be recorded, not improvised."
+      }
+    ]
+  },
+  "open_decisions": [
+    {
+      "id": "OD-TC-01",
+      "question": "Can one brief receive multiple proposals, and is acceptance exclusive (i.e. does accepting one auto-decline the others)?",
+      "blocked_design": "Proposal acceptance transaction, auto-decline step, notification fan-out",
+      "what_is_missing": "A product rule. No document in this repository describes the Creative brief/proposal model. Note artifact 09 already encodes this as a candidate unique(brief_id, creator_id) and artifact 06 records the same question as OD-DB-03."
+    },
+    {
+      "id": "OD-TC-02",
+      "question": "Is the proposal amount server-derived from a rate card, or a creator-proposed figure that the client accepts?",
+      "blocked_design": "The AgreedTerms snapshot columns and where the amount is validated",
+      "what_is_missing": "A product decision on pricing model. Artifact 06 flags this as a CRITICAL OPEN DECISION. If the amount is creator-proposed, then acceptance is the moment a client-supplied number becomes a financial fact, and the server-side validation boundary must be designed explicitly."
+    },
+    {
+      "id": "OD-TC-03",
+      "question": "Does funding precede or follow project creation?",
+      "blocked_design": "Project creation transaction boundary",
+      "what_is_missing": "A product decision. Determines whether creative_projects is created accepted-but-unfunded or funded-first."
+    },
+    {
+      "id": "OD-TC-04",
+      "question": "Is escrow or milestone funding in scope for the initial release?",
+      "blocked_design": "creative_fundings shape, whether a tranche table and a held-balance concept exist",
+      "what_is_missing": "A product decision plus a financial design. Same as artifact 09 OD-DB-04. MUST NOT be invented here."
+    },
+    {
+      "id": "OD-TC-05",
+      "question": "How many revision rounds are included in the agreed terms, who owns that number, and does exceeding it require a paid change order?",
+      "blocked_design": "Revision entitlement check and any over-limit earning",
+      "what_is_missing": "A commercial term. Nothing in this repository has any concept of a revision (grep -ri 'revision' over app/ = 0 matches). The pricing of an over-limit round is a financial rule and MUST NOT be invented here."
+    },
+    {
+      "id": "OD-TC-06",
+      "question": "On a rejected delivery, is a NEW delivery created (append-only) or is the existing one revised in place?",
+      "blocked_design": "Delivery sequence allocation and the rejection transaction",
+      "what_is_missing": "A product decision. Recommendation is append-only for auditability, consistent with AGENTS.md section 10, but the choice is the client's."
+    },
+    {
+      "id": "OD-TC-07",
+      "question": "Is an inbound gateway webhook in scope, and if so what is its signature-verification, replay-window and idempotency contract?",
+      "blocked_design": "Funding confirmation design, and any reconciliation process",
+      "what_is_missing": "Everything. This repository has ZERO webhooks (0 matches for 'webhook' in app/ and routes/). There is no contract to copy and none may be invented here. Until this is decided, Creative funding is client-initiated only and inherits the replay exposure of PaymentController::verify."
+    },
+    {
+      "id": "OD-TC-08",
+      "question": "Which business event accrues a creator earning, and does a dispute/hold window exist?",
+      "blocked_design": "Accrual trigger point, the earning status vocabulary, whether a settlement period is needed",
+      "what_is_missing": "A product and finance decision. Same as artifact 09 OD-DB-05. This single decision determines the entire financial architecture and MUST NOT be guessed."
+    },
+    {
+      "id": "OD-TC-09",
+      "question": "Is platform commission computed on the quoted amount (gross) or on the amount net of third-party costs and tax?",
+      "blocked_design": "The split formula and therefore every snapshot column",
+      "what_is_missing": "A financial rule. MUST NOT be invented here."
+    },
+    {
+      "id": "OD-TC-10",
+      "question": "Is a review required for a project to complete, or optional? One per project or one per delivery? Is it public on the creator's profile?",
+      "blocked_design": "Review requiredness, the unique constraint scope, and privacy of review content",
+      "what_is_missing": "A product decision. Same as artifact 06."
+    },
+    {
+      "id": "OD-TC-11",
+      "question": "Does a rating ever affect money (ranking, commission tier, future pricing)?",
+      "blocked_design": "Whether review immutability is a financial invariant",
+      "what_is_missing": "A product decision with a financial consequence. If yes, no edit path for a review may ever be added."
+    },
+    {
+      "id": "OD-TC-12",
+      "question": "Is tax in scope? Is there a third-party cost (stock, licensing, printing) component?",
+      "blocked_design": "The AgreedTerms invariant formula and the earning column set",
+      "what_is_missing": "A finance decision. Same as artifact 09 OD-DB-06."
+    },
+    {
+      "id": "OD-TC-13",
+      "question": "Is Creative money multi-currency or INR only?",
+      "blocked_design": "The exchange_rate_used snapshot, and whether an earning can be audited against the rate at accrual time",
+      "what_is_missing": "A product decision. Note currency_rates are overwritten in place with no history (artifact 08), so a rate is NOT reconstructable later — the snapshot is mandatory either way."
+    },
+    {
+      "id": "OD-TC-14",
+      "question": "Where does the Creative commission percentage come from, and is it snapshotted per earning or read at payout time?",
+      "blocked_design": "The earning snapshot columns",
+      "what_is_missing": "A decision, constrained by AGENTS.md section 10 which requires the snapshot. Only the source of the rate is open. The existing screen_providers.illuvision_percentage default 10.00 is an advertising constant and is not a Creative rate."
+    },
+    {
+      "id": "OD-TC-15",
+      "question": "Is a payout an actual gateway disbursement or a recorded manual bank transfer?",
+      "blocked_design": "Whether a network call sits between two payout transactions, and whether PaymentGatewayInterface (createOrder/verifySignature/fetchPayment/refund) is sufficient",
+      "blocked_by": "OD-TC-07 is adjacent but separate",
+      "what_is_missing": "A finance/operations decision. Note PaymentGatewayInterface has NO payout/disburse method — only createOrder, verifySignature, fetchPayment and refund. If a real disbursement is required, the gateway contract itself must change, which is a Rule 3 (vendor encapsulation) concern, not a Creative concern."
+    },
+    {
+      "id": "OD-TC-16",
+      "question": "Does a settlement period exist for creator payouts, and what is the cadence and minimum threshold?",
+      "blocked_design": "Whether the SettlementService period pattern is reused via a contract, or a separate immediate-release mechanism is built",
+      "what_is_missing": "A product and finance decision. Consequential because if earnings are released immediately on completion, the whole settlement-period capability is unnecessary for Creative."
+    },
+    {
+      "id": "OD-TC-17",
+      "question": "Where do Creative's transactional orchestration classes live: app/Services/Creative, app/Application/Creative, or a new layer?",
+      "blocked_design": "Namespace and container bindings for every Creative use case",
+      "what_is_missing": "An architect decision per AGENTS.md section 20. Note the conflict: app/Application is being retired (32 deferred classes) while the approved target tree has no Creative application namespace. Artifact 05 records the same conflict for reporting."
+    },
+    {
+      "id": "OD-TC-18",
+      "question": "Is a background worker guaranteed in the deployment?",
+      "blocked_design": "Whether any Creative correctness control may depend on a queued job (for example a Cache::lock-based mutex or a deferred accrual job)",
+      "what_is_missing": "A production/operations fact. app/Jobs and app/Support/Jobs do not exist, no job class exists, and the only queued units are the 28 Mailables. If no worker is guaranteed, every control above MUST be synchronous and database-enforced."
+    }
+  ],
+  "discrepancies_vs_existing_artifacts": {
+    "classification": "CURRENT_FACT",
+    "policy": "CURRENT SOURCE CODE WINS over any existing docs/audit artifact.",
+    "findings": [
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Idempotency].current_implementation",
+        "artifact_claim": "'0 matches for Idempotency in app/.'",
+        "source_truth": "Confirmed and slightly refined. grep -rni 'idempot' across app/, routes/, database/ and config/ returns 1 match, and it is an English-word usage in a seeder comment (database/seeders/PricingPlanSeeder.php:365), not a mechanism. The artifact's claim is correct in substance. No conflict."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Queues and background work].current_implementation",
+        "artifact_claim": "'No app/Jobs directory. No queued job class anywhere.'",
+        "source_truth": "Confirmed. find app -type d -name Jobs returns nothing (neither app/Jobs nor app/Support/Jobs exists). 28 ShouldQueue implementors, all in app/Mail. No conflict."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Commission lifecycle machinery].current_implementation",
+        "artifact_claim": "'3 DB transactions, pessimistic lock via findOrFailForUpdate'.",
+        "source_truth": "Confirmed exactly. CommissionService.php:40, :63, :111; the lock is EloquentPartnerCommissionRepository.php:31. No conflict."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Settlement].current_implementation",
+        "artifact_claim": "'Approve and markAsPaid are NOT transaction-wrapped (SettlementService:143, :176).'",
+        "source_truth": "Confirmed. DB::transaction appears only at :97 and :118 in that file. This audit adds the consequence: those two methods also take NO row lock, so the omission is a concurrency defect, not merely a stylistic one. The artifact understates the risk."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/05-shared-capability-reuse-matrix.json",
+        "key": "capabilities[Payment gateway].risk",
+        "artifact_claim": "'There is also NO webhook endpoint anywhere — verification is entirely client-initiated.'",
+        "source_truth": "Confirmed and strengthened. grep -rni 'webhook' over app/ and routes/ = 0 matches; routes/api.php:303 is the only confirmation route. No conflict."
+      },
+      {
+        "artifact": "Task brief baseline",
+        "key": "transaction file count",
+        "brief_claim": "'26 files in app/ contain DB::transaction (15 of them services).'",
+        "source_truth": "Confirmed with a refinement: 26 files contain the STRING, but 2 of those (app/Application/Booking/Exceptions/BookingCreationException.php:16 and app/Application/Financial/UseCases/DistributeBookingRevenueUseCase.php:37) contain only docblock mentions. 24 files contain a real DB::transaction( call, at 42 call sites, of which 15 files are under app/Services. The '15 services' figure is exact."
+      },
+      {
+        "artifact": "Task brief baseline",
+        "key": "lockForUpdate service count",
+        "brief_claim": "'only 2 services use lockForUpdate (app/Services/CommissionService.php, app/Services/InventoryService.php).'",
+        "source_truth": "Confirmed with a refinement: 26 files contain the STRING, but 3 of those contain only docblock mentions (app/Application/Booking/Exceptions/BookingCreationException.php:16 and :23, app/Application/Financial/UseCases/DistributeBookingRevenueUseCase.php:37, app/Services/Campaign/ReferralTrackingService.php:22). 23 files contain a real DB::transaction( call at 41 call sites. The '15 services' figure in the brief is the count of app/Services files containing the STRING; only 14 of them contain a real call. The discrepancy is a counting-definition difference, not a factual error."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/08-creative-database-current-schema-map.json",
+        "key": "counts.explicit_foreign_keys",
+        "artifact_claim": "91 explicit foreign keys (now superseded: 96 foreign-key definitions = 94 ->constrained() + 2 legacy ->foreign()).",
+        "source_truth": "NOT RE-VERIFIED by this audit. AGENTS.md section 4 states 94. The two figures have not been reconciled and this audit makes no claim about it. Flagged as an unresolved documentation conflict, recorded rather than resolved (AGENTS.md section 21)."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/06-creative-domain-boundary-map.json",
+        "key": "domain_event_note",
+        "artifact_claim": "'no existing event implements ShouldHandleEventsAfterCommit; the current pattern dispatches inside the transaction (ManualBookingService:642)'.",
+        "source_truth": "Confirmed exactly. ManualBookingService.php:642 `event(new PaymentReceived($booking, $payment));` is inside the DB::transaction closure opened at :579. This audit additionally finds the SAME event dispatched after commit at PaymentController.php:95, so the current codebase is internally inconsistent rather than uniformly inside-transaction — which is a stronger and more useful statement than the artifact's."
+      },
+      {
+        "artifact": "docs/audit/creative-marketplace/09-creative-database-target-schema-blueprint.json",
+        "key": "tables[creative_projects].unique_constraints / tables[creator_payout_items].unique_constraints / tables[creative_revisions].concurrency",
+        "artifact_claim": "UNIQUE creative_projects.proposal_id; UNIQUE creator_payout_items.earning_id; allocate revision round inside the project lock with unique(project_id, round) as the backstop.",
+        "source_truth": "AGREES and is carried forward unchanged. These three constraints are the backbone of the concurrency design in this artifact. No conflict; this artifact does not restate them as new findings."
+      }
+    ]
+  },
+  "what_this_artifact_does_not_cover": [
+    "Schema column-level design — that is artifact 09 and is not duplicated here.",
+    "Business flow steps — that is artifact 07.",
+    "Aggregate and ownership boundaries — that is artifact 06.",
+    "Storage and file access — that is artifact 17.",
+    "Event and notification mechanics — that is artifact 18.",
+    "The security risk register — that is artifact 19; this artifact cross-references it for IDOR, double-spend and webhook-replay exposure but does not duplicate it.",
+    "Any fix. Nothing in this repository was modified by this audit."
+  ]
+}

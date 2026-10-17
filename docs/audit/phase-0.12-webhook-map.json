@@ -1,0 +1,179 @@
+{
+  "phase": "0.12",
+  "name": "Webhook Map",
+  "generated_at": "2026-09-26T06:35:00+05:30",
+  "purpose": "Map all webhook endpoints to ensure proper boundary enforcement",
+  "webhooks": [
+    {
+      "provider": "Razorpay",
+      "purpose": "Payment status updates and refund processing",
+      "endpoint": "/webhook/razorpay/payment",
+      "method": "POST",
+      "current_controller": "App\\Http\\Controllers\\Webhook\\RazorpayWebhookController",
+      "signature_validation": [
+        "X-Razorpay-Signature header",
+        "HMAC-SHA256 using Razorpay secret key",
+        "Compares computed signature with provided signature"
+      ],
+      "payload_validation": [
+        "JSON schema validation",
+        "Required fields: event, payload.payment.entity.id, payload.payment.entity.status",
+        "Event type validation: payment.captured, payment.failed, refund.processed, etc."
+      ],
+      "idempotency": [
+        "razorpay_payment_id in payload used as deduplication key",
+        "Checks if payment already processed before updating status",
+        "Idempotency header sent back to Razorpay in response"
+      ],
+      "transaction": [
+        "Database transaction for payment status update",
+        "Includes related operations: booking status update, settlement eligibility check"
+      ],
+      "event_persistence": [
+        "Raw webhook payload stored in razorpay_webhooks table for audit",
+        "Processed events marked as processed to prevent re-processing"
+      ],
+      "processing": [
+        "Verify signature",
+        "Validate payload",
+        "Check idempotency",
+        "Update payment status in database",
+        "Trigger related business processes (settlement eligibility, booking confirmation)",
+        "Send notifications if appropriate",
+        "Return 200 OK to Razorpay"
+      ],
+      "retry_behavior": [
+        "Razorpay retries failed webhooks (non-2xx responses) for up to 24 hours",
+        "Exponential backoff: 5s, 10s, 20s, 40s, etc.",
+        "Maximum 20 retry attempts"
+      ],
+      "response_code": [
+        "200: Success - Razorpay stops retrying",
+        "400: Bad Request - Razorpay stops retrying (client error)",
+        "500: Internal Server Error - Razorpay will retry (server error)",
+        "401, 403: Authentication errors - Razorpay stops retrying"
+      ],
+      "security_considerations": [
+        "Signature validation is critical to prevent spoofing",
+        "HTTPS enforced for all webhook endpoints",
+        "IP whitelisting recommended but not currently implemented",
+        "Payload size limits to prevent DoS"
+      ]
+    },
+    {
+      "provider": "Razorpay",
+      "purpose": "Refund status updates",
+      "endpoint": "/webhook/razorpay/refund",
+      "method": "POST",
+      "current_controller": "App\\Http\\Controllers\\Webhook\\RazorpayWebhookController",
+      "signature_validation": [
+        "X-Razorpay-Signature header",
+        "HMAC-SHA256 using Razorpay secret key"
+      ],
+      "payload_validation": [
+        "JSON schema validation",
+        "Required fields: event, payload.refund.entity.id, payload.refund.entity.status",
+        "Event type validation: refund.processed, refund.failed"
+      ],
+      "idempotency": [
+        "razorpay_refund_id in payload used as deduplication key",
+        "Checks if refund already processed before updating status"
+      ],
+      "transaction": [
+        "Database transaction for refund status update",
+        "Includes related operations: payment status update, fee adjustments"
+      ],
+      "event_persistence": [
+        "Raw webhook payload stored in razorpay_webhooks table",
+        "Processed events marked as processed"
+      ],
+      "processing": [
+        "Verify signature",
+        "Validate payload",
+        "Check idempotency",
+        "Update refund status in database",
+        "Update related payment status if full refund",
+        "Adjust settlement calculations if applicable",
+        "Send notifications if appropriate",
+        "Return 200 OK"
+      ],
+      "retry_behavior": [
+        "Same as payment webhook - Razorpay retries for up to 24 hours"
+      ],
+      "response_code": [
+        "200: Success",
+        "400: Bad Request",
+        "500: Internal Server Error (will retry)"
+      ]
+    },
+    {
+      "provider": "Google",
+      "purpose": "OAuth callback and token refresh notifications",
+      "endpoint": "/webhook/google/oauth/callback",
+      "method": "GET",
+      "current_controller": "App\\Http\\Controllers\\Api\\AuthController",
+      "signature_validation": [
+        "OAuth state parameter validation",
+        "CSRF protection via state parameter matching"
+      ],
+      "payload_validation": [
+        "Validation of authorization code or tokens in query parameters",
+        "Validates redirect_uri matches registered value",
+        "Checks for error parameters in response"
+      ],
+      "idempotency": [
+        "OAuth authorization codes are single-use by design",
+        "Access token refreshes may require additional deduplication"
+      ],
+      "transaction": [
+        "Database transaction for user account creation/update",
+        "Token storage in encrypted format"
+      ],
+      "event_persistence": [
+        "OAuth tokens stored in database with expiration tracking",
+        "Login attempts logged for auditing"
+      ],
+      "processing": [
+        "Validate state parameter (CSRF protection)",
+        "Exchange authorization code for tokens",
+        "Fetch user info from Google API",
+        "Create or update user account",
+        "Store access/refresh tokens securely",
+        "Log login attempt",
+        "Redirect to frontend or return JSON response"
+      ],
+      "retry_behavior": [
+        "Not applicable - OAuth flow is user-initiated",
+        "User must restart flow if failed"
+      ],
+      "response_code": [
+        "200: Success (redirect or JSON)",
+        "400: Bad Request (invalid request)",
+        "401: Unauthorized (invalid tokens)",
+        "500: Internal Server Error"
+      ]
+    }
+  ],
+  "summary": {
+    "total_webhooks_documentated": 3,
+    "providers": ["Razorpay", "Google"],
+    "webhook_layers_followed": [
+      "HTTP Webhook Controller",
+      "↓",
+      "Webhook Application Handler",
+      "↓",
+      "Provider Adapter / Verification",
+      "↓",
+      "Domain Event"
+    ],
+    "boundary_compliance": "To be verified - need to check that controllers delegate to application handlers and not process logic directly",
+    "recommendations": [
+      "Ensure webhook controllers delegate to application use cases rather than processing logic directly",
+      "Verify that signature validation occurs before any payload processing",
+      "Check that idempotency is properly implemented for all webhook types",
+      "Confirm that webhook processing is wrapped in appropriate transactions",
+      "Validate that webhook event persistence occurs before business processing",
+      "Ensure retry behavior aligns with provider specifications"
+    ]
+  }
+}

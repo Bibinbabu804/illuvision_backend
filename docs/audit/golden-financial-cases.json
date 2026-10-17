@@ -1,0 +1,57 @@
+{
+  "phase": "0.3",
+  "name": "Golden Financial Cases",
+  "generated_at": "2026-09-25T21:50:00+05:30",
+  "authorities": {
+    "provider_revenue": "App\\Services\\RevenueDistributionService & RevenueSplitResolverService",
+    "partner_commission": "App\\Services\\CommissionService & ReferralTrackingService",
+    "settlement": "App\\Services\\SettlementService"
+  },
+  "cases": [
+    {
+      "case_id": "CASE-FIN-001",
+      "title": "Provider Revenue Split Snapshotting",
+      "booking_scenario": {
+        "gross_booking_amount": 10000.00,
+        "screens": [
+          {
+            "screen_code": "GLD-PRV-02",
+            "owner_type": "screen_provider",
+            "provider_percentage": 80.00,
+            "illuvision_percentage": 20.00
+          }
+        ]
+      },
+      "expected_financial_snapshot": {
+        "booking_screen": {
+          "gross_revenue": 10000.00,
+          "provider_share": 8000.00,
+          "platform_share": 2000.00,
+          "settlement_status": "pending"
+        }
+      }
+    },
+    {
+      "case_id": "CASE-FIN-002",
+      "title": "Decimal Precision and Boundary Invariance",
+      "tested_amounts": [0.01, 1.99, 10.01, 99.99, 999.99, 10000.01],
+      "invariants": {
+        "paise_conversion_roundtrip": "amount == round((int)round(amount * 100) / 100, 2)",
+        "split_conservation": "abs(gross_revenue - (provider_share + platform_share)) <= 0.01"
+      },
+      "result": "Passed with zero floating point drift across all boundary test cases."
+    },
+    {
+      "case_id": "CASE-FIN-003",
+      "title": "Partner Commission on Platform Revenue",
+      "formula": "Partner Commission = Platform Share * (Commission Rate / 100)",
+      "example": {
+        "gross_booking": 10000.00,
+        "provider_share_80_pct": 8000.00,
+        "platform_share_20_pct": 2000.00,
+        "partner_commission_15_pct": 300.00,
+        "net_illuvision_retained": 1700.00
+      }
+    }
+  ]
+}

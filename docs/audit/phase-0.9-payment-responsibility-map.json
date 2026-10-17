@@ -1,0 +1,222 @@
+{
+  "phase": "0.9",
+  "name": "Payment Responsibility Map",
+  "generated_at": "2026-09-26T00:05:00+05:30",
+  "canonical_domain_support": [
+    "App\\Domain\\Payment\\Support\\Money",
+    "App\\Domain\\Payment\\PaymentStatus"
+  ],
+  "canonical_persistence_contract": "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+  "canonical_gateway_contract": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface (pre-existing, unchanged)",
+  "canonical_persistence_adapter": "App\\Infrastructure\\Payments\\Persistence\\EloquentPaymentRepository",
+  "canonical_gateway_adapter": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway",
+  "application_entry_points": [
+    "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+    "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+    "App\\Application\\Payment\\UseCases\\GetPaymentStatusUseCase",
+    "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+    "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase"
+  ],
+  "rules": [
+    {
+      "rule": "Minor-unit (paise) conversion for the online gateway",
+      "current_implementation": "(int) round($amount * 100) inline at each gateway call site",
+      "current_class": "App\\Domain\\Payment\\Support\\Money",
+      "current_method": "Money::toPaise()",
+      "legacy_paths": [
+        "App\\Services\\PaymentService::createOrder()",
+        "App\\Services\\PaymentService::refund()",
+        "App\\Services\\RefundService::initiateRefund()"
+      ],
+      "target_domain_owner": "Domain\\Payment\\Support\\Money",
+      "target_application_owner": "Application\\Payment\\UseCases\\CreatePaymentOrderUseCase / RefundPaymentUseCase",
+      "golden_test": "Tests\\Unit\\Domain\\Payment\\MoneyTest::test_to_paise_reproduces_legacy_arithmetic",
+      "status": "EXTRACTED_CANONICAL"
+    },
+    {
+      "rule": "Major-unit (rupee) conversion for gateway responses",
+      "current_implementation": "round($paise / 100, 2) inline",
+      "current_class": "App\\Domain\\Payment\\Support\\Money",
+      "current_method": "Money::toRupees()",
+      "legacy_paths": [
+        "App\\Services\\PaymentService::createOrder() response shaping"
+      ],
+      "target_domain_owner": "Domain\\Payment\\Support\\Money",
+      "target_application_owner": "Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+      "golden_test": "Tests\\Unit\\Domain\\Payment\\MoneyTest::test_to_rupees_reproduces_legacy_arithmetic",
+      "status": "EXTRACTED_CANONICAL"
+    },
+    {
+      "rule": "Full-vs-partial refund determination",
+      "current_implementation": "Duplicated ternary in two services with DIFFERENT null semantics",
+      "current_class": "App\\Domain\\Payment\\Support\\Money",
+      "current_method": "Money::isFullRefund()",
+      "legacy_paths": [
+        "App\\Services\\PaymentService::refund() — is_null($amount) || $amount >= $payment->amount",
+        "App\\Services\\RefundService::initiateRefund() — $amount >= $payment->amount (amount always supplied)"
+      ],
+      "target_domain_owner": "Domain\\Payment\\Support\\Money",
+      "target_application_owner": "Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "golden_test": "Tests\\Unit\\Domain\\Payment\\MoneyTest::test_is_full_refund_treats_null_as_full_only_for_gateway_path",
+      "status": "EXTRACTED_CANONICAL",
+      "note": "The intentional null-asymmetry between the two call sites is preserved, not normalised. See architecture-decisions ADR-P09-04."
+    },
+    {
+      "rule": "Payment status vocabulary",
+      "current_implementation": "Two overlapping constant sets read directly off App\\Models\\Payment at every call site",
+      "current_class": "App\\Domain\\Payment\\PaymentStatus",
+      "current_method": "Class constants (read-only aliases)",
+      "legacy_paths": [
+        "App\\Services\\PaymentService",
+        "App\\Http\\Controllers\\AdminPaymentController",
+        "App\\Http\\Controllers\\PaymentController"
+      ],
+      "target_domain_owner": "Domain\\Payment\\PaymentStatus",
+      "target_application_owner": "N/A — vocabulary only, no transitions",
+      "golden_test": "Tests\\Unit\\Domain\\Payment\\PaymentStatusTest",
+      "status": "EXTRACTED_CANONICAL",
+      "note": "App\\Models\\Payment remains the single source of truth for status VALUES. No enum introduced, no state machine added, no transition validation."
+    },
+    {
+      "rule": "Gateway order lookup",
+      "current_implementation": "Payment::where('razorpay_order_id', $x)->first() / ->firstOrFail()",
+      "current_class": "App\\Infrastructure\\Payments\\Persistence\\EloquentPaymentRepository",
+      "current_method": "findByGatewayOrderId(), findOrFailByGatewayOrderId()",
+      "legacy_paths": [
+        "App\\Services\\PaymentService::verifyPaymentSignature()"
+      ],
+      "target_domain_owner": "Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+      "target_application_owner": "Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_payment_repository_preserves_pending_lookup_semantics",
+      "status": "EXTRACTED_CANONICAL"
+    },
+    {
+      "rule": "Pending-payment reuse on order creation",
+      "current_implementation": "Payment::where('booking_id',...)->where('payment_status','pending')->first()",
+      "current_class": "App\\Infrastructure\\Payments\\Persistence\\EloquentPaymentRepository",
+      "current_method": "findPendingForBooking()",
+      "legacy_paths": [
+        "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase::execute()"
+      ],
+      "target_domain_owner": "Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+      "target_application_owner": "Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+      "golden_test": "Tests\\Unit\\Application\\Payment\\CreatePaymentOrderUseCaseTest::test_existing_pending_payment_returned_without_calling_service_create",
+      "status": "EXTRACTED_CANONICAL",
+      "note": "This application-scoped, non-transactional lookup is the de facto order-reuse idempotency mechanism. NO new idempotency system was added."
+    },
+    {
+      "rule": "Latest-payment lookup for the status endpoint",
+      "current_implementation": "$booking->payments()->latest()->first()",
+      "current_class": "App\\Application\\Payment\\UseCases\\PaymentStatusProjector",
+      "current_method": "project()",
+      "legacy_paths": [
+        "App\\Http\\Controllers\\PaymentController::paymentStatus()"
+      ],
+      "target_domain_owner": "N/A — read projection",
+      "target_application_owner": "Application\\Payment\\UseCases\\PaymentStatusProjector",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_payment_status_projection_reports_latest_payment",
+      "status": "EXTRACTED_CANONICAL"
+    },
+    {
+      "rule": "Payment-status read-model columns",
+      "current_implementation": "Inline array of 8 attributes in the controller",
+      "current_class": "App\\Application\\Payment\\UseCases\\PaymentStatusProjector",
+      "current_method": "PAYMENT_PROJECTION const",
+      "legacy_paths": [
+        "App\\Http\\Controllers\\PaymentController::paymentStatus()"
+      ],
+      "target_domain_owner": "N/A — read projection",
+      "target_application_owner": "Application\\Payment\\UseCases\\PaymentStatusProjector",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "EXTRACTED_CANONICAL",
+      "note": "Response envelope intentionally NOT converted to an API Resource — the envelope is a frozen external contract."
+    },
+    {
+      "rule": "Signature verification and paid transition",
+      "current_implementation": "DB::transaction { verify; on success update payment+booking, create referral tracking, dispatch event }",
+      "current_class": "App\\Services\\PaymentService",
+      "current_method": "verifyPaymentSignature()",
+      "legacy_paths": [
+        "App\\Http\\Controllers\\PaymentController::verify()"
+      ],
+      "target_domain_owner": "Domain\\Payment\\Contracts\\PaymentGatewayInterface::verifySignature()",
+      "target_application_owner": "Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPaymentRegressionTest",
+      "status": "DELEGATED_TRANSPARENTLY",
+      "note": "The gateway call remains INSIDE the DB transaction (pre-existing). Transaction boundaries were NOT changed. See concurrency verification."
+    },
+    {
+      "rule": "Offline / direct payment recording",
+      "current_implementation": "App\\Services\\ManualBookingService::recordOfflinePayment()",
+      "current_class": "App\\Services\\ManualBookingService",
+      "current_method": "recordOfflinePayment()",
+      "legacy_paths": [
+        "App\\Http\\Controllers\\AdminManualBookingController::payment()",
+        "App\\Http\\Controllers\\BookingController::markManualPayment() (DIVERGENT — deliberately not merged)"
+      ],
+      "target_domain_owner": "N/A",
+      "target_application_owner": "Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_offline_payment_use_case_records_without_gateway",
+      "status": "DELEGATED_TRANSPARENTLY",
+      "note": "The two offline paths are materially divergent and were NOT merged. See refund-map ADR-P09-06."
+    },
+    {
+      "rule": "Recorded refund (refunds table + payment status)",
+      "current_implementation": "App\\Services\\RefundService directly instantiated Razorpay\\Api\\Api",
+      "current_class": "App\\Services\\RefundService",
+      "current_method": "initiateRefund()",
+      "legacy_paths": [
+        "App\\Http\\Controllers\\AdminPaymentController::initiateRefund() (LIVE, routed)"
+      ],
+      "target_domain_owner": "Domain\\Payment\\Contracts\\PaymentGatewayInterface::refund()",
+      "target_application_owner": "Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_recorded_refund_writes_row_log_and_partial_status",
+      "status": "ARCHITECTURE_VIOLATION_REMOVED",
+      "note": "This was the ONLY vendor SDK leak in the application/service layer. Now resolved through the gateway contract."
+    },
+    {
+      "rule": "Legacy gateway-only refund",
+      "current_implementation": "App\\Services\\PaymentService::refund() — no refunds row, no PaymentLog",
+      "current_class": "App\\Services\\PaymentService",
+      "current_method": "refund()",
+      "legacy_paths": [
+        "App\\Http\\Controllers\\PaymentController::refund() (UNROUTED / DEAD CODE)"
+      ],
+      "target_domain_owner": "Domain\\Payment\\Contracts\\PaymentGatewayInterface::refund()",
+      "target_application_owner": "Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "golden_test": "None — path is unrouted and unreachable by HTTP",
+      "status": "PRESERVED_UNREACHABLE",
+      "note": "Left intact rather than deleted. Removing dead code is a behaviour change and out of scope. See refund-map ADR-P09-05."
+    }
+  ],
+  "status_vocabularies_preserved": {
+    "legacy_compatibility_set": [
+      "STATUS_PENDING = 'pending'",
+      "STATUS_VERIFICATION_PENDING = 'verification_pending'",
+      "STATUS_PAID = 'paid'",
+      "STATUS_FAILED = 'failed'",
+      "STATUS_REFUNDED = 'refunded'",
+      "STATUS_PARTIALLY_REFUNDED = 'partially_refunded'"
+    ],
+    "payment_mode_set": [
+      "PAYMENT_STATUS_PENDING = 'pending'",
+      "PAYMENT_STATUS_AWAITING_VERIFICATION = 'awaiting_verification'",
+      "PAYMENT_STATUS_COMPLETED = 'completed'",
+      "PAYMENT_STATUS_FAILED = 'failed'",
+      "PAYMENT_STATUS_REFUNDED = 'refunded'"
+    ],
+    "note": "The two sets OVERLAP on 'pending' and differ on terminal states. The overlap is intentional and preserved; see PaymentStatusTest::test_both_status_vocabularies_are_preserved_verbatim."
+  },
+  "out_of_scope_deliberately_unmodified": [
+    {
+      "item": "App\\Services\\RevenueDistributionService::getProviderRevenueStats()",
+      "issue": "References an undefined variable $totalScreensInBookings",
+      "reason": "Pre-existing latent defect in a method with no callers. Fixing it would be an unrequested behaviour change and is not part of the Payment boundary."
+    },
+    {
+      "item": "App\\Http\\Controllers\\BookingController::markManualPayment()",
+      "issue": "Second, divergent offline-payment path",
+      "reason": "Diverges from ManualBookingService::recordOfflinePayment() in status handling, event dispatch and referral attribution. Merging them is a redesign."
+    }
+  ]
+}

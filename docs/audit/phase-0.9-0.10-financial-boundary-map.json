@@ -1,0 +1,154 @@
+{
+  "phases": "0.9 + 0.10",
+  "name": "Combined Financial Boundary Map",
+  "generated_at": "2026-09-26T01:05:00+05:30",
+  "scope": "The Payment and Financial boundaries introduced by Phases 0.9 and 0.10, and their relationship to every pre-existing layer.",
+  "layer_inventory": {
+    "app/Domain/Payment": {
+      "status": "NEW",
+      "files": [
+        "Support/Money.php",
+        "PaymentStatus.php",
+        "Contracts/PaymentRepositoryInterface.php",
+        "Contracts/PaymentGatewayInterface.php (pre-existing)"
+      ],
+      "framework_dependencies": "NONE",
+      "persistence_dependencies": "NONE",
+      "vendor_dependencies": "NONE"
+    },
+    "app/Domain/Financial": {
+      "status": "NEW",
+      "files": [
+        "Support/RevenueAllocation.php",
+        "Contracts/SettlementRepositoryInterface.php",
+        "Contracts/PartnerCommissionRepositoryInterface.php"
+      ],
+      "framework_dependencies": "NONE",
+      "persistence_dependencies": "NONE",
+      "vendor_dependencies": "NONE"
+    },
+    "app/Application/Payment": {
+      "status": "PARTIALLY NEW",
+      "files": [
+        "UseCases/CreatePaymentOrderUseCase.php (modified)",
+        "UseCases/VerifyPaymentUseCase.php (new)",
+        "UseCases/GetPaymentStatusUseCase.php (new)",
+        "UseCases/PaymentStatusProjector.php (new)",
+        "UseCases/CreateOfflinePaymentUseCase.php (new)",
+        "UseCases/RefundPaymentUseCase.php (new)"
+      ],
+      "depends_on": ["Domain/Payment", "Services (transitional)"],
+      "persistence_dependencies": "PaymentRepositoryInterface only — no direct Eloquent except the documented PaymentStatusProjector read projection"
+    },
+    "app/Application/Financial": {
+      "status": "NEW",
+      "files": [
+        "UseCases/DistributeBookingRevenueUseCase.php",
+        "UseCases/GenerateProviderSettlementUseCase.php",
+        "UseCases/RecordReferralAttributionUseCase.php"
+      ],
+      "depends_on": ["Domain/Financial", "Services (transitional)"]
+    },
+    "app/Infrastructure/Payments": {
+      "status": "EXTENDED",
+      "files": [
+        "Razorpay/RazorpayPaymentGateway.php (pre-existing, unchanged)",
+        "Persistence/EloquentPaymentRepository.php (new)"
+      ],
+      "vendor_dependencies": "Razorpay\\Api\\Api — correctly confined here"
+    },
+    "app/Infrastructure/Financial": {
+      "status": "NEW",
+      "files": [
+        "Persistence/EloquentSettlementRepository.php",
+        "Persistence/EloquentPartnerCommissionRepository.php"
+      ],
+      "vendor_dependencies": "NONE"
+    }
+  },
+  "boundary_rules_enforced": [
+    {
+      "rule": "HTTP must not call SDKs or low-level HTTP",
+      "status": "PASS",
+      "evidence": "No GuzzleHttp / Http:: / curl_init reference under app/Http"
+    },
+    {
+      "rule": "Domain must be framework-free",
+      "status": "PASS",
+      "evidence": "Money, PaymentStatus and RevenueAllocation import no framework class"
+    },
+    {
+      "rule": "Vendor SDKs confined to infrastructure",
+      "status": "PASS",
+      "evidence": "The RefundService violation was eliminated; the only Razorpay\\Api\\Api import in app/ is inside app/Infrastructure/Payments/Razorpay/"
+    },
+    {
+      "rule": "Persistence behind contracts",
+      "status": "PASS_WITH_DOCUMENTED_EXCEPTION",
+      "evidence": "All Payment and Financial persistence is behind three contracts. One deliberate exception: PaymentStatusProjector queries Booking/Payment directly as a read projection, documented on the class.",
+      "exception_rationale": "A query-side repository for a single 8-column projection was judged over-engineering. The class is a read-model builder, not a business-rule owner."
+    },
+    {
+      "rule": "Explicit financial transaction boundaries",
+      "status": "PASS",
+      "evidence": "Every transaction in the Payment and Financial subsystems is catalogued in the transaction maps with its lock and network-call profile"
+    },
+    {
+      "rule": "External network outside row locks",
+      "status": "PRE-EXISTING VIOLATION, RECORDED",
+      "evidence": "RefundService::initiateRefund() performs a real gateway call inside a DB transaction. RISK-04. Not changed."
+    },
+    {
+      "rule": "Stable API contracts",
+      "status": "PASS",
+      "evidence": "Zero route, request, response or status-string changes; pinned by the golden API contract suite"
+    }
+  ],
+  "cross_boundary_dependencies": [
+    {
+      "from": "Domain/Payment",
+      "to": "Domain/Financial",
+      "exists": false,
+      "note": "The two domains are independent. Money does not know about RevenueAllocation and vice versa."
+    },
+    {
+      "from": "Application/Payment",
+      "to": "Application/Financial",
+      "exists": true,
+      "via": "RecordReferralAttributionUseCase is consumed by AdminPaymentController and ManualBookingService",
+      "accepted_because": "Referral attribution and partner commission creation are genuinely part of the payment-success transition. Severing it would change transaction semantics. ADR-P09-03."
+    },
+    {
+      "from": "Services/PaymentService",
+      "to": "Services/ReferralTrackingService",
+      "exists": true,
+      "accepted_because": "Same reason as above. Pre-existing, documented, not restructured."
+    }
+  ],
+  "transitional_debt": {
+    "note": "The application use cases are thin dispatchers that still delegate to the legacy service layer. This is deliberate, bounded technical debt.",
+    "affected_edges": [
+      "DistributeBookingRevenueUseCase -> RevenueDistributionService",
+      "GenerateProviderSettlementUseCase -> SettlementService",
+      "RecordReferralAttributionUseCase -> ReferralTrackingService",
+      "CreatePaymentOrderUseCase -> PaymentService",
+      "VerifyPaymentUseCase -> PaymentService",
+      "RefundPaymentUseCase -> RefundService / PaymentService",
+      "CreateOfflinePaymentUseCase -> ManualBookingService"
+    ],
+    "benefit_already_realised": [
+      "The HTTP layer no longer reaches services directly",
+      "No vendor SDK outside infrastructure",
+      "The domain layer exists and is framework-free",
+      "All three persistence concerns are behind contracts",
+      "Service locators removed from the affected paths"
+    ],
+    "planned_resolution": "A later phase moves each service body behind its use case, at which point these edges disappear. The dependency is documented on each use case class so the migration is mechanical."
+  },
+  "coverage": {
+    "new_boundary_files": 17,
+    "new_test_files": 4,
+    "new_test_cases": 37,
+    "total_suite_after": "451 passed, 2 pre-existing failures, 1 warning, 4 skipped"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "phases": "0.17 + 0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy retirement and modular monolith migration",
+  "artifact": "legacy-retirement-map",
+  "principle": "Delete first, reorganise second. Deletion required the full verification stack; relocation required consumer-level proof.",
+  "retired": [
+    {
+      "class": "App\\Enums\\ApprovalStatus",
+      "category": "enum",
+      "evidence": "zero refs; no route/command/binding/Gate/policy resolution"
+    },
+    {
+      "class": "App\\Enums\\AssetStatus",
+      "category": "enum",
+      "evidence": "zero refs; live state is a DB column"
+    },
+    {
+      "class": "App\\Enums\\CampaignStatus",
+      "category": "enum",
+      "evidence": "zero refs; live state is a DB column"
+    },
+    {
+      "class": "App\\Enums\\MediaType",
+      "category": "enum",
+      "evidence": "zero refs; duplicated by the live App\\Enums\\AssetType"
+    },
+    {
+      "class": "App\\Enums\\NotificationType",
+      "category": "enum",
+      "evidence": "zero refs; routing driven by the Notifications event classes"
+    },
+    {
+      "class": "App\\Enums\\PaymentStatus",
+      "category": "enum",
+      "evidence": "zero refs; DUPLICATE of the live App\\Domain\\Payment\\PaymentStatus"
+    },
+    {
+      "class": "App\\Enums\\ProviderStatus",
+      "category": "enum",
+      "evidence": "zero refs; live state is a DB column"
+    },
+    {
+      "class": "App\\Enums\\SettlementStatus",
+      "category": "enum",
+      "evidence": "zero refs; live state is a DB column"
+    },
+    {
+      "class": "App\\Enums\\UserRole",
+      "category": "enum",
+      "evidence": "zero refs; roles resolved from the roles/permissions tables"
+    },
+    {
+      "class": "App\\Exceptions\\AssetUnavailableException",
+      "category": "exception",
+      "evidence": "zero refs; unavailability surfaces as BookingEligibilityResult"
+    },
+    {
+      "class": "App\\Exceptions\\BookingConflictException",
+      "category": "exception",
+      "evidence": "zero refs; conflicts surface as EligibilityResult / HTTP 409"
+    },
+    {
+      "class": "App\\Policies\\AssetPolicy",
+      "category": "policy",
+      "evidence": "no model resolves to it; Gate convention hit the non-existent App\\Models\\Asset"
+    },
+    {
+      "class": "App\\Policies\\PartnerBookingPolicy",
+      "category": "policy",
+      "evidence": "no model resolves to it"
+    },
+    {
+      "class": "App\\Services\\Pricing\\CampaignDiscountCalculator",
+      "category": "service",
+      "evidence": "zero refs; owned by Domain\\Pricing\\CampaignPricingEngine"
+    },
+    {
+      "class": "App\\Services\\Pricing\\PeakPricingCalculator",
+      "category": "service",
+      "evidence": "zero refs; owned by Models\\PricingPeakRule via ScreenPricingResolver"
+    },
+    {
+      "class": "App\\Services\\Pricing\\WeekendPricingCalculator",
+      "category": "service",
+      "evidence": "zero refs; owned by Models\\PricingWeekendRule via ScreenPricingResolver"
+    }
+  ],
+  "retained_after_investigation": [
+    {
+      "class": "App\\Console\\Commands\\ExpirePendingBookings",
+      "reason": "LIVE scheduled job (bookings:expire-pending). Initially mis-flagged dead because the class name does not appear in the Artisan signature."
+    },
+    {
+      "class": "App\\Console\\Commands\\ExpireRewardPoints",
+      "reason": "LIVE scheduled job (rewards:expire). Same mis-flag cause."
+    },
+    {
+      "class": "App\\Console\\Commands\\SyncExchangeRates",
+      "reason": "LIVE scheduled job (currency:sync-rates). Same mis-flag cause."
+    },
+    {
+      "class": "App\\Application\\Payment\\UseCases\\PaymentStatusProjector",
+      "reason": "ACTIVE - referenced by GetPaymentStatusUseCase."
+    },
+    {
+      "class": "App\\Services\\AssetDiscoveryFilterService",
+      "reason": "ACTIVE - referenced by AssetService. Subsequently MIGRATED, not deleted."
+    },
+    {
+      "class": "App\\Models\\CoverageCity",
+      "reason": "0 code refs but maps the live table asset_coverage_cities (3 rows) used via the query builder."
+    },
+    {
+      "class": "App\\Models\\MobileAssetCoverageCity",
+      "reason": "0 code refs but maps the live table mobile_asset_coverage_cities (28 rows)."
+    },
+    {
+      "class": "App\\Models\\MobileAssetCoverageState",
+      "reason": "0 code refs but maps the live table mobile_asset_coverage_states (8 rows)."
+    },
+    {
+      "class": "App\\Models\\PricingDiscountRule",
+      "reason": "0 code refs, but pricing_discount_rules is FK-constrained to pricing_plans and is live pricing schema."
+    },
+    {
+      "class": "App\\Services\\CampaignPricingService",
+      "reason": "Not a pure wrapper - retains genuine reconciliation logic, 131 inbound references."
+    },
+    {
+      "class": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "reason": "Pure pass-through, but it is the live implementation behind /api/v2/pricing/calculate. Removing it changes an API contract."
+    }
+  ],
+  "totals": {
+    "retired": 16,
+    "lines_removed": 324,
+    "migrated": 3,
+    "wrappers_removed": 0,
+    "duplicates_merged": 0,
+    "controllers_removed": 0,
+    "routes_removed": 0,
+    "models_removed": 0,
+    "schema_changes": 0,
+    "empty_scaffolding_removed": 1,
+    "false_positives_caught": 6
+  }
+}

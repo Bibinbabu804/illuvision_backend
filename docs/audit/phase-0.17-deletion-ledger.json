@@ -1,0 +1,163 @@
+{
+  "phase": "0.17",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy code and controller retirement",
+  "artifact": "deletion-ledger",
+  "principle": "Delete first, reorganise second. Each deletion required the full verification stack in phase-0.17-dead-code-verification.json before the file was removed.",
+  "summary": {
+    "production_files_deleted": 16,
+    "production_directories_removed": 1,
+    "controllers_deleted": 0,
+    "api_routes_removed": 0,
+    "api_behaviour_changed": false,
+    "schema_changes": 0,
+    "migrations_added": 0,
+    "models_deleted": 0,
+    "support_files_deleted": 0,
+    "tests_modified": 0,
+    "net_production_lines_removed": 324
+  },
+  "order_of_operations": [
+    "1. Captured pre-change snapshots: 385 routes (docs/audit/routes-baseline.json), schema 74 tables / 796 columns / 252 indexes / 94 foreign keys, full test suite, 352-class inventory.",
+    "2. Applied the 16 deletions in a single batch (no partial states, so no intermediate run could pass by accident).",
+    "3. Removed the empty app/Core scaffolding (7 directories, 0 files).",
+    "4. composer dump-autoload to clear the classmap.",
+    "5. Re-ran the full suite, route parity check, schema parity check and architecture test.",
+    "6. Re-scanned for dangling references to every deleted class."
+  ],
+  "entries": [
+    {
+      "path": "app/Enums/ApprovalStatus.php",
+      "class": "App\\Enums\\ApprovalStatus",
+      "lines": 11,
+      "category": "enum",
+      "reason": "Zero references; status vocabulary is owned by App\\Domain\\Booking\\BookingStatus."
+    },
+    {
+      "path": "app/Enums/AssetStatus.php",
+      "class": "App\\Enums\\AssetStatus",
+      "lines": 11,
+      "category": "enum",
+      "reason": "Zero references; live asset state is a DB column on the assets table."
+    },
+    {
+      "path": "app/Enums/CampaignStatus.php",
+      "class": "App\\Enums\\CampaignStatus",
+      "lines": 14,
+      "category": "enum",
+      "reason": "Zero references; live campaign state is a DB column on the campaigns table."
+    },
+    {
+      "path": "app/Enums/MediaType.php",
+      "class": "App\\Enums\\MediaType",
+      "lines": 11,
+      "category": "enum",
+      "reason": "Zero references; MediaType is duplicated by App\\Enums\\AssetType, which is live."
+    },
+    {
+      "path": "app/Enums/NotificationType.php",
+      "class": "App\\Enums\\NotificationType",
+      "lines": 14,
+      "category": "enum",
+      "reason": "Zero references; notification routing is driven by the App\\Events\\Notifications\\* event classes."
+    },
+    {
+      "path": "app/Enums/PaymentStatus.php",
+      "class": "App\\Enums\\PaymentStatus",
+      "lines": 12,
+      "category": "enum",
+      "reason": "Zero references. DUPLICATE of App\\Domain\\Payment\\PaymentStatus, which is the live vocabulary imported by the payment use cases and tests. This was a financial-adjacent deletion, so the live domain enum was confirmed to be the one in use before removal."
+    },
+    {
+      "path": "app/Enums/ProviderStatus.php",
+      "class": "App\\Enums\\ProviderStatus",
+      "lines": 12,
+      "category": "enum",
+      "reason": "Zero references; provider state is a DB column on the providers table."
+    },
+    {
+      "path": "app/Enums/SettlementStatus.php",
+      "class": "App\\Enums\\SettlementStatus",
+      "lines": 12,
+      "category": "enum",
+      "reason": "Zero references; live settlement state is a DB column on the settlements table."
+    },
+    {
+      "path": "app/Enums/UserRole.php",
+      "class": "App\\Enums\\UserRole",
+      "lines": 12,
+      "category": "enum",
+      "reason": "Zero references; roles are resolved dynamically from the roles/permissions tables, not from a PHP enum."
+    },
+    {
+      "path": "app/Exceptions/AssetUnavailableException.php",
+      "class": "App\\Exceptions\\AssetUnavailableException",
+      "lines": 19,
+      "category": "exception",
+      "reason": "Zero references. Unavailability is surfaced through App\\Support\\BookingEligibilityResult, not exceptions."
+    },
+    {
+      "path": "app/Exceptions/BookingConflictException.php",
+      "class": "App\\Exceptions\\BookingConflictException",
+      "lines": 19,
+      "category": "exception",
+      "reason": "Zero references. Booking conflicts are surfaced as an EligibilityResult and as the documented HTTP 409 response."
+    },
+    {
+      "path": "app/Policies/AssetPolicy.php",
+      "class": "App\\Policies\\AssetPolicy",
+      "lines": 54,
+      "category": "policy",
+      "reason": "No model resolves to it. Phase 0.13 retained it on a Gate-convention assumption; runtime verification proved App\\Models\\Asset does not exist, so the convention lookup was a phantom."
+    },
+    {
+      "path": "app/Policies/PartnerBookingPolicy.php",
+      "class": "App\\Policies\\PartnerBookingPolicy",
+      "lines": 47,
+      "category": "policy",
+      "reason": "No model resolves to it. Retained in Phase 0.13 on the same faulty convention assumption."
+    },
+    {
+      "path": "app/Services/Pricing/CampaignDiscountCalculator.php",
+      "class": "App\\Services\\Pricing\\CampaignDiscountCalculator",
+      "lines": 62,
+      "category": "service",
+      "reason": "Zero references; campaign discount arithmetic is owned by App\\Domain\\Pricing\\CampaignPricingEngine."
+    },
+    {
+      "path": "app/Services/Pricing/PeakPricingCalculator.php",
+      "class": "App\\Services\\Pricing\\PeakPricingCalculator",
+      "lines": 85,
+      "category": "service",
+      "reason": "Zero references; peak pricing is owned by App\\Models\\PricingPeakRule via ScreenPricingResolver."
+    },
+    {
+      "path": "app/Services/Pricing/WeekendPricingCalculator.php",
+      "class": "App\\Services\\Pricing\\WeekendPricingCalculator",
+      "lines": 65,
+      "category": "service",
+      "reason": "Zero references; weekend pricing is owned by App\\Models\\PricingWeekendRule via ScreenPricingResolver."
+    }
+  ],
+  "directory_removals": [
+    {
+      "path": "app/Core",
+      "contents": "7 empty directories, 0 files",
+      "reason": "Empty architecture scaffolding; forbidden by section 3 of the brief."
+    },
+    {
+      "path": "app/Policies",
+      "contents": "2 files, both deleted above",
+      "reason": "Directory left empty by the policy deletions."
+    }
+  ],
+  "post_deletion_integrity": {
+    "dangling_references": 0,
+    "method": "Re-scanned app/ routes/ config/ tests/ resources/ database/ bootstrap/ for every deleted class name and short name; also confirmed composer dump-autoload completed and the affected namespaces no longer resolve.",
+    "namespaces_left_empty": [
+      "app/Enums now holds only AssetType, BookingStatus, PricingUnit"
+    ]
+  },
+  "reversibility": "No VCS is present in this working tree. The 16 deleted files plus app/Core were copied to /tmp/p017/deleted-backup/ before removal so the batch can be restored verbatim."
+}

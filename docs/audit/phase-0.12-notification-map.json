@@ -1,0 +1,159 @@
+{
+  "phase": "0.12",
+  "name": "Notification Map",
+  "generated_at": "2026-09-26T06:15:00+05:30",
+  "purpose": "Map the notification boundary to ensure proper separation of concerns",
+  "notification_flow": {
+    "Business_Event": [
+      "Booking confirmed",
+      "Payment processed",
+      "Refund issued",
+      "Referral used",
+      "Reward points awarded",
+      "Password reset requested",
+      "Account created"
+    ],
+    "Notification_Application_Handler": [
+      "App\\Application\\Notification\\UseCases\\SendBookingConfirmationUseCase",
+      "App\\Application\\Notification\\UseCases\\SendPaymentReceiptUseCase",
+      "App\\Application\\Notification\\UseCases\\SendRefundNotificationUseCase",
+      "App\\Application\\Notification\\UseCases\\SendReferralNotificationUseCase",
+      "App\\Application\\Notification\\UseCases\\SendRewardNotificationUseCase",
+      "App\\Application\\Notification\\UseCases\\SendPasswordResetUseCase",
+      "App\\Application\\Notification\\UseCases\\SendWelcomeEmailUseCase"
+    ],
+    "Notification_Contract": [
+      "App\\Domain\\Notification\\Contracts\\NotificationServiceInterface",
+      "App\\Domain\\Notification\\Contracts\\MailContractInterface",
+      "App\\Domain\\Notification\\Contracts\\SmsContractInterface",
+      "App\\Domain\\Notification\\Contracts\\PushContractInterface"
+    ],
+    "Channel_Adapter": [
+      "Mail: App\\Infrastructure\\Mail\\MailAdapter",
+      "SMS: App\\Infrastructure\\Sms\\TwilioAdapter",
+      "Push: App\\Infrastructure\\Push\\FirebaseAdapter (if applicable)",
+      "In-App: App\\Infrastructure\\Notification\\InAppNotificationAdapter"
+    ]
+  },
+  "notification_timing": {
+    "inside_transaction": [
+      "App\\Services\\PaymentService::success() - sends payment confirmation",
+      "App\\Services\\SettlementService::process() - may send settlement notifications"
+    ],
+    "after_commit": [
+      "App\\Observers\\BookingObserver::created - sends welcome/confirmation",
+      "App\\Observers\\PaymentObserver::updated - sends payment status updates"
+    ],
+    "queued": [
+      "App\\Jobs\\SendEmailJob",
+      "App\\Jobs\\SendSmsJob",
+      "App\\Jobs\\SendNotificationJob"
+    ],
+    "synchronous": [
+      "Direct Mail::send() calls in services",
+      "Direct NotificationService calls in controllers"
+    ],
+    "asynchronous": [
+      "Queue-based notification sending"
+    ]
+  },
+  "notification_idempotency": {
+    "mechanisms": [
+      {
+        "mechanism": "Database-backed deduplication",
+        "description": "Notification records stored with unique identifiers to prevent duplicates",
+        "location": "notification_logs table",
+        "scope": "Global",
+        "example": "Email notifications checked against notification_logs before sending"
+      },
+      {
+        "mechanism": "Idempotency keys",
+        "description": "External services provide idempotency keys to prevent duplicate processing",
+        "location": "Payment gateway integrations",
+        "scope": "Per-external-service",
+        "example": "Razorpay payments use payment ID as idempotency key"
+      },
+      {
+        "mechanism": "Job deduplication",
+        "description": "Queue system prevents duplicate job processing",
+        "location": "Queue workers",
+        "scope": "Per-job-type",
+        "example": "Email jobs checked for recent duplicates before processing"
+      }
+    ],
+    "current_gaps": [
+      "In-process deduplication is limited to request scope",
+      "No global deduplication for notifications sent outside request lifecycle",
+      "Some notification paths may lack deduplication entirely"
+    ]
+  },
+  "notification_events": [
+    {
+      "event": "booking.confirmed",
+      "trigger": "Booking status changes to confirmed",
+      "handlers": [
+        "Send booking confirmation email",
+        "Send SMS notification (if opted in)",
+        "Create in-app notification"
+      ],
+      "timing": "after_commit",
+      "channels": ["email", "sms", "in-app"],
+      "idempotency": "database-backed"
+    },
+    {
+      "event": "payment.processed",
+      "trigger": "Payment status changes to processed",
+      "handlers": [
+        "Send payment receipt email",
+        "Update booking status if applicable"
+      ],
+      "timing": "after_commit",
+      "channels": ["email"],
+      "idempotency": "database-backed"
+    },
+    {
+      "event": "refund.initiated",
+      "trigger": "Refund process started",
+      "handlers": [
+        "Send refund notification email"
+      ],
+      "timing": "after_commit",
+      "channels": ["email"],
+      "idempotency": "database-backed"
+    },
+    {
+      "event": "referral.used",
+      "trigger": "Referral code applied to booking",
+      "handlers": [
+        "Send referral notification to referrer",
+        "Update referral usage counts"
+      ],
+      "timing": "after_commit",
+      "channels": ["email"],
+      "idempotency": "database-backed"
+    }
+  ],
+  "summary": {
+    "notification_services_analyzed": [
+      "App\\Services\\NotificationService",
+      "App\\Services\\MailService"
+    ],
+    "notification_event_listeners": "To be analyzed from observers and event service providers",
+    "queued_notification_jobs": [
+      "App\\Jobs\\SendEmailJob",
+      "App\\Jobs\\SendSmsJob"
+    ],
+    "notification_tables": [
+      "notification_logs",
+      "mail_logs"
+    ],
+    "adheres_to_boundary": "To be verified - need to check for direct Mail::, Storage::, Http:: calls in domain/application layers",
+    "recommendations": [
+      "Extract all notification sending logic to application use cases",
+      "Ensure notification use cases depend on notification contracts, not concrete implementations",
+      "Verify that all notification channels go through appropriate adapters",
+      "Check that notification timing (inside/after transaction) is intentional and documented",
+      "Improve idempotency mechanisms where gaps exist"
+    ]
+  }
+}

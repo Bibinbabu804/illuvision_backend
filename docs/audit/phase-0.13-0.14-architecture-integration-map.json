@@ -1,0 +1,204 @@
+{
+  "phases": "0.13-0.14",
+  "name": "Architecture Integration Map",
+  "generated_at": "2026-09-26",
+  "method": "Every module touched across Phases 0.11-0.14 was traced from its HTTP entry point to its persistence and external calls, and each class was assigned a layer based on what it actually does rather than where it lives.",
+  "target_flow": "HTTP -> Application -> Domain -> Contracts -> Infrastructure -> Persistence/External",
+  "rules_applied": {
+    "1": "HTTP Layer SDK Decoupling - controllers must not instantiate third-party SDKs or low-level HTTP clients",
+    "2": "Pure Domain Invariants - Domain entities and calculation engines must be pure, deterministic, and based only on in-memory state or value objects",
+    "3": "Vendor Encapsulation in Infrastructure - vendor SDK classes must never leak into Domain or Application signatures",
+    "4": "Explicit Financial Transaction Boundaries - DB::transaction required; external network operations isolated outside row locks",
+    "5": "Stable External API Contracts - routes, methods, fields, validation, response structure, status codes and error formats must remain stable",
+    "6": "High-Value Repository Abstraction Only - no blanket repository boilerplate; boundaries only where demonstrably justified",
+    "7": "Zero Business Logic Duplication - strangler pattern: wrap and delegate, verify with golden suites, then extract deeper behaviour",
+    "8": "Modular Monolith Cohesion - no microservices, event sourcing or distributed database splits",
+    "9": "Pricing Domain Autonomy and Determinism - Pricing must not depend on HTTP, session, external payment APIs or transaction orchestration",
+    "10": "Legacy Compatibility Isolation via Adapters - divergent legacy paths isolated without algorithm duplication; retirement requires product authorisation",
+    "11": "Strict Layer Dependency Direction (ADDED in Phase 0.14) - dependencies flow HTTP -> Application -> Domain -> Contracts -> Infrastructure; no inner layer references an outer layer's implementation",
+    "12": "Authorization at the Route Boundary (ADDED in Phase 0.14) - route/middleware is the authoritative check; the permission algorithm has exactly one shared owner",
+    "13": "Verified Deletion (ADDED in Phase 0.14) - deletion requires reference counting AND framework-registration verification"
+  },
+  "compliance": {
+    "rules_fully_satisfied": 10,
+    "rules_with_open_violations": 3,
+    "open_rules": {
+      "2": "CampaignPricingEngine takes Eloquent models and DB-backed settings instead of value objects (deferred to Phase 0.15)",
+      "9": "a DB-backed setting is an external input to pricing, so replaying a historical price is not guaranteed deterministic (deferred)",
+      "11": "7 service locators remain in app/Models and app/Services (deferred to Phase 0.15)"
+    },
+    "shared_root_cause": "app/Services and app/Models still own cross-domain behaviour"
+  },
+  "layered_modules": [
+    {
+      "module": "Authorization",
+      "domain": "Shared",
+      "class": "App\\Support\\Authorization\\RolePermissionChecker",
+      "layer": "Support (new)",
+      "moved": "New home. The rule previously lived in App\\Http\\Middleware\\PermissionMiddleware and was duplicated for App\\Models\\User::hasPermission().",
+      "allowed": "Support is framework-level policy resolution, not a domain rule, so it is not Domain. Not a Policy object because Laravel policies are unreachable here (no Gate::/authorize() call).",
+      "evidence": "The permission algorithm, cache key and cache TTL were copied verbatim. The super-admin bypass was deliberately NOT added to the model helper, preserving the pre-existing asymmetry.",
+      "risk_introduced": "none"
+    },
+    {
+      "module": "Booking - campaign creation",
+      "domain": "Booking",
+      "class": "CreateCampaignBookingUseCase",
+      "layer": "Application (new)",
+      "moved": "Moved from BookingController::storeCampaign (299 lines) to a named Application use case (332 lines including docblocks and imports).",
+      "allowed": "Allowed: it orchestrates services and owns a transaction boundary, but computes no pricing or financial rule itself - it delegates to CampaignPricingService and DistributeBookingRevenueUseCase.",
+      "evidence": "GoldenBookingRegressionTest, GoldenPricingRegressionTest, GoldenApiContractRegressionTest and GoldenConcurrencyVerificationTest all pass unchanged.",
+      "risk_introduced": "none"
+    },
+    {
+      "module": "Booking - reschedule",
+      "domain": "Booking",
+      "class": "RescheduleBookingUseCase",
+      "layer": "Application (new)",
+      "moved": "Moved from BookingController::update (130 lines).",
+      "allowed": "Allowed: orchestration plus transaction ownership only.",
+      "evidence": "The merged old+new screen lock set was carried over unchanged; 8 lockForUpdate sites before and after.",
+      "risk_introduced": "none - but the pre-existing staleness gap (no repricing, no revenue redistribution) was carried over deliberately and is now recorded as high-severity debt."
+    },
+    {
+      "module": "Booking - availability",
+      "domain": "Booking",
+      "class": "CheckBookingAvailabilityQuery",
+      "layer": "Application (new)",
+      "moved": "Moved from BookingController::checkConflicts (84 lines).",
+      "allowed": "Allowed: read-only query, no transaction, no writes.",
+      "evidence": "GoldenAvailabilityRegressionTest (5 cases) passes unchanged.",
+      "risk_introduced": "none"
+    },
+    {
+      "module": "Booking - rejection signalling",
+      "domain": "Booking",
+      "class": "BookingCreationException",
+      "layer": "Application (new)",
+      "moved": "New. Previously the controller returned an HTTP response inline from the middle of the transaction.",
+      "allowed": "Required so that the Application layer can abort a transaction without knowing about HTTP. The exception carries status, message and errors as data; the controller renders them. This is the only place the two layers meet.",
+      "evidence": "All four rejection reasons produce byte-identical responses: same 422, same message, same errors payload.",
+      "risk_introduced": "none - and it removes the possibility of the two layers drifting apart, because the status/message now has exactly one source."
+    },
+    {
+      "module": "Pricing - legacy facade",
+      "domain": "Pricing",
+      "class": "CampaignPricingService",
+      "layer": "Services (unchanged location)",
+      "moved": "Not moved. Reduced from 8 constructor dependencies to 1 (PricingEngineInterface); the 7 unused injections were removed.",
+      "allowed": "Retained as a compatibility wrapper because existing callers and the golden pricing tests depend on the class name.",
+      "evidence": "The class is now a documented pass-through to the Domain pricing engine. GoldenPricingRegressionTest passes.",
+      "risk_introduced": "none"
+    },
+    {
+      "module": "Media - booking upload",
+      "domain": "Media",
+      "class": "MediaService behind StorageContractInterface",
+      "layer": "Services -> Infrastructure/Storage (Phase 0.12)",
+      "moved": "Storage access moved behind a port; the adapter owns the Storage facade.",
+      "allowed": "Allowed by Rule 5.",
+      "evidence": "The only Storage:: call sites left in app/ are the 9 in 6 controllers deferred by explicit user decision.",
+      "risk_introduced": "none"
+    },
+    {
+      "module": "Notifications",
+      "domain": "Shared",
+      "class": "NotificationService behind MailContractInterface",
+      "layer": "Services -> Infrastructure/Notification (Phase 0.12)",
+      "moved": "Mail moved behind a port; LaravelMailAdapter owns the Mail facade.",
+      "allowed": "Allowed by Rule 5.",
+      "evidence": "grep confirms the only Mail:: call site in app/ is inside LaravelMailAdapter.",
+      "risk_introduced": "none"
+    },
+    {
+      "module": "Media - image encoding",
+      "domain": "Media",
+      "class": "MediaHelper + GdImageProcessor",
+      "layer": "Helpers + Infrastructure/Media (Phase 0.12)",
+      "moved": "GD encoding moved behind a port.",
+      "allowed": "Allowed by Rule 5.",
+      "evidence": "The only GD call sites in app/ are inside GdImageProcessor.",
+      "risk_introduced": "none - but MediaHelper still holds application policy (the 70KB budget and the 80->20 quality ladder) and performs direct filesystem writes. Recorded as low-severity debt."
+    },
+    {
+      "module": "Reporting",
+      "domain": "Reporting",
+      "class": "10 classes behind ReportQuery + ReportQueryRegistry",
+      "layer": "Application/Reporting (Phase 0.11)",
+      "moved": "Query construction moved out of the controller; ReportService retained as a compatibility facade.",
+      "allowed": "Allowed: reporting is a read model with no business-rule decisions.",
+      "evidence": "Zero write calls under app/Application/Reporting. 63 reporting tests / 363 assertions pass.",
+      "risk_introduced": "none"
+    },
+    {
+      "module": "Payments",
+      "domain": "Payment",
+      "class": "CreatePaymentOrderUseCase, VerifyPaymentUseCase, RefundPaymentUseCase, GetPaymentStatusUseCase, CreateOfflinePaymentUseCase",
+      "layer": "Application/Payment (Phase 0.9)",
+      "moved": "Gateway orchestration moved out of the controller.",
+      "allowed": "Allowed: external I/O stays outside row locks per Rule 4.",
+      "evidence": "GoldenPaymentBoundaryTest (12 cases) and GoldenPaymentRegressionTest (4 cases) pass unchanged.",
+      "risk_introduced": "none - but the webhook contract and gateway idempotency gaps are carried forward unresolved as RISK-02/RISK-05."
+    },
+    {
+      "module": "Financial - distribution & settlement",
+      "domain": "Financial",
+      "class": "DistributeBookingRevenueUseCase, GenerateProviderSettlementUseCase",
+      "layer": "Application/Financial (Phase 0.10)",
+      "moved": "Revenue split and settlement generation moved out of the services that called them.",
+      "allowed": "Allowed: orchestration inside the caller's transaction.",
+      "evidence": "GoldenFinancialBoundaryTest (15 cases) and GoldenFinancialRegressionTest (3 cases) pass unchanged.",
+      "risk_introduced": "none - the settlement lifecycle state machine, revenue split resolution and referral attribution were deliberately left in the service layer."
+    }
+  ],
+  "not_moved_and_why": [
+    {
+      "class": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "reason": "Correctly placed in Domain. Its 10 legacy-service/model imports are a coupling problem, not a placement problem, and the calculators take Eloquent models as parameters - moving them would move the Active Record leak into Domain rather than remove it."
+    },
+    {
+      "class": "App\\Services\\BudgetRecommendationService (1443 lines)",
+      "reason": "The largest remaining God service. It is a self-contained read path, so it is the next recommended extraction, but it is not a conformance violation and it is out of scope for a phase whose goal was the booking/pricing seams."
+    },
+    {
+      "class": "App\\Services\\ManualBookingService",
+      "reason": "Reached by three different channels (admin, partner, and a legacy path) with materially different behaviour. Normalising them is explicitly forbidden by the phase brief."
+    },
+    {
+      "class": "App\\Models\\Booking",
+      "reason": "Deliberately left in place. Its model events own loyalty reversal and referral cancellation. Moving them changes when those financial side effects commit, which requires dedicated regression coverage and an explicit decision."
+    },
+    {
+      "class": "App\\Services\\{LoyaltyService, SettingsService, PricingRuleEngine}",
+      "reason": "Own loyalty accounting, settings and pricing rule evaluation respectively. These are the highest-value extraction targets but each needs its own approved phase."
+    },
+    {
+      "class": "11 business domains with no Domain/Application module",
+      "reason": "Campaign, Media, Asset, Provider, Partner, Availability, Booking, Settlement, Reporting, Creative and loyalty are all owned by the flat app/Services namespace (51 classes). The brief says not to force classes into the tree; each module should be created when its service is extracted."
+    }
+  ],
+  "residual_dependencies": {
+    "Application -> Services": "17 classes (expected strangler state per Rule 7)",
+    "Domain -> Services": "1 class, 10 imports (deferred)",
+    "Http -> Storage facade": "9 call sites in 6 controllers (deferred by user decision)",
+    "Models -> Services": "1 class, 7 service locators in model events (deferred, high severity)",
+    "Models -> Http": "0 - resolved in Phase 0.13"
+  },
+  "verified_invariants": {
+    "routes": 385,
+    "db_transaction_sites": 48,
+    "lock_for_update_sites": 8,
+    "migrations": 112,
+    "domain_files": 9,
+    "application_files": 32,
+    "infrastructure_files": 14
+  },
+  "rules_added_in_this_phase": {
+    "rationale": "All three were already being enforced in practice but were unstated in ARCHITECTURE_RULES.md. Rule 11 is the significant one: the App\\Models\\User -> App\\Http\\Middleware\\PermissionMiddleware inversion fixed in Phase 0.13 was not covered by any pre-existing rule, which is why it survived since the project's earliest phases.",
+    "rules": [
+      11,
+      12,
+      13
+    ]
+  }
+}

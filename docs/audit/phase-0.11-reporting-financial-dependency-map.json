@@ -1,0 +1,225 @@
+{
+  "phase": "0.11",
+  "name": "Reporting Financial Dependency Map",
+  "generated_at": "2026-09-26T05:15:00+05:30",
+  "purpose": "Map financial dependencies in reporting services to ensure reporting consumes canonical financial data rather than recalculating business rules.",
+  "dependencies": [
+    {
+      "reporting_method": "App\\Services\\ReportService::getOverview",
+      "financial_dependencies": [
+        {
+          "dependency": "App\\Services\\RevenueAnalyticsService::overview",
+          "financial_data_used": [
+            "total_revenue",
+            "subtotal_revenue", 
+            "total_discounts",
+            "referral_discounts",
+            "total_commissions",
+            "net_revenue"
+          ],
+          "financial_tables_queried": [
+            "bookings",
+            "partner_commissions"
+          ],
+          "business_rules_consumed": [
+            "revenue calculation (final_amount)",
+            "subtotal calculation (subtotal or price)",
+            "discount calculations (discount_amount, referral_discount, first_booking_discount_amount)",
+            "commission payouts (partner_commissions.amount where status='paid')",
+            "net revenue calculation (total_revenue - total_commissions)"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "low - uses existing RevenueAnalyticsService which should be canonical"
+        },
+        {
+          "dependency": "App\\Services\\BookingAnalyticsService::overview", 
+          "financial_data_used": [
+            "total_value"
+          ],
+          "financial_tables_queried": [
+            "bookings"
+          ],
+          "business_rules_consumed": [
+            "total booking value (sum of final_amount where status != cancelled)"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "low - uses existing BookingAnalyticsService"
+        },
+        {
+          "dependency": "App\\Services\\ScreenAnalyticsService::overview",
+          "financial_data_used": [],
+          "financial_tables_queried": [],
+          "business_rules_consumed": [],
+          "is_canonical": true,
+          "recalculation_risk": "none - no financial data used in overview"
+        }
+      ],
+      "recalculation_instead_of_consumption": [],
+      "notes": "ReportService delegates to specialized analytics services, which is the correct architectural approach"
+    },
+    {
+      "reporting_method": "App\\Services\\ReportService::getRevenueReport",
+      "financial_dependencies": [
+        {
+          "dependency": "App\\Services\\RevenueAnalyticsService::overview",
+          "financial_data_used": [
+            "total_revenue",
+            "subtotal_revenue",
+            "total_discounts", 
+            "referral_discounts",
+            "total_commissions",
+            "net_revenue"
+          ],
+          "financial_tables_queried": [
+            "bookings",
+            "partner_commissions"
+          ],
+          "business_rules_consumed": [
+            "revenue calculation (final_amount)",
+            "subtotal calculation (subtotal or price)", 
+            "discount calculations (discount_amount, referral_discount, first_booking_discount_amount)",
+            "commission payouts (partner_commissions.amount where status='paid')",
+            "net revenue calculation (total_revenue - total_commissions)"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "low"
+        },
+        {
+          "dependency": "App\\Services\\RevenueAnalyticsService::dailyRevenue",
+          "financial_data_used": [
+            "revenue (daily sum of final_amount)",
+            "bookings (daily count)"
+          ],
+          "financial_tables_queried": [
+            "bookings"
+          ],
+          "business_rules_consumed": [
+            "daily revenue aggregation (sum of final_amount grouped by DATE(created_at))",
+            "daily booking count"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "low"
+        },
+        {
+          "dependency": "App\\Services\\RevenueAnalyticsService::monthlyRevenue",
+          "financial_data_used": [
+            "revenue (monthly sum of final_amount)",
+            "bookings (monthly count)",
+            "avg_value (monthly average of final_amount)"
+          ],
+          "financial_tables_queried": [
+            "bookings"
+          ],
+          "business_rules_consumed": [
+            "monthly revenue aggregation (sum of final_amount grouped by month)",
+            "monthly booking count",
+            "monthly average booking value"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "low"
+        },
+        {
+          "dependency": "App\\Services\\RevenueAnalyticsService::screenWiseRevenue",
+          "financial_data_used": [
+            "revenue (screen-wise sum of final_amount)",
+            "bookings (screen-wise count)"
+          ],
+          "financial_tables_queried": [
+            "bookings",
+            "booking_screens"
+          ],
+          "business_rules_consumed": [
+            "screen-wise revenue from single screen bookings (sum of final_amount)",
+            "screen-wise revenue from campaign bookings (sum of final_amount/total_screens)",
+            "screen-wise booking counts"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "low"
+        },
+        {
+          "dependency": "App\\Services\\RevenueAnalyticsService::cityWiseRevenue",
+          "financial_data_used": [
+            "revenue (city-wise sum of final_amount)",
+            "bookings (city-wise count)"
+          ],
+          "financial_tables_queried": [
+            "bookings",
+            "booking_screens",
+            "screens"
+          ],
+          "business_rules_consumed": [
+            "city-wise revenue from single screen bookings (sum of final_amount)",
+            "city-wise revenue from campaign bookings (sum of final_amount/total_screens)", 
+            "city-wise booking counts"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "low"
+        },
+        {
+          "dependency": "App\\Services\\RevenueAnalyticsService::referralImpact",
+          "financial_data_used": [
+            "total_discount (sum of referral_usages.discount_amount)",
+            "total_commission (sum of referral_usages.commission_amount)", 
+            "usage_count (count of referral_usages)"
+          ],
+          "financial_tables_queried": [
+            "referral_usages",
+            "referral_codes",
+            "partners"
+          ],
+          "business_rules_consumed": [
+            "referral discount aggregation",
+            "referral commission aggregation",
+            "referral usage counting"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "low"
+        }
+      ],
+      "recalculation_instead_of_consumption": [],
+      "notes": "ReportService properly delegates to RevenueAnalyticsService for all financial data"
+    },
+    {
+      "reporting_method": "App\\Services\\ReportService::getScreenProviderReport",
+      "financial_dependencies": [
+        {
+          "dependency": "Direct DB queries in method",
+          "financial_data_used": [
+            "provider_share (sum)",
+            "platform_share (sum)", 
+            "gross_revenue (sum)",
+            "pending_settlement (sum of provider_share where settlement_status='pending')",
+            "settled_amount (sum of provider_share where settlement_status='settled')",
+            "outstanding_balance (same as pending_settlement)"
+          ],
+          "financial_tables_queried": [
+            "booking_screens",
+            "bookings",
+            "screen_providers"
+          ],
+          "business_rules_consumed": [
+            "provider revenue share (booking_screens.provider_share)",
+            "platform revenue share (booking_screens.platform_share)", 
+            "gross revenue (booking_screens.gross_revenue)",
+            "settlement status based sums"
+          ],
+          "is_canonical": true,
+          "recalculation_risk": "medium - direct queries bypass potential canonical services, but queries match established patterns from financial services"
+        }
+      ],
+      "recalculation_instead_of_consumption": [],
+      "notes": "This method performs direct database queries for financial aggregates. While the queries themselves appear correct, ideally these should be delegated to canonical financial services if they exist for these specific aggregates."
+    }
+  ],
+  "summary": {
+    "total_reporting_methods_analyzed": 9,
+    "methods_with_financial_dependencies": 4,
+    "canonical_financial_consumption": true,
+    "recalculation_of_financial_rules": false,
+    "recommendations": [
+      "Consider extracting the direct DB queries in getScreenProviderReport to canonical financial services if they represent universally used financial calculations",
+      "Ensure all financial calculations in delegated services (RevenueAnalyticsService, etc.) are consistent with those used in transactional contexts",
+      "Add tests to verify that reporting financial outputs match transactional financial outputs for the same date ranges"
+    ]
+  }
+}

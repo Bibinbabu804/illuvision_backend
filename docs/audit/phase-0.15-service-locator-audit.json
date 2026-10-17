@@ -1,0 +1,106 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "service-locator-audit",
+  "total_call_sites": 18,
+  "distinct_files": 9,
+  "by_layer": {
+    "Domain": 0,
+    "Application": 0,
+    "Helpers": 3,
+    "Http": 2,
+    "Models": 8,
+    "Services": 5
+  },
+  "sites": [
+    {
+      "file": "app/Helpers/MediaHelper.php",
+      "lines": [
+        43,
+        84,
+        85
+      ],
+      "layer": "Helpers",
+      "category": "B",
+      "note": "Filesystem + application-policy boundary; stat()/mime checks. Candidate for an injected filesystem contract, but the helper is called from controllers and views, so the refactor is presentation-only."
+    },
+    {
+      "file": "app/Http/Controllers/BookingController.php",
+      "lines": [
+        180
+      ],
+      "layer": "Http",
+      "category": "B",
+      "note": "Single availability-service lookup inside a 1414-line controller. Safe to convert to constructor injection, but the controller is the largest surface in the app so it is deferred to the controller-splitting phase."
+    },
+    {
+      "file": "app/Http/Middleware/PermissionMiddleware.php",
+      "lines": [
+        51
+      ],
+      "layer": "Http",
+      "category": "B",
+      "note": "clearPermissionCache() is a static-context call from the middleware invalidate path. Low risk; mechanical to inject."
+    },
+    {
+      "file": "app/Models/Booking.php",
+      "lines": [
+        46,
+        47,
+        73,
+        79,
+        85,
+        376,
+        377
+      ],
+      "layer": "Models",
+      "category": "C",
+      "note": "HIGHEST RISK. These resolve services from inside Eloquent model events, so they execute inside whatever transaction the caller opened. Loyalty and referral side effects are therefore transaction-timing dependent. Any change alters financial/loyalty behaviour."
+    },
+    {
+      "file": "app/Models/User.php",
+      "lines": [
+        82
+      ],
+      "layer": "Models",
+      "category": "B",
+      "note": "Resolves RolePermissionChecker to answer hasPermission(). The Model->Http edge was already removed in Phase 0.13; the remaining locator is a narrow, cache-backed, side-effect-free lookup."
+    },
+    {
+      "file": "app/Services/ExchangeRateService.php",
+      "lines": [
+        23
+      ],
+      "layer": "Services",
+      "category": "B",
+      "note": "Self-lookup in a fallback path."
+    },
+    {
+      "file": "app/Services/ManualBookingService.php",
+      "lines": [
+        325,
+        504,
+        509
+      ],
+      "layer": "Services",
+      "category": "C",
+      "note": "Finance, audit and commission services are resolved mid-flow across multi-channel manual booking paths. Financial."
+    },
+    {
+      "file": "app/Services/RevenueSplitResolverService.php",
+      "lines": [
+        210
+      ],
+      "layer": "Services",
+      "category": "C",
+      "note": "Resolves BookingService from inside revenue-split resolution. Financial."
+    }
+  ],
+  "not_a_violation": {
+    "App/Services/Pricing/ScreenPricingResolver.php": "Its own public method resolve(Screen) plus $this->resolve() are an ordinary method declaration and call, not a container lookup. An early draft detector misreported this; fixed by scanning backwards for the previous significant token."
+  },
+  "enforcement": "The exact 9-file set is pinned in ArchitectureRuleTest::test_service_locator_debt_does_not_grow. A new locator fails the suite; a removed one must be reflected in the same commit.",
+  "action_taken": "No production locator was removed in Phase 0.15. Categories B and C are recorded, not fixed."
+}

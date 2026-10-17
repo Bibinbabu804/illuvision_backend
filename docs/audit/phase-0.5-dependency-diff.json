@@ -1,0 +1,100 @@
+{
+  "phase": "0.5",
+  "name": "Phase 0.5 Dependency Inversion & Graph Diff",
+  "generated_at": "2026-09-25T23:40:00+05:30",
+  "dependencies_removed": [
+    {
+      "source": "App\\Services\\PaymentService",
+      "target": "Razorpay\\Api\\Api",
+      "reason": "Direct vendor SDK instantiation replaced by PaymentGatewayInterface."
+    },
+    {
+      "source": "App\\Http\\Controllers\\Auth\\GoogleAuthController",
+      "target": "Illuminate\\Support\\Facades\\Http",
+      "reason": "Direct HTTP call to Google OAuth tokeninfo endpoint moved behind GoogleIdentityProviderInterface."
+    },
+    {
+      "source": "App\\Services\\ExchangeRateService",
+      "target": "Illuminate\\Support\\Facades\\Http",
+      "reason": "Direct HTTP call to ExchangeRate-API moved behind ExchangeRateApiClientInterface."
+    }
+  ],
+  "dependencies_added": [
+    {
+      "source": "App\\Services\\PaymentService",
+      "target": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+      "nature": "Constructor injection (Inversion of Control)"
+    },
+    {
+      "source": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway",
+      "target": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+      "nature": "Interface implementation"
+    },
+    {
+      "source": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway",
+      "target": "Razorpay\\Api\\Api",
+      "nature": "Encapsulated vendor SDK call"
+    },
+    {
+      "source": "App\\Http\\Controllers\\PaymentController",
+      "target": "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+      "nature": "Controller delegation to Application layer"
+    },
+    {
+      "source": "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+      "target": "App\\Services\\PaymentService",
+      "nature": "Use case orchestration"
+    },
+    {
+      "source": "App\\Http\\Controllers\\Auth\\GoogleAuthController",
+      "target": "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+      "nature": "Method injection in __invoke"
+    },
+    {
+      "source": "App\\Infrastructure\\Auth\\GoogleOAuthAdapter",
+      "target": "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+      "nature": "Interface implementation"
+    },
+    {
+      "source": "App\\Services\\ExchangeRateService",
+      "target": "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+      "nature": "Constructor injection"
+    },
+    {
+      "source": "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient",
+      "target": "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+      "nature": "Interface implementation"
+    },
+    {
+      "source": "App\\Http\\Controllers\\BookingController",
+      "target": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "nature": "Method injection in calculateCampaignPricing"
+    },
+    {
+      "source": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "target": "App\\Services\\CampaignPricingService",
+      "nature": "Use case delegation"
+    }
+  ],
+  "new_abstractions": [
+    "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+    "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway",
+    "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+    "App\\Infrastructure\\Auth\\GoogleOAuthAdapter",
+    "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+    "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient",
+    "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+    "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase"
+  ],
+  "remaining_cycles": [
+    {
+      "type": "CLASS_LEVEL_CYCLE",
+      "participants": [
+        "App\\Services\\CampaignPricingService",
+        "App\\Services\\LoyaltyService"
+      ],
+      "status": "PRESERVED_UNCHANGED",
+      "reason": "Documented in Phase 0.4 Section 41. Preserved for dedicated Pricing/Loyalty domain migration in Phase 0.6."
+    }
+  ]
+}

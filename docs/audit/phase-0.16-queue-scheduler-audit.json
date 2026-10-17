@@ -1,0 +1,71 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "queue-scheduler-audit",
+  "queue": {
+    "connection": "database",
+    "default_queue_size": 0,
+    "status": "OK",
+    "jobs_table_rows": 0,
+    "assessment": "Healthy but idle. With QUEUE_CONNECTION=database, queue depth is only drained when a worker is running; a stopped worker silently accumulates jobs."
+  },
+  "scheduled": [
+    {
+      "command": "currency:sync-rates",
+      "schedule": "13 1 * * *",
+      "import_references": 0,
+      "status": "LIVE"
+    },
+    {
+      "command": "bookings:expire-pending",
+      "schedule": "*/5 * * * *",
+      "import_references": 0,
+      "status": "LIVE"
+    },
+    {
+      "command": "rewards:expire",
+      "schedule": "0 0 * * *",
+      "import_references": 0,
+      "status": "LIVE"
+    },
+    {
+      "command": "inspire",
+      "schedule": "0 * * * *",
+      "import_references": 0,
+      "status": "LIVE - PROBLEM"
+    }
+  ],
+  "findings": [
+    {
+      "id": "SCHED-01",
+      "title": "Laravel's demo 'inspire' command is still scheduled hourly",
+      "severity": "low",
+      "impact": "Harmless but it is framework demo scaffolding running in production, and it is evidence that the schedule is not curated.",
+      "remediation": "Remove the route from routes/console.php.",
+      "why_not_applied": "It changes registered schedule entries, which the brief treats as protected scheduler behaviour."
+    },
+    {
+      "id": "SCHED-02",
+      "title": "bookings:expire-pending runs every 5 minutes with no overlap guard",
+      "severity": "medium",
+      "impact": "If a run exceeds 5 minutes, two instances can overlap and both transition the same pending bookings.",
+      "remediation": "withoutOverlapping() and/or onOneServer().",
+      "why_not_applied": "Alters scheduler registration semantics."
+    },
+    {
+      "id": "SCHED-03",
+      "title": "No monitoring or alerting on scheduler success/failure",
+      "severity": "medium",
+      "impact": "A command that starts failing every night (for example currency:sync-rates after a gateway failure) is silent."
+    },
+    {
+      "id": "SCHED-04",
+      "title": "No queue worker supervision documented",
+      "severity": "medium",
+      "impact": "database queue without a supervised worker is a common silent-failure mode."
+    }
+  ],
+  "lesson_reaffirmed": "Three business-critical commands have zero import references. Any future dead-code analysis MUST include runtime registration, not just reference counts."
+}

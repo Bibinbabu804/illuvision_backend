@@ -1,0 +1,151 @@
+{
+  "phase": "0.9",
+  "name": "Payment Migration Ledger",
+  "generated_at": "2026-09-26T00:22:00+05:30",
+  "schema_migrations_added": 0,
+  "schema_migrations_modified": 0,
+  "schema_migrations_removed": 0,
+  "total_files_created": 9,
+  "total_files_modified": 7,
+  "total_files_deleted": 0,
+  "entries": [
+    {
+      "component": "Minor-unit money conversion",
+      "before": "Inline (int) round($amount * 100) at 3 call sites in App\\Services\\PaymentService and App\\Services\\RefundService",
+      "after": "App\\Domain\\Payment\\Support\\Money::toPaise()",
+      "domain": "Domain\\Payment\\Support",
+      "application_boundary": "Consumed by CreatePaymentOrderUseCase and RefundPaymentUseCase",
+      "legacy_compatibility": "100% — reproduces the legacy expression exactly, including PHP round() half-up behaviour",
+      "golden_tests": "Tests\\Unit\\Domain\\Payment\\MoneyTest",
+      "financial_tests": "N/A (Payment phase)",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Full-vs-partial refund determination",
+      "before": "Duplicated ternary with divergent null semantics in PaymentService::refund() and RefundService::initiateRefund()",
+      "after": "App\\Domain\\Payment\\Support\\Money::isFullRefund()",
+      "domain": "Domain\\Payment\\Support",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "legacy_compatibility": "100% — the null-asymmetry between the two call sites is preserved deliberately (ADR-P09-04)",
+      "golden_tests": "Tests\\Unit\\Domain\\Payment\\MoneyTest::test_is_full_refund_*",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Payment status vocabulary",
+      "before": "App\\Models\\Payment constants read directly at every call site",
+      "after": "App\\Domain\\Payment\\PaymentStatus read-only aliases (source of truth unchanged)",
+      "domain": "Domain\\Payment",
+      "application_boundary": "N/A — vocabulary only",
+      "legacy_compatibility": "100% — no enum, no transition guard, no value change",
+      "golden_tests": "Tests\\Unit\\Domain\\Payment\\PaymentStatusTest",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Payment persistence",
+      "before": "Direct Eloquent queries in App\\Services\\PaymentService and App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+      "after": "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface -> App\\Infrastructure\\Payments\\Persistence\\EloquentPaymentRepository",
+      "domain": "Domain\\Payment\\Contracts",
+      "application_boundary": "All payment use cases and PaymentService",
+      "legacy_compatibility": "100% — query shapes, ordering, hydration and ModelNotFoundException behaviour preserved",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_payment_repository_preserves_pending_lookup_semantics, ::test_gateway_order_lookup_still_throws_when_missing",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Unit\\Application\\Payment\\CreatePaymentOrderUseCaseTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Recorded refund gateway integration",
+      "before": "App\\Services\\RefundService instantiated Razorpay\\Api\\Api directly — ARCHITECTURE VIOLATION",
+      "after": "App\\Services\\RefundService injects App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+      "domain": "Domain\\Payment\\Contracts",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "legacy_compatibility": "100% — same gateway payload keys, same transaction boundary, same write order, same exception propagation",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_recorded_refund_writes_row_log_and_partial_status, ::test_refund_failure_rolls_back_partial_refund_rows",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED",
+      "note": "The ONLY architecture rule violation eliminated in Phase 0.9."
+    },
+    {
+      "component": "Payment status read model",
+      "before": "App\\Http\\Controllers\\PaymentController::paymentStatus() built the response inline",
+      "after": "App\\Application\\Payment\\UseCases\\PaymentStatusProjector",
+      "domain": "N/A — read projection",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\GetPaymentStatusUseCase",
+      "legacy_compatibility": "100% — same 8 columns, same nesting, same envelope; deliberately NOT converted to an API Resource",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_payment_status_projection_reports_latest_payment, ::test_payment_status_projection_requires_a_booking",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Payment verification entry point",
+      "before": "App\\Http\\Controllers\\PaymentController::verify() called PaymentService directly",
+      "after": "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase -> PaymentService::verifyPaymentSignature()",
+      "domain": "Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+      "legacy_compatibility": "100% — pure delegation; the transaction, the failure-rollback oddity and the duplicate guard are untouched",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenPaymentRegressionTest (4 tests)",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Offline payment recording",
+      "before": "App\\Http\\Controllers\\AdminManualBookingController::payment() called ManualBookingService directly",
+      "after": "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase -> ManualBookingService::recordOfflinePayment()",
+      "domain": "N/A",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+      "legacy_compatibility": "100% — pure delegation. The divergent BookingController::markManualPayment() path was NOT merged (ADR-P09-06)",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_offline_payment_use_case_records_without_gateway",
+      "financial_tests": "N/A",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    },
+    {
+      "component": "Service locator in admin payment approval",
+      "before": "app(\\App\\Services\\ReferralTrackingService::class)->createReferralTracking(...)",
+      "after": "Constructor-injected App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "domain": "Domain\\Financial (use case lives in the Financial application layer)",
+      "application_boundary": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "legacy_compatibility": "100% — same call, same enclosing controller transaction, same commission lock",
+      "golden_tests": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest",
+      "financial_tests": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_commission_repository_preserves_pessimistic_locking",
+      "api_tests": "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest",
+      "status": "COMPLETED"
+    }
+  ],
+  "not_migrated": [
+    {
+      "component": "Legacy gateway-only refund",
+      "path": "App\\Http\\Controllers\\PaymentController::refund() -> PaymentService::refund()",
+      "reason": "Unrouted dead code with a materially different implementation (no refunds row, no PaymentLog). Left intact and routed through RefundPaymentUseCase only for symmetry. See ADR-P09-05.",
+      "status": "DEFERRED"
+    },
+    {
+      "component": "BookingController::markManualPayment()",
+      "path": "App\\Http\\Controllers\\BookingController::markManualPayment()",
+      "reason": "Diverges from ManualBookingService::recordOfflinePayment() in status handling, event dispatch and referral attribution. Merging them is a redesign. See ADR-P09-06.",
+      "status": "DEFERRED"
+    },
+    {
+      "component": "Payment idempotency hardening",
+      "path": "CreatePaymentOrderUseCase pending-reuse check; verify duplicate guard",
+      "reason": "Both are best-effort read-then-write checks with no row lock. Adding lockForUpdate() changes lock ordering and deadlock potential, and a real idempotency key requires a schema migration. See the idempotency map.",
+      "status": "DEFERRED"
+    }
+  ],
+  "verification": {
+    "php_lint": "pass",
+    "composer_validate": "pass",
+    "migrate_status_pending": 0,
+    "vendor_sdk_leaks_outside_infrastructure": 0,
+    "golden_payment_suite": "4/4 pass",
+    "golden_payment_boundary_suite": "12/12 pass",
+    "full_suite": "451 pass / 2 pre-existing failures (availability message wording, unrelated to Payment)"
+  }
+}

@@ -1,0 +1,272 @@
+{
+  "phase": "0.3",
+  "name": "Golden API Contracts",
+  "generated_at": "2026-09-25T21:50:00+05:30",
+  "endpoints": [
+    {
+      "endpoint": "/api/campaigns/calculate",
+      "method": "POST",
+      "auth_context": "optional (guest or sanctum user)",
+      "scenario": "Commercial campaign pricing preview calculation",
+      "request_contract": {
+        "required_fields": ["screen_ids", "start_date", "end_date", "daily_start_time", "daily_end_time"],
+        "optional_fields": ["quantities", "referral_code_id", "country_code", "redeem_points"],
+        "types": {
+          "screen_ids": "array of integers (exists:screens,id)",
+          "quantities": "array of integers (keyed by screen_id, min:1, max:500)",
+          "start_date": "date_format:Y-m-d",
+          "end_date": "date_format:Y-m-d (after_or_equal:start_date)",
+          "daily_start_time": "date_format:H:i",
+          "daily_end_time": "date_format:H:i",
+          "referral_code_id": "integer (exists:referral_codes,id)",
+          "country_code": "string (size:2)"
+        }
+      },
+      "response_contract": {
+        "status_code": 200,
+        "envelope": {
+          "status": "boolean (true)",
+          "message": "string ('Campaign pricing calculated successfully')",
+          "data": {
+            "campaign_summary": {
+              "start_date": "string (Y-m-d)",
+              "end_date": "string (Y-m-d)",
+              "total_days": "integer",
+              "daily_runtime": {
+                "start_time": "string (H:i)",
+                "end_time": "string (H:i)"
+              },
+              "total_screens": "integer"
+            },
+            "per_screen": [
+              {
+                "screen_id": "integer",
+                "quantity": "integer",
+                "pricing_plan_id": "integer",
+                "pricing_plan_name": "string",
+                "daily_breakdown": "array",
+                "screen_total": {
+                  "base_price": "float",
+                  "quantity": "integer",
+                  "peak_charge": "float",
+                  "weekend_charge": "float",
+                  "discount_amount": "float",
+                  "screen_discount": "float",
+                  "duration_discount": "float",
+                  "subtotal_before_discount": "float",
+                  "subtotal_after_discount": "float"
+                },
+                "applied_rules": "object",
+                "applied_discount_rule": "object|null",
+                "applied_screen_rule": "object|null"
+              }
+            ],
+            "aggregated": {
+              "base_price": "float",
+              "screen_count": "integer",
+              "screen_discount": "float",
+              "duration_discount": "float",
+              "combined_discount": "float",
+              "peak_adjustment": "float",
+              "weekend_adjustment": "float",
+              "first_booking_discount": "float",
+              "referral_discount": "float",
+              "reward_points_used": "integer",
+              "reward_discount": "float",
+              "reward_points_earned": "integer",
+              "rewards_disabled_reason": "string|null",
+              "subtotal": "float",
+              "final_amount": "float"
+            },
+            "applied_referral": "object|null",
+            "first_booking_discount": {
+              "eligible": "boolean",
+              "amount": "float",
+              "settings_snapshot": "object|null"
+            },
+            "loyalty": {
+              "enabled": "boolean",
+              "max_redemption_percentage": "float",
+              "point_monetary_value": "float"
+            }
+          }
+        }
+      },
+      "validation_failure_contract": {
+        "status_code": 422,
+        "envelope": {
+          "message": "string (The screen ids field is required. (and 2 more errors))",
+          "errors": {
+            "screen_ids": ["array of strings"],
+            "start_date": ["array of strings"],
+            "end_date": ["array of strings"]
+          }
+        }
+      }
+    },
+    {
+      "endpoint": "/api/v2/pricing/calculate",
+      "method": "POST",
+      "auth_context": "public / unauthenticated",
+      "scenario": "V2 automated multi-asset pricing preview",
+      "request_contract": {
+        "required_fields": ["start_date", "end_date", "items"],
+        "types": {
+          "start_date": "date_format:Y-m-d",
+          "end_date": "date_format:Y-m-d",
+          "items": "array of objects with asset_id (exists:screens,id) and optional quantity (min:1)"
+        }
+      },
+      "response_contract": {
+        "status_code": 200,
+        "envelope": {
+          "data": {
+            "summary": {
+              "start_date": "string (Y-m-d)",
+              "end_date": "string (Y-m-d)",
+              "total_days": "integer",
+              "total_items": "integer"
+            },
+            "line_items": [
+              {
+                "asset_id": "integer",
+                "asset_name": "string",
+                "asset_type": "string",
+                "quantity": "integer",
+                "unit_price_per_day": "float",
+                "days": "integer",
+                "line_subtotal": "float"
+              }
+            ],
+            "pricing": {
+              "gross_total": "float",
+              "duration_discount": "float",
+              "final_total": "float"
+            }
+          }
+        }
+      }
+    },
+    {
+      "endpoint": "/api/v2/availability/check",
+      "method": "POST",
+      "auth_context": "public / unauthenticated",
+      "scenario": "V2 automated availability validation",
+      "request_contract": {
+        "required_fields": ["items", "start_date|start_time", "end_date|end_time"],
+        "types": {
+          "items": "array of objects with asset_id|screen_id and optional quantity",
+          "start_date": "string",
+          "end_date": "string"
+        }
+      },
+      "response_contract": {
+        "status_code": 200,
+        "envelope": {
+          "success": "boolean",
+          "available": "boolean",
+          "eligible": "boolean",
+          "error_code": "string|null",
+          "conflict_type": "string|null",
+          "message": "string",
+          "conflicts": "array",
+          "first_error": "string|null",
+          "conflict_dates": "array",
+          "screens": "array",
+          "details": "object",
+          "daily_capacity": "object",
+          "physical_capacity": "object"
+        }
+      }
+    },
+    {
+      "endpoint": "/api/bookings/campaign",
+      "method": "POST",
+      "auth_context": "auth:sanctum (user role)",
+      "scenario": "Advertiser web campaign creation",
+      "request_contract": {
+        "required_fields": ["campaign_title", "ad_frequency", "start_time", "end_time", "screen_ids", "total_screens", "subtotal", "final_amount", "advertisement_category_id"],
+        "optional_fields": ["daily_start_time", "daily_end_time", "quantities", "discount_amount", "referral_code_id", "referral_discount", "redeem_points", "currency_code", "exchange_rate_used", "display_amount", "country_code", "pricing_plan_id", "notes"],
+        "types": {
+          "campaign_title": "string (max:255)",
+          "ad_frequency": "in:every_2_min,every_5_min,every_10_min,custom",
+          "start_time": "date",
+          "end_time": "date (after:start_time)",
+          "screen_ids": "array of integers (exists:screens,id)",
+          "total_screens": "integer (min:1)",
+          "subtotal": "numeric (min:0)",
+          "final_amount": "numeric (min:0)",
+          "advertisement_category_id": "integer (exists:advertisement_categories,id,status:active)"
+        }
+      },
+      "response_contract": {
+        "status_code": 201,
+        "envelope": {
+          "status": "boolean (true)",
+          "message": "string ('Campaign booking created. Proceed to payment.')",
+          "data": {
+            "id": "integer",
+            "user_id": "integer",
+            "campaign_title": "string",
+            "status": "string ('payment_pending')",
+            "subtotal": "numeric string",
+            "final_amount": "numeric string",
+            "booking_screens": "array of objects",
+            "booking_media": "array of objects"
+          }
+        }
+      }
+    },
+    {
+      "endpoint": "/api/payments/razorpay/create-order",
+      "method": "POST",
+      "auth_context": "auth:sanctum (booking owner)",
+      "scenario": "Initiate Razorpay order for booking in payment_pending status",
+      "request_contract": {
+        "required_fields": ["booking_id"],
+        "types": {
+          "booking_id": "integer (exists:bookings,id)"
+        }
+      },
+      "response_contract": {
+        "status_code": 201,
+        "envelope": {
+          "status": "boolean (true)",
+          "message": "string ('Razorpay order created successfully')",
+          "data": {
+            "payment": "object (Payment entity)",
+            "razorpay_order_id": "string (starts with 'order_')",
+            "amount": "integer (paise = final_amount * 100)",
+            "currency": "string ('INR')"
+          }
+        }
+      }
+    },
+    {
+      "endpoint": "/api/payments/razorpay/verify",
+      "method": "POST",
+      "auth_context": "public webhook / customer client",
+      "scenario": "Verify Razorpay payment signature and transition booking",
+      "request_contract": {
+        "required_fields": ["razorpay_order_id", "razorpay_payment_id", "razorpay_signature"],
+        "types": {
+          "razorpay_order_id": "string",
+          "razorpay_payment_id": "string",
+          "razorpay_signature": "string"
+        }
+      },
+      "response_contract": {
+        "status_code": 200,
+        "envelope": {
+          "status": "boolean (true)",
+          "message": "string ('Payment verified successfully. Booking is pending approval.')",
+          "data": {
+            "payment": "object (Payment entity with status='paid')",
+            "booking": "object (Booking entity with status='pending_approval')",
+            "status": "string ('verified')"
+          }
+        }
+      }
+    }
+  ]
+}

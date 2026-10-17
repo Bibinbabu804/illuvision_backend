@@ -1,0 +1,326 @@
+[
+  {
+    "method": "getOverview",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get the overview dashboard data with all KPI metrics.",
+    "data_sources": [
+      "RevenueAnalyticsService",
+      "BookingAnalyticsService",
+      "ScreenAnalyticsService"
+    ],
+    "tables_queried": [
+      "bookings",
+      "payments",
+      "screens",
+      "booking_screens",
+      "referral_usages",
+      "partner_commissions"
+    ],
+    "models_used": [
+      "App\\Models\\Booking",
+      "App\\Models\\Payment",
+      "App\\Models\\Screen",
+      "App\\Models\\ScreenProvider",
+      "App\\Models\\BookingScreen"
+    ],
+    "services_called": [
+      "App\\Services\\RevenueAnalyticsService",
+      "App\\Services\\BookingAnalyticsService",
+      "App\\Services\\ScreenAnalyticsService"
+    ],
+    "financial_dependencies": true,
+    "pricing_dependencies": true,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Calculates growth rates, sums revenue, counts bookings, etc.",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with kpis, charts, summary sections",
+    "api_endpoint": "GET /reports/overview",
+    "target_reporting_module": "dashboard"
+  },
+  {
+    "method": "getRevenueReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get revenue analytics with charts and breakdowns.",
+    "data_sources": [
+      "RevenueAnalyticsService"
+    ],
+    "tables_queried": [
+      "bookings",
+      "payments",
+      "referral_usages"
+    ],
+    "models_used": [
+      "App\\Models\\Booking",
+      "App\\Models\\Payment",
+      "App\\Models\\ReferralUsage"
+    ],
+    "services_called": [
+      "App\\Services\\RevenueAnalyticsService"
+    ],
+    "financial_dependencies": true,
+    "pricing_dependencies": true,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Groups by date, screen, city; sums revenue and bookings",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with overview, daily_revenue, monthly_revenue, screen_wise, city_wise, referral_impact",
+    "api_endpoint": "GET /reports/revenue",
+    "target_reporting_module": "revenue"
+  },
+  {
+    "method": "getBookingReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get booking analytics with status breakdown and trends.",
+    "data_sources": [
+      "BookingAnalyticsService"
+    ],
+    "tables_queried": [
+      "bookings"
+    ],
+    "models_used": [
+      "App\\Models\\Booking"
+    ],
+    "services_called": [
+      "App\\Services\\BookingAnalyticsService"
+    ],
+    "financial_dependencies": false,
+    "pricing_dependencies": false,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Counts by status, groups by date for trends",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with overview, daily_volumes, booking_trends, approval_metrics, source_breakdown",
+    "api_endpoint": "GET /reports/bookings",
+    "target_reporting_module": "bookings"
+  },
+  {
+    "method": "getScreenReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get screen performance report.",
+    "data_sources": [
+      "ScreenAnalyticsService"
+    ],
+    "tables_queried": [
+      "screens",
+      "bookings",
+      "booking_screens",
+      "cities",
+      "countries"
+    ],
+    "models_used": [
+      "App\\Models\\Screen",
+      "App\\Models\\Booking",
+      "App\\Models\\BookingScreen",
+      "App\\Models\\City",
+      "App\\Models\\Country"
+    ],
+    "services_called": [
+      "App\\Services\\ScreenAnalyticsService"
+    ],
+    "financial_dependencies": true,
+    "pricing_dependencies": true,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Counts bookings, sums revenue, calculates occupancy",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with overview, screen_performance, utilization_distribution",
+    "api_endpoint": "GET /reports/screens",
+    "target_reporting_module": "screens"
+  },
+  {
+    "method": "getCityReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get city performance report.",
+    "data_sources": [
+      "ScreenAnalyticsService",
+      "RevenueAnalyticsService"
+    ],
+    "tables_queried": [
+      "screens",
+      "cities",
+      "bookings",
+      "booking_screens",
+      "countries"
+    ],
+    "models_used": [
+      "App\\Models\\Screen",
+      "App\\Models\\City",
+      "App\\Models\\Booking",
+      "App\\Models\\BookingScreen",
+      "App\\Models\\Country"
+    ],
+    "services_called": [
+      "App\\Services\\ScreenAnalyticsService",
+      "App\\Services\\RevenueAnalyticsService"
+    ],
+    "financial_dependencies": true,
+    "pricing_dependencies": true,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Aggregates screen and revenue data by city",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with city_performance, total_cities, top_cities",
+    "api_endpoint": "GET /reports/cities",
+    "target_reporting_module": "cities"
+  },
+  {
+    "method": "getCampaignReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get campaign analytics report.",
+    "data_sources": [
+      "ScreenAnalyticsService",
+      "BookingAnalyticsService"
+    ],
+    "tables_queried": [
+      "bookings",
+      "pricing_plans",
+      "screens",
+      "booking_screens"
+    ],
+    "models_used": [
+      "App\\Models\\Booking",
+      "App\\Models\\PricingPlan",
+      "App\\Models\\Screen",
+      "App\\Models\\BookingScreen"
+    ],
+    "services_called": [
+      "App\\Services\\ScreenAnalyticsService",
+      "App\\Services\\BookingAnalyticsService"
+    ],
+    "financial_dependencies": true,
+    "pricing_dependencies": true,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Filters campaigns, calculates durations, sums amounts",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with campaigns, active_campaigns, completed_campaigns, summary",
+    "api_endpoint": "GET /reports/campaigns",
+    "target_reporting_module": "campaigns"
+  },
+  {
+    "method": "getReferralReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get referral and partner analytics report.",
+    "data_sources": [
+      "Direct DB queries",
+      "RevenueAnalyticsService (for referralImpact)"
+    ],
+    "tables_queried": [
+      "referral_usages",
+      "referral_codes",
+      "partners",
+      "bookings"
+    ],
+    "models_used": [
+      "App\\Models\\ReferralUsage",
+      "App\\Models\\ReferralCode",
+      "App\\Models\\Partner",
+      "App\\Models\\Booking"
+    ],
+    "services_called": [
+      "App\\Services\\RevenueAnalyticsService"
+    ],
+    "financial_dependencies": true,
+    "pricing_dependencies": false,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Groups by partner and referral code, sums discounts and commissions",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with kpis, top_partners, top_codes, monthly_trend",
+    "api_endpoint": "GET /reports/referrals",
+    "target_reporting_module": "referrals"
+  },
+  {
+    "method": "getScreenProviderReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get screen provider financial report with provider, screen, and booking breakdowns.",
+    "data_sources": [
+      "Direct DB queries"
+    ],
+    "tables_queried": [
+      "booking_screens",
+      "bookings",
+      "screen_providers",
+      "screens",
+      "cities",
+      "countries"
+    ],
+    "models_used": [
+      "App\\Models\\BookingScreen",
+      "App\\Models\\Booking",
+      "App\\Models\\ScreenProvider",
+      "App\\Models\\Screen",
+      "App\\Models\\City",
+      "App\\Models\\Country"
+    ],
+    "services_called": [],
+    "financial_dependencies": true,
+    "pricing_dependencies": true,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Groups by provider and screen, sums revenue shares",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with summary, provider_breakdown, screen_breakdown",
+    "api_endpoint": "GET /reports/screen-providers",
+    "target_reporting_module": "screen_providers"
+  },
+  {
+    "method": "getCategoryReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get advertisement category report.",
+    "data_sources": [
+      "Direct DB queries"
+    ],
+    "tables_queried": [
+      "bookings",
+      "advertisement_categories"
+    ],
+    "models_used": [
+      "App\\Models\\Booking"
+      // Assuming there is an advertisement_category relationship via attribute
+    ],
+    "services_called": [],
+    "financial_dependencies": true,
+    "pricing_dependencies": false,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Groups by advertisement_category_name, sums final_amount",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with revenue_by_category, bookings_by_category, trend_by_category, top_categories",
+    "api_endpoint": "GET /reports/categories",
+    "target_reporting_module": "categories"
+  },
+  {
+    "method": "getRewardReport",
+    "current_owner": "App\\Services\\ReportService",
+    "business_purpose": "Get rewards & loyalty program analytics report.",
+    "data_sources": [
+      "Direct DB queries",
+      "App\\Models\\RewardAccount",
+      "App\\Models\\RewardTransaction"
+    ],
+    "tables_queried": [
+      "reward_accounts",
+      "reward_transactions",
+      "bookings",
+      "users"
+    ],
+    "models_used": [
+      "App\\Models\\RewardAccount",
+      "App\\Models\\RewardTransaction",
+      "App\\Models\\Booking",
+      "App\\Models\\User"
+    ],
+    "services_called": [],
+    "financial_dependencies": true,
+    "pricing_dependencies": false,
+    "booking_dependencies": true,
+    "authorization_requirements": "Handled by middleware (auth, roles)",
+    "aggregation_logic": "Sums points earned/redeemed/expired, calculates redemption rate",
+    "side_effects": "None (read-only)",
+    "output_format": "Array with kpis, top_customers, monthly_trend",
+    "api_endpoint": "GET /reports/rewards",
+    "target_reporting_module": "rewards"
+  }
+]

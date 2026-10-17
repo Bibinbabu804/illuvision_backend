@@ -1,0 +1,62 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "transaction-concurrency-verification",
+  "db_transaction_sites": 48,
+  "lock_for_update_sites": 8,
+  "lock_sites": [
+    "app/Console/Commands/ExpirePendingBookings.php",
+    "app/Domain/Financial/Contracts/PartnerCommissionRepositoryInterface.php",
+    "app/Infrastructure/Financial/Persistence/EloquentPartnerCommissionRepository.php",
+    "app/Services/CommissionService.php",
+    "app/Services/InventoryService.php"
+  ],
+  "verified": [
+    {
+      "workflow": "campaign booking",
+      "evidence": "CreateCampaignBookingUseCase delegates inventory reservation to InventoryService, which locks at InventoryService.php:48 (lockForUpdate). The use case owns the transaction. Verified by tests/Feature/Golden/GoldenConcurrencyVerificationTest.php and BookingConcurrencyTest."
+    },
+    {
+      "workflow": "reschedule",
+      "evidence": "RescheduleBookingUseCase wraps its work in DB::transaction (line 63) and delegates eligibility to BookingCapacityService, self-excluding the booking being rescheduled. Documented to preserve the same lock ordering."
+    }
+  ],
+  "retry": {
+    "mechanism": "DB::transaction(..., attempts: 5) on retryable deadlock paths",
+    "status": "present"
+  },
+  "known_test_failures": [
+    {
+      "test": "Tests\\Feature\\BookingConcurrencyTest > second booking rejected after first consumes last unit",
+      "state": "pre-existing",
+      "assertion": "expects 'no longer available'",
+      "actual": "current EligibilityResult message",
+      "note": "Message-wording only; the rejection itself is enforced. Not caused by remediation."
+    },
+    {
+      "test": "Tests\\Feature\\CampaignBookingPricingIntegrityTest > booking rejects quantity over fleet availability",
+      "state": "pre-existing",
+      "assertion": "expects 'no longer available'",
+      "actual": "current EligibilityResult message",
+      "note": "Same wording drift."
+    }
+  ],
+  "residual_risk": [
+    {
+      "id": "TX-01",
+      "title": "Booking model events run inside the caller's transaction",
+      "severity": "high",
+      "detail": "Loyalty and referral side effects are triggered from Eloquent events, so their commit/rollback is bound to whichever transaction the caller opened. Changing this changes financial and loyalty outcomes.",
+      "category": "C"
+    },
+    {
+      "id": "TX-02",
+      "title": "VerifyPaymentUseCase has no row lock on the duplicate-verification check",
+      "severity": "low",
+      "detail": "The duplicate guard plus the Razorpay signature make a double-apply very unlikely, but two concurrent verify calls for the same order are not serialised by a lock."
+    }
+  ],
+  "verdict": "No new concurrency defect introduced. Two golden concurrency tests pass; the 2 failures are message-wording drift, not behaviour."
+}

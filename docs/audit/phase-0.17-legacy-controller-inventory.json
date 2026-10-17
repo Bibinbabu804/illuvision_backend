@@ -1,0 +1,51 @@
+{
+  "phase": "0.17",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy code and controller retirement",
+  "artifact": "legacy-controller-inventory",
+  "method": "Bootstrapped the real Laravel application (console kernel) so that container-aware facts are read from the runtime, not guessed from source text. Per-class evidence combines: route table (442 actions), Gate policy resolution, scheduler, Artisan command registry, container bindings, Eloquent conventions, and a cross-file name-reference scan over app/ routes/ config/ database/ bootstrap/ tests/ resources/.",
+  "runtime_facts": {
+    "classes": 352,
+    "route_actions": 442,
+    "scheduled": [
+      "currency:sync-rates",
+      "inspire",
+      "rewards:expire",
+      "bookings:expire-pending"
+    ],
+    "artisan_commands_registered": 133,
+    "container_bindings": 35,
+    "gate_policies_resolved": 0,
+    "phantom_convention_policies": {
+      "App\\Policies\\AssetPolicy": "no conventional model exists (tried App\\Models\\Asset, App\\Asset)",
+      "App\\Policies\\PartnerBookingPolicy": "no conventional model exists (tried App\\Models\\PartnerBooking, App\\PartnerBooking)"
+    }
+  },
+  "classification_totals": {
+    "ACTIVE": 331,
+    "DEAD_CANDIDATE": 21
+  },
+  "by_layer": {
+    "Application": 32,
+    "Console": 3,
+    "Domain": 9,
+    "Enums": 12,
+    "Events": 34,
+    "Exceptions": 6,
+    "Helpers": 1,
+    "Http": 81,
+    "Infrastructure": 14,
+    "Listeners": 1,
+    "Mail": 28,
+    "Models": 62,
+    "Observers": 1,
+    "Policies": 2,
+    "Providers": 2,
+    "Repositories": 4,
+    "Services": 51,
+    "Support": 9
+  },
+  "critical_method_finding": "Gate::getPolicyFor() returns a policy class for ANY class string whose conventional name exists, even when that class string names no real class. Passing the non-existent App\\Models\\Asset produced App\\Policies\\AssetPolicy, which made a dead policy look live. A convention check must assert the MODEL exists, not just the policy class.",
+  "full_per_class_inventory": "see /tmp/p017/inventory.json (352 classes with per-class evidence)"
+}

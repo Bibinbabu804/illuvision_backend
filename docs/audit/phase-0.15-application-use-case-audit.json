@@ -1,0 +1,56 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "application-use-case-audit",
+  "application_class_count": 32,
+  "use_case_classes_identified": 6,
+  "orchestrating_use_cases": [
+    {
+      "class": "App/Application/Booking/UseCases/CreateCampaignBookingUseCase.php",
+      "role": "transaction owner",
+      "status": "compliant"
+    },
+    {
+      "class": "App/Application/Booking/UseCases/RescheduleBookingUseCase.php",
+      "role": "transaction owner",
+      "status": "compliant",
+      "note": "Repricing and revenue redistribution are NOT performed; recorded as accepted financial-staleness debt."
+    },
+    {
+      "class": "App/Application/Booking/Queries/CheckBookingAvailabilityQuery.php",
+      "role": "read model",
+      "status": "compliant"
+    },
+    {
+      "class": "App/Application/Payment/UseCases/VerifyPaymentUseCase.php",
+      "role": "transaction owner",
+      "status": "compliant"
+    },
+    {
+      "class": "App/Application/Payment/UseCases/RefundPaymentUseCase.php",
+      "role": "transaction owner",
+      "status": "compliant"
+    },
+    {
+      "class": "App/Application/Payment/UseCases/CreateOfflinePaymentUseCase.php",
+      "role": "transaction owner",
+      "status": "compliant"
+    }
+  ],
+  "transaction_ownership": {
+    "app_db_transaction_sites": 48,
+    "note": "Controllers no longer open the campaign-booking or reschedule transactions; the use cases own them. DB::transaction(..., attempts:5) is used for retryable deadlocks."
+  },
+  "exceptions": {
+    "App/Application/Booking/Exceptions/BookingCreationException.php": "Carries HTTP status and payload so Application can express 422 rejections without importing App\\Http."
+  },
+  "open_debt": [
+    "Report-side read models under app/Application/Reporting use DB and Cache facades directly (62 facade call sites across Application). This is accepted for reporting read paths; consolidating them behind repository interfaces is a larger phase."
+  ],
+  "not_consolidated": {
+    "CreateCampaignBookingUseCase vs ManualBookingService::createBooking": "Deliberately different: campaign booking derives authoritative amounts from CampaignPricingService; manual booking is a multi-channel flow with its own finance/audit/commission side effects.",
+    "CreateOfflinePaymentUseCase vs ManualBookingService::markManualPayment": "Deliberately different: differing status vocabularies, receipt requirements and settlement triggers."
+  }
+}

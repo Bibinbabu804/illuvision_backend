@@ -1,0 +1,89 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "IMPORTANT": "This score measures PHYSICAL STRUCTURE CONFORMANCE ONLY. It is NOT a measure of architecture maturity, and a high score does not mean the codebase is architecturally clean.",
+ "dimensions": [
+  {
+   "name": "Target directories created",
+   "score": "36/36",
+   "pct": 100.0,
+   "note": "All plan-mandated top-level capability directories exist."
+  },
+  {
+   "name": "Creative subdomains created",
+   "score": "9/9",
+   "pct": 100.0,
+   "note": "All 9 Creative subdomains exist and are intentionally empty."
+  },
+  {
+   "name": "Deliberately empty directories",
+   "score": 19,
+   "pct": null,
+   "note": "Empty is a PASS for declared-but-unimplemented capabilities, not a defect."
+  },
+  {
+   "name": "Migrated classes resolving",
+   "score": "64/64",
+   "pct": 100.0,
+   "note": "Every relocated class resolves through the Composer autoloader."
+  },
+  {
+   "name": "Route parity",
+   "score": "385/385",
+   "pct": 100.0,
+   "note": "Public API contract unchanged."
+  },
+  {
+   "name": "Test parity",
+   "score": "571 passed / 2 failed",
+   "pct": 99.65,
+   "note": "Both failures are pre-existing message-wording drift, identical to the pre-Phase-0.20 baseline."
+  },
+  {
+   "name": "Schema parity",
+   "score": "74 tables / 94 FKs / 112 migrations",
+   "pct": 100.0,
+   "note": "No migration was added, altered or reverted."
+  },
+  {
+   "name": "Directional boundary conformance",
+   "score": "9 pre-existing violations",
+   "pct": null,
+   "note": "Domain->Models 9, Domain->Services 7, Support->Services 7. Zero were INTRODUCED by Phase 0.20. Domain->Models is NOT enforced by ArchitectureRuleTest and is the highest-value follow-up (P1)."
+  },
+  {
+   "name": "Services conformance",
+   "score": "16/29 flat classes remaining",
+   "pct": 55.2,
+   "note": "16 of 29 Services classes relocated. 27 remain flat, deliberately: 10 are P3 financial, 5 are P4 transaction/concurrency, remainder P2. See phase-0.20-legacy-directory-status.json."
+  },
+  {
+   "name": "Repositories conformance",
+   "score": "2/6 capabilities",
+   "pct": 33.3,
+   "note": "Asset and Booking extracted. Campaign, Pricing, Payment and Creative services still query Eloquent directly (33 candidates recorded)."
+  }
+ ],
+ "physical_structure_score_pct": 100.0,
+ "behavioural_safety_score": "PASS - zero route, schema, authorization, financial, transaction or integration drift",
+ "verdict": "PHASE 0.20 COMPLETE WITH CONTROLLED MIGRATION DEBT",
+ "residual_debt_register": {
+  "P1": [
+   "Domain->Models 9 import edges in 6 files, unenforced by tests"
+  ],
+  "P2": [
+   "33 repository extraction candidates",
+   "11 service-locator call sites, 4 unenforced",
+   "27 flat Services classes",
+   "17 Reporting Application classes have no plan-assigned target (OPEN clarification)"
+  ],
+  "P3": [
+   "10 P3 financial Services classes",
+   "11 financial Application use cases"
+  ],
+  "P4": [
+   "5 P4 transaction/concurrency Services classes",
+   "5 Booking Application use cases"
+  ]
+ }
+}

@@ -1,0 +1,186 @@
+{
+  "phase": "0.10",
+  "name": "Financial Responsibility Map",
+  "generated_at": "2026-09-26T00:28:00+05:30",
+  "canonical_domain_support": [
+    "App\\Domain\\Financial\\Support\\RevenueAllocation"
+  ],
+  "canonical_persistence_contracts": [
+    "App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+    "App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface"
+  ],
+  "canonical_persistence_adapters": [
+    "App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository",
+    "App\\Infrastructure\\Financial\\Persistence\\EloquentPartnerCommissionRepository"
+  ],
+  "application_entry_points": [
+    "App\\Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+    "App\\Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+    "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase"
+  ],
+  "rules": [
+    {
+      "rule": "Per-screen gross revenue",
+      "current_implementation": "round($booking->final_amount / $totalScreens, 2) with a final_amount > 0 guard and a subtotal/price fallback, inline in processBookingScreens()",
+      "current_class": "App\\Domain\\Financial\\Support\\RevenueAllocation",
+      "current_method": "grossPerScreen()",
+      "legacy_path": "App\\Services\\RevenueDistributionService::processBookingScreens()",
+      "target_domain_owner": "Domain\\Financial\\Support\\RevenueAllocation",
+      "target_application_owner": "Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "golden_test": "Tests\\Unit\\Domain\\Financial\\RevenueAllocationTest::test_gross_per_screen_prefers_final_amount",
+      "status": "EXTRACTED_CANONICAL"
+    },
+    {
+      "rule": "Platform / provider share split",
+      "current_implementation": "Two independent round(gross * pct / 100, 2) expressions inline",
+      "current_class": "App\\Domain\\Financial\\Support\\RevenueAllocation",
+      "current_method": "split()",
+      "legacy_path": "App\\Services\\RevenueDistributionService::processBookingScreens()",
+      "target_domain_owner": "Domain\\Financial\\Support\\RevenueAllocation",
+      "target_application_owner": "Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "golden_test": "Tests\\Unit\\Domain\\Financial\\RevenueAllocationTest::test_split_rounds_each_share_from_rounded_gross",
+      "status": "EXTRACTED_CANONICAL",
+      "note": "Each share is computed from the ALREADY-ROUNDED gross, and the two shares round INDEPENDENTLY. The resulting sub-paisa drift versus gross is a property of the existing ledger and is preserved (ADR-P10-03)."
+    },
+    {
+      "rule": "Illuvision-owned screen allocation (100/0)",
+      "current_implementation": "Inline conditional branch assigning the full gross to the platform",
+      "current_class": "App\\Domain\\Financial\\Support\\RevenueAllocation",
+      "current_method": "illuvisionOwned()",
+      "legacy_path": "App\\Services\\RevenueDistributionService::processBookingScreens()",
+      "target_domain_owner": "Domain\\Financial\\Support\\RevenueAllocation",
+      "target_application_owner": "Application\\Financial\\UseCases\\DistributeBookingRevenueUseCase",
+      "golden_test": "Tests\\Unit\\Domain\\Financial\\RevenueAllocationTest::test_illuvision_owned_allocation_is_100_0",
+      "status": "EXTRACTED_CANONICAL"
+    },
+    {
+      "rule": "Revenue split precedence resolution",
+      "current_implementation": "direct Illuvision -> duration override -> screen static override -> provider default -> system default 10/90",
+      "current_class": "App\\Services\\RevenueSplitResolverService",
+      "current_method": "resolveForBookingScreen()",
+      "legacy_path": "App\\Services\\RevenueDistributionService::processBookingScreens()",
+      "target_domain_owner": "NOT EXTRACTED",
+      "target_application_owner": "App\\Services\\RevenueSplitResolverService (unchanged)",
+      "golden_test": "Tests\\Feature\\ScreenManagementDurationSplitTest, Tests\\Feature\\BookingChannelDurationSplitIntegrationTest",
+      "status": "UNCHANGED_BY_DESIGN",
+      "note": "The resolver is a coherent, already-isolated rule set with its own test coverage. Extracting it would be refactoring for its own sake with no boundary benefit. Recorded as a deliberate non-change."
+    },
+    {
+      "rule": "Settlement eligibility predicate",
+      "current_implementation": "A four-filter aggregate read (provider ownership, settlement_status = pending, settleable booking statuses, three-branch period overlap) inline in generateSettlement()",
+      "current_class": "App\\Infrastructure\\Financial\\Persistence\\EloquentSettlementRepository",
+      "current_method": "findEligibleBookingScreens()",
+      "legacy_path": "App\\Services\\SettlementService::generateSettlement()",
+      "target_domain_owner": "Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+      "target_application_owner": "Application\\Financial\\UseCases\\GenerateProviderSettlementUseCase",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest (4 eligibility tests)",
+      "status": "EXTRACTED_CANONICAL",
+      "note": "Byte-for-byte reproduction of both branches, including the booking_id branch that deliberately SKIPS the period filter. The RuntimeException contract is preserved."
+    },
+    {
+      "rule": "Settlement total computation",
+      "current_implementation": "sum(gross_revenue), sum(platform_share), sum(provider_share) plus unique booking/screen counts, all from booking_screen snapshots",
+      "current_class": "App\\Services\\SettlementService",
+      "current_method": "generateSettlement()",
+      "legacy_path": "App\\Services\\SettlementService::generateSettlement()",
+      "target_domain_owner": "N/A",
+      "target_application_owner": "App\\Services\\SettlementService (unchanged)",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_generated_settlement_sums_snapshots_not_live_percentages",
+      "status": "UNCHANGED",
+      "note": "Snapshots are the sole source. Live Screen/ScreenProvider percentages are NEVER consulted, even when they contradict the snapshot. This is pinned by an explicit test."
+    },
+    {
+      "rule": "Settlement lifecycle transitions",
+      "current_implementation": "generated -> approved -> processing -> paid / cancelled",
+      "current_class": "App\\Services\\SettlementService",
+      "current_method": "approveSettlement(), markSettlementAsProcessing(), markSettlementAsPaid(), cancelSettlement()",
+      "legacy_paths": [
+        "App\\Http\\Controllers\\AdminSettlementController"
+      ],
+      "target_domain_owner": "N/A",
+      "target_application_owner": "App\\Services\\SettlementService (unchanged)",
+      "golden_test": "Existing settlement feature tests",
+      "status": "UNCHANGED",
+      "note": "Only generation was moved behind a use case. The lifecycle state machine stayed put deliberately — it is cohesive and already separated from generation."
+    },
+    {
+      "rule": "Partner commission persistence and locking",
+      "current_implementation": "Three lockForUpdate() reads and one create, inline in CommissionService and ReferralTrackingService",
+      "current_class": "App\\Infrastructure\\Financial\\Persistence\\EloquentPartnerCommissionRepository",
+      "current_method": "find(), findOrFail(), findOrFailForUpdate(), findForReferralUsage(), create()",
+      "legacy_paths": [
+        "App\\Services\\CommissionService",
+        "App\\Services\\ReferralTrackingService"
+      ],
+      "target_domain_owner": "Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+      "target_application_owner": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_commission_repository_preserves_pessimistic_locking",
+      "status": "EXTRACTED_CANONICAL",
+      "note": "lockForUpdate() was NOT weakened. This is the only genuinely serialised financial write in the subsystem."
+    },
+    {
+      "rule": "Referral attribution and duplicate-commission guard",
+      "current_implementation": "createReferralTracking() with a lockForUpdate duplicate check",
+      "current_class": "App\\Services\\ReferralTrackingService",
+      "current_method": "createReferralTracking()",
+      "legacy_paths": [
+        "App\\Services\\PaymentService (inside the verification transaction)",
+        "App\\Http\\Controllers\\AdminPaymentController::approvePayment() (service locator)",
+        "App\\Services\\ManualBookingService::recordOfflinePayment() (service locator)"
+      ],
+      "target_domain_owner": "Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+      "target_application_owner": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "golden_test": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest",
+      "status": "DELEGATED_TRANSPARENTLY",
+      "note": "Two service-locator call sites were replaced with constructor injection. The caller-owned transaction requirement is unchanged and is documented on the use case."
+    },
+    {
+      "rule": "Referral attribution backfill",
+      "current_implementation": "Lazy backfill when a booking has a payment but no referral usage",
+      "current_class": "App\\Services\\ReferralTrackingService",
+      "current_method": "createReferralTracking()",
+      "legacy_path": "App\\Services\\ReferralTrackingService",
+      "target_domain_owner": "N/A",
+      "target_application_owner": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "golden_test": "Existing referral feature tests",
+      "status": "UNCHANGED",
+      "note": "Runs inside the caller's transaction. A failure here rolls back the whole payment verification, which is pre-existing behaviour."
+    },
+    {
+      "rule": "Cancellation of referral tracking",
+      "current_implementation": "cancelReferralTracking() on payment rejection",
+      "current_class": "App\\Services\\ReferralTrackingService",
+      "current_method": "cancelReferralTracking()",
+      "legacy_path": "App\\Http\\Controllers\\AdminPaymentController::rejectPayment()",
+      "target_domain_owner": "N/A",
+      "target_application_owner": "NOT EXTRACTED",
+      "golden_test": "N/A",
+      "status": "DEFERRED",
+      "note": "Cancellation is a distinct operation from attribution and is NOT modelled by RecordReferralAttributionUseCase. Extending the use case to cover it would conflate two responsibilities."
+    }
+  ],
+  "money_handling": {
+    "persistence": "decimal(12,2) / decimal(14,2) columns with Eloquent decimal casts — unchanged",
+    "float_in_domain": "RevenueAllocation returns float PRE-PERSISTENCE values only; nothing is persisted from a float calculation without a decimal column cast",
+    "bcmath_introduced": false,
+    "rounding_mode_changed": false,
+    "note": "Phase 0.10 extracted arithmetic without altering a single stored value. Verified by the golden financial suite plus the new boundary suite."
+  },
+  "out_of_scope_deliberately_unmodified": [
+    {
+      "item": "App\\Services\\RevenueDistributionService::getProviderRevenueStats()",
+      "issue": "References an undefined variable $totalScreensInBookings",
+      "reason": "Pre-existing latent defect with no callers. Fixing it would be an unrequested behaviour change."
+    },
+    {
+      "item": "Settlement lifecycle methods",
+      "issue": "approve / markProcessing / markPaid / cancel remain on SettlementService",
+      "reason": "Cohesive state machine already separated from generation. Moving it adds indirection with no boundary benefit."
+    },
+    {
+      "item": "RevenueSplitResolverService",
+      "issue": "Not extracted into Domain\\Financial",
+      "reason": "Already an isolated, well-tested rule set. See the responsibility map entry above."
+    }
+  ]
+}

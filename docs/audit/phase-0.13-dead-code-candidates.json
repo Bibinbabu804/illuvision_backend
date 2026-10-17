@@ -1,0 +1,195 @@
+{
+  "phase": "0.13",
+  "name": "Dead Code Candidates",
+  "generated_at": "2026-09-26",
+  "method": "Reference search over app/, routes/, tests/, database/, config/ and bootstrap/, cross-checked against `php artisan list` for framework-registered commands and against routes/console.php for the scheduler. A class with zero source references is NOT dead if the framework can reach it by convention.",
+  "critical_finding": "3 scheduled console commands (rewards:expire, bookings:expire-pending, currency:sync-rates) have zero source-code references and are still live. A purely lexical dead-code scan would have deleted three running scheduled jobs. All candidates were therefore validated against `php artisan list` before any deletion.",
+  "counts": {
+    "confirmed_dead": 14,
+    "removed": 9,
+    "retained_despite_being_dead": 5,
+    "active_false_positives": 6
+  },
+  "candidates": [
+    {
+      "class": "App\\DTOs\\AssetDTO",
+      "location": "app/DTOs/AssetDTO.php",
+      "lines": 78,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "No imports, no FQN usage, no framework registration path, not a Model so not relation-discovered.",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\DTOs\\CreateBookingDTO",
+      "location": "app/DTOs/CreateBookingDTO.php",
+      "lines": 33,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references. A DTO with no consumer.",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\Services\\NotificationDispatcher",
+      "location": "app/Services/NotificationDispatcher.php",
+      "lines": 15,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references. Superseded by NotificationService behind MailContractInterface (Phase 0.12).",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\Jobs\\GenerateAssetCodeJob",
+      "location": "app/Jobs/GenerateAssetCodeJob.php",
+      "lines": 28,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references. Never dispatched, not scheduled in routes/console.php.",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\Http\\Controllers\\Api\\CampaignPricingController",
+      "location": "app/Http/Controllers/Api/CampaignPricingController.php",
+      "lines": 49,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references; routes/api.php registers /campaigns/calculate and /campaigns/validate on BookingController instead, so this controller was never routed.",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\Events\\Notifications\\ClientCreated",
+      "location": "app/Events/Notifications/ClientCreated.php",
+      "lines": 28,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero dispatch sites and zero listener registrations.",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\Events\\Notifications\\CampaignActivated",
+      "location": "app/Events/Notifications/CampaignActivated.php",
+      "lines": 25,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero dispatch sites and zero listener registrations.",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\Events\\Notifications\\CampaignCompleted",
+      "location": "app/Events/Notifications/CampaignCompleted.php",
+      "lines": 25,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero dispatch sites and zero listener registrations.",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\Events\\Notifications\\SettlementReady",
+      "location": "app/Events/Notifications/SettlementReady.php",
+      "lines": 25,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero dispatch sites and zero listener registrations.",
+      "action_taken": "removed in Phase 0.13"
+    },
+    {
+      "class": "App\\Policies\\AssetPolicy",
+      "location": "app/Policies/AssetPolicy.php",
+      "lines": 53,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references, and the application contains no Gate:: call and no $this->authorize() call anywhere, so Laravel policy auto-discovery can never reach it.",
+      "action_taken": "RETAINED - it is the conventional authorization extension point and costs nothing; deleting it would remove the obvious home for future policy work"
+    },
+    {
+      "class": "App\\Policies\\PartnerBookingPolicy",
+      "location": "app/Policies/PartnerBookingPolicy.php",
+      "lines": 46,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references; no Gate:: or authorize() usage exists in the application.",
+      "action_taken": "RETAINED - same rationale as AssetPolicy"
+    },
+    {
+      "class": "App\\Services\\Pricing\\PeakPricingCalculator",
+      "location": "app/Services/Pricing/PeakPricingCalculator.php",
+      "lines": 84,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references. Peak adjustment is computed inline inside CampaignPricingEngine, so this is a superseded duplicate of a rule that already has an authoritative implementation.",
+      "action_taken": "RETAINED - Rule 7 forbids deleting a rule implementation until the canonical owner of peak pricing is explicitly designated; flagged for consolidation in a pricing-focused phase"
+    },
+    {
+      "class": "App\\Services\\Pricing\\WeekendPricingCalculator",
+      "location": "app/Services/Pricing/WeekendPricingCalculator.php",
+      "lines": 64,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references. Weekend adjustment likewise computed inline in CampaignPricingEngine.",
+      "action_taken": "RETAINED - same rationale as PeakPricingCalculator"
+    },
+    {
+      "class": "App\\Services\\Pricing\\CampaignDiscountCalculator",
+      "location": "app/Services/Pricing/CampaignDiscountCalculator.php",
+      "lines": 61,
+      "reference_count": 0,
+      "classification": "confirmed_dead",
+      "evidence": "Zero references. Campaign discount logic lives in CampaignPricingEngine.",
+      "action_taken": "RETAINED - same rationale"
+    },
+    {
+      "class": "App\\Services\\AssetDiscoveryFilterService",
+      "location": "app/Services/AssetDiscoveryFilterService.php",
+      "lines": 33,
+      "reference_count": 1,
+      "classification": "active",
+      "evidence": "Referenced by AssetService.",
+      "action_taken": "retained"
+    },
+    {
+      "class": "App\\Console\\Commands\\ExpireRewardPoints",
+      "location": "app/Console/Commands/ExpireRewardPoints.php",
+      "lines": 129,
+      "reference_count": 1,
+      "classification": "active - NOT dead; a naive scan would have deleted a live scheduled job",
+      "evidence": "Signature rewards:expire is scheduled daily in routes/console.php. Confirmed present in `php artisan list`.",
+      "action_taken": "retained"
+    },
+    {
+      "class": "App\\Console\\Commands\\ExpirePendingBookings",
+      "location": "app/Console/Commands/ExpirePendingBookings.php",
+      "lines": 97,
+      "reference_count": 1,
+      "classification": "active - NOT dead",
+      "evidence": "Signature bookings:expire-pending is scheduled every five minutes in routes/console.php. Confirmed in `php artisan list`.",
+      "action_taken": "retained"
+    },
+    {
+      "class": "App\\Console\\Commands\\SyncExchangeRates",
+      "location": "app/Console/Commands/SyncExchangeRates.php",
+      "lines": 43,
+      "reference_count": 1,
+      "classification": "active - NOT dead",
+      "evidence": "Signature currency:sync-rates is scheduled twice daily in routes/console.php and is registered in `php artisan list`.",
+      "action_taken": "retained"
+    },
+    {
+      "class": "App\\Providers\\EventServiceProvider",
+      "location": "app/Providers/EventServiceProvider.php",
+      "lines": 35,
+      "reference_count": 0,
+      "classification": "active - NOT dead",
+      "evidence": "Framework-registered provider; discovered by the container.",
+      "action_taken": "retained"
+    },
+    {
+      "class": "App\\Models\\CoverageCity / MobileAssetCoverageCity / MobileAssetCoverageState / BlogDescription",
+      "location": "app/Models/*.php",
+      "lines": 137,
+      "reference_count": 0,
+      "classification": "active - NOT dead",
+      "evidence": "Zero direct references but they are Eloquent relation targets; relationship methods reference them by short name from other models.",
+      "action_taken": "retained"
+    }
+  ]
+}

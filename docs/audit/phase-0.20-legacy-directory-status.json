@@ -1,0 +1,325 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "principle": "A target directory existing is NOT a reason to move a class. Each legacy class below has a recorded priority and reason.",
+ "app_Services_flat_remaining": [
+  {
+   "class": "App\\Services\\AssetImportService",
+   "file": "app/Services/AssetImportService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Asset import orchestration; tightly coupled to Eloquent Screen/Asset models. Safe to move later, deferred to avoid batching risk.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\AssetService",
+   "file": "app/Services/AssetService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Direct Eloquent orchestration; no Domain contract exists yet.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\BookingCapacityService",
+   "file": "app/Services/BookingCapacityService.php",
+   "priority": "P4",
+   "intended_capability": "Booking",
+   "reason": "Availability CHECK. Deliberately kept separate from InventoryService (transactional LOCK) - merging them would change concurrency semantics.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\BookingPriceCalculator",
+   "file": "app/Services/BookingPriceCalculator.php",
+   "priority": "P3",
+   "intended_capability": "Booking",
+   "reason": "Financial calculation. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\BookingWorkflowService",
+   "file": "app/Services/BookingWorkflowService.php",
+   "priority": "P4",
+   "intended_capability": "Booking",
+   "reason": "Owns the booking status-transition invariant and transaction boundary. P4 - must not be relocated without dedicated concurrency tests.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\CampaignPricingService",
+   "file": "app/Services/CampaignPricingService.php",
+   "priority": "P3",
+   "intended_capability": "Campaign",
+   "reason": "Financial calculation. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\CommissionService",
+   "file": "app/Services/CommissionService.php",
+   "priority": "P3",
+   "intended_capability": "Settlement",
+   "reason": "Financial. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\ConflictDetectionService",
+   "file": "app/Services/ConflictDetectionService.php",
+   "priority": "P2",
+   "intended_capability": "Booking",
+   "reason": "Detection logic; depends on Booking models. P2.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\FinanceService",
+   "file": "app/Services/FinanceService.php",
+   "priority": "P3",
+   "intended_capability": "Settlement",
+   "reason": "Financial. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\FirstBookingDiscountService",
+   "file": "app/Services/FirstBookingDiscountService.php",
+   "priority": "P3",
+   "intended_capability": "Campaign",
+   "reason": "Financial. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\InventoryService",
+   "file": "app/Services/InventoryService.php",
+   "priority": "P4",
+   "intended_capability": "Booking",
+   "reason": "Transaction + SELECT ... FOR UPDATE inventory LOCK. Highest-risk class in the codebase; P4.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\ManualBookingService",
+   "file": "app/Services/ManualBookingService.php",
+   "priority": "P4",
+   "intended_capability": "Booking",
+   "reason": "Admin booking creation with financial side effects and transaction boundary. P4.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\MediaService",
+   "file": "app/Services/MediaService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Media orchestration; depends on Media namespace. P2.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\NotificationService",
+   "file": "app/Services/NotificationService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Notification orchestration; depends on Support/Events + MailContractInterface. P2.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\PartnerService",
+   "file": "app/Services/PartnerService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Partner orchestration. P2.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\PaymentService",
+   "file": "app/Services/PaymentService.php",
+   "priority": "P3",
+   "intended_capability": "Payment",
+   "reason": "Financial + gateway. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\PricingEngine",
+   "file": "app/Services/PricingEngine.php",
+   "priority": "P3",
+   "intended_capability": "Pricing",
+   "reason": "Financial. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\PricingRuleEngine",
+   "file": "app/Services/PricingRuleEngine.php",
+   "priority": "P3",
+   "intended_capability": "Pricing",
+   "reason": "Financial. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\PricingService",
+   "file": "app/Services/PricingService.php",
+   "priority": "P3",
+   "intended_capability": "Pricing",
+   "reason": "Financial. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\ProfileService",
+   "file": "app/Services/ProfileService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Profile orchestration. P2.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\RefundService",
+   "file": "app/Services/RefundService.php",
+   "priority": "P3",
+   "intended_capability": "Payment",
+   "reason": "Financial + transaction. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\ReportService",
+   "file": "app/Services/ReportService.php",
+   "priority": "P2",
+   "intended_capability": "Reporting",
+   "reason": "Report orchestration. Reporting has no Services capability in the plan; left flat deliberately.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\RevenueDistributionService",
+   "file": "app/Services/RevenueDistributionService.php",
+   "priority": "P3",
+   "intended_capability": "Settlement",
+   "reason": "Financial. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\RevenueSplitResolverService",
+   "file": "app/Services/RevenueSplitResolverService.php",
+   "priority": "P3",
+   "intended_capability": "Settlement",
+   "reason": "Financial. P3.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\ScreenDeletionService",
+   "file": "app/Services/ScreenDeletionService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Asset/screen lifecycle. P2.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\ScreenProviderService",
+   "file": "app/Services/ScreenProviderService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Provider orchestration. P2.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\SettingsService",
+   "file": "app/Services/SettingsService.php",
+   "priority": "P2",
+   "intended_capability": "Campaign",
+   "reason": "Settings cache/IO. P2.",
+   "moved": false
+  },
+  {
+   "class": "App\\Services\\SettlementService",
+   "file": "app/Services/SettlementService.php",
+   "priority": "P3",
+   "intended_capability": "Settlement",
+   "reason": "Financial. P3.",
+   "moved": false
+  }
+ ],
+ "app_Application_remaining": {
+  "decision": "PARTIALLY MIGRATE",
+  "rationale": "The approved Project 01 structure has no Application/ layer; Services/ is the application/use-case layer. Phase 0.18 had placed 2 Asset services under Application/Asset/Services, which contradicted the plan and was corrected in Phase 0.20 (Batch 2d). The remaining 32 classes are Financial/Payment/Pricing use cases (P3) and Booking use cases (P4) plus 17 Reporting read-side classes. None are P0/P1, and relocating financial/transactional orchestration in the same phase that restructured the tree would concentrate risk. They are DEFERRED with an explicit target, not left unclassified.",
+  "entries": [
+   {
+    "source": "Application/Booking/**",
+    "class_count": 5,
+    "target": "Services/Booking",
+    "decision": "DEFERRED",
+    "priority": "P4",
+    "reason": "Booking use cases own transaction + concurrency semantics."
+   },
+   {
+    "source": "Application/Financial/UseCases/**",
+    "class_count": 3,
+    "target": "Services/Settlement",
+    "decision": "DEFERRED",
+    "priority": "P3",
+    "reason": "Financial. Revenue distribution + provider settlement + referral attribution."
+   },
+   {
+    "source": "Application/Payment/UseCases/**",
+    "class_count": 6,
+    "target": "Services/Payment",
+    "decision": "DEFERRED",
+    "priority": "P3",
+    "reason": "Financial + gateway. 6 payment use cases incl. projector."
+   },
+   {
+    "source": "Application/Pricing/**",
+    "class_count": 2,
+    "target": "Services/Pricing",
+    "decision": "DEFERRED",
+    "priority": "P3",
+    "reason": "Pricing use case + LegacyPricingEngineAdapter."
+   },
+   {
+    "source": "Application/Reporting/**",
+    "class_count": 17,
+    "target": "UNASSIGNED (plan defines no Services/Reporting or Domain/Reporting capability; read-side)",
+    "decision": "DEFERRED",
+    "decision_status": "OPEN - needs an explicit plan clarification",
+    "priority": "P2",
+    "reason": "The plan's Project 01 tree does not include a Reporting capability. Inventing one would be an architecture decision beyond Phase 0.20's mandate. Flagged as OPEN."
+   },
+   {
+    "source": "Application/Asset/Services/**",
+    "class_count": 2,
+    "target": "Services/Campaign",
+    "decision": "MIGRATED",
+    "priority": "P0",
+    "reason": "Moved in Batch 2d. Phase 0.18 had created Application/Asset/Services, which is not in the target structure."
+   }
+  ],
+  "residual_Application_classes": 32
+ },
+ "other_legacy_directories": [
+  {
+   "directory": "app/Enums",
+   "classes": 1,
+   "status": "RETAINED",
+   "reason": "App\\Enums\\AssetType is shared by Asset, Media, Availability and Campaign. Duplicating it per domain would create ambiguous dual ownership, which the plan forbids."
+  },
+  {
+   "directory": "app/Helpers",
+   "classes": 1,
+   "status": "RETAINED",
+   "reason": "App\\Helpers\\MediaHelper. Pure media-geometry helper; Media/MediaHelper already exists, so this is a duplicate. Documented, not deleted - deduplication is out of Phase 0.20 scope."
+  },
+  {
+   "directory": "app/Observers",
+   "classes": 3,
+   "status": "RETAINED",
+   "reason": "Laravel model observers. Belong to the Models/persistence layer. The plan defines no Observers directory."
+  },
+  {
+   "directory": "app/Models",
+   "classes": 27,
+   "status": "RETAINED",
+   "reason": "Persistence-model layer, explicitly endorsed by the plan. The plan puts VALUE OBJECTS in Domain; models stay here."
+  },
+  {
+   "directory": "app/Providers",
+   "classes": 6,
+   "status": "RETAINED",
+   "reason": "Framework composition root. The plan defines no Providers directory."
+  },
+  {
+   "directory": "app/Console",
+   "classes": 133,
+   "status": "RETAINED",
+   "reason": "Artisan command layer. Referenced by plan section 14 as a Prohibited dependency target for Domain/Services."
+  }
+ ]
+}

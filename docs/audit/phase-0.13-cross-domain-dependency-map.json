@@ -1,0 +1,206 @@
+{
+  "phase": "0.13",
+  "name": "Cross-Domain Dependency Map",
+  "generated_at": "2026-09-26",
+  "method": "Imports were parsed for every class in app/ and grouped by area, then each cross-area edge was inspected for its actual purpose before being classified. A dependency was not classified as a violation without reading what it is used for.",
+  "classifications": {
+    "allowed": "legitimate one-directional dependency",
+    "application-mediated": "crosses via an Application use case that owns the boundary",
+    "infrastructure-mediated": "crosses via an Infrastructure adapter",
+    "legacy": "pre-boundary coupling still in place",
+    "circular": "mutual dependency",
+    "suspicious": "violates or strains a stated rule and needs a decision"
+  },
+  "summary": {
+    "infrastructure-mediated": 2,
+    "allowed": 13,
+    "suspicious": 4,
+    "application-mediated": 2
+  },
+  "dangerous_relationships_checked": [
+    {
+      "pattern": "Pricing -> Booking -> Pricing",
+      "present": false,
+      "evidence": "Booking depends on Pricing one-directionally; CampaignPricingEngine imports no Booking class."
+    },
+    {
+      "pattern": "Payment -> Booking -> Payment",
+      "present": false,
+      "evidence": "Payment transitions Booking status; Booking imports no Payment class."
+    },
+    {
+      "pattern": "Financial -> Payment -> Financial",
+      "present": false,
+      "evidence": "One-directional: Financial reads booking projections and owns commissions."
+    },
+    {
+      "pattern": "Reporting -> Financial -> Reporting",
+      "present": false,
+      "evidence": "Reporting performs reads only; no reverse edge exists."
+    },
+    {
+      "pattern": "Domain -> Http",
+      "present": false,
+      "evidence": "Resolved in Phase 0.13. User::hasPermission was the sole instance and now depends on app/Support/Authorization instead."
+    },
+    {
+      "pattern": "Domain -> External SDK",
+      "present": false,
+      "evidence": "No Domain class imports an SDK, HTTP client, Mail or Storage facade."
+    },
+    {
+      "pattern": "Domain -> Controller",
+      "present": false,
+      "evidence": "No Domain class imports anything under App\\Http."
+    }
+  ],
+  "edges": [
+    {
+      "from_domain": "Booking",
+      "to_domain": "Inventory/Availability",
+      "classification": "allowed",
+      "evidence": "Booking -> InventoryService, BookingCapacityService via constructor injection in CreateCampaignBookingUseCase / RescheduleBookingUseCase / CheckBookingAvailabilityQuery",
+      "note": "Availability is a subordinate capability of booking; dependency is one-directional and declared."
+    },
+    {
+      "from_domain": "Booking",
+      "to_domain": "Pricing",
+      "classification": "allowed",
+      "evidence": "CreateCampaignBookingUseCase -> CampaignPricingService -> PricingEngineInterface -> CampaignPricingEngine",
+      "note": "Pricing is called, never the reverse."
+    },
+    {
+      "from_domain": "Booking",
+      "to_domain": "Financial",
+      "classification": "application-mediated",
+      "evidence": "CreateCampaignBookingUseCase -> DistributeBookingRevenueUseCase (Application/Financial) -> RevenueDistributionService",
+      "note": "Booking does not call revenue allocation directly; it calls the application use case that owns it."
+    },
+    {
+      "from_domain": "Booking",
+      "to_domain": "Media",
+      "classification": "allowed",
+      "evidence": "BookingController -> MediaService (constructor-injected in Phase 0.13)",
+      "note": "Storage access is behind StorageContractInterface since Phase 0.12."
+    },
+    {
+      "from_domain": "Booking",
+      "to_domain": "Loyalty",
+      "classification": "application-mediated",
+      "evidence": "CreateCampaignBookingUseCase -> LoyaltyService::debitRedeemedPoints",
+      "note": "Point debit is a financial side effect invoked explicitly by the use case, not implicitly by the model."
+    },
+    {
+      "from_domain": "Booking",
+      "to_domain": "Referral",
+      "classification": "suspicious",
+      "evidence": "app/Models/Booking.php:41-90 - updated/deleting model events call app(LoyaltyService), app(SettingsService), app(ReferralTrackingService)",
+      "note": "A persistence model is driving three cross-domain side effects through the service locator. Highest-risk architectural item found in Phase 0.13. Left in place: the side effects are load-bearing financial logic and relocating them would change transaction timing."
+    },
+    {
+      "from_domain": "Payment",
+      "to_domain": "Booking",
+      "classification": "allowed",
+      "evidence": "PaymentService, RefundService -> Booking model / CampaignPricingService",
+      "note": "Payment transitions booking status; Booking does not depend on Payment."
+    },
+    {
+      "from_domain": "Payment",
+      "to_domain": "Financial",
+      "classification": "allowed",
+      "evidence": "CommissionService, RevenueSplitResolverService",
+      "note": "Commission accrual is owned by Financial and called by Payment-adjacent flows."
+    },
+    {
+      "from_domain": "Payment",
+      "to_domain": "External (Razorpay)",
+      "classification": "infrastructure-mediated",
+      "evidence": "PaymentService -> app/Infrastructure/Payments adapter",
+      "note": "Gateway SDK is confined to Infrastructure per Rule 3."
+    },
+    {
+      "from_domain": "Financial",
+      "to_domain": "Booking",
+      "classification": "allowed",
+      "evidence": "RevenueDistributionService, SettlementService read booking_screens",
+      "note": "Financial reads booking projections; no write-back into Booking rules."
+    },
+    {
+      "from_domain": "Financial",
+      "to_domain": "Partner",
+      "classification": "allowed",
+      "evidence": "CommissionService -> partner_commissions",
+      "note": "Commission ledger is the contract between Financial and Partner."
+    },
+    {
+      "from_domain": "Reporting",
+      "to_domain": "Financial",
+      "classification": "allowed",
+      "evidence": "app/Application/Reporting/Queries/* -> DB::table read of persisted booking_screens splits and partner_commissions",
+      "note": "Reporting consumes STORED financial truth; it never recomputes it. This is the canonical pattern and is the reason the two commission totals in the referral report legitimately differ."
+    },
+    {
+      "from_domain": "Reporting",
+      "to_domain": "Transactional mutation",
+      "classification": "allowed",
+      "evidence": "zero write calls anywhere under app/Application/Reporting",
+      "note": "Verified: the reporting layer performs no writes. Reporting -> transactional mutation is the explicitly prohibited edge and it does not exist."
+    },
+    {
+      "from_domain": "Pricing",
+      "to_domain": "Booking",
+      "classification": "suspicious",
+      "evidence": "app/Domain/Pricing/CampaignPricingEngine.php imports 7 App\\Services classes including LoyaltyService and PricingRuleEngine",
+      "note": "A Domain engine depends on legacy Services. Genuine Rule 3 / Rule 9 pressure. Not remediated in this phase - see the debt register."
+    },
+    {
+      "from_domain": "Pricing",
+      "to_domain": "Settings (persistence)",
+      "classification": "suspicious",
+      "evidence": "CampaignPricingEngine -> SettingsService (DB-backed settings)",
+      "note": "Domain engine reads persisted settings; Rule 9 requires pricing determinism for identical parameters, and a DB-backed setting is an external input to the calculation."
+    },
+    {
+      "from_domain": "Partner",
+      "to_domain": "Booking",
+      "classification": "allowed",
+      "evidence": "PartnerService -> PartnerApproved/PartnerRejected events; booking rows carry created_by_partner_id",
+      "note": "Partner ownership of bookings is recorded, not computed cross-domain."
+    },
+    {
+      "from_domain": "Provider",
+      "to_domain": "Asset",
+      "classification": "allowed",
+      "evidence": "ScreenProviderService -> screens.owner_type / screen_provider_id",
+      "note": "Provider owns screen assets."
+    },
+    {
+      "from_domain": "Media",
+      "to_domain": "Notifications",
+      "classification": "allowed",
+      "evidence": "Booking media approval/rejection -> events -> NotificationEventSubscriber -> NotificationService",
+      "note": "Event-mediated, not a direct call."
+    },
+    {
+      "from_domain": "Notifications",
+      "to_domain": "Booking/Payment/Media/Partner/Rewards",
+      "classification": "infrastructure-mediated",
+      "evidence": "NotificationEventSubscriber -> NotificationService -> MailContractInterface -> LaravelMailAdapter",
+      "note": "Since Phase 0.12 no direct Mail facade usage remains outside the adapter."
+    },
+    {
+      "from_domain": "Authorization (Support)",
+      "to_domain": "Http + Models",
+      "classification": "allowed",
+      "evidence": "app/Support/Authorization/RolePermissionChecker <- PermissionMiddleware, User::hasPermission",
+      "note": "Phase 0.13: the dependency direction is now Support <- {Http, Models} rather than Models -> Http."
+    },
+    {
+      "from_domain": "Auth",
+      "to_domain": "Http",
+      "classification": "suspicious",
+      "evidence": "Api/ProfileController, Auth controllers read the authenticated user from the request",
+      "note": "Unavoidable for an HTTP adapter; noted rather than flagged as a defect."
+    }
+  ]
+}

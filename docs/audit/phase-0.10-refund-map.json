@@ -1,0 +1,83 @@
+{
+  "phase": "0.10",
+  "name": "Refund Map (cross-cutting, Payment + Financial)",
+  "generated_at": "2026-09-26T00:40:00+05:30",
+  "summary": "Two materially different refund implementations exist. Phase 0.10 unified their ENTRY POINTS but deliberately did not unify their behaviour.",
+  "implementations": [
+    {
+      "id": "REFUND-A",
+      "name": "Recorded refund",
+      "routed": true,
+      "route": "POST /api/admin/payments/{id}/refund",
+      "controller": "App\\Http\\Controllers\\AdminPaymentController::initiateRefund()",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "service": "App\\Services\\RefundService::initiateRefund()",
+      "writes_refunds_row": true,
+      "writes_payment_log": true,
+      "updates_booking": "yes, to 'refunded' when the refund is full",
+      "amount_parameter": "required (float, validated numeric min:0)",
+      "null_amount_semantics": "not reachable — the amount is always supplied",
+      "gateway_call": "inside the DB transaction",
+      "status": "CANONICAL"
+    },
+    {
+      "id": "REFUND-B",
+      "name": "Legacy gateway-only refund",
+      "routed": false,
+      "route": "NONE — PaymentController::refund() has no route entry",
+      "controller": "App\\Http\\Controllers\\PaymentController::refund()",
+      "application_boundary": "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "service": "App\\Services\\PaymentService::refund()",
+      "writes_refunds_row": false,
+      "writes_payment_log": false,
+      "updates_booking": "yes, to 'refunded' when the refund is full",
+      "amount_parameter": "optional (nullable float)",
+      "null_amount_semantics": "a null amount means FULL refund at the gateway and is sent as no amount key",
+      "gateway_call": "inside the DB transaction",
+      "status": "DEAD_CODE_PRESERVED"
+    }
+  ],
+  "behavioural_differences": [
+    "REFUND-A writes a refunds row and a PaymentLog row; REFUND-B writes neither.",
+    "REFUND-A requires an amount; REFUND-B treats a missing amount as a full refund.",
+    "REFUND-A always sends an explicit paise amount to the gateway; REFUND-B omits the amount key entirely when null.",
+    "REFUND-A records the gateway response in refunds.metadata.razorpay_response; REFUND-B keeps no response record."
+  ],
+  "unification_decision": {
+    "decision": "Route BOTH through RefundPaymentUseCase, but keep each service implementation intact behind it.",
+    "rationale": "The use case is a thin dispatcher. Collapsing the two implementations into one would have to pick a winner on each of the four differences above, changing observable behaviour on the live path. That is a product decision, not a refactor.",
+    "recorded_as": "ADR-P09-05"
+  },
+  "money_handling": {
+    "gateway_payload": "integer paise via Money::toPaise(), matching the legacy (int) round($amount * 100)",
+    "refunds_table_amount": "stored in RUPEES as decimal(12,2), NOT paise — pre-existing and preserved",
+    "note": "The gateway payload and the local row use DIFFERENT units. This is legacy behaviour and is pinned by GoldenPaymentBoundaryTest::test_recorded_refund_writes_row_log_and_partial_status.",
+    "bcmath_introduced": false,
+    "float_persisted_without_decimal_cast": false
+  },
+  "status_effects": {
+    "partial": "payment_status -> 'partially_refunded'; refund_status -> 'processed'; booking UNCHANGED",
+    "full": "payment_status -> 'refunded'; refund_status -> 'processed'; booking -> 'refunded'",
+    "full_determination": "Money::isFullRefund($amount, $payment->amount) — a >= comparison, so an over-payment request is also a full refund",
+    "enforced_by": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_recorded_refund_writes_row_log_and_partial_status"
+  },
+  "failure_semantics": {
+    "gateway_exception": "Propagates out of the DB::transaction. The refund row, the payment status change, the booking status change and the PaymentLog are ALL rolled back.",
+    "net_effect": "No local trace of a failed refund attempt, and no gateway debit, because the gateway call precedes every local write.",
+    "gap": "An AMBIGUOUS gateway timeout is not covered: if the gateway debited but the response was lost, the local transaction rolls back and no record exists of a real debit.",
+    "changed_in_phase_0_9_0_10": false,
+    "enforced_by": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_refund_failure_rolls_back_partial_refund_rows"
+  },
+  "architecture_rule_4_violation": {
+    "rule": "External network operations must happen outside DB row locks / transactions.",
+    "status": "PRE-EXISTING VIOLATION, RECORDED NOT FIXED",
+    "why_not_fixed": "Moving the gateway call outside the transaction would change failure semantics: today a gateway failure leaves no local state, and the gateway has not been debited. Moving the call out risks a debited gateway with no local record if the subsequent DB write fails. That is a redesign of financial failure handling, out of scope for an extraction phase.",
+    "recommendation": "Handle in a dedicated refund-hardening phase with a gateway idempotency key and a pending-intent record written BEFORE the gateway call."
+  },
+  "idempotency": {
+    "gateway_idempotency_key": "none",
+    "consequence": "A client retry after an ambiguous timeout can double-refund.",
+    "changed_in_phase_0_9_0_10": false,
+    "recorded_in": "docs/audit/phase-0.9-payment-idempotency-map.json"
+  }
+}

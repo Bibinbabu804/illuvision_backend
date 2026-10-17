@@ -1,0 +1,140 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "debt-triage",
+  "carried_from_phase_014": {
+    "items": 16,
+    "high": 4,
+    "medium": 7,
+    "low": 5,
+    "register": "docs/audit/phase-0.14-architecture-debt-register.json"
+  },
+  "new_items": [
+    {
+      "id": "SEC-01",
+      "priority": "P0",
+      "title": "PATCH /api/bookings/{booking} bypasses permission:bookings.edit and allows arbitrary status+price write",
+      "area": "security",
+      "effort": "S",
+      "blocked_by": "needs approval - changes authorization outcome"
+    },
+    {
+      "id": "SEC-02",
+      "priority": "P0",
+      "title": "19 anonymous /api/v2/* routes incl. finance reads and settlement writes",
+      "area": "security",
+      "effort": "M",
+      "blocked_by": "needs a per-route public/private decision"
+    },
+    {
+      "id": "SEC-03",
+      "priority": "P0",
+      "title": "Role and partner administration authenticated but unpermissioned (privilege escalation)",
+      "area": "security",
+      "effort": "M",
+      "blocked_by": "needs approval - changes authorization outcome"
+    },
+    {
+      "id": "SEC-04",
+      "priority": "P1",
+      "title": "Anonymous gallery CRUD",
+      "area": "security",
+      "effort": "S"
+    },
+    {
+      "id": "SEC-05",
+      "priority": "P1",
+      "title": "Anonymous admin asset-import and screen-category writes",
+      "area": "security",
+      "effort": "S"
+    },
+    {
+      "id": "SEC-06",
+      "priority": "P1",
+      "title": ".env.testing real credentials committed, not git-ignored",
+      "area": "security",
+      "effort": "S"
+    },
+    {
+      "id": "SEC-07",
+      "priority": "P2",
+      "title": "Unpermissioned file/video upload",
+      "area": "security",
+      "effort": "S"
+    },
+    {
+      "id": "OBS-01",
+      "priority": "P1",
+      "title": "No error tracking (Sentry absent)",
+      "area": "operations",
+      "effort": "S"
+    },
+    {
+      "id": "OBS-02",
+      "priority": "P1",
+      "title": "No structured JSON log channel",
+      "area": "operations",
+      "effort": "S"
+    },
+    {
+      "id": "DEP-01",
+      "priority": "P0",
+      "title": "APP_DEBUG enabled",
+      "area": "deployment",
+      "effort": "S"
+    },
+    {
+      "id": "DEP-02",
+      "priority": "P1",
+      "title": "No version control - changes are not revertable",
+      "area": "process",
+      "effort": "M"
+    },
+    {
+      "id": "IDEM-01",
+      "priority": "P1",
+      "title": "No idempotency key on campaign booking creation",
+      "area": "financial",
+      "effort": "M",
+      "blocked_by": "changes API surface and schema"
+    },
+    {
+      "id": "TX-01",
+      "priority": "P1",
+      "title": "Loyalty/referral side effects inside caller transaction via model events",
+      "area": "financial",
+      "effort": "L"
+    },
+    {
+      "id": "STOR-01",
+      "priority": "P1",
+      "title": "User-influenced storage paths unverified for traversal",
+      "area": "security",
+      "effort": "M"
+    },
+    {
+      "id": "SCHED-01",
+      "priority": "P3",
+      "title": "Laravel demo 'inspire' command scheduled hourly",
+      "area": "operations",
+      "effort": "XS"
+    },
+    {
+      "id": "DV-01",
+      "priority": "P2",
+      "title": "Domain Pricing CampaignPricingEngine depends on 7 Services classes",
+      "area": "architecture",
+      "effort": "L"
+    }
+  ],
+  "totals": {
+    "p0": 4,
+    "p1": 8,
+    "p2": 2,
+    "p3": 1,
+    "carried_from_0_14": 16
+  },
+  "note": "The 4 P0 items each change an authorization outcome, an API contract, or a deployment environment variable, so all require explicit approval before remediation."
+}

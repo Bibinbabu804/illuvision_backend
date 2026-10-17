@@ -1,0 +1,134 @@
+{
+  "phase": "0.9",
+  "name": "Payment Dependency Diff",
+  "generated_at": "2026-09-26T00:10:00+05:30",
+  "purpose": "Record every dependency-edge change introduced by the Payment boundary extraction. Allowed edges are enumerated so that future phases can detect re-introduction of forbidden dependencies.",
+  "summary": {
+    "edges_added": 11,
+    "edges_removed": 3,
+    "files_created": 9,
+    "files_modified": 7,
+    "files_deleted": 0,
+    "net_dependency_direction": "Controllers -> Application -> Domain <- Infrastructure (strictly inward for business rules; persistence and vendor SDK strictly outward)"
+  },
+  "allowed_dependencies": {
+    "App\\Http": ["App\\Application", "App\\Models (DTO/response shaping only)"],
+    "App\\Application": ["App\\Domain", "App\\Services (transitional legacy facades)"],
+    "App\\Domain": ["nothing — no framework, no persistence, no vendor SDK"],
+    "App\\Infrastructure": ["App\\Domain", "App\\Models", "vendor SDKs"]
+  },
+  "edges_added": [
+    {
+      "from": "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+      "to": "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+      "type": "domain_contract",
+      "rationale": "Pending-payment reuse lookup moved out of the use case's inline Eloquent call."
+    },
+    {
+      "from": "App\\Services\\PaymentService",
+      "to": "App\\Domain\\Payment\\Contracts\\PaymentRepositoryInterface",
+      "type": "domain_contract",
+      "rationale": "Gateway-order lookup and payment creation moved behind a persistence contract."
+    },
+    {
+      "from": "App\\Services\\PaymentService",
+      "to": "App\\Domain\\Payment\\Support\\Money",
+      "type": "domain_support",
+      "rationale": "Replaces three inline paise conversions with one audited helper."
+    },
+    {
+      "from": "App\\Services\\RefundService",
+      "to": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+      "type": "domain_contract",
+      "rationale": "REMOVES the Razorpay\\Api\\Api dependency. This is the only architecture violation eliminated in this phase."
+    },
+    {
+      "from": "App\\Services\\RefundService",
+      "to": "App\\Domain\\Payment\\Support\\Money",
+      "type": "domain_support",
+      "rationale": "Replaces the inline refund amount conversion and full-refund ternary."
+    },
+    {
+      "from": "App\\Http\\Controllers\\PaymentController",
+      "to": "App\\Application\\Payment\\UseCases\\VerifyPaymentUseCase",
+      "type": "application_use_case",
+      "rationale": "Controller no longer reaches the service directly."
+    },
+    {
+      "from": "App\\Http\\Controllers\\PaymentController",
+      "to": "App\\Application\\Payment\\UseCases\\GetPaymentStatusUseCase",
+      "type": "application_use_case",
+      "rationale": "Status read-model construction moved out of HTTP."
+    },
+    {
+      "from": "App\\Http\\Controllers\\AdminPaymentController",
+      "to": "App\\Application\\Payment\\UseCases\\RefundPaymentUseCase",
+      "type": "application_use_case",
+      "rationale": "Live refund path now enters through the application boundary."
+    },
+    {
+      "from": "App\\Http\\Controllers\\AdminPaymentController",
+      "to": "App\\Application\\Financial\\UseCases\\RecordReferralAttributionUseCase",
+      "type": "application_use_case",
+      "rationale": "Replaces the inline app(ReferralTrackingService::class) service-locator call."
+    },
+    {
+      "from": "App\\Http\\Controllers\\AdminManualBookingController",
+      "to": "App\\Application\\Payment\\UseCases\\CreateOfflinePaymentUseCase",
+      "type": "application_use_case",
+      "rationale": "Offline payment recording enters through the application boundary."
+    },
+    {
+      "from": "App\\Application\\Payment\\UseCases\\PaymentStatusProjector",
+      "to": "App\\Models\\Booking / App\\Models\\Payment",
+      "type": "read_projection",
+      "rationale": "Deliberate, documented exception: this is a read-model builder, not a business-rule owner. The alternative (a query-side repository) was judged over-engineering for a single 8-column projection."
+    }
+  ],
+  "edges_removed": [
+    {
+      "from": "App\\Services\\RefundService",
+      "to": "Razorpay\\Api\\Api",
+      "type": "vendor_sdk",
+      "violation": "ARCHITECTURE_RULE_EXTERNAL_INTEGRATION",
+      "replacement": "App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+      "status": "ELIMINATED"
+    },
+    {
+      "from": "App\\Http\\Controllers\\PaymentController",
+      "to": "App\\Services\\PaymentService",
+      "type": "controller_to_service",
+      "replacement": "VerifyPaymentUseCase, GetPaymentStatusUseCase, RefundPaymentUseCase",
+      "status": "ELIMINATED"
+    },
+    {
+      "from": "App\\Http\\Controllers\\AdminPaymentController",
+      "to": "App\\Services\\RefundService (write path)",
+      "type": "controller_to_service",
+      "replacement": "RefundPaymentUseCase",
+      "status": "ELIMINATED",
+      "note": "The read-side settlement/refund listing methods still depend on RefundService; those are pure reads and are explicitly out of scope."
+    }
+  ],
+  "service_locators_removed": [
+    {
+      "location": "App\\Http\\Controllers\\AdminPaymentController::approvePayment()",
+      "was": "app(\\App\\Services\\ReferralTrackingService::class)->createReferralTracking(...)",
+      "now": "injected RecordReferralAttributionUseCase",
+      "rationale": "Unresolvable-at-static-analysis service locator; now constructor-injected and testable."
+    }
+  ],
+  "unresolved_violations": [
+    {
+      "edge": "App\\Services\\PaymentService -> App\\Services\\ReferralTrackingService -> App\\Domain\\Financial",
+      "type": "payment_to_financial_legitimate_dependency",
+      "severity": "accepted",
+      "rationale": "Referral attribution and partner commission creation are a genuine part of the payment-success transition, not an accidental coupling. Removing it would change transaction semantics. Documented in ADR-P09-03, not 'fixed'."
+    }
+  ],
+  "verification": {
+    "vendor_sdk_leak_scan": "Only Razorpay\\Api\\Api import in app/ is app/Infrastructure/Payments/Razorpay/RazorpayPaymentGateway.php",
+    "http_layer_client_scan": "No GuzzleHttp / Http:: / curl_init references under app/Http",
+    "enforced_by_test": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_no_vendor_sdk_import_remains_in_services_or_domain"
+  }
+}

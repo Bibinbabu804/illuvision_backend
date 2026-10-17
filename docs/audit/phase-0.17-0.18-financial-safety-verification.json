@@ -1,0 +1,82 @@
+{
+  "phases": "0.17 + 0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy retirement and modular monolith migration",
+  "artifact": "financial-safety-verification",
+  "verdict": "NO FINANCIAL BEHAVIOUR CHANGED",
+  "hard_stops_observed": [
+    "pricing",
+    "availability",
+    "booking",
+    "payment",
+    "refund",
+    "settlement",
+    "commission",
+    "revenue split",
+    "financial snapshots/calculations",
+    "transaction boundaries",
+    "row locks and lock ordering"
+  ],
+  "classes_touched_in_financial_paths": 0,
+  "near_misses_and_how_they_were_handled": [
+    {
+      "item": "App\\Enums\\PaymentStatus",
+      "risk": "HIGH - a payment status enum",
+      "handling": "Confirmed the live vocabulary is App\\Domain\\Payment\\PaymentStatus (imported by the payment use cases and tests) and that the App\\Enums one had zero references, then deleted only the unreferenced duplicate. Verified payment tests unchanged in count and outcome."
+    },
+    {
+      "item": "App\\Services\\Pricing\\{Peak,Weekend,CampaignDiscount}Calculator",
+      "risk": "HIGH - pricing calculators",
+      "handling": "Identified the canonical live owner for each (PricingPeakRule, PricingWeekendRule, CampaignPricingEngine) and proved zero references before deleting. Rule 7 forbids COPYING logic, not deleting an unreferenced class - Phase 0.13's deferral was based on a mis-citation, which is now corrected and documented."
+    },
+    {
+      "item": "App\\Models\\PricingDiscountRule",
+      "risk": "MEDIUM - unused model on live pricing schema",
+      "handling": "RETAINED. The table is FK-constrained to pricing_plans; deleting its only model class would have been a schema-ownership change."
+    },
+    {
+      "item": "CampaignPricingService / PricingEngine / Availability trio / ManualBookingService / Payment / Refund / Settlement services",
+      "risk": "HIGH",
+      "handling": "NOT MOVED. All are listed in the sequenced plan as blocked pending an explicit behaviour decision."
+    }
+  ],
+  "verifications": [
+    {
+      "check": "Full test suite",
+      "baseline": "571 passed, 5323 assertions",
+      "after": "571 passed, 5323 assertions",
+      "result": "IDENTICAL"
+    },
+    {
+      "check": "CampaignBookingPricingIntegrityTest",
+      "result": "runs within the passing set, unchanged (its only failure is the pre-existing message-wording assertion)"
+    },
+    {
+      "check": "MinutePricingEngineTest",
+      "result": "passes, unchanged"
+    },
+    {
+      "check": "BookingConcurrencyTest",
+      "result": "locking behaviour separately covered by a passing assertion; the only failure is the pre-existing message wording"
+    },
+    {
+      "check": "Schema (74/796/252/94)",
+      "result": "IDENTICAL - no migration added, removed or edited"
+    },
+    {
+      "check": "InventoryService lockForUpdate + transaction boundaries",
+      "result": "file not opened"
+    },
+    {
+      "check": "Idempotency, external payment, refund, settlement, commission, reconciliation classes",
+      "result": "not opened"
+    }
+  ],
+  "known_pre_existing_financial_observations_not_introduced_here": [
+    "booking idempotency key is not implemented",
+    "storage-traversal behaviour is unverified",
+    "Screen-level and duration-level campaign discount values are pinned by tests and were not touched"
+  ],
+  "conclusion": "Financial safety held. The only deletions adjacent to money were two provably unreferenced duplicates, and the only files moved were three contract-only collaborators outside every financial path."
+}

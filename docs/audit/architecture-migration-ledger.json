@@ -1,0 +1,125 @@
+[
+  {
+    "component": "Razorpay Payment Gateway Adapter",
+    "phase": "0.5",
+    "before": "App\\Services\\PaymentService instantiating Razorpay\\Api\\Api",
+    "after": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway implementing App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface",
+    "domain": "Payment",
+    "target_layer": "Infrastructure",
+    "tests": [
+      "Tests\\Unit\\Infrastructure\\Payments\\RazorpayPaymentGatewayTest",
+      "Tests\\Feature\\Golden\\GoldenPaymentRegressionTest",
+      "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_payment_order_create_contract_and_auth"
+    ],
+    "contract_protected": true,
+    "financial_behavior_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "status": "complete"
+  },
+  {
+    "component": "Google OAuth Identity Provider Adapter",
+    "phase": "0.5",
+    "before": "App\\Http\\Controllers\\Auth\\GoogleAuthController calling Http::get('https://oauth2.googleapis.com/tokeninfo')",
+    "after": "App\\Infrastructure\\Auth\\GoogleOAuthAdapter implementing App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+    "domain": "Authentication",
+    "target_layer": "Infrastructure",
+    "tests": [
+      "Tests\\Unit\\Infrastructure\\Auth\\GoogleOAuthAdapterTest",
+      "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_google_auth_contract_with_mocked_tokeninfo"
+    ],
+    "contract_protected": true,
+    "financial_behavior_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "status": "complete"
+  },
+  {
+    "component": "Exchange Rate API Client Adapter",
+    "phase": "0.5",
+    "before": "App\\Services\\ExchangeRateService calling Http::get() directly",
+    "after": "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient implementing App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+    "domain": "Pricing / Currency",
+    "target_layer": "Infrastructure",
+    "tests": [
+      "Tests\\Unit\\Infrastructure\\ExchangeRates\\ExchangeRateApiClientTest",
+      "Tests\\Feature\\CurrencyConversionTest"
+    ],
+    "contract_protected": true,
+    "financial_behavior_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "status": "complete"
+  },
+  {
+    "component": "Create Payment Order Use Case",
+    "phase": "0.5",
+    "before": "PaymentController checking existing pending payment and calling PaymentService::createOrder inline",
+    "after": "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase",
+    "domain": "Payment",
+    "target_layer": "Application",
+    "tests": [
+      "Tests\\Unit\\Application\\Payment\\CreatePaymentOrderUseCaseTest",
+      "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_payment_order_create_contract_and_auth"
+    ],
+    "contract_protected": true,
+    "financial_behavior_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "status": "complete"
+  },
+  {
+    "component": "Calculate Campaign Price Use Case",
+    "phase": "0.5",
+    "before": "BookingController::calculateCampaignPricing directly invoking CampaignPricingService",
+    "after": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+    "domain": "Pricing",
+    "target_layer": "Application",
+    "tests": [
+      "Tests\\Unit\\Application\\Pricing\\CalculateCampaignPriceUseCaseTest",
+      "Tests\\Feature\\Golden\\GoldenPricingRegressionTest",
+      "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_campaign_pricing_calculate_contract_success_and_validation"
+    ],
+    "contract_protected": true,
+    "financial_behavior_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "status": "complete"
+  },
+  {
+    "component": "Canonical Campaign Pricing Engine",
+    "phase": "0.6",
+    "before": "App\\Services\\CampaignPricingService owning calculation, validation, and rule composition",
+    "after": "App\\Domain\\Pricing\\CampaignPricingEngine implementing App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+    "domain": "Pricing",
+    "target_layer": "Domain",
+    "tests": [
+      "Tests\\Unit\\Domain\\Pricing\\CampaignPricingEngineTest",
+      "Tests\\Feature\\Golden\\GoldenPricingRegressionTest",
+      "Tests\\Feature\\MinutePricingEngineTest"
+    ],
+    "contract_protected": true,
+    "financial_behavior_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "status": "complete"
+  },
+  {
+    "component": "Legacy Pricing Engine Adapter",
+    "phase": "0.6",
+    "before": "App\\Http\\Controllers\\Api\\PricingEngineController directly invoking App\\Services\\PricingEngine",
+    "after": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter wrapping App\\Services\\PricingEngine",
+    "domain": "Pricing (Legacy)",
+    "target_layer": "Application",
+    "tests": [
+      "Tests\\Unit\\Application\\Pricing\\LegacyPricingEngineAdapterTest",
+      "Tests\\Feature\\Golden\\GoldenPricingRegressionTest::test_case_pricing_010_v2_pricing_engine",
+      "Tests\\Feature\\Golden\\GoldenApiContractRegressionTest::test_v2_pricing_calculate_contract_success_and_validation"
+    ],
+    "contract_protected": true,
+    "financial_behavior_changed": false,
+    "database_changed": false,
+    "api_changed": false,
+    "status": "complete"
+  }
+]

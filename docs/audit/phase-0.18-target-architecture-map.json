@@ -1,0 +1,143 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "target-architecture-map",
+  "style": "modular monolith (NOT microservices, NOT CQRS, NOT event sourcing)",
+  "layer_dependency_direction": [
+    "Http",
+    "Application",
+    "Domain",
+    "Contracts",
+    "Infrastructure",
+    "Persistence/External"
+  ],
+  "allowed_dependencies": {
+    "Http": {
+      "may_depend_on": [
+        "Application",
+        "Domain",
+        "Infrastructure",
+        "Models",
+        "Support",
+        "Http"
+      ],
+      "forbidden": [
+        "Domain->Http (Rule 11)",
+        "service locators in controllers (Rule 12)"
+      ]
+    },
+    "Application": {
+      "may_depend_on": [
+        "Domain",
+        "Contracts",
+        "Infrastructure contracts",
+        "Models (allowed, pragmatic)",
+        "Support"
+      ],
+      "forbidden": [
+        "Http",
+        "raw external SDK calls"
+      ]
+    },
+    "Domain": {
+      "may_depend_on": [
+        "Domain",
+        "Support",
+        "Contracts"
+      ],
+      "forbidden": [
+        "Services (Rule 2)",
+        "Http (Rule 11)",
+        "Models",
+        "Eloquent",
+        "Facades",
+        "service locators"
+      ]
+    },
+    "Infrastructure": {
+      "may_depend_on": [
+        "Domain contracts",
+        "Application contracts",
+        "Framework",
+        "External SDKs"
+      ],
+      "forbidden": [
+        "Domain business rules",
+        "Http"
+      ]
+    }
+  },
+  "permitted_violations": "Explicitly allowed in this codebase: Domain/Financial/Support/RevenueAllocation.php and Domain/Pricing/CampaignPricingEngine.php currently reference Services. These are documented debt, not conformance. Rule 2 remains RED in the debt register with exactly these two allowlisted classes.",
+  "target_modules": {
+    "Asset": {
+      "Domain": 0,
+      "Application": 2,
+      "status": "NOW ESTABLISHED (migrated in this phase)"
+    },
+    "Availability": {
+      "Domain": 0,
+      "Application": 0,
+      "status": "NO MODULE - deferred"
+    },
+    "Booking": {
+      "Domain": 0,
+      "Application": 4,
+      "status": "partial - legacy orchestration still in Services"
+    },
+    "Campaign": {
+      "Domain": 0,
+      "Application": 0,
+      "status": "NO MODULE - deferred"
+    },
+    "Creative": {
+      "Domain": 0,
+      "Application": 0,
+      "status": "NO MODULE - deferred"
+    },
+    "Financial": {
+      "Domain": 3,
+      "Application": 3,
+      "status": "best-covered module"
+    },
+    "Media": {
+      "Domain": 0,
+      "Application": 0,
+      "status": "NO MODULE - deferred"
+    },
+    "Partner": {
+      "Domain": 0,
+      "Application": 0,
+      "status": "NO MODULE - deferred"
+    },
+    "Payment": {
+      "Domain": 4,
+      "Application": 6,
+      "status": "well covered"
+    },
+    "Pricing": {
+      "Domain": 2,
+      "Application": 2,
+      "status": "partial - 4 calculators + 2 engines still in Services"
+    },
+    "Provider": {
+      "Domain": 0,
+      "Application": 0,
+      "status": "NO MODULE - deferred"
+    },
+    "Reporting": {
+      "Domain": 0,
+      "Application": 17,
+      "status": "Application-only module (acceptable for read models)"
+    },
+    "Settlement": {
+      "Domain": 0,
+      "Application": 0,
+      "status": "NO MODULE - deferred (lives in Financial + Services)"
+    }
+  },
+  "modules_total": 13,
+  "modules_without_domain_or_application_folder": 8,
+  "conclusion": "Phase 0.18 established the first missing module (Asset) and the first missing Support/Events home, but 8 of 13 target modules still have no Domain/Application ownership. The remaining work is a large, behaviour-sensitive relocation that cannot be completed safely in one phase. See phase-0.18-application-module-map.json for the full sequenced plan."
+}

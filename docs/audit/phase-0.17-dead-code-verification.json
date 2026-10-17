@@ -1,0 +1,231 @@
+{
+  "phase": "0.17",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy code and controller retirement",
+  "artifact": "dead-code-verification",
+  "standard": "Static analysis + route analysis + runtime registration analysis + scheduler/queue analysis + container resolution analysis + configuration analysis + test verification. Never 'grep returned zero'.",
+  "verification_layers": [
+    {
+      "layer": "Route table",
+      "evidence": "Route::getRoutes() - 442 controller actions enumerated; none referenced these classes."
+    },
+    {
+      "layer": "Scheduler",
+      "evidence": "Console kernel schedule() driven with a real Schedule instance - 4 entries (currency:sync-rates, inspire, rewards:expire, bookings:expire-pending). None referenced these classes."
+    },
+    {
+      "layer": "Artisan registry",
+      "evidence": "Artisan::all() - 133 registered commands compared against each class."
+    },
+    {
+      "layer": "Container bindings",
+      "evidence": "35 bindings parsed from app/Providers/*.php."
+    },
+    {
+      "layer": "Gate policy resolution",
+      "evidence": "All 62 models queried; none resolves to any policy."
+    },
+    {
+      "layer": "Eloquent conventions",
+      "evidence": "Model inheritance checked so relation-discovered models are not misjudged."
+    },
+    {
+      "layer": "Database dynamic resolution",
+      "evidence": "Every varchar/text/char/json/longtext column in all 74 tables scanned for stored class names."
+    },
+    {
+      "layer": "Test suite",
+      "evidence": "Full suite re-run after the deletion batch."
+    }
+  ],
+  "verified_dead_count": 16,
+  "verified_dead": [
+    {
+      "class": "App\\Enums\\ApprovalStatus",
+      "path": "app/Enums/ApprovalStatus.php",
+      "lines": 11,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Enums\\AssetStatus",
+      "path": "app/Enums/AssetStatus.php",
+      "lines": 11,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Enums\\CampaignStatus",
+      "path": "app/Enums/CampaignStatus.php",
+      "lines": 14,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Enums\\MediaType",
+      "path": "app/Enums/MediaType.php",
+      "lines": 11,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Enums\\NotificationType",
+      "path": "app/Enums/NotificationType.php",
+      "lines": 14,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Enums\\PaymentStatus",
+      "path": "app/Enums/PaymentStatus.php",
+      "lines": 12,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Enums\\ProviderStatus",
+      "path": "app/Enums/ProviderStatus.php",
+      "lines": 12,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Enums\\SettlementStatus",
+      "path": "app/Enums/SettlementStatus.php",
+      "lines": 12,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Enums\\UserRole",
+      "path": "app/Enums/UserRole.php",
+      "lines": 12,
+      "kind": "enum",
+      "layer": "Enums",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Exceptions\\AssetUnavailableException",
+      "path": "app/Exceptions/AssetUnavailableException.php",
+      "lines": 19,
+      "kind": "class",
+      "layer": "Exceptions",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Exceptions\\BookingConflictException",
+      "path": "app/Exceptions/BookingConflictException.php",
+      "lines": 19,
+      "kind": "class",
+      "layer": "Exceptions",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Policies\\AssetPolicy",
+      "path": "app/Policies/AssetPolicy.php",
+      "lines": 54,
+      "kind": "class",
+      "layer": "Policies",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Policies\\PartnerBookingPolicy",
+      "path": "app/Policies/PartnerBookingPolicy.php",
+      "lines": 47,
+      "kind": "class",
+      "layer": "Policies",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Services\\Pricing\\CampaignDiscountCalculator",
+      "path": "app/Services/Pricing/CampaignDiscountCalculator.php",
+      "lines": 62,
+      "kind": "class",
+      "layer": "Services",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Services\\Pricing\\PeakPricingCalculator",
+      "path": "app/Services/Pricing/PeakPricingCalculator.php",
+      "lines": 85,
+      "kind": "class",
+      "layer": "Services",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    },
+    {
+      "class": "App\\Services\\Pricing\\WeekendPricingCalculator",
+      "path": "app/Services/Pricing/WeekendPricingCalculator.php",
+      "lines": 65,
+      "kind": "class",
+      "layer": "Services",
+      "evidence": "Static name scan: 0 references outside own file across app/ routes/ config/ database/ bootstrap/ tests/ resources/. No route action, scheduler entry, Artisan registration, container binding, or Gate policy resolution. No config/composer/views reference. No database column stores the class name (verified by scanning every varchar/text/json column for '%Calculator%' and '%App\\\\%'; the only hits were polymorphic model values and serialized failed-job payloads, neither of which referenced this class)."
+    }
+  ],
+  "false_positives_caught": [
+    {
+      "class": "App\\Console\\Commands\\ExpirePendingBookings",
+      "initially_flagged": "DEAD",
+      "actual": "ACTIVE - LIVE scheduled job",
+      "detail": "The first detector matched class names against Artisan command SIGNATURES. 'ExpirePendingBookings' does not appear in 'bookings:expire-pending', so three running scheduled jobs were flagged dead. This is the exact failure mode Phase 0.13 documented, reproduced by a new detector and caught by runtime verification.",
+      "proof": "routes/console.php + schedule:list + artisan list --raw all confirm the command is registered and scheduled (*/5 * * * *)."
+    },
+    {
+      "class": "App\\Console\\Commands\\ExpireRewardPoints",
+      "initially_flagged": "DEAD",
+      "actual": "ACTIVE - LIVE scheduled job",
+      "detail": "Same cause. Signature 'rewards:expire'."
+    },
+    {
+      "class": "App\\Console\\Commands\\SyncExchangeRates",
+      "initially_flagged": "DEAD",
+      "actual": "ACTIVE - LIVE scheduled job",
+      "detail": "Same cause. Signature 'currency:sync-rates'."
+    },
+    {
+      "class": "App\\Application\\Payment\\UseCases\\PaymentStatusProjector",
+      "initially_flagged": "DEAD",
+      "actual": "ACTIVE",
+      "detail": "Referenced by GetPaymentStatusUseCase."
+    },
+    {
+      "class": "App\\Services\\AssetDiscoveryFilterService",
+      "initially_flagged": "DEAD",
+      "actual": "ACTIVE",
+      "detail": "Referenced by AssetService."
+    },
+    {
+      "class": "App\\Policies\\AssetPolicy",
+      "initially_flagged": "ACTIVE",
+      "actual": "DEAD",
+      "detail": "Gate::getPolicyFor() returned it for the non-existent class string App\\Models\\Asset. No Asset model exists, so no model can ever resolve to it. Corrected in the opposite direction from the other false positives."
+    }
+  ],
+  "deferred_not_deleted": [
+    {
+      "class": "App\\Models\\CoverageCity",
+      "reason": "0 code references, but maps the live table asset_coverage_cities (3 rows) which is read through the query builder by CoverageController. An unused model over a live, data-bearing table is not worth the deletion risk."
+    },
+    {
+      "class": "App\\Models\\MobileAssetCoverageCity",
+      "reason": "Same: live table mobile_asset_coverage_cities (28 rows), query-builder access."
+    },
+    {
+      "class": "App\\Models\\MobileAssetCoverageState",
+      "reason": "Same: live table mobile_asset_coverage_states (8 rows), query-builder access."
+    },
+    {
+      "class": "App\\Models\\PricingDiscountRule",
+      "reason": "0 code references, but the table pricing_discount_rules is FK-constrained to pricing_plans and is part of the live pricing schema. Rule 7's spirit says do not churn pricing ownership; this is the natural Eloquent home for a first-class pricing table."
+    }
+  ],
+  "conclusion": "16 of 21 candidates deleted. 3 were live scheduled jobs, 2 were actively referenced, and 4 are unused models over live tables that are deliberately retained."
+}

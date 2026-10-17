@@ -1,0 +1,70 @@
+{
+  "phase": "0.17",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy code and controller retirement",
+  "artifact": "dead-service-status",
+  "services_before": 51,
+  "services_after": 48,
+  "services_deleted": 3,
+  "deleted": [
+    {
+      "class": "App\\Services\\Pricing\\PeakPricingCalculator",
+      "lines": 85,
+      "reason": "Zero references. Peak pricing is owned by the DB-driven rule set App\\Models\\PricingPeakRule, eagerly loaded by ScreenPricingResolver (line 52 loads pricingPlan.peakRules). This class was a parallel, unused code path.",
+      "risk": "None identified. It was never invoked, so no financial behaviour can change. Rule 7's deferral in Phase 0.13 was based on a mis-citation: Rule 7 forbids COPYING business logic, it does not forbid deleting an unreferenced class. The canonical owner of peak pricing is therefore now explicitly designated as PricingPeakRule + ScreenPricingResolver."
+    },
+    {
+      "class": "App\\Services\\Pricing\\WeekendPricingCalculator",
+      "lines": 65,
+      "reason": "Zero references. Weekend pricing is owned by App\\Models\\PricingWeekendRule, eagerly loaded by ScreenPricingResolver alongside peakRules.",
+      "risk": "None identified; never invoked."
+    },
+    {
+      "class": "App\\Services\\Pricing\\CampaignDiscountCalculator",
+      "lines": 62,
+      "reason": "Zero references. Campaign discount arithmetic lives in App\\Domain\\Pricing\\CampaignPricingEngine, which computes screen, screen-level and duration discount amounts (lines 89-91).",
+      "risk": "None identified; never invoked."
+    }
+  ],
+  "helpers": {
+    "before": 1,
+    "after": 1,
+    "deleted": 0,
+    "note": "App\\Helpers\\MediaHelper has 5 inbound references and 3 service locators. It is a static filesystem/validation utility consumed by controllers and Blade views. Relocating a static helper referenced from views is low value and non-zero risk; deferred."
+  },
+  "repositories": {
+    "before": 4,
+    "after": 4,
+    "deleted": 0,
+    "note": "All 4 are bound in AppServiceProvider (AssetRepositoryInterface, BookingRepositoryInterface and 2 others). Contract-bound, therefore live."
+  },
+  "requests": {
+    "deleted": 0,
+    "note": "All FormRequest classes are resolved by the framework from controller type-hints; each is reachable."
+  },
+  "resources": {
+    "deleted": 0,
+    "note": "All API Resource classes are resolved by controller return types; each is reachable."
+  },
+  "other_types": {
+    "events_deleted": 0,
+    "listeners_deleted": 0,
+    "jobs_deleted": 0,
+    "commands_deleted": 0,
+    "notifications_deleted": 0,
+    "providers_deleted": 0,
+    "adapters_deleted": 0,
+    "dto_deleted": 0,
+    "exceptions_deleted": 2,
+    "enums_deleted": 9,
+    "policies_deleted": 2,
+    "note": "Commands (3) are LIVE scheduled jobs. Events (34) are all dispatched or subscribed. Jobs directory does not exist."
+  },
+  "empty_scaffolding_removed": {
+    "path": "app/Core",
+    "subdirectories": 7,
+    "files": 0,
+    "reason": "Seven empty directories (Result, Traits, Contracts, Enums, Exceptions, Support, Helpers, ValueObjects) containing zero PHP files. Section 3 of the brief forbids creating empty architecture to satisfy a tree diagram, so this scaffolding was removed rather than left to imply modules that do not exist."
+  }
+}

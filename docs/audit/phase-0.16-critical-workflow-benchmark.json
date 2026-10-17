@@ -1,0 +1,106 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "Structural query-count benchmarking of critical read/write paths on the testing dataset.",
+  "artifact": "critical-workflow-benchmark",
+  "results": [
+    {
+      "workflow": "booking_list",
+      "queries": 2,
+      "ms": 21.94,
+      "mem_delta_bytes": 1168456,
+      "error": null
+    },
+    {
+      "workflow": "booking_count_by_status",
+      "queries": 1,
+      "ms": 1.63,
+      "mem_delta_bytes": 3920,
+      "error": null
+    },
+    {
+      "workflow": "capacity_check",
+      "queries": 0,
+      "ms": 1.33,
+      "mem_delta_bytes": 136232,
+      "error": "Error: Call to undefined method App\\Services\\BookingCapacityService::checkAvailability()"
+    },
+    {
+      "workflow": "pricing_rules_active",
+      "queries": 1,
+      "ms": 1.2,
+      "mem_delta_bytes": 29280,
+      "error": null
+    },
+    {
+      "workflow": "campaign_pricing_service_resolve",
+      "queries": 1,
+      "ms": 3.34,
+      "mem_delta_bytes": 257032,
+      "error": null
+    },
+    {
+      "workflow": "finance_ledger",
+      "queries": 1,
+      "ms": 2.03,
+      "mem_delta_bytes": 38896,
+      "error": null
+    },
+    {
+      "workflow": "partner_commissions",
+      "queries": 1,
+      "ms": 2.56,
+      "mem_delta_bytes": 38304,
+      "error": null
+    }
+  ],
+  "workflow_classification": [
+    {
+      "workflow": "booking creation (campaign)",
+      "benchmarked": false,
+      "reason": "Requires a full pricing + inventory fixture; not measured in this phase."
+    },
+    {
+      "workflow": "booking reschedule",
+      "benchmarked": false,
+      "reason": "Same reason."
+    },
+    {
+      "workflow": "payment verification",
+      "benchmarked": false,
+      "reason": "Requires a Razorpay signature fixture."
+    },
+    {
+      "workflow": "booking list",
+      "benchmarked": true,
+      "queries": 2,
+      "verdict": "no N+1"
+    },
+    {
+      "workflow": "finance ledger read",
+      "benchmarked": true,
+      "queries": 1,
+      "verdict": "no N+1"
+    },
+    {
+      "workflow": "partner commissions read",
+      "benchmarked": true,
+      "queries": 1,
+      "verdict": "no N+1"
+    },
+    {
+      "workflow": "pricing rules read",
+      "benchmarked": true,
+      "queries": 1,
+      "verdict": "no N+1"
+    },
+    {
+      "workflow": "booking count by status",
+      "benchmarked": true,
+      "queries": 1,
+      "verdict": "optimal"
+    }
+  ],
+  "verdict": "The measured read paths are query-efficient. The financially critical WRITE paths (campaign booking, reschedule, payment verification, settlement) were NOT benchmarked and remain unmeasured - this is a gap in Phase 1 readiness, not a clean result."
+}

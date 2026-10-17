@@ -1,0 +1,326 @@
+{
+  "artifact": "06-creative-domain-boundary-map",
+  "generated": "2026-09-26",
+  "classification": "RECOMMENDATION throughout, except where marked CURRENT_FACT.",
+  "status": "DESIGN PROPOSAL. No aggregate below exists in source. Nothing is implemented by this artifact.",
+  "bounded_context": {
+    "name": "Creative Marketplace",
+    "classification": "ARCHITECTURE_DOCUMENT",
+    "source": "AGENTS.md sections 1, 2 and 8 declare Creative as a bounded domain inside Project 01, initialised as a capability, with Project 03 CMS as a separate application and database.",
+    "current_state": "CURRENT_FACT — not implemented. 0 classes, 0 tables, 0 routes, 0 migrations, 0 tests. app/Domain/Creative, app/Services/Creative, app/Repositories/Creative and app/Http/Controllers/Creative are all absent from disk.",
+    "boundary_rule": "A class belongs to Creative if and only if its reason to change is a Creative Marketplace business rule. A class belongs to a shared capability if it changes for a non-Creative reason.",
+    "ubiquitous_language_warning": "CURRENT_FACT — 'asset' in this repository means AD INVENTORY (a Screen), not creative work. 'review' means an admin approving an uploaded ad asset. 'media' means the file a client uploads for a booking. 'service' means a MediaService/MailContractInterface, not a purchasable creative service. Creative must not adopt any of these four words for a domain concept without an explicit naming decision."
+  },
+
+  "aggregates": [
+    {
+      "aggregate": "Creator",
+      "subdomain": "app/Domain/Creative/Creator",
+      "aggregate_root": "Creator",
+      "classification": "RECOMMENDATION",
+      "purpose": "Identity, capability and commercial standing of a person or studio that supplies creative work.",
+      "owner": "Creative domain",
+      "lifecycle": "draft -> pending_review -> active -> (suspended) -> (deactivated)",
+      "lifecycle_note": "OPEN DECISION. The vocabulary and the suspension/deactivation split are not defined by any project document. The closest precedent is screen_providers: draft, pending_review (DB default), approved, rejected, inactive.",
+      "value_objects": [
+        { "name": "CreatorSlug", "purpose": "URL-safe public identifier", "note": "See open decision on public identifier strategy" },
+        { "name": "Craft", "purpose": "The category of creative work a creator supplies", "note": "OPEN DECISION: free-form vs enumerated vs taxonomy table" },
+        { "name": "PayoutDetails", "purpose": "Bank/UPI destination", "note": "OPEN DECISION: no equivalent exists anywhere in the repository. Any storage of payout details is a new compliance surface." }
+      ],
+      "entities": [
+        { "name": "CreatorProfile", "note": "One-to-one with Creator; bio, headline, capabilities" },
+        { "name": "PortfolioItem", "note": "A portfolio entry; references stored files, not an embedded blob" }
+      ],
+      "relationships": "Creator 1..1 User (via users.id). Creator 1..N CreativeService. Creator 1..N PortfolioItem. Creator 1..N CreativeProposal. Creator 1..N CreatorEarning. Creator 1..N CreatorPayout.",
+      "important_states": ["status", "verification_state (OPEN DECISION)", "availability (OPEN DECISION)"],
+      "who_can_mutate": "Creator for profile/portfolio/availability (own only). Admin for status transitions and verification. Nobody else.",
+      "authorization_boundary": "Route middleware 'permission:creative.creators.*' for admin actions; a new CreatorPolicy for ownership actions. This is NEW WORK — the repository has no policy layer.",
+      "financial_boundary": "A Creator does not hold money. Earnings are a separate aggregate precisely so a creator's commercial standing and their balance are not the same object.",
+      "reuse_from_marketplace": [
+        "users.id as the identity anchor (DIRECT)",
+        "role/permission machinery (EXTEND vocabulary)",
+        "StorageContractInterface for avatars and portfolio images (DIRECT)",
+        "ActivityLog for transitions (DIRECT)"
+      ],
+      "must_be_new": "Everything else — table, model, domain rules, repository, service, policy, requests, resources, events."
+    },
+    {
+      "aggregate": "CreativeService",
+      "subdomain": "app/Domain/Creative/Service",
+      "aggregate_root": "CreativeService",
+      "classification": "RECOMMENDATION",
+      "purpose": "A listing by which a creator offers a defined unit of creative work at a defined rate.",
+      "owner": "Creative domain",
+      "lifecycle": "draft -> published -> (paused) -> (archived)",
+      "lifecycle_note": "RECOMMENDATION. The published/paused split is what makes discovery safe; the existing screen_categories.status (active/inactive) and blogs.status (draft/published) are the in-repo precedents.",
+      "value_objects": [
+        { "name": "Rate", "purpose": "Price + currency + pricing unit (per project / per hour / per item / per day)", "note": "OPEN DECISION: is a rate mandatory, or can a service be 'quote on request'? This determines whether the Brief can be priced at creation." },
+        { "name": "DeliveryCommitment", "purpose": "Turnaround time and included revision count", "note": "OPEN DECISION: revision count is a commercial term and belongs on the accepted proposal, not only the listing." }
+      ],
+      "relationships": "CreativeService N..1 Creator. CreativeService N..1 CreativeServiceCategory (via junction). CreativeService 1..N PortfolioItem (optional linkage).",
+      "important_states": ["status", "is_featured (OPEN DECISION)"],
+      "who_can_mutate": "Owning creator; admin.",
+      "authorization_boundary": "permission:creative.services.* for admin; CreativeServicePolicy for the owner.",
+      "financial_boundary": "A published rate is a price quote, not a financial fact. A financial fact is created only when a proposal is accepted.",
+      "reuse_from_marketplace": [
+        "SettingsService for a platform-wide minimum/maximum and a default rate policy (DIRECT)",
+        "ExchangeRateService for displaying a foreign-currency rate (DIRECT)",
+        "StorageContractInterface for cover images (DIRECT)"
+      ],
+      "must_be_new": "Everything else. IMPORTANT: do NOT reuse pricing_plans, PricingService or PricingRuleEngine. Those price advertising media time with duration/peak/weekend/screen-count rules. A creative service rate is a different money model."
+    },
+    {
+      "aggregate": "Brief",
+      "subdomain": "app/Domain/Creative/Brief",
+      "aggregate_root": "CreativeBrief",
+      "classification": "RECOMMENDATION",
+      "purpose": "A client's statement of work: what is needed, with what constraints, by when, with what budget expectation.",
+      "owner": "Creative domain",
+      "lifecycle": "draft -> open (published to creators) -> in_proposal (proposals received) -> awarded -> closed",
+      "lifecycle_note": "OPEN DECISION. Whether a brief is a standalone object that creators browse, or is always created against a specific CreativeService (and therefore a specific creator), is not determined by any project document. The two models produce different schemas.",
+      "value_objects": [
+        { "name": "Scope", "purpose": "Structured description of deliverables requested", "note": "OPEN DECISION: free text, structured line items, or both. Structured line items are needed if a brief is priced automatically; free text is needed if it is quote-on-request." },
+        { "name": "BudgetRange", "purpose": "Optional min/max expectation in a currency", "note": "OPEN DECISION: whether a budget is mandatory, optional, or forbidden. Publishing a budget changes proposal dynamics completely." }
+      ],
+      "entities": [
+        { "name": "BriefAttachment", "note": "References a private stored file; never a public path" }
+      ],
+      "relationships": "CreativeBrief N..1 User (the client). CreativeBrief 0..1 N..1 CreativeService. CreativeBrief 1..N CreativeProposal.",
+      "important_states": ["status", "closes_at (OPEN DECISION: does a brief expire?)"],
+      "who_can_mutate": "Owning client; admin; a creator may not mutate a brief (a proposal is the creator's response, not an edit to the brief).",
+      "authorization_boundary": "CreativeBriefPolicy (own client only). Public discovery must use a read model that does not expose the client's identity.",
+      "financial_boundary": "A brief's budget is an expectation, never a financial fact. No payment may reference a brief.",
+      "reuse_from_marketplace": [
+        "StorageContractInterface via a NEW private-disk adapter for attachments",
+        "rate limiting on creation (EXTEND)",
+        "ActivityLog for transitions (DIRECT)"
+      ],
+      "must_be_new": "Everything else."
+    },
+    {
+      "aggregate": "Proposal",
+      "subdomain": "app/Domain/Creative/Proposal",
+      "aggregate_root": "CreativeProposal",
+      "classification": "RECOMMENDATION",
+      "purpose": "A creator's offer to fulfil a brief: price, timeline, scope, included revisions.",
+      "owner": "Creative domain",
+      "lifecycle": "draft -> submitted -> (withdrawn) | accepted | declined | expired",
+      "lifecycle_note": "OPEN DECISION. Two unresolved questions: (a) may a brief receive multiple proposals, or exactly one? (b) is acceptance exclusive, i.e. does accepting one proposal auto-decline the others? Both change the concurrency design.",
+      "value_objects": [
+        { "name": "QuotedAmount", "purpose": "Amount + currency, server-derived or client-proposed?", "note": "CRITICAL OPEN DECISION. See 'server-derived amounts' in the decision register." },
+        { "name": "Timeline", "purpose": "Estimated start and delivery dates", "note": "OPEN DECISION: fixed dates or a duration in working days" }
+      ],
+      "relationships": "CreativeProposal N..1 CreativeBrief. CreativeProposal N..1 Creator. Accepted CreativeProposal 1..1 CreativeProject.",
+      "important_states": ["status", "submitted_at", "responded_at", "expires_at (OPEN DECISION)"],
+      "who_can_mutate": "Owning creator (submit/withdraw); the client (accept/decline); admin (override).",
+      "authorization_boundary": "CreativeProposalPolicy. The client must be the brief's owner, not merely any authenticated user.",
+      "financial_boundary": "The accepted proposal's amount becomes a frozen financial fact, snapshotted onto the CreativeProject.",
+      "reuse_from_marketplace": [
+        "NONE of the existing proposal machinery — there is none. A proposal is a first-class new concept."
+      ],
+      "must_be_new": "Everything. THIS IS THE FIRST CONCURRENCY-CRITICAL AGGREGATE IN CREATIVE: acceptance must be exactly-once (see 16-transaction-concurrency-analysis.json)."
+    },
+    {
+      "aggregate": "Project",
+      "subdomain": "app/Domain/Creative/Project",
+      "aggregate_root": "CreativeProject",
+      "classification": "RECOMMENDATION",
+      "purpose": "The engagement created when a proposal is accepted. Owns the agreed commercial terms and the work lifecycle.",
+      "owner": "Creative domain",
+      "lifecycle": "funded_pending -> awaiting_start -> in_progress -> in_review -> delivered -> completed | cancelled",
+      "lifecycle_note": "RECOMMENDATION, modelled on the in-repo booking state graph (App\\Services\\BookingWorkflowService:14-39) which is the only existing multi-state machine. OPEN DECISION: whether funding precedes or follows project creation, and whether 'delivered' and 'completed' are distinct (delivered = creator submitted, completed = client accepted).",
+      "value_objects": [
+        { "name": "AgreedTerms", "purpose": "frozen snapshot: quoted amount, currency, commission rate, platform fee, creator net, delivery date, included revisions", "note": "MUST be immutable once the project is created, mirroring bookings.pricing_snapshot and booking_screens revenue columns." },
+        { "name": "ProjectState", "purpose": "the state machine value object" }
+      ],
+      "entities": [
+        { "name": "CreativeProjectItem", "note": "A line item of the agreed scope. If a proposal is a single lump sum, this table is NOT REQUIRED — see 09-creative-database-target-schema-blueprint.json." }
+      ],
+      "relationships": "CreativeProject 1..1 accepted CreativeProposal. CreativeProject N..1 CreativeBrief. CreativeProject N..1 Creator. CreativeProject 1..1..N CreativeRevision. CreativeProject 1..1..N CreativeDelivery. CreativeProject 0..1 CreativeReview. CreativeProject 0..N CreatorEarning.",
+      "important_states": ["status", "funded_at", "started_at", "delivered_at", "completed_at", "cancelled_at + reason"],
+      "who_can_mutate": "Creator and client, each limited to their own transitions. Admin may cancel. Finance/admin for funding and payout actions.",
+      "authorization_boundary": "CreativeProjectPolicy — both the client (brief owner) and the creator are authorised actors, with different allowed transitions per role. This is a new authorization shape: no existing aggregate has two parties with asymmetric transition rights.",
+      "financial_boundary": "AgreedTerms is the boundary between the Creative domain and the shared financial infrastructure. Earnings are created only from AgreedTerms, never recomputed.",
+      "reuse_from_marketplace": [
+        "The state-machine PATTERN from App\\Services\\BookingWorkflowService (not the class).",
+        "The immutable-snapshot PATTERN from bookings.pricing_snapshot and booking_pricing_breakdowns.",
+        "payment gateway via PaymentGatewayInterface (contract only)."
+      ],
+      "must_be_new": "Everything else. DO NOT reuse InventoryService, ConflictDetectionService, BookingCapacityService or ManualBookingService — they are all hard-wired to Screen rows and booking overlap windows."
+    },
+    {
+      "aggregate": "Revision",
+      "subdomain": "app/Domain/Creative/Revision",
+      "aggregate_root": "CreativeRevision",
+      "classification": "RECOMMENDATION",
+      "purpose": "A requested change to a delivered item and the creator's response to it, forming an auditable round.",
+      "owner": "Creative domain",
+      "lifecycle": "requested -> in_progress -> submitted -> accepted | rejected",
+      "lifecycle_note": "OPEN DECISION — the most consequential unresolved product question. Specifically: how many revision rounds are included (is the limit in AgreedTerms?), does an over-limit request require a paid change order, and who decides when the limit is reached?",
+      "value_objects": [
+        { "name": "RoundNumber", "purpose": "monotonic sequence within a project" },
+        { "name": "ChangeRequest", "purpose": "the client's structured request" }
+      ],
+      "relationships": "CreativeRevision N..1 CreativeProject. CreativeRevision N..1 CreativeDelivery (the item being revised) — OPEN DECISION: is a revision always against a specific delivery, or against the project? Against a delivery is safer for auditability.",
+      "important_states": ["status", "round", "requested_at", "submitted_at", "accepted_at"],
+      "who_can_mutate": "Client requests; creator submits; client accepts or rejects.",
+      "authorization_boundary": "CreativeRevisionPolicy — both parties, asymmetric transitions.",
+      "financial_boundary": "An over-limit revision may create an additional earning. That is a financial consequence and requires a decided pricing rule (OPEN DECISION).",
+      "reuse_from_marketplace": [
+        "NOTHING. grep -ri 'revision' = 0 matches in the repository. This concept is entirely new.",
+        "The approval PATTERN from booking_media review (review_status + reviewed_by + reviewed_at + rejection_reason) is a reasonable shape template."
+      ],
+      "must_be_new": "Everything."
+    },
+    {
+      "aggregate": "Delivery",
+      "subdomain": "app/Domain/Creative/Delivery",
+      "aggregate_root": "CreativeDelivery",
+      "classification": "RECOMMENDATION",
+      "purpose": "A submission of work by the creator for client acceptance.",
+      "owner": "Creative domain",
+      "lifecycle": "submitted -> under_review -> accepted | rejected | superseded",
+      "lifecycle_note": "OPEN DECISION: on rejection, does the delivery become 'superseded' and a new delivery is created, or is it revised in place? 'Superseded' (append-only) is strongly recommended for auditability and matches the immutability discipline in AGENTS.md section 10.",
+      "value_objects": [
+        { "name": "DeliveredFile", "purpose": "file reference + a private-access descriptor" },
+        { "name": "DeliveryManifest", "purpose": "what was delivered, in what form" }
+      ],
+      "relationships": "CreativeDelivery N..1 CreativeProject. CreativeDelivery 1..N DeliveredFile. CreativeDelivery 0..N CreativeRevision.",
+      "important_states": ["status", "submitted_at", "reviewed_at", "accepted_at"],
+      "who_can_mutate": "Creator submits; client reviews. Admin may intervene.",
+      "authorization_boundary": "CreativeDeliveryPolicy. File download must additionally be authorised per file, not per delivery row — see 19-creative-security-risk-register.json (SR-05).",
+      "financial_boundary": "Acceptance of a delivery may trigger earning creation. The trigger rule is an OPEN DECISION (on delivery acceptance vs on project completion vs on settlement period).",
+      "reuse_from_marketplace": [
+        "StorageContractInterface — but see the private-disk requirement. THIS IS THE HIGHEST-SECURITY-SENSITIVE REUSE POINT IN THE ENTIRE CREATIVE BUILD.",
+        "MediaConfig-style extension allowlists (EXTEND with a creative.* group)"
+      ],
+      "must_be_new": "Everything else. DO NOT route Creative uploads through App\\Http\\Controllers\\FileController: it has zero validation, uses the client-supplied $request->path as the storage directory, and preserves the client-supplied extension."
+    },
+    {
+      "aggregate": "Review",
+      "subdomain": "app/Domain/Creative/Review",
+      "aggregate_root": "CreativeReview",
+      "classification": "RECOMMENDATION",
+      "purpose": "The client's structured assessment of a completed engagement.",
+      "owner": "Creative domain",
+      "lifecycle": "single-shot: submitted (or absent)",
+      "lifecycle_note": "RECOMMENDATION — a review is written once and is immutable. There is no review state machine. OPEN DECISION: is a review required for a project to complete, or optional? Is it one per project or one per delivery? Is it public on the creator's profile?",
+      "value_objects": [
+        { "name": "Rating", "purpose": "bounded score", "note": "testimonials.rating is decimal(3,2) validated min:0|max:5 and is NOT cast on the model. Creative should use a small unsigned integer and validate explicitly. OPEN DECISION: single overall rating, or per-criterion scores?" }
+      ],
+      "relationships": "CreativeReview N..1 CreativeProject. N..1 Creator (denormalised for the profile read model). N..1 User (the reviewer, who is the client).",
+      "important_states": ["none — immutability replaces the state machine"],
+      "who_can_mutate": "The client, once, and only if they were a party to the project. Nobody may edit or delete a review.",
+      "authorization_boundary": "CreativeReviewPolicy + a strict one-per-project-per-reviewer unique constraint.",
+      "financial_boundary": "A rating may affect future ranking or commission tiering. OPEN DECISION — if it affects money, then a review can never be edited, which reinforces immutability.",
+      "reuse_from_marketplace": [
+        "NOTHING. testimonials.rating is public marketing content with no author binding; reusing it would let anyone edit any rating."
+      ],
+      "must_be_new": "Everything."
+    },
+    {
+      "aggregate": "Earnings",
+      "subdomain": "app/Domain/Creative/Earnings",
+      "aggregate_root": "CreatorEarning",
+      "classification": "RECOMMENDATION + OPEN DECISION",
+      "purpose": "An immutable financial fact: an amount earned by a creator from a specific project, under specific terms.",
+      "owner": "CREATIVE domain for accrual; SHARED financial infrastructure for settlement and payout.",
+      "lifecycle": "accrued -> approved -> released | reversed",
+      "lifecycle_note": "OPEN DECISION — this is the most under-specified area in the entire brief. Unanswered: (a) when does an earning accrue — delivery accepted, project completed, review submitted, or after a dispute window? (b) is there a dispute/hold window at all? (c) who approves an earning? (d) is the creator paid automatically or on request? (e) what is the platform commission basis — the quoted amount, or the amount net of fees?",
+      "value_objects": [
+        { "name": "EarningAmount", "purpose": "gross, platform commission, creator net — computed once, stored, never recomputed", "note": "MUST mirror the booking_screens pattern (gross_revenue, platform_share, provider_share + the split percentages) so the split is auditable." },
+        { "name": "SettlementPeriod", "purpose": "the window in which an earning becomes payable" }
+      ],
+      "relationships": "CreatorEarning N..1 CreativeProject. N..1 Creator. N..0..1 settlement batch. N..0..N CreatorPayout line.",
+      "important_states": ["status", "accrued_at", "approved_at", "released_at", "reversed_at + reason"],
+      "who_can_mutate": "System (accrual, from a project event). Finance/admin (approve, release). Creator may REQUEST a payout but never approve their own earning.",
+      "authorization_boundary": "permission:creative.earnings.view for the creator's own; permission:creative.payouts.approve for finance. Separation of duties between request and approve is MANDATORY.",
+      "financial_boundary": "THE CENTRAL BOUNDARY OF THE WHOLE CREATIVE BUILD. See section 'Financial boundary analysis' below.",
+      "reuse_from_marketplace": [
+        "The PATTERN from partner_commissions (state lifecycle + immutable profit snapshot) and screen_provider_settlements (period + release).",
+        "Money conversion from App\\Domain\\Payment\\Support\\Money for the gateway only.",
+        "The payment gateway for actual disbursement, via PaymentGatewayInterface."
+      ],
+      "must_be_new": "The earning aggregate, the creator balance derivation, and the payout request flow. DECISION REQUIRED on whether to extract CommissionService/SettlementService into shared contracts or build Creative equivalents."
+    }
+  ],
+
+  "domain_services": [
+    { "name": "ProposalSelectionDomainService", "responsibility": "Decides which proposal is valid to accept for a given brief and rejects invalid ones (expired, withdrawn, budget-mismatched, creator-suspended).", "classification": "RECOMMENDATION", "pure": true },
+    { "name": "EarningsCalculationDomainService", "responsibility": "Computes gross, platform commission and creator net from a frozen AgreedTerms snapshot. Pure, deterministic, no I/O. This is the direct analogue of App\\Domain\\Financial\\Support\\RevenueAllocation::split, which is the ONLY existing pure financial function in the repository and is therefore the correct template.", "classification": "RECOMMENDATION", "pure": true, "template": "App\\Domain\\Financial\\Support\\RevenueAllocation" },
+    { "name": "RevisionEntitlementDomainService", "responsibility": "Decides whether a requested revision is within the agreed included rounds and computes any over-limit charge.", "classification": "RECOMMENDATION", "pure": true, "blocked_by": "OPEN DECISION on revision limits" },
+    { "name": "CreatorEligibilityDomainService", "responsibility": "Decides whether a creator may receive work (status, verification, availability).", "classification": "RECOMMENDATION", "pure": true }
+  ],
+
+  "domain_events": [
+    { "name": "CreatorRegistered", "producer": "Creator aggregate", "classification": "RECOMMENDATION", "existing_precedent": "UserRegistered (App\\Support\\Events\\Notifications\\UserRegistered) — same shape, add a Creative consumer" },
+    { "name": "CreativeServicePublished", "producer": "CreativeService", "classification": "RECOMMENDATION", "existing_precedent": "NONE. Closest shape is ScreenProviderCreated" },
+    { "name": "BriefCreated", "producer": "CreativeBrief", "classification": "RECOMMENDATION", "existing_precedent": "NONE. Closest shape is BookingCreated" },
+    { "name": "ProposalSubmitted", "producer": "CreativeProposal", "classification": "RECOMMENDATION", "existing_precedent": "NONE. Closest shape is ContactEnquirySubmitted" },
+    { "name": "ProposalAccepted", "producer": "CreativeProposal", "classification": "RECOMMENDATION", "existing_precedent": "NONE. Closest shape is BookingApproved — and the most important one, because acceptance is the financial commitment point" },
+    { "name": "ProjectCreated", "producer": "CreativeProject", "classification": "RECOMMENDATION", "existing_precedent": "NONE" },
+    { "name": "RevisionRequested", "producer": "CreativeRevision", "classification": "RECOMMENDATION", "existing_precedent": "NONE" },
+    { "name": "RevisionSubmitted", "producer": "CreativeRevision", "classification": "RECOMMENDATION", "existing_precedent": "NONE. Closest shape is MediaUploaded" },
+    { "name": "DeliverySubmitted", "producer": "CreativeDelivery", "classification": "RECOMMENDATION", "existing_precedent": "NONE. Closest shape is MediaUploaded" },
+    { "name": "DeliveryAccepted", "producer": "CreativeDelivery", "classification": "RECOMMENDATION", "existing_precedent": "NONE. Closest shape is MediaApproved" },
+    { "name": "ReviewSubmitted", "producer": "CreativeReview", "classification": "RECOMMENDATION", "existing_precedent": "NONE" },
+    { "name": "CreatorEarningCreated", "producer": "CreatorEarning", "classification": "RECOMMENDATION", "existing_precedent": "CommissionGenerated (App\\Support\\Events\\Notifications\\CommissionGenerated) — closest existing analogue" },
+    { "name": "CreatorPayoutRequested", "producer": "CreatorPayout", "classification": "RECOMMENDATION", "existing_precedent": "NONE" }
+  ],
+  "domain_event_note": "RECOMMENDATION: all 13 events should be emitted AFTER the transaction commits, not inside it. CURRENT_FACT: no existing event implements ShouldHandleEventsAfterCommit; the current pattern dispatches inside the transaction (ManualBookingService:642), which can notify for a rolled-back write. Creative should not inherit that.",
+
+  "integration_events": [
+    { "name": "CreativeProjectCompleted (integration)", "purpose": "Notify Project 03 CMS / analytics that a creative engagement completed", "classification": "RECOMMENDATION", "note": "Must be a separate event from the domain event, per the CMS boundary in AGENTS.md section 9 (versioned APIs, events, webhooks, external IDs)." }
+  ],
+
+  "state_machines_summary": {
+    "existing_reusable_patterns": [
+      { "pattern": "Booking state graph", "location": "App\\Services\\BookingWorkflowService:14-39, 13 Booking::STATUS_* constants", "reuse": "PATTERN ONLY" },
+      { "pattern": "Media approval (pending/approved/rejected + reviewed_by + reviewed_at + rejection_reason)", "location": "booking_media, migration 2026_09_16_103654", "reuse": "PATTERN ONLY" },
+      { "pattern": "Commission lifecycle (pending/approved/paid/cancelled) with pessimistic locking", "location": "App\\Services\\CommissionService (lock via App\\Infrastructure\\Financial\\Persistence\\EloquentPartnerCommissionRepository::findOrFailForUpdate)", "reuse": "PATTERN + locking discipline" },
+      { "pattern": "Settlement lifecycle (draft/generated/approved/paid/cancelled) with period", "location": "App\\Services\\SettlementService", "reuse": "PATTERN ONLY" },
+      { "pattern": "Partner/provider onboarding (pending_review -> approved/rejected -> portal invitation)", "location": "App\\Services\\ScreenProviderService", "reuse": "PATTERN ONLY" }
+    ],
+    "no_existing_pattern": "No aggregate in this repository has TWO parties with asymmetric transition rights on the same object. CreativeProject (client + creator) and CreativeProposal (creator submits, client accepts) are the first. There is no template to copy; this must be designed from first principles."
+  },
+
+  "financial_boundary_analysis": {
+    "classification": "INFERENCE + OPEN_DECISION",
+    "question": "Should creator earnings reuse the existing settlement infrastructure?",
+    "advertising_financial_domain": {
+      "owns": ["PricingEngine / CampaignPricingEngine", "RevenueSplitResolverService (5-level split precedence)", "RevenueDistributionService (immutable per-line-item snapshot)", "SettlementService + screen_provider_settlements", "CommissionService + partner_commissions", "ReferralService + referral_codes/usages"],
+      "hard_coupling_points": [
+        "EloquentSettlementRepository::findEligibleBookingScreens filters on Screen::OWNER_TYPE_PROVIDER and booking_screens.settlement_status",
+        "SettlementService imports 7 models including Booking, BookingScreen and Screen",
+        "CommissionService locks partner_commissions then referral_usages in that order",
+        "RevenueSplitResolverService has 5 split sources, none of them creator-related"
+      ]
+    },
+    "creative_financial_domain": {
+      "owns": ["AgreedTerms snapshot on the project", "CreatorEarning accrual", "Creator balance derivation", "Payout request"],
+      "must_not_touch": ["bookings", "booking_screens", "booking_pricing_breakdowns", "partner_commissions", "referral_usages", "screen_provider_settlements", "screens.illuvision_percentage"]
+    },
+    "shared_financial_infrastructure": {
+      "reusable_unchanged": ["PaymentGatewayInterface (Razorpay adapter)", "Money (gateway paise conversion)", "currency_rates + ExchangeRateService", "SettingsService (for the commission rate)", "ActivityLog (audit)"],
+      "reusable_with_new_implementation": [
+        "Commission lifecycle machinery — extract a contract OR reimplement",
+        "Settlement period release — new eligibility predicate OR immediate release"
+      ],
+      "not_reusable": ["RevenueSplitResolverService (5 sources, all advertising)", "RevenueDistributionService (writes booking_screens)", "FinanceService (hard-coded 0.70 platform margin at :53)"]
+    },
+    "recommendation": "RECOMMENDATION: Do NOT extend screen_provider_settlements or partner_commissions with creator columns. Create creator_earnings and creator_payouts as separate aggregates, and extract ONLY the lifecycle pattern (state + transition guard + pessimistic lock) into a shared contract if and only if both domains need it. The existing settlement and commission services are too tightly coupled to advertising to be generalised without a refactor that AGENTS.md section 19 forbids performing opportunistically.",
+    "open_decision": "OPEN DECISION: earning release trigger (delivery accepted / project completed / review submitted / after a dispute window), approval authority, dispute window existence, payout cadence, and whether the platform commission is on the quoted amount or on the net."
+  },
+
+  "aggregate_count_summary": {
+    "classification": "RECOMMENDATION",
+    "aggregate_roots": 9,
+    "entities": 6,
+    "value_objects": 12,
+    "domain_services": 4,
+    "domain_events": 13,
+    "integration_events": 1,
+    "state_machines": 8,
+    "note": "The declared subdomain list in AGENTS.md section 8 (Creator, Service, Brief, Proposal, Project, Revision, Delivery, Review, Earnings) is confirmed as a sound aggregate set for the initial scope. It may need extending with Disputes, Contracts, Payouts and Notifications if the product scope includes them — those are OPEN DECISIONS, not omissions."
+  }
+}

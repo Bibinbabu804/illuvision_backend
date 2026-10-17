@@ -1,0 +1,183 @@
+[
+  {
+    "component": "GoogleAuthService dependency",
+    "current_location": "App\\Http\\Controllers\\Auth\\GoogleAuthController",
+    "target_location": "app/Infrastructure/Auth/ (already in place)",
+    "responsibility": "Handle Google OAuth authentication flow",
+    "callers": [
+      "App\\Http\\Controllers\\Api\\AuthController"
+    ],
+    "dependencies_before": [
+      "Illuminate Http client to Google OAuth2 tokeninfo endpoint"
+    ],
+    "dependencies_after": [
+      "App\\Infrastructure\\Auth\\Contracts\\GoogleIdentityProviderInterface",
+      "App\\Infrastructure\\Auth\\GoogleOAuthAdapter"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "Pre-existing Google auth tests; unchanged by this phase"
+    ],
+    "status": "already_implemented",
+    "ledger_correction": "The ledger named App\\Services\\GoogleAuthService, which does not exist. The Google boundary was already extracted: GoogleAuthController depends on GoogleIdentityProviderInterface, bound to GoogleOAuthAdapter in AppServiceProvider. No work was required."
+  },
+  {
+    "component": "ExchangeRateService dependency",
+    "current_location": "app/Services/ExchangeRateService.php",
+    "target_location": "app/Infrastructure/ExchangeRates/ (already in place)",
+    "responsibility": "Provide exchange rate information for currency conversion",
+    "callers": [
+      "App\\Application\\Financial\\UseCases\\*UseCase"
+    ],
+    "dependencies_before": [
+      "Illuminate Http client to the exchange-rate API"
+    ],
+    "dependencies_after": [
+      "App\\Infrastructure\\ExchangeRates\\Contracts\\ExchangeRateApiClientInterface",
+      "App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "Pre-existing exchange rate tests; unchanged by this phase"
+    ],
+    "status": "already_implemented",
+    "ledger_correction": "The ledger proposed App\\Domain\\Financial\\Contracts\\ExchangeRateApiClientInterface. The interface already exists under App\\Infrastructure\\ExchangeRates\\Contracts and is already injected. The ledger also speculated \"Possible direct HTTP client usage\"; the HTTP call is real but already confined to ExchangeRateApiClient. No work was required."
+  },
+  {
+    "component": "MailService dependency",
+    "current_location": "App\\Services\\MailService",
+    "target_location": "n/a \u2014 merged into the NotificationService row",
+    "responsibility": "Handle email sending operations",
+    "callers": [
+      "App\\Services\\NotificationService",
+      "App\\Services\\ReferralService",
+      "App\\Services\\PaymentService",
+      "App\\Services\\\\*OtherServices"
+    ],
+    "dependencies_before": [
+      "Possible direct Mail:: facade usage"
+    ],
+    "dependencies_after": [
+      "App\\Domain\\Notification\\Contracts\\MailContractInterface"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Application/Notification/MailServiceTest.php"
+    ],
+    "status": "not_applicable",
+    "ledger_correction": "App\\Services\\MailService does not exist. Outbound mail is dispatched from exactly two places: App\\Services\\NotificationService and App\\Http\\Controllers\\Auth\\ForgotPasswordController. Both are now covered by the NotificationService row."
+  },
+  {
+    "component": "NotificationService dependencies",
+    "current_location": "app/Services/NotificationService.php",
+    "target_location": "app/Infrastructure/Notification/ (extracted)",
+    "responsibility": "Orchestrate notification sending across channels",
+    "callers": [
+      "App\\Services\\ReferralService",
+      "App\\Services\\PaymentService",
+      "App\\Services\\BookingService",
+      "App\\Services\\\\*OtherServices"
+    ],
+    "dependencies_before": [
+      "Illuminate\\Support\\Facades\\Mail"
+    ],
+    "dependencies_after": [
+      "App\\Infrastructure\\Notification\\Contracts\\MailContractInterface",
+      "App\\Infrastructure\\Notification\\LaravelMailAdapter"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Integrations/IntegrationBoundaryTest.php"
+    ],
+    "status": "implemented",
+    "ledger_correction": "Two corrections. (1) The ledger proposed three targets including NotificationServiceInterface and SmsContractInterface; there is no SMS gateway anywhere in the codebase and NotificationService is not an interface, so only the mail port was extracted. (2) NotificationService is not the only place the Mail facade was used \u2014 ForgotPasswordController also called Mail::to() directly, contradicting the class docblock. Both now go through MailContractInterface, so the stated invariant actually holds."
+  },
+  {
+    "component": "MediaHelper dependencies",
+    "current_location": "app/Helpers/MediaHelper.php",
+    "target_location": "app/Infrastructure/Media/ (extracted)",
+    "responsibility": "Handle media processing and storage operations",
+    "callers": [
+      "App\\Services\\UploadService",
+      "App\\Services\\PartnerService",
+      "App\\Services\\\\*OtherServices"
+    ],
+    "dependencies_before": [
+      "GD extension (imagecreatefromstring, imagewebp)"
+    ],
+    "dependencies_after": [
+      "App\\Infrastructure\\Media\\Contracts\\ImageProcessingContractInterface",
+      "App\\Infrastructure\\Media\\GdImageProcessor"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Integrations/IntegrationBoundaryTest.php"
+    ],
+    "status": "implemented",
+    "ledger_correction": "Two corrections. (1) The class lives at app/Helpers/MediaHelper.php, not app/Services/MediaHelper.php. (2) It used no Storage facade at all \u2014 the filesystem writes are raw mkdir/copy/file_put_contents against a path it computes itself \u2014 so the proposed StorageContractInterface dependency was wrong. The GD encoding step was extracted; the compression policy (70KB target, 80-to-20 quality ladder) deliberately stayed in the helper. The port is expressed in bytes rather than GD handles so it does not leak the extension."
+  },
+  {
+    "component": "UploadService dependency",
+    "current_location": "App\\Services\\UploadService",
+    "target_location": "n/a \u2014 replaced by the MediaService + ProfileService storage rows",
+    "responsibility": "Handle file upload operations",
+    "callers": [
+      "App\\Http\\Controllers\\*Controllers"
+    ],
+    "dependencies_before": [
+      "Illuminate\\Support\\Facades\\Storage"
+    ],
+    "dependencies_after": [
+      "App\\Infrastructure\\Media\\Contracts\\StorageContractInterface",
+      "App\\Infrastructure\\Media\\LaravelStorageAdapter"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "tests/Feature/Integrations/IntegrationBoundaryTest.php"
+    ],
+    "status": "superseded",
+    "ledger_correction": "App\\Services\\UploadService does not exist. The real service-layer consumers of the Storage facade are App\\Services\\MediaService and App\\Services\\ProfileService, both of which are now behind StorageContractInterface. Nine Storage:: call sites across 6 controllers (AuthorController, SuccessStoryController, GalleryController, ScreenController, ScreenProviderPortalController, JobApplicationController) also use the facade directly; those were deliberately left alone this phase to avoid touching unrelated features, and are recorded as deferred."
+  },
+  {
+    "component": "PartnerService dependency",
+    "current_location": "app/Services/PartnerService.php",
+    "target_location": "n/a \u2014 no storage usage to migrate",
+    "responsibility": "Handle partner-related operations including file uploads",
+    "callers": [
+      "App\\Http\\Controllers\\PartnerPortalController"
+    ],
+    "dependencies_before": [
+      "DB, Hash, Str, domain events \u2014 no Storage facade"
+    ],
+    "dependencies_after": [
+      "unchanged"
+    ],
+    "api_contract_changed": false,
+    "database_schema_changed": false,
+    "behavior_changed": false,
+    "transaction_boundary_changed": false,
+    "tests_added": [
+      "None \u2014 no change made"
+    ],
+    "status": "not_applicable",
+    "ledger_correction": "The ledger claimed \"Possible direct Storage:: facade usage\". PartnerService does not import or call Storage at all; it uses DB, Hash, Str and dispatches PartnerApproved/PartnerRejected events. There is nothing to extract. Verified by reading the class."
+  }
+]

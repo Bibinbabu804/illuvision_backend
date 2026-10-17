@@ -1,0 +1,93 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "authorization-audit",
+  "summary": {
+    "total_routes": 385,
+    "authenticated": null,
+    "permission_gated": null,
+    "authenticated_but_no_permission": null,
+    "fully_anonymous": null
+  },
+  "root_cause": "Authorization is enforced almost entirely by route middleware, not by controllers or policies. There are only 2 Policy classes against 81 controllers, so the middleware list is the single point of control. Any verb or resource that is not explicitly listed is unprotected.",
+  "groups": [
+    {
+      "group": "/api/v2/*",
+      "auth": "none",
+      "permission": "none",
+      "count": 19,
+      "severity": "critical",
+      "finding": "SEC-02"
+    },
+    {
+      "group": "/api/gallery*",
+      "auth": "none",
+      "permission": "none",
+      "count": 5,
+      "severity": "high",
+      "finding": "SEC-04"
+    },
+    {
+      "group": "/api/roles*",
+      "auth": "yes",
+      "permission": "none",
+      "count": 7,
+      "severity": "critical",
+      "finding": "SEC-03 - includes PUT /api/roles/{role}/permissions"
+    },
+    {
+      "group": "/api/partners*",
+      "auth": "yes",
+      "permission": "none",
+      "count": 17,
+      "severity": "critical",
+      "finding": "SEC-03"
+    },
+    {
+      "group": "/api/admin/assets/import/*",
+      "auth": "none",
+      "permission": "none",
+      "count": 3,
+      "severity": "high",
+      "finding": "SEC-05"
+    },
+    {
+      "group": "/api/screen-categories (POST), /api/admin/screen-categories (POST)",
+      "auth": "none",
+      "permission": "none",
+      "count": 2,
+      "severity": "high",
+      "finding": "SEC-05"
+    },
+    {
+      "group": "/api/file-upload, /api/video-upload",
+      "auth": "yes",
+      "permission": "none",
+      "count": 2,
+      "severity": "medium",
+      "finding": "SEC-07"
+    },
+    {
+      "group": "PATCH /api/bookings/{booking}",
+      "auth": "yes",
+      "permission": "none",
+      "count": 1,
+      "severity": "critical",
+      "finding": "SEC-01"
+    }
+  ],
+  "correct_behaviour_preserved": [
+    "super-admin bypass lives in PermissionMiddleware::handle() and is intentionally absent from RolePermissionChecker - a documented, test-pinned asymmetry that must not be 'fixed'.",
+    "Permission resolution is by role slug via Role::grantedPermissions(), cached 3600s under role_permissions:{slug}, compared with strict in_array.",
+    "A missing role resolves to an empty permission list, not an error."
+  ],
+  "recommended_remediation_order": [
+    "1. SEC-03 PUT /api/roles/{role}/permissions - smallest change, largest impact (privilege escalation).",
+    "2. SEC-01 PATCH bookings - restrict the verb or narrow the validated fields.",
+    "3. SEC-02 /api/v2/* - decide per route whether it is intentionally public (coverage/availability/recommendations look intentional) or a leak (finance, booking writes).",
+    "4. SEC-04/05/07."
+  ],
+  "blocked": "All of the above change authorization outcomes, so none were applied in Phase 0.16."
+}

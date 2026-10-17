@@ -1,0 +1,98 @@
+{
+  "phase": "0.6",
+  "name": "Pricing Divergence Matrix",
+  "generated_at": "2026-09-25T23:52:30+05:30",
+  "engines": {
+    "engine_a": {
+      "name": "App\\Domain\\Pricing\\CampaignPricingEngine (Canonical V1 / Advertiser / Partner / Manual)",
+      "wrapper": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "legacy_facade": "App\\Services\\CampaignPricingService::calculateCampaignPreview()"
+    },
+    "engine_b": {
+      "name": "App\\Services\\PricingEngine (Legacy V2 Multi-Asset Engine)",
+      "wrapper": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "legacy_facade": "POST /api/v2/pricing/calculate"
+    }
+  },
+  "divergence_cases": [
+    {
+      "scenario": "Payload Schema & Input Ingestion",
+      "engine_a_behavior": "Expects 'screen_ids' (array of ints), optional 'quantities', 'start_date', 'end_date', 'daily_start_time', 'daily_end_time', 'referral_code_id', 'redeem_points', 'user', 'country_code'",
+      "engine_b_behavior": "Expects 'items' (array of objects with 'asset_id' and 'quantity'), 'start_date', 'end_date'",
+      "difference": "Incompatible request structure; Engine A takes flat screen array + optional time windows, Engine B takes structured items array without intraday window support",
+      "current_consumers": {
+        "engine_a": ["POST /api/campaigns/calculate", "POST /api/bookings/campaign", "POST /api/partner/bookings/calculate", "ManualBookingService"],
+        "engine_b": ["POST /api/v2/pricing/calculate"]
+      },
+      "golden_contract": "GoldenApiContractRegressionTest::test_campaign_pricing_calculate_contract_success_and_validation, test_v2_pricing_calculate_contract_success_and_validation",
+      "target_architecture": "Engine A is Canonical Domain Engine; Engine B is isolated behind LegacyPricingEngineAdapter",
+      "action": "PRESERVE"
+    },
+    {
+      "scenario": "Rate Derivation & Pricing Plan Resolution",
+      "engine_a_behavior": "Resolves attached PricingPlan, evaluates duration tiers, screen tiers, and calculates exact runtime hours",
+      "engine_b_behavior": "Takes base_price from screen or plan; if monthly rate exists divides by 30, if weekly divides by 7",
+      "difference": "Engine A supports dynamic pricing rules and intraday scheduling; Engine B uses simple calendar division",
+      "current_consumers": {
+        "engine_a": ["Marketplace advertiser campaigns, partner campaigns, manual bookings"],
+        "engine_b": ["V2 multi-asset quotations"]
+      },
+      "golden_contract": "GoldenPricingRegressionTest::test_case_pricing_011_divergence_between_v1_and_v2_engines",
+      "target_architecture": "Preserve existing algorithms in their respective domains; do not force unification without product sign-off",
+      "action": "ADAPTER"
+    },
+    {
+      "scenario": "Peak & Weekend Surcharges",
+      "engine_a_behavior": "Evaluates calendar day of week and intraday runtime hour overlaps with plan peak_hours; applies percentage charges per day",
+      "engine_b_behavior": "No concept of peak hours or weekend surcharges; flat calculation across all days",
+      "difference": "Engine A adds peak/weekend charges to subtotal; Engine B ignores day-of-week and time-of-day pricing variations",
+      "current_consumers": {
+        "engine_a": ["Marketplace checkout & booking breakdown snapshots"],
+        "engine_b": ["V2 pricing API"]
+      },
+      "golden_contract": "GoldenPricingRegressionTest::test_case_pricing_001_single_screen_one_day, test_case_pricing_002_single_screen_seven_days",
+      "target_architecture": "Engine A maintains peak/weekend domain rules; Engine B remains isolated",
+      "action": "PRESERVE"
+    },
+    {
+      "scenario": "Duration Discount Tiers",
+      "engine_a_behavior": "Evaluates PricingPlanDuration rules configured per screen (e.g. 7-day, 14-day, 30-day tiered percentages)",
+      "engine_b_behavior": "Hardcoded flat 10% discount applied strictly if total duration >= 30 days",
+      "difference": "Engine A uses database-driven multi-tier rules; Engine B uses hardcoded 10% threshold",
+      "current_consumers": {
+        "engine_a": ["Production campaign bookings"],
+        "engine_b": ["V2 API clients"]
+      },
+      "golden_contract": "GoldenPricingRegressionTest::test_case_pricing_003_single_screen_thirty_days, test_case_pricing_010_v2_pricing_engine",
+      "target_architecture": "Retain separate rule application to preserve 100% contract fidelity for existing clients",
+      "action": "ADAPTER"
+    },
+    {
+      "scenario": "Referral, Loyalty, and First-Booking Discounts",
+      "engine_a_behavior": "Supports referral codes (percentage or flat), first-booking discount for new users, and loyalty point redemption",
+      "engine_b_behavior": "Does not support promotional codes, partner referrals, first-booking incentives, or loyalty points",
+      "difference": "Engine A supports the full commercial incentive layer; Engine B is pure inventory quotation",
+      "current_consumers": {
+        "engine_a": ["Advertiser checkout, partner portal bookings"],
+        "engine_b": ["V2 pricing API"]
+      },
+      "golden_contract": "GoldenPricingRegressionTest::test_case_pricing_007_referral_discount, GoldenApiContractRegressionTest::test_partner_calculate_contract_and_auth",
+      "target_architecture": "Incentive layer is part of Canonical CampaignPricingEngine",
+      "action": "PRESERVE"
+    },
+    {
+      "scenario": "Response Envelope & Breakdown Granularity",
+      "engine_a_behavior": "Returns { campaign_summary, per_screen: [{ daily_breakdown: [...] }], aggregated: { base_price, screen_discount, duration_discount, combined_discount, peak_adjustment, weekend_adjustment, subtotal_before_discount, subtotal_after_discount, first_booking_discount, referral_discount, reward_discount, final_total } }",
+      "engine_b_behavior": "Returns { summary: { total_items, total_quantity, start_date, end_date, duration_days }, line_items: [...], pricing: { gross_total, discount_total, final_total, daily_average } }",
+      "difference": "Completely different JSON schema and keys; client applications depend on exact response keys",
+      "current_consumers": {
+        "engine_a": ["Frontend campaign builder, partner booking portal"],
+        "engine_b": ["Third-party / V2 API integrations"]
+      },
+      "golden_contract": "GoldenApiContractRegressionTest::test_campaign_pricing_calculate_contract_success_and_validation, test_v2_pricing_calculate_contract_success_and_validation",
+      "target_architecture": "Preserve both response structures exactly as defined in API contracts",
+      "action": "PRESERVE"
+    }
+  ],
+  "decision_summary": "Do NOT unify or merge Engine A and Engine B. Engine A is extracted into App\\Domain\\Pricing\\CampaignPricingEngine as the canonical marketplace engine. Engine B is wrapped in App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter to preserve 100% backward compatibility for /api/v2/pricing/calculate."
+}

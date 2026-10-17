@@ -1,0 +1,73 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "legacy-service-status",
+  "method": "Runtime registration was checked in addition to import scanning. Three scheduled commands have zero import references yet are live, proving reference-count-only scans are unsafe.",
+  "classes": [
+    {
+      "class": "CampaignPricingService",
+      "status": "compatibility wrapper",
+      "finding": "Single dependency on PricingEngine. Kept as a named seam so campaign pricing can be re-pointed without touching call sites.",
+      "retained": true
+    },
+    {
+      "class": "RolePermissionChecker",
+      "status": "current - promoted",
+      "finding": "Created in Phase 0.13 as the single owner of the permission decision; now load-bearing in two layers.",
+      "retained": true
+    },
+    {
+      "class": "ManualBookingService",
+      "status": "legacy - characterisation required",
+      "finding": "Multi-channel manual booking with finance/audit/commission side effects and 3 service locators.",
+      "retained": true
+    },
+    {
+      "class": "RevenueSplitResolverService",
+      "status": "legacy - characterisation required",
+      "finding": "Financial revenue distribution.",
+      "retained": true
+    },
+    {
+      "class": "InventoryService",
+      "status": "current",
+      "finding": "Owns the lockForUpdate inventory reservation used by the campaign booking path.",
+      "retained": true
+    },
+    {
+      "class": "BookingCapacityService",
+      "status": "current",
+      "finding": "Owns capacity/eligibility checks used by the reschedule path.",
+      "retained": true
+    }
+  ],
+  "runtime_only_registrations": [
+    {
+      "command": "bookings:expire-pending",
+      "schedule": "*/5 * * * *",
+      "import_references": 0,
+      "status": "LIVE"
+    },
+    {
+      "command": "rewards:expire",
+      "schedule": "0 0 * * *",
+      "import_references": 0,
+      "status": "LIVE"
+    },
+    {
+      "command": "currency:sync-rates",
+      "schedule": "13 1 * * *",
+      "import_references": 0,
+      "status": "LIVE"
+    },
+    {
+      "command": "inspire",
+      "schedule": "0 * * * *",
+      "import_references": 0,
+      "status": "LIVE - Laravel demo command, see phase-0.16-queue-scheduler-audit.json"
+    }
+  ],
+  "deletions_in_scope": "None in Phase 0.15. The 11 files deleted in Phase 0.13-0.14 remain deleted; 5 confirmed-dead conventional/rule classes remain pending characterisation."
+}

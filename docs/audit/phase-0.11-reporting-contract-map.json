@@ -1,0 +1,1356 @@
+{
+  "phase": "0.11",
+  "name": "Reporting Contract Map",
+  "generated_at": "2026-09-26T05:35:00+05:30",
+  "purpose": "Document all reporting API endpoints to ensure contracts are preserved during boundary extraction",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/reports/overview",
+      "controller": "App\\Http\\Controllers\\ReportController::overview",
+      "description": "Dashboard overview with all KPIs and charts",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string", 
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        }
+        // Note: Other filters like city_id, screen_id etc. are handled in parseFilters but not used in overview
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "kpis": {
+            "type": "object",
+            "properties": {
+              "total_revenue": {"type": "number"},
+              "revenue_growth": {"type": "number"},
+              "total_bookings": {"type": "integer"},
+              "booking_growth": {"type": "number"},
+              "active_campaigns": {"type": "integer"},
+              "pending_approvals": {"type": "integer"},
+              "average_occupancy": {"type": "number"},
+              "referral_revenue": {"type": "number"}
+            }
+          },
+          "charts": {
+            "type": "object",
+            "properties": {
+              "revenue_trends": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "date": {"type": "string", "format": "date"},
+                    "revenue": {"type": "number"},
+                    "bookings": {"type": "integer"}
+                  }
+                }
+              },
+              "booking_trends": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "date": {"type": "string", "format": "date"},
+                    "bookings": {"type": "integer"},
+                    "revenue": {"type": "number"}
+                  }
+                }
+              },
+              "screen_utilization": {"type": "array"},
+              "top_cities": {"type": "array"}
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total_revenue": {"type": "number"},
+              "total_bookings": {"type": "integer"},
+              "total_screens": {"type": "integer"},
+              "active_screens": {"type": "integer"},
+              "total_discounts": {"type": "number"},
+              "referral_discounts": {"type": "number"},
+              "total_commissions": {"type": "number"},
+              "net_revenue": {"type": "number"}
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/revenue",
+      "controller": "App\\Http\\Controllers\\ReportController::revenue",
+      "description": "Revenue analytics with trends and breakdowns",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date", 
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "overview": {
+            "type": "object",
+            "properties": {
+              "total_revenue": {"type": "number"},
+              "subtotal_revenue": {"type": "number"},
+              "total_discounts": {"type": "number"},
+              "first_booking_discounts": {"type": "number"},
+              "first_booking_bookings": {"type": "integer"},
+              "referral_discounts": {"type": "number"},
+              "total_commissions": {"type": "number"},
+              "booking_count": {"type": "integer"},
+              "average_campaign_value": {"type": "number"},
+              "net_revenue": {"type": "number"}
+            }
+          },
+          "daily_revenue": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {"type": "string", "format": "date"},
+                "revenue": {"type": "number"},
+                "bookings": {"type": "integer"}
+              }
+            }
+          },
+          "monthly_revenue": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "month": {"type": "string", "format": "YYYY-MM"},
+                "revenue": {"type": "number"},
+                "bookings": {"type": "integer"},
+                "avg_value": {"type": "number"}
+              }
+            }
+          },
+          "screen_wise": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "screen_id": {"type": "integer"},
+                "screen_name": {"type": "string"},
+                "revenue": {"type": "number"},
+                "bookings": {"type": "integer"}
+              }
+            }
+          },
+          "city_wise": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "city_id": {"type": "integer"},
+                "city_name": {"type": "string"},
+                "revenue": {"type": "number"},
+                "bookings": {"type": "integer"}
+              }
+            }
+          },
+          "referral_impact": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "partner_id": {"type": "integer"},
+                "partner_name": {"type": "string"},
+                "code": {"type": "string"},
+                "total_discount": {"type": "number"},
+                "total_commission": {"type": "number"},
+                "usage_count": {"type": "integer"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/bookings",
+      "controller": "App\\Http\\Controllers\\ReportController::bookings",
+      "description": "Booking analytics with status distribution and trends",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "overview": {
+            "type": "object",
+            "properties": {
+              "total_bookings": {"type": "integer"},
+              "campaign_bookings": {"type": "integer"},
+              "single_bookings": {"type": "integer"},
+              "status_breakdown": {
+                "type": "object",
+                "properties": {
+                  "payment_pending": {"type": "integer"},
+                  "media_review_pending": {"type": "integer"},
+                  "pending_approval": {"type": "integer"},
+                  "approved": {"type": "integer"},
+                  "rejected": {"type": "integer"},
+                  "scheduled": {"type": "integer"},
+                  "running": {"type": "integer"},
+                  "completed": {"type": "integer"},
+                  "cancelled": {"type": "integer"},
+                  "draft": {"type": "integer"}
+                }
+              },
+              "pending_review": {"type": "integer"},
+              "active_campaigns": {"type": "integer"},
+              "total_value": {"type": "number"},
+              "average_campaign_value": {"type": "number"},
+              "approval_rate": {"type": "number"},
+              "cancellation_rate": {"type": "number"}
+            }
+          },
+          "daily_volumes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {"type": "string", "format": "date"},
+                "bookings": {"type": "integer"},
+                "revenue": {"type": "number"}
+              }
+            }
+          },
+          "booking_trends": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "period": {"type": "string"},
+                "total": {"type": "integer"},
+                "successful": {"type": "integer"},
+                "revenue": {"type": "number"}
+              }
+            }
+          },
+          "approval_metrics": {
+            "type": "object",
+            "properties": {
+              "total_decided": {"type": "integer"},
+              "approved": {"type": "integer"},
+              "rejected": {"type": "integer"},
+              "approval_rate": {"type": "number"},
+              "average_approval_time_hours": {"type": "number"}
+            }
+          },
+          "source_breakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source": {"type": "string"},
+                "count": {"type": "integer"},
+                "revenue": {"type": "number"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/screens",
+      "controller": "App\\Http\\Controllers\\ReportController::screens",
+      "description": "Screen performance analytics",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "overview": {
+            "type": "object",
+            "properties": {
+              "total_screens": {"type": "integer"},
+              "active_screens": {"type": "integer"},
+              "inactive_screens": {"type": "integer"},
+              "total_active_bookings": {"type": "integer"},
+              "occupancy_rate": {"type": "number"},
+              "max_capacity": {"type": "integer"},
+              "max_ads_per_day": {"type": "integer"}
+            }
+          },
+          "screen_performance": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "screen_id": {"type": "integer"},
+                "screen_name": {"type": "string"},
+                "screen_code": {"type": "string"},
+                "city_name": {"type": "string"},
+                "occupancy_pct": {"type": "number"},
+                "booking_count": {"type": "integer"},
+                "revenue": {"type": "number"},
+                "completed_bookings": {"type": "integer"},
+                "status": {"type": "string"}
+              }
+            }
+          },
+          "utilization_distribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {"type": "string", "format": "date"},
+                "utilization": {"type": "number"},
+                "active_bookings": {"type": "integer"},
+                "max_capacity": {"type": "integer"},
+                "max_ads_per_day": {"type": "integer"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/cities",
+      "controller": "App\\Http\\Controllers\\ReportController::cities",
+      "description": "City performance analytics",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "city_performance": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "city_id": {"type": "integer"},
+                "city_name": {"type": "string"},
+                "screen_count": {"type": "integer"},
+                "booking_count": {"type": "integer"},
+                "revenue": {"type": "number"},
+                "avg_revenue_per_screen": {"type": "number"}
+              }
+            }
+          },
+          "total_cities": {"type": "integer"},
+          "top_cities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "city_id": {"type": "integer"},
+                "city_name": {"type": "string"},
+                "screen_count": {"type": "integer"},
+                "booking_count": {"type": "integer"},
+                "revenue": {"type": "number"},
+                "avg_revenue_per_screen": {"type": "number"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/campaigns",
+      "controller": "App\\Http\\Controllers\\ReportController::campaigns",
+      "description": "Campaign analytics",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "campaigns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "title": {"type": "string"},
+                "advertiser_name": {"type": "string"},
+                "start_time": {"type": "string", "format": "date-time"},
+                "end_time": {"type": "string", "format": "date-time"},
+                "duration_minutes": {"type": "integer"},
+                "duration_days": {"type": "number"},
+                "duration_label": {"type": "string"},
+                "status": {"type": "string"},
+                "final_amount": {"type": "number"},
+                "total_screens": {"type": "integer"},
+                "sources": {"type": "string"},
+                "pricing_plan": {"type": "string"},
+                "screens": {"type": "array", "items": {"type": "string"}},
+                "created_at": {"type": "string", "format": "date-time"}
+              }
+            }
+          },
+          "active_campaigns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "title": {"type": "string"},
+                "advertiser_name": {"type": "string"},
+                "start_time": {"type": "string", "format": "date-time"},
+                "end_time": {"type": "string", "format": "date-time"},
+                "duration_minutes": {"type": "integer"},
+                "duration_days": {"type": "number"},
+                "duration_label": {"type": "string"},
+                "status": {"type": "string"},
+                "final_amount": {"type": "number"},
+                "total_screens": {"type": "integer"},
+                "sources": {"type": "string"},
+                "pricing_plan": {"type": "string"},
+                "screens": {"type": "array", "items": {"type": "string"}},
+                "created_at": {"type": "string", "format": "date-time"}
+              }
+            }
+          },
+          "completed_campaigns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "title": {"type": "string"},
+                "advertiser_name": {"type": "string"},
+                "start_time": {"type": "string", "format": "date-time"},
+                "end_time": {"type": "string", "format": "date-time"},
+                "duration_minutes": {"type": "integer"},
+                "duration_days": {"type": "number"},
+                "duration_label": {"type": "string"},
+                "status": {"type": "string"},
+                "final_amount": {"type": "number"},
+                "total_screens": {"type": "integer"},
+                "sources": {"type": "string"},
+                "pricing_plan": {"type": "string"},
+                "screens": {"type": "array", "items": {"type": "string"}},
+                "created_at": {"type": "string", "format": "date-time"}
+              }
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total_campaigns": {"type": "integer"},
+              "active_count": {"type": "integer"},
+              "completed_count": {"type": "integer"},
+              "average_duration_minutes": {"type": "integer"},
+              "average_duration_days": {"type": "number"},
+              "average_duration_label": {"type": "string"},
+              "total_duration_minutes": {"type": "integer"},
+              "total_duration_label": {"type": "string"},
+              "total_value": {"type": "number"},
+              "campaign_share_pct": {"type": "number"}
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/screen-providers",
+      "controller": "App\\Http\\Controllers\\ReportController::screenProviders",
+      "description": "Screen Provider financial analytics with provider, screen, and booking breakdowns",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        },
+        "screen_provider_id": {
+          "type": "integer",
+          "required": false,
+          "description": "Filter by specific screen provider ID"
+        },
+        "screen_id": {
+          "type": "integer",
+          "required": false,
+          "description": "Filter by specific screen ID"
+        },
+        "country_id": {
+          "type": "integer",
+          "required": false,
+          "description": "Filter by country ID"
+        },
+        "city_id": {
+          "type": "integer",
+          "required": false,
+          "description": "Filter by city ID"
+        },
+        "business_type": {
+          "type": "string",
+          "required": false,
+          "description": "Filter by business type"
+        },
+        "settlement_status": {
+          "type": "string",
+          "required": false,
+          "description": "Filter by settlement status (pending, settled, etc.)"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total_providers": {"type": "integer"},
+              "total_provider_revenue": {"type": "number"},
+              "total_platform_revenue": {"type": "number"},
+              "total_gross_revenue": {"type": "number"},
+              "pending_settlement": {"type": "number"},
+              "settled_amount": {"type": "number"},
+              "outstanding_liability": {"type": "number"},
+              "total_owned_screens": {"type": "integer"}
+            }
+          },
+          "provider_breakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "provider_id": {"type": "integer"},
+                "provider_name": {"type": "string"},
+                "business_name": {"type": "string"},
+                "business_type": {"type": "string"},
+                "owned_screens": {"type": "integer"},
+                "campaign_count": {"type": "integer"},
+                "gross_revenue": {"type": "number"},
+                "platform_revenue": {"type": "number"},
+                "provider_revenue": {"type": "number"},
+                "pending_settlement": {"type": "number"},
+                "settled_amount": {"type": "number"},
+                "outstanding_balance": {"type": "number"}
+              }
+            }
+          },
+          "screen_breakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "screen_id": {"type": "integer"},
+                "screen_name": {"type": "string"},
+                "screen_code": {"type": "string"},
+                "provider_name": {"type": "string"},
+                "city_name": {"type": "string"},
+                "country_name": {"type": "string"},
+                "campaign_count": {"type": "integer"},
+                "gross_revenue": {"type": "number"},
+                "platform_revenue": {"type": "number"},
+                "provider_revenue": {"type": "number"},
+                "avg_revenue": {"type": "number"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/categories",
+      "controller": "App\\Http\\Controllers\\ReportController::categories",
+      "description": "Category analytics",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        },
+        "advertisement_category_id": {
+          "type": "integer",
+          "required": false,
+          "description": "Filter by advertisement category ID"
+        },
+        "provider_id": {
+          "type": "integer",
+          "required": false,
+          "description": "Filter by provider ID"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "revenue_by_category": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "revenue": {"type": "number"},
+                "bookings": {"type": "integer"}
+              }
+            }
+          },
+          "bookings_by_category": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "total_bookings": {"type": "integer"},
+                "campaign_bookings": {"type": "integer"}
+              }
+            }
+          },
+          "trend_by_category": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {"type": "string", "format": "date"},
+                "name": {"type": "string"},
+                "revenue": {"type": "number"}
+              }
+            }
+          },
+          "top_categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "revenue": {"type": "number"},
+                "bookings": {"type": "integer"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/referrals",
+      "controller": "App\\Http\\Controllers\\ReportController::referrals",
+      "description": "Referral & partner analytics",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "kpis": {
+            "type": "object",
+            "properties": {
+              "referral_revenue": {"type": "number"},
+              "total_commissions": {"type": "number"},
+              "pending_commissions": {"type": "number"},
+              "total_usage_count": {"type": "integer"},
+              "top_partner": {"type": "string"},
+              "active_referral_campaigns": {"type": "integer"}
+            }
+          },
+          "top_partners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "usage_count": {"type": "integer"},
+                "total_discount": {"type": "number"},
+                "total_commission": {"type": "number"}
+              }
+            }
+          },
+          "top_codes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "code": {"type": "string"},
+                "partner_name": {"type": "string"},
+                "usage_count": {"type": "integer"},
+                "total_discount": {"type": "number"},
+                "total_commission": {"type": "number"}
+              }
+            }
+          },
+          "monthly_trend": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "month": {"type": "string", "format": "YYYY-MM"},
+                "usage_count": {"type": "integer"},
+                "total_discount": {"type": "number"},
+                "total_commission": {"type": "number"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/rewards",
+      "controller": "App\\Http\\Controllers\\ReportController::rewards",
+      "description": "Rewards & loyalty program analytics",
+      "request_parameters": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)",
+          "default": "first day of current month"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)",
+          "default": "last day of current month"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "kpis": {
+            "type": "object",
+            "properties": {
+              "total_issued": {"type": "number"},
+              "total_redeemed": {"type": "number"},
+              "total_expired": {"type": "number"},
+              "outstanding_liability": {"type": "number"},
+              "total_accounts": {"type": "integer"},
+              "accounts_with_balance": {"type": "integer"},
+              "redemption_rate": {"type": "number"},
+              "period_issued": {"type": "number"},
+              "period_redeemed": {"type": "number"},
+              "period_expired": {"type": "number"},
+              "bookings_with_rewards": {"type": "integer"},
+              "total_revenue_influenced": {"type": "number"},
+              "total_discount_given": {"type": "number"},
+              "average_reward_per_booking": {"type": "number"}
+            }
+          },
+          "top_customers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "user_id": {"type": "integer"},
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+                "balance": {"type": "number"},
+                "lifetime_earned": {"type": "number"},
+                "lifetime_redeemed": {"type": "number"},
+                "lifetime_expired": {"type": "number"}
+              }
+            }
+          },
+          "monthly_trend": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "month": {"type": "string", "format": "YYYY-MM"},
+                "issued": {"type": "number"},
+                "redeemed": {"type": "number"},
+                "expired": {"type": "number"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/export",
+      "controller": "App\\Http\\Controllers\\ReportController::export",
+      "description": "Export report data as CSV/JSON",
+      "request_parameters": {
+        "type": {
+          "type": "string",
+          "required": true,
+          "enum": ["bookings", "revenue", "screens", "cities", "referrals", "campaigns", "screen-providers", "categories"],
+          "description": "Type of report to export"
+        },
+        "format": {
+          "type": "string",
+          "required": false,
+          "enum": ["csv", "json", "xlsx"],
+          "description": "Export format",
+          "default": "csv"
+        },
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period (inclusive)"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period (inclusive)"
+        }
+      },
+      "response_format": {
+        "oneOf": [
+          {
+            "description": "JSON response",
+            "content": {
+              "application/json": {
+                "type": "object",
+                "properties": {
+                  "success": {"type": "boolean"},
+                  "message": {"type": "string"},
+                  "data": {"type": "object"}
+                }
+              }
+            }
+          },
+          {
+            "description": "CSV file download",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "description": "CSV formatted data"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "status_codes": {
+        "200": "Success (JSON or file download)",
+        "400": "Bad Request (invalid parameters)",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard",
+      "controller": "App\\Http\\Controllers\\DashBoardController::index",
+      "description": "Comprehensive dashboard data for the admin overview page",
+      "request_parameters": {
+        // No specific query parameters, uses hardcoded date ranges (today, week, month, etc.)
+      },
+      "response_format": {
+        "type": "object",
+        "properties": {
+          "kpis": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {"type": "string"},
+                "value": {"type": ["number", "string"]},
+                "meta": {"type": "string"},
+                "icon": {"type": "string"},
+                "to": {"type": "string"}
+              }
+            }
+          },
+          "provider_kpis": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {"type": "string"},
+                "value": {"type": ["number", "string"]},
+                "meta": {"type": "string"},
+                "icon": {"type": "string"},
+                "to": {"type": "string"}
+              }
+            }
+          },
+          "reward_kpis": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {"type": "string"},
+                "value": {"type": ["number", "string"]},
+                "meta": {"type": "string"},
+                "icon": {"type": "string"},
+                "to": {"type": "string"}
+              }
+            }
+          },
+          "screens": {
+            "type": "object",
+            "properties": {
+              "total": {"type": "integer"},
+              "active": {"type": "integer"},
+              "offline": {"type": "integer"},
+              "available": {"type": "integer"},
+              "sold_out": {"type": "integer"},
+              "maintenance": {"type": "integer"},
+              "utilizationRate": {"type": "number"}
+            }
+          },
+          "bookings": {
+            "type": "object",
+            "properties": {
+              "today": {"type": "integer"},
+              "confirmed": {"type": "integer"},
+              "pending": {"type": "integer"},
+              "completed": {"type": "integer"},
+              "cancelled": {"type": "integer"},
+              "revenueToday": {"type": "number"}
+            }
+          },
+          "campaigns": {
+            "type": "object",
+            "properties": {
+              "active": {"type": "integer"},
+              "endingSoon": {"type": "integer"}
+            }
+          },
+          "utilizationChart": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "day": {"type": "string"},
+                "rate": {"type": "number"},
+                "date": {"type": "string", "format": "date"}
+              }
+            }
+          },
+          "bookingDistribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "value": {"type": "integer"},
+                "color": {"type": "string"}
+              }
+            }
+          },
+          "categoryDistribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "value": {"type": "integer"},
+                "color": {"type": "string"}
+              }
+            }
+          },
+          "recentBookings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "reference": {"type": "string"},
+                "advertiser": {"type": "string"},
+                "screen": {"type": "string"},
+                "date": {"type": "string", "format": "M d, h:i A"},
+                "status": {"type": "string"},
+                "amount": {"type": "number"},
+                "is_campaign": {"type": "boolean"}
+              }
+            }
+          },
+          "topScreens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rank": {"type": "integer"},
+                "name": {"type": "string"},
+                "utilization": {"type": "number"},
+                "revenue": {"type": "number"},
+                "bookings": {"type": "integer"}
+              }
+            }
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {"type": "string"},
+                "label": {"type": "string"},
+                "count": {"type": "integer"},
+                "detail": {"type": "string"},
+                "severity": {"type": "string"}
+              }
+            }
+          },
+          "contact_stats": {
+            "type": "object",
+            "properties": {
+              "new_enquiries": {"type": "integer"},
+              "open_enquiries": {"type": "integer"},
+              "in_progress_enquiries": {"type": "integer"},
+              "closed_enquiries": {"type": "integer"}
+            }
+          },
+          "recent_enquiries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+                "status": {"type": "string"},
+                "created_at": {"type": "string", "format": "date-time"}
+              }
+            }
+          }
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Admin or manager roles typically required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/partner/reports",
+      "controller": "App\\Http\\Controllers\\PartnerPortalController::reports",
+      "description": "Get aggregated partner reports across Bookings, Campaigns, Payments, Revenue, Commissions, and Settlements",
+      "request_parameters": {
+        "type": {
+          "type": "string",
+          "required": false,
+          "enum": ["bookings", "campaigns", "payments", "revenue", "commissions", "settlements"],
+          "description": "Type of report",
+          "default": "revenue"
+        },
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "Start date for reporting period"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "required": false,
+          "description": "End date for reporting period"
+        }
+      },
+      "response_format": {
+        "type": "object",
+        "description": "Varied response format based on 'type' parameter - see controller logic for detailed structure",
+        "properties": {
+          // This is simplified - actual structure varies by type
+          "total_gross_revenue": {"type": "number"},
+          "total_commissions_earned": {"type": "number"},
+          "bookings_count": {"type": "integer"}
+        }
+      },
+      "status_codes": {
+        "200": "Success",
+        "401": "Unauthorized",
+        "403": "Forbidden (Partner not found or access denied)",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Partner role required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    },
+    {
+      "method": "GET",
+      "path": "/partner/reports/export",
+      "controller": "App\\Http\\Controllers\\PartnerPortalController::exportReport",
+      "description": "Export partner report in CSV or JSON format",
+      "request_parameters": {
+        "type": {
+          "type": "string",
+          "required": false,
+          "enum": ["bookings", "campaigns", "payments", "revenue", "commissions", "settlements"],
+          "description": "Type of report",
+          "default": "revenue"
+        },
+        "format": {
+          "type": "string",
+          "required": false,
+          "enum": ["csv", "json", "excel"],
+          "description": "Export format",
+          "default": "csv"
+        }
+      },
+      "response_format": {
+        "oneOf": [
+          {
+            "description": "JSON response",
+            "content": {
+              "application/json": {
+                "type": "object",
+                "properties": {
+                  "success": {"type": "boolean"},
+                  "message": {"type": "string"}
+                }
+              }
+            }
+          },
+          {
+            "description": "CSV/Excel file download",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "description": "CSV formatted data"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "status_codes": {
+        "200": "Success (JSON or file download)",
+        "401": "Unauthorized",
+        "403": "Forbidden (Partner not found or access denied)",
+        "422": "Validation Error"
+      },
+      "authentication": "Required (auth:sanctum middleware)",
+      "authorization": "Partner role required",
+      "cacheability": "Not cacheable (dynamic data)",
+      "rate_limiting": "Subject to standard API rate limits"
+    }
+  ],
+  "summary": {
+    "total_endpoints_documentated": 12,
+    "endpoints_requiring_auth": 12,
+    "endpoints_with_date_filtering": 10,
+    "export_endpoints": 2,
+    "consistency_notes": [
+      "All endpoints require authentication via sanctum middleware",
+      "Most endpoints support date_from/date_to filtering with consistent defaults",
+      "Response formats are consistent in structure but vary in complexity based on endpoint purpose",
+      "Export endpoints support CSV, JSON, and Excel formats",
+      "Partner endpoints require partner role instead of general admin/manager roles"
+    ],
+    "recommendations": [
+      "Consider standardizing error response formats across all endpoints",
+      "Ensure all date filtering uses consistent inclusive/exclusive boundaries",
+      "Validate that authorization checks are properly implemented for all endpoints"
+    ]
+  }
+}

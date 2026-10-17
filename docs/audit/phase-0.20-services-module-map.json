@@ -1,0 +1,75 @@
+{
+ "phase": "0.20",
+ "captured": "2026-09-26",
+ "module": "Services",
+ "note": "Services = application/use-case orchestration. 14 P0/P1 analytics/orchestration services + 2 Asset services migrated. 27 classes remain flat in app/Services/ and are individually justified in phase-0.20-legacy-directory-status.json.",
+ "capabilities": [
+  {
+   "capability": "Campaign",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 13,
+   "classes": [
+    "App\\Services\\Campaign\\AssetDiscoveryFilterService",
+    "App\\Services\\Campaign\\BudgetRecommendationService",
+    "App\\Services\\Campaign\\ClientAnalyticsService",
+    "App\\Services\\Campaign\\ClientService",
+    "App\\Services\\Campaign\\CountryDetectionService",
+    "App\\Services\\Campaign\\CoverageService",
+    "App\\Services\\Campaign\\CurrencyService",
+    "App\\Services\\Campaign\\ExchangeRateService",
+    "App\\Services\\Campaign\\LoyaltyService",
+    "App\\Services\\Campaign\\RecommendationService",
+    "App\\Services\\Campaign\\ReferralService",
+    "App\\Services\\Campaign\\ReferralTrackingService",
+    "App\\Services\\Campaign\\ScreenAnalyticsService"
+   ]
+  },
+  {
+   "capability": "Booking",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 1,
+   "classes": [
+    "App\\Services\\Booking\\BookingAnalyticsService"
+   ]
+  },
+  {
+   "capability": "Pricing",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 4,
+   "classes": [
+    "App\\Services\\Pricing\\DailyPricingCalculator",
+    "App\\Services\\Pricing\\FirstBookingDiscountPricingCalculator",
+    "App\\Services\\Pricing\\ReferralPricingCalculator",
+    "App\\Services\\Pricing\\ScreenPricingResolver"
+   ]
+  },
+  {
+   "capability": "Payment",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 1,
+   "classes": [
+    "App\\Services\\Payment\\PaymentAnalyticsService"
+   ]
+  },
+  {
+   "capability": "Creative",
+   "exists": true,
+   "is_empty": true,
+   "class_count": 0,
+   "classes": []
+  },
+  {
+   "capability": "Settlement",
+   "exists": true,
+   "is_empty": false,
+   "class_count": 1,
+   "classes": [
+    "App\\Services\\Settlement\\RevenueAnalyticsService"
+   ]
+  }
+ ]
+}

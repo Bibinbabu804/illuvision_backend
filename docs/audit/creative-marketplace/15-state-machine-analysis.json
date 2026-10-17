@@ -1,0 +1,1346 @@
+{
+  "artifact": "15-creative-state-machine-analysis",
+  "generated": "2026-09-26",
+  "status": "PROPOSAL ONLY. READ-ONLY AUDIT. No class, enum, migration, route, controller, model, event, notification or test was created. No Creative code exists: 0 classes, 0 routes, 0 tables, 0 migrations, 0 tests. Every state set below is a RECOMMENDATION, not a description of existing behaviour.",
+  "classification": "CURRENT_FACT for every entry in reusable_state_transition_patterns_in_current_codebase and every current-code citation. RECOMMENDATION for every proposed Creative state, transition, actor, side effect and event. OPEN_DECISION wherever a transition rule cannot be derived from evidence. ARCHITECTURE_DOCUMENT for the rule citations. INFERENCE for reasoning that follows from the verified facts but is not itself stated anywhere.",
+  "companion_artifacts": [
+    "docs/audit/creative-marketplace/13-authorization-audit.md",
+    "docs/audit/creative-marketplace/14-api-architecture-audit.md"
+  ],
+  "method": [
+    "Read every existing state vocabulary in the codebase end to end: BookingStatus, PaymentStatus, App\\Models\\Booking, App\\Models\\Payment, App\\Models\\Partner, App\\Models\\PartnerCommission, App\\Models\\ScreenProviderSettlement, App\\Models\\BookingMedia, App\\Models\\ScreenProviderEnquiry, and the enquiry status columns in the migrations.",
+    "Read every existing transition site: app/Services/BookingWorkflowService.php, app/Services/SettlementService.php, app/Http/Controllers/PartnerApprovalController.php, app/Http/Controllers/BookingController.php, app/Http/Controllers/AdminManualBookingController.php, app/Http/Controllers/Api/BookingEngineController.php.",
+    "Searched for any generic state-machine abstraction (classes, traits, interfaces, composer packages). Result recorded verbatim in abstract_state_machine_availability.",
+    "Diffed the BookingStatus enum against the Booking model's STATUS_ constants by reflection, to measure enum/model drift exactly rather than by inspection.",
+    "Invented no business rule. Where a limit, window, threshold, penalty, actor set or accrual trigger is not derivable, the entry is OPEN_DECISION and states what is missing."
+  ],
+  "classification_legend": {
+    "CURRENT_FACT": "Verified from source code on 2026-09-26, with file:line evidence.",
+    "ARCHITECTURE_DOCUMENT": "Defined by docs/architecture/ARCHITECTURE_RULES.md or root AGENTS.md.",
+    "INFERENCE": "Reasonably inferred from the implementation or from relationships between artefacts.",
+    "RECOMMENDATION": "Proposed target design. Not implemented. No enum, class, table or route was written.",
+    "OPEN_DECISION": "Cannot be determined from available evidence; requires a product or architecture decision. The missing information is stated exactly."
+  },
+  "reading_rules": [
+    "Every state in every lifecycle is a RECOMMENDATION. There is no Creative code to describe.",
+    "No percentage, commission rate, limit, window, deadline, penalty, tax, currency-support statement or minimum amount appears anywhere in this artifact. Where such a value would be needed, the field is OPEN_DECISION.",
+    "'actor' names a ROLE (from artifact 13 section 5), not a person. Where the correct role is itself undecided, the actor is OPEN_DECISION.",
+    "'authorization_basis' names a permission string proposed in artifact 13 section 5, or a policy, or an OPEN_DECISION. No permission string here is seeded today.",
+    "database_change describes the row the RECOMMENDED transition would write. No such column or table exists."
+  ],
+
+  "global_conventions": {
+    "classification": "RECOMMENDATION",
+    "enum_backed_status_columns": "Every Creative status column is string(50) (or narrower where the vocabulary is small) cast to a PHP backed enum. This follows the dominant existing convention: database/migrations/2026_06_15_000001_create_screen_provider_enquiries_table.php:17 uses string(20), database/migrations/2026_09_01_000001_create_screen_provider_settlements_table.php:21 uses string default 'generated', and app/Domain/Booking/Enums/BookingStatus.php is a backed enum. DB-level ENUM is used nowhere in the Creative blueprint.",
+    "single_transition_owner": "Each lifecycle has exactly ONE transition owner. This is already the case for Booking (app/Services/BookingWorkflowService.php:41) and partially for settlements (app/Services/SettlementService.php). The known anti-pattern to avoid is the Booking enum/model drift documented in booking_status_enum_model_drift below, which exists precisely because two owners exist.",
+    "no_generic_framework": "No state-machine library or framework is to be introduced. See abstract_state_machine_availability and verdict.",
+    "guards_not_controllers": "Every transition is guarded in the domain/service layer and throws a domain exception on an illegal transition. HTTP status mapping happens only in the exception's render() method, exactly as app/Domain/Booking/Exceptions/InvalidBookingStateException.php:11-18 already does. Controllers must not contain transition logic (ARCHITECTURE_RULES Rule 1, AGENTS.md section 6).",
+    "one_activity_log_per_transition": "Every transition writes one activity_logs row (App\\Models\\ActivityLog already exists and is used for this, e.g. app/Http/Controllers/Api/RoleController.php:40-49). Append-only, matching booking_activities.",
+    "immutable_financial_records": "creator_earnings rows are never updated to a new status in a way that destroys history: a reversal is a NEW row with a negative amount linked by reverses_earning_id (AGENTS.md section 10, 09-creative-database-target-schema-blueprint.json:574).",
+    "idempotency": "Any transition that writes money must be safe to retry. 09-...json:563 already recommends UNIQUE(project_id, earning_type) as a double-credit backstop. There is no request-level idempotency key anywhere in the current codebase (artifact 14 section 10.1)."
+  },
+
+  "lifecycles": [
+    {
+      "id": "LC-CREATOR",
+      "name": "Creator",
+      "owner_table": "creators",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "The vocabulary mirrors App\\Models\\Partner::STATUS_* at app/Models/Partner.php:14-18 (pending, under_review, approved, rejected, inactive), which is the only existing approval lifecycle with a review stage in this repository. Mirroring it is a RECOMMENDATION for familiarity, not a claim that a creator is a partner.",
+      "states": [
+        {
+          "state": "pending",
+          "valid_next_states": ["under_review", "approved", "rejected"],
+          "actor": "RECOMMENDATION: admin",
+          "authorization_basis": "RECOMMENDATION: no permission — the transition is performed by the system at registration, or by an admin. The existing analogue app/Http/Controllers/PartnerApprovalController.php:100 writes Partner::STATUS_PENDING with no permission gate beyond the route's own permission.",
+          "side_effects": ["RECOMMENDATION: send an acknowledgement to the applicant"],
+          "database_change": "RECOMMENDATION: INSERT creators row (status = 'pending'); log activity",
+          "event": "RECOMMENDATION: a Creative onboarding event, modelled on app/Support/Events/Notifications/ScreenProviderCreated.php and .../PartnerCreated.php",
+          "notification": "RECOMMENDATION: reuse App\\Services\\NotificationService (app/Services/NotificationService.php:62) with a NEW recipient_type value 'creator' (09-...json:657 proposes the same). No existing notification config key covers it.",
+          "financial_effect": "none"
+        },
+        {
+          "state": "under_review",
+          "valid_next_states": ["approved", "rejected"],
+          "actor": "RECOMMENDATION: admin",
+          "authorization_basis": "RECOMMENDATION: creative.profile.edit is too broad; a dedicated creative.onboarding.review permission is RECOMMENDED but does not exist in artifact 13 section 5.",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creators.status = 'under_review'; log activity",
+          "event": "none",
+          "notification": "RECOMMENDATION: none",
+          "financial_effect": "none",
+          "notes": "Mirrors app/Http/Controllers/PartnerApprovalController.php:69 which sets Partner::STATUS_UNDER_REVIEW with no notification."
+        },
+        {
+          "state": "approved",
+          "valid_next_states": ["suspended", "inactive"],
+          "actor": "RECOMMENDATION: admin",
+          "authorization_basis": "RECOMMENDATION: creative.onboarding.approve. NOTE: no such string exists in artifact 13 section 5; this is a gap in that artifact's matrix, recorded here as OD-SM-02.",
+          "side_effects": [
+            "RECOMMENDATION: this is the transition that makes the creator's public profile and service listings visible. It is the point at which the identity becomes externally discoverable."
+          ],
+          "database_change": "RECOMMENDATION: UPDATE creators.status = 'approved', approved_at = now(); log activity",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/ScreenProviderApproved.php",
+          "notification": "RECOMMENDATION: approval notice to the creator",
+          "financial_effect": "none"
+        },
+        {
+          "state": "rejected",
+          "valid_next_states": ["pending"],
+          "actor": "RECOMMENDATION: admin",
+          "authorization_basis": "RECOMMENDATION: creative.onboarding.reject",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creators.status = 'rejected', rejection_reason; log activity",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/PartnerRejected.php",
+          "notification": "RECOMMENDATION: rejection notice including the reason",
+          "financial_effect": "none",
+          "notes": "Mirrors app/Http/Controllers/PartnerApprovalController.php:47 which refuses to reject an already approved partner."
+        },
+        {
+          "state": "suspended",
+          "valid_next_states": ["approved", "inactive"],
+          "actor": "RECOMMENDATION: admin",
+          "authorization_basis": "RECOMMENDATION: creative.profile.edit, or a dedicated suspend permission",
+          "side_effects": ["RECOMMENDATION: unpublish the creator's service listings so they stop appearing on the public surface without deleting them"],
+          "database_change": "RECOMMENDATION: UPDATE creators.status = 'suspended', suspended_at, suspension_reason; log activity",
+          "event": "RECOMMENDATION: none in the current evidence",
+          "notification": "RECOMMENDATION: suspension notice",
+          "financial_effect": "OPEN_DECISION: whether suspension affects in-flight projects, undelivered earnings or a pending payout is not defined. Missing information: the policy for work already accepted when a creator is suspended.",
+          "open_decision_id": "OD-SM-01"
+        },
+        {
+          "state": "inactive",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: admin or system",
+          "authorization_basis": "RECOMMENDATION: admin only",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creators.status = 'inactive'; log activity",
+          "event": "none",
+          "notification": "RECOMMENDATION: none",
+          "financial_effect": "none",
+          "notes": "Terminal. This is a deactivation, NOT a delete: 09-...json:81 recommends soft delete plus a deactivated status so that a creator's financial history survives."
+        }
+      ],
+      "open_decisions": [
+        {
+          "id": "OD-SM-01",
+          "question": "What happens to in-flight projects, undelivered earnings and pending payouts when a creator is suspended or becomes inactive?",
+          "missing_information": "A product and finance policy. Nothing in the codebase or in any audit artifact addresses mid-engagement creator suspension. The existing analogue (Partner::STATUS_INACTIVE at app/Models/Partner.php:18) has no such handling either."
+        }
+      ]
+    },
+
+    {
+      "id": "LC-CREATIVE-SERVICE",
+      "name": "CreativeService",
+      "owner_table": "creator_services",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "No existing analogue. 09-...json:235 indexes (status, published_at), implying a published_at column and therefore a publish transition, but no state vocabulary is specified anywhere.",
+      "states": [
+        {
+          "state": "draft",
+          "valid_next_states": ["published"],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.services.edit for edits, creative.services.publish for the transition itself. Artifact 13 section 5.3 keeps them separate, which is why the endpoint table in artifact 14 section 11.3 uses POST .../publish rather than a boolean PATCH.",
+          "side_effects": ["none"],
+          "database_change": "RECOMMENDATION: INSERT creator_services row (status = 'draft')",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "OPEN_DECISION: whether a creator_service carries a rate/price, and whether that amount is a commercial commitment. 09-...json:122-148 proposes a 'defined rate' but no value or currency rule. Missing information: the rate model, its currency, and whether a published rate is binding or indicative."
+        },
+        {
+          "state": "published",
+          "valid_next_states": ["paused", "withdrawn"],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.services.publish / creative.services.edit",
+          "side_effects": [
+            "RECOMMENDATION: the service becomes readable on the unauthenticated surface GET /api/creative/services (artifact 14 section 11.1). This is a visibility change, not just a row update, which is why it is a separate transition."
+          ],
+          "database_change": "RECOMMENDATION: UPDATE creator_services.status = 'published', published_at = now()",
+          "event": "RECOMMENDATION: none needed",
+          "notification": "RECOMMENDATION: none",
+          "financial_effect": "none"
+        },
+        {
+          "state": "paused",
+          "valid_next_states": ["published", "withdrawn"],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.services.edit",
+          "side_effects": ["RECOMMENDATION: hidden from public listing but still visible to creators browsing open briefs? OPEN_DECISION — see OD-SM-02"],
+          "database_change": "RECOMMENDATION: UPDATE creator_services.status = 'paused', paused_at",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "OPEN_DECISION: does pausing affect a service that already has open proposals or an active project? Missing information: the policy for in-flight work on a paused listing."
+        },
+        {
+          "state": "withdrawn",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.services.edit",
+          "side_effects": ["RECOMMENDATION: removed from all public surfaces; retained for history"],
+          "database_change": "RECOMMENDATION: UPDATE creator_services.status = 'withdrawn', withdrawn_at",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "none",
+          "notes": "Terminal, and distinct from archive/delete: 09-...json:81 recommends soft delete on creator_services, so withdrawn is the visible state and deleted_at is the storage concern."
+        }
+      ],
+      "open_decisions": [
+        {
+          "id": "OD-SM-02",
+          "question": "Can a paused service still receive new proposals, and can a withdrawn service still be the service attached to an active project?",
+          "missing_information": "A product rule about whether a listing's availability is independent of its visibility. Nothing in the codebase or the artifacts addresses it."
+        }
+      ]
+    },
+
+    {
+      "id": "LC-BRIEF",
+      "name": "Brief",
+      "owner_table": "creative_briefs",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "No existing analogue. The closest shape is App\\Models\\ProductEnquiry / ContactEnquiry / ScreenProviderEnquiry, but those are single-status lead records (status default 'new', see database/migrations/2026_06_15_000001_create_screen_provider_enquiries_table.php:17), not lifecycles with review stages. A brief is materially richer than any of them.",
+      "states": [
+        {
+          "state": "draft",
+          "valid_next_states": ["open", "cancelled"],
+          "actor": "RECOMMENDATION: buyer",
+          "authorization_basis": "RECOMMENDATION: creative.briefs.edit",
+          "side_effects": ["none"],
+          "database_change": "RECOMMENDATION: INSERT creative_briefs row (status = 'draft')",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "none"
+        },
+        {
+          "state": "open",
+          "valid_next_states": ["closed", "cancelled"],
+          "actor": "RECOMMENDATION: buyer",
+          "authorization_basis": "RECOMMENDATION: creative.briefs.close is proposed in artifact 13 section 5.2 for closing; opening is RECOMMENDED under creative.briefs.edit.",
+          "side_effects": [
+            "RECOMMENDATION: the brief enters the creator discovery surface (GET /api/creative/briefs/open, artifact 14 section 11.3), filtered by the creator's categories"
+          ],
+          "database_change": "RECOMMENDATION: UPDATE creative_briefs.status = 'open', opened_at = now()",
+          "event": "RECOMMENDATION: a brief-opened event, so notification dispatch can fan out to matching creators",
+          "notification": "RECOMMENDATION: new-brief alert to matching creators. This requires a NEW recipient_type ('creator'); the existing App\\Services\\NotificationService resolves admin and user recipients only (app/Services/NotificationService.php:43 getAdminRecipients).",
+          "financial_effect": "none",
+          "notes": "OPEN_DECISION on the deadline: 09-...json proposes a deadline column and a creative.briefs.extend permission (artifact 13 section 5.5), but no window, no default and no expiry behaviour is defined. See OD-SM-03."
+        },
+        {
+          "state": "closed",
+          "valid_next_states": ["cancelled"],
+          "actor": "RECOMMENDATION: buyer or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.briefs.close (buyer) or creative.briefs.moderate (project manager)",
+          "side_effects": ["RECOMMENDATION: no new proposals accepted; existing proposals must be explicitly rejected or left pending"],
+          "database_change": "RECOMMENDATION: UPDATE creative_briefs.status = 'closed', closed_at",
+          "event": "RECOMMENDATION: brief-closed event so pending proposers are informed",
+          "notification": "RECOMMENDATION: outcome notice to every creator who submitted a proposal",
+          "financial_effect": "OPEN_DECISION: what happens to proposals when a brief closes. Missing information: whether closing auto-rejects outstanding proposals, whether any fee is non-refundable, and whether a closed brief can be reopened."
+        },
+        {
+          "state": "cancelled",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: buyer or admin",
+          "authorization_basis": "RECOMMENDATION: creative.briefs.close (buyer) or admin",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_briefs.status = 'cancelled', cancelled_at, cancelled_by_party",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/BookingCancelled.php",
+          "notification": "RECOMMENDATION: cancellation notice",
+          "financial_effect": "OPEN_DECISION: cancellation penalties do not exist as a concept in this repository. Missing information: whether cancelling a brief with an accepted proposal incurs any financial consequence, and whether the buyer or the platform absorbs it.",
+          "open_decision_id": "OD-SM-04"
+        }
+      ],
+      "open_decisions": [
+        {
+          "id": "OD-SM-03",
+          "question": "Does a brief have a submission deadline, and what happens when it passes?",
+          "missing_information": "A business rule. 09-...json:214-237 mentions a deadline and a creative.briefs.extend permission, but no artifact states a duration, a default, or an expiry behaviour (auto-close, stay open, or extend)."
+        },
+        {
+          "id": "OD-SM-04",
+          "question": "Who may cancel a brief or a project, at which states, and with what financial consequence?",
+          "missing_information": "A product and finance policy. 09-...json:327 records cancelled_by_party as 'client' | 'creator' | 'admin', which is a column, not a rule. No penalty, fee or refund rule exists anywhere in this repository for a cancellation."
+        }
+      ]
+    },
+
+    {
+      "id": "LC-PROPOSAL",
+      "name": "Proposal",
+      "owner_table": "creative_proposals",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "No existing analogue. The nearest shape is the booking approval flow at app/Http/Controllers/BookingController.php:315-387, which guards a transition with 'Booking is not in a reviewable status.' (422) before approve/reject.",
+      "states": [
+        {
+          "state": "draft",
+          "valid_next_states": ["submitted", "withdrawn"],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.proposals.edit / creative.proposals.submit",
+          "side_effects": ["none"],
+          "database_change": "RECOMMENDATION: INSERT creative_proposals row (status = 'draft')",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "OPEN_DECISION: whether a draft proposal may carry a monetary amount. 09-...json:270 lists amount fields on the proposal. Missing information: whether a quoted amount is binding at proposal stage or only becomes binding at acceptance."
+        },
+        {
+          "state": "submitted",
+          "valid_next_states": ["accepted", "rejected", "withdrawn"],
+          "actor": "RECOMMENDATION: buyer (accept/reject), creator (withdraw)",
+          "authorization_basis": "RECOMMENDATION: creative.proposals.accept / creative.proposals.reject / creative.proposals.withdraw",
+          "side_effects": [
+            "RECOMMENDATION: only one proposal per brief may be accepted. The others must move to rejected or a new state; which one is OPEN_DECISION, see OD-SM-05."
+          ],
+          "database_change": "RECOMMENDATION: UPDATE creative_proposals.status = 'submitted', submitted_at",
+          "event": "RECOMMENDATION: proposal-submitted event",
+          "notification": "RECOMMENDATION: notification to the brief owner",
+          "financial_effect": "none"
+        },
+        {
+          "state": "accepted",
+          "valid_next_states": ["declined"],
+          "actor": "RECOMMENDATION: buyer",
+          "authorization_basis": "RECOMMENDATION: creative.proposals.accept",
+          "side_effects": [
+            "RECOMMENDATION: this transition creates the Project. That is the single most consequential side effect in the Creative context.",
+            "RECOMMENDATION: the agreed amount, currency and any split must be SNAPSHOTSHOT onto the project at this moment, per AGENTS.md section 10 and 09-...json:335-338. They must never be recomputed later."
+          ],
+          "database_change": "RECOMMENDATION: UPDATE creative_proposals.status = 'accepted', accepted_at; INSERT creative_projects row; log activity",
+          "event": "RECOMMENDATION: project-created event",
+          "notification": "RECOMMENDATION: award notice to the winning creator; outcome notice to the others",
+          "financial_effect": "OPEN_DECISION: acceptance is the point at which any money becomes committed, but nothing states what. Missing information: whether acceptance triggers escrow/funding, whether an amount is computed, what the platform's share is, in which currencies, and whether any earning accrues at acceptance. NO amount, rate or split is proposed here. See OD-SM-06 and artifact 13 OD-AUTH-10.",
+          "open_decision_id": "OD-SM-06"
+        },
+        {
+          "state": "rejected",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: buyer or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.proposals.reject",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_proposals.status = 'rejected', rejected_at, rejection_reason",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/BookingRejected.php",
+          "notification": "RECOMMENDATION: rejection notice with the reason",
+          "financial_effect": "none"
+        },
+        {
+          "state": "withdrawn",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.proposals.withdraw",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_proposals.status = 'withdrawn', withdrawn_at",
+          "event": "none",
+          "notification": "RECOMMENDATION: notice to the brief owner",
+          "financial_effect": "none"
+        },
+        {
+          "state": "declined",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: buyer",
+          "authorization_basis": "RECOMMENDATION: creative.projects.cancel on the resulting project, or creative.proposals.reject",
+          "side_effects": ["RECOMMENDATION: the project it created is withdrawn; the proposal is not reopened"],
+          "database_change": "RECOMMENDATION: UPDATE creative_proposals.status = 'declined'; UPDATE the project",
+          "event": "RECOMMENDATION: none in current evidence",
+          "notification": "RECOMMENDATION: notice to both parties",
+          "financial_effect": "OPEN_DECISION: an accepted-then-declined project may already have funded money attached. Missing information: the refund/compensating-record rule. AGENTS.md section 10 requires a compensating record, never a rewrite, but the trigger for issuing one is undefined.",
+          "open_decision_id": "OD-SM-07"
+        }
+      ],
+      "open_decisions": [
+        {
+          "id": "OD-SM-05",
+          "question": "When one proposal is accepted, what happens to the other proposals on the same brief — auto-rejected, or left in a distinct state?",
+          "missing_information": "A product rule. The state set must model the losing proposals explicitly, because 'rejected' implies a buyer action that did not occur."
+        },
+        {
+          "id": "OD-SM-06",
+          "question": "What financial effect does accepting a proposal have?",
+          "missing_information": "The full financial rule: whether escrow applies, whether an amount is computed, what the platform share is, supported currencies, tax treatment, and whether any earning accrues at acceptance. Nothing in the codebase or any audit artifact states any of these. This artifact deliberately proposes NO value."
+        },
+        {
+          "id": "OD-SM-07",
+          "question": "What is the compensating-record rule when an accepted proposal is later declined?",
+          "missing_information": "A finance policy. AGENTS.md section 10 mandates the mechanism (compensating record, never a rewrite) but not the trigger conditions or the amount."
+        }
+      ]
+    },
+
+    {
+      "id": "LC-PROJECT",
+      "name": "Project",
+      "owner_table": "creative_projects",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "Structurally modelled on app/Domain/Booking/Enums/BookingStatus (draft, pending_approval, approved, rejected, scheduled, running, completed, cancelled) combined with booking_media.review_status (pending, approved, rejected), because a Creative project interleaves a client-approval lifecycle with a creative-work review lifecycle. It is deliberately NOT a copy of either.",
+      "states": [
+        {
+          "state": "pending_start",
+          "valid_next_states": ["active", "cancelled"],
+          "actor": "RECOMMENDATION: system, or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.projects.transition",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: INSERT creative_projects row at proposal acceptance, with status = 'pending_start'",
+          "event": "RECOMMENDATION: project-created event",
+          "notification": "RECOMMENDATION: creation notice to both parties",
+          "financial_effect": "OPEN_DECISION: whether a project is 'active' immediately on acceptance or waits on funding. Missing information: the relationship between proposal acceptance, project activation and any funding step. See OD-SM-06."
+        },
+        {
+          "state": "active",
+          "valid_next_states": ["in_delivery", "cancelled", "disputed"],
+          "actor": "RECOMMENDATION: project manager",
+          "authorization_basis": "RECOMMENDATION: creative.projects.transition",
+          "side_effects": ["RECOMMENDATION: the creator may begin submitting deliveries"],
+          "database_change": "RECOMMENDATION: UPDATE creative_projects.status = 'active', started_at",
+          "event": "RECOMMENDATION: none in current evidence",
+          "notification": "RECOMMENDATION: kickoff notice to the creator",
+          "financial_effect": "none"
+        },
+        {
+          "state": "in_delivery",
+          "valid_next_states": ["in_review", "cancelled", "disputed"],
+          "actor": "RECOMMENDATION: system (on first delivery submission)",
+          "authorization_basis": "RECOMMENDATION: driven by creative.deliveries.submit, not by a direct project transition",
+          "side_effects": ["RECOMMENDATION: the delivery becomes visible to the reviewer queue"],
+          "database_change": "RECOMMENDATION: UPDATE creative_projects.status = 'in_delivery'",
+          "event": "RECOMMENDATION: delivery-submitted event",
+          "notification": "RECOMMENDATION: submission notice to reviewer and buyer",
+          "financial_effect": "none"
+        },
+        {
+          "state": "in_review",
+          "valid_next_states": ["changes_requested", "delivered", "cancelled", "disputed"],
+          "actor": "RECOMMENDATION: reviewer (approve path), buyer (accept path)",
+          "authorization_basis": "RECOMMENDATION: creative.review.approve or creative.deliveries.accept",
+          "side_effects": ["RECOMMENDATION: a review record is written by the reviewer, or a delivery acceptance is written by the buyer"],
+          "database_change": "RECOMMENDATION: UPDATE creative_projects.status = 'in_review'",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/MediaUploaded.php and .../MediaApproved.php",
+          "notification": "RECOMMENDATION: review-in-progress notice",
+          "financial_effect": "none"
+        },
+        {
+          "state": "changes_requested",
+          "valid_next_states": ["in_delivery", "cancelled", "disputed"],
+          "actor": "RECOMMENDATION: buyer or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.deliveries.request_changes or creative.revisions.request",
+          "side_effects": [
+            "RECOMMENDATION: creates a Revision record (LC-REVISION), which is the auditable unit of a change round."
+          ],
+          "database_change": "RECOMMENDATION: UPDATE creative_projects.status = 'changes_requested'; INSERT creative_revisions row",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/MediaRejected.php",
+          "notification": "RECOMMENDATION: change-request notice to the creator",
+          "financial_effect": "none",
+          "notes": "OPEN_DECISION on revision limits — see OD-SM-08."
+        },
+        {
+          "state": "delivered",
+          "valid_next_states": ["accepted", "changes_requested", "cancelled", "disputed"],
+          "actor": "RECOMMENDATION: system (on reviewer approval) or buyer",
+          "authorization_basis": "RECOMMENDATION: creative.review.approve",
+          "side_effects": ["RECOMMENDATION: the deliverable is presented to the buyer for acceptance"],
+          "database_change": "RECOMMENDATION: UPDATE creative_projects.status = 'delivered', delivered_at",
+          "event": "RECOMMENDATION: delivery-ready event",
+          "notification": "RECOMMENDATION: ready-for-acceptance notice to the buyer",
+          "financial_effect": "none"
+        },
+        {
+          "state": "accepted",
+          "valid_next_states": ["completed", "disputed"],
+          "actor": "RECOMMENDATION: buyer",
+          "authorization_basis": "RECOMMENDATION: creative.deliveries.accept",
+          "side_effects": [
+            "RECOMMENDATION: this is the point at which any earning may become accruable. See OD-SM-09 — the accrual trigger is undefined."
+          ],
+          "database_change": "RECOMMENDATION: UPDATE creative_projects.status = 'accepted', accepted_at, accepted_by",
+          "event": "RECOMMENDATION: acceptance event",
+          "notification": "RECOMMENDATION: acceptance notice to both parties",
+          "financial_effect": "OPEN_DECISION: whether acceptance accrues a creator earning, and of what amount and split. Missing information: the earning accrual trigger, the amount basis, and the currency. NO value is proposed.",
+          "open_decision_id": "OD-SM-09"
+        },
+        {
+          "state": "completed",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: system, or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.projects.transition",
+          "side_effects": ["RECOMMENDATION: the project becomes eligible for a post-completion review (LC-REVIEW)"],
+          "database_change": "RECOMMENDATION: UPDATE creative_projects.status = 'completed', completed_at",
+          "event": "RECOMMENDATION: project-completed event",
+          "notification": "RECOMMENDATION: completion notice to both parties",
+          "financial_effect": "OPEN_DECISION: whether completion releases escrowed funds, or whether that is a separate payout step. Missing information: the relationship between project completion, earning release and payout."
+        },
+        {
+          "state": "cancelled",
+          "valid_next_states": [],
+          "actor": "OPEN_DECISION: buyer, creator, project manager or admin",
+          "authorization_basis": "OPEN_DECISION: artifact 13 section 5.2 lists creative.projects.cancel for the buyer, but who else may cancel is undefined. A policy, not a middleware permission, must own the per-state answer.",
+          "side_effects": ["RECOMMENDATION: any open delivery, revision and proposal is closed out"],
+          "database_change": "RECOMMENDATION: UPDATE creative_projects.status = 'cancelled', cancelled_at, cancelled_by_party (09-...json:327 defines the column as 'client' | 'creator' | 'admin' — note this omits 'project_manager', which is itself a gap)",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/BookingCancelled.php",
+          "notification": "RECOMMENDATION: cancellation notice to both parties",
+          "financial_effect": "OPEN_DECISION: cancellation penalties are not a concept in this repository. Missing information: the rule, and whether cancellation at different states has different consequences.",
+          "open_decision_id": "OD-SM-04"
+        },
+        {
+          "state": "disputed",
+          "valid_next_states": ["in_delivery", "in_review", "completed", "cancelled"],
+          "actor": "OPEN_DECISION: buyer or creator",
+          "authorization_basis": "OPEN_DECISION: artifact 13 section 5.2 and 5.5 propose creative.disputes.open and creative.disputes.resolve, but no prior artifact defines a dispute entity. 09-...json contains no dispute table.",
+          "side_effects": ["RECOMMENDATION: freezes further transitions on the project until resolved"],
+          "database_change": "OPEN_DECISION: there is no dispute table to write to. Missing information: the dispute data model itself, not merely its rules.",
+          "event": "OPEN_DECISION",
+          "notification": "RECOMMENDATION: dispute notice to both parties and to the resolver",
+          "financial_effect": "OPEN_DECISION: whether a dispute freezes an earning or a payout. Missing information: the rule."
+        }
+      ],
+      "open_decisions": [
+        {
+          "id": "OD-SM-08",
+          "question": "Is there a limit on how many times a delivery can be sent back for changes?",
+          "missing_information": "A business rule. Nothing in the codebase or any audit artifact states a revision limit, a per-project cap, or a per-round cap. Artifact 13 OD-AUTH-10 lists this as undefined."
+        },
+        {
+          "id": "OD-SM-09",
+          "question": "What exactly triggers a creator earning to accrue, and how is its amount derived?",
+          "missing_information": "A finance policy. The trigger could be proposal acceptance, delivery acceptance, project completion, or client payment — all four are plausible and none is stated. The amount basis, the split, the currency and any tax treatment are equally undefined. This is the single most important unknown in the Creative context and NO value is proposed here."
+        },
+        {
+          "id": "OD-SM-10",
+          "question": "Does a dispute state exist at all, and what is its data model?",
+          "missing_information": "A product decision plus a schema decision. Permissions are proposed (artifact 13 sections 5.2 and 5.5) and settings keys are proposed (10-existing-table-reuse-analysis.json:1237 mentions creative.dispute_window_days), but no dispute table and no window rule exist."
+        }
+      ]
+    },
+
+    {
+      "id": "LC-REVISION",
+      "name": "Revision",
+      "owner_table": "creative_revisions",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "Structurally modelled on booking_media.review_status (pending, approved, rejected) at app/Models/BookingMedia.php:35-37, which is the only existing request-and-respond-with-reason pattern in the repository (rejection_reason at app/Models/BookingMedia.php:25, set at app/Http/Controllers/BookingController.php:1259).",
+      "states": [
+        {
+          "state": "requested",
+          "valid_next_states": ["submitted", "withdrawn"],
+          "actor": "RECOMMENDATION: buyer or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.revisions.request (project manager) or creative.deliveries.request_changes (buyer)",
+          "side_effects": ["RECOMMENDATION: project moves to changes_requested"],
+          "database_change": "RECOMMENDATION: INSERT creative_revisions row (status = 'requested'), reason required",
+          "event": "RECOMMENDATION: change-requested event",
+          "notification": "RECOMMENDATION: notice to the creator",
+          "financial_effect": "none",
+          "notes": "A reason is REQUIRED. This mirrors the existing convention at app/Models/BookingMedia.php:25 (rejection_reason) and app/Http/Controllers/BookingController.php:1259."
+        },
+        {
+          "state": "submitted",
+          "valid_next_states": ["accepted", "rejected"],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.revisions.create",
+          "side_effects": ["RECOMMENDATION: a new Delivery is created referencing this revision"],
+          "database_change": "RECOMMENDATION: UPDATE creative_revisions.status = 'submitted', submitted_at, delivery_id",
+          "event": "RECOMMENDATION: revision-submitted event",
+          "notification": "RECOMMENDATION: notice to the requester",
+          "financial_effect": "none"
+        },
+        {
+          "state": "accepted",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: buyer or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.review.approve or creative.deliveries.accept",
+          "side_effects": ["RECOMMENDATION: the project returns to the main delivery flow"],
+          "database_change": "RECOMMENDATION: UPDATE creative_revisions.status = 'accepted', resolved_at, resolved_by",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/MediaApproved.php",
+          "notification": "RECOMMENDATION: notice to the creator",
+          "financial_effect": "none"
+        },
+        {
+          "state": "rejected",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: buyer or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.review.reject",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_revisions.status = 'rejected', resolved_at, resolved_by, reason",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/MediaRejected.php",
+          "notification": "RECOMMENDATION: rejection notice with the reason",
+          "financial_effect": "none"
+        },
+        {
+          "state": "withdrawn",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: requester",
+          "authorization_basis": "RECOMMENDATION: creative.revisions.request holder",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_revisions.status = 'withdrawn', resolved_at",
+          "event": "none",
+          "notification": "RECOMMENDATION: notice to the creator",
+          "financial_effect": "none"
+        }
+      ],
+      "open_decisions": [
+        {
+          "id": "OD-SM-08b",
+          "question": "Is a revision ever auto-accepted after a timeout?",
+          "missing_information": "A business rule about time. No timeout, window or SLA exists anywhere for Creative work."
+        }
+      ]
+    },
+
+    {
+      "id": "LC-DELIVERY",
+      "name": "Delivery",
+      "owner_table": "creative_deliveries",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "The closest existing analogue in the whole repository, and the one Creative most resembles: booking_media.review_status with its three states and its reviewed_by / reviewed_at / rejection_reason columns (database/migrations/2026_09_16_103654_add_review_fields_to_booking_media_table.php:12-17). Creative adds a client-acceptance stage that booking_media does not have.",
+      "states": [
+        {
+          "state": "draft",
+          "valid_next_states": ["submitted", "discarded"],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.deliveries.submit",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: INSERT creative_deliveries row (status = 'draft') plus creative_delivery_files rows (09-...json:504 requires the file path never to appear in a list response — only the file's public_id)",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "OPEN_DECISION: whether delivery at draft stage implies a storage or bandwidth cost. Missing information: whether there is any storage quota or fee."
+        },
+        {
+          "state": "submitted",
+          "valid_next_states": ["under_review", "withdrawn"],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.deliveries.submit",
+          "side_effects": [
+            "RECOMMENDATION: the delivery files become readable by the reviewer through an authorised, EXPIRING download. This is mandatory: 09-...json:187 and artifact 14 section 10.3 both record that this repository has ZERO signed URLs and that LaravelStorageAdapter hard-codes DISK = 'public' (app/Infrastructure/Storage/LaravelStorageAdapter.php:17)."
+          ],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'submitted', submitted_at",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/MediaUploaded.php, which app/Http/Controllers/BookingController.php:144 dispatches after a media upload",
+          "notification": "RECOMMENDATION: submission notice to reviewer and buyer",
+          "financial_effect": "none"
+        },
+        {
+          "state": "under_review",
+          "valid_next_states": ["approved", "rejected", "changes_requested"],
+          "actor": "RECOMMENDATION: reviewer",
+          "authorization_basis": "RECOMMENDATION: creative.review.approve / creative.review.reject",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'under_review'",
+          "event": "none",
+          "notification": "RECOMMENDATION: review-started notice",
+          "financial_effect": "none"
+        },
+        {
+          "state": "changes_requested",
+          "valid_next_states": ["superseded", "under_review"],
+          "actor": "RECOMMENDATION: reviewer or buyer or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.review.reject or creative.deliveries.request_changes",
+          "side_effects": ["RECOMMENDATION: creates a Revision (LC-REVISION); the project moves to changes_requested"],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'changes_requested', review_reason",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/MediaRejected.php",
+          "notification": "RECOMMENDATION: change-request notice to the creator",
+          "financial_effect": "none"
+        },
+        {
+          "state": "approved",
+          "valid_next_states": ["accepted", "rejected"],
+          "actor": "RECOMMENDATION: reviewer (approve), buyer (accept/reject)",
+          "authorization_basis": "RECOMMENDATION: creative.review.approve for approved; creative.deliveries.accept / creative.deliveries.request_changes for the buyer stage",
+          "side_effects": ["RECOMMENDATION: the project moves to delivered and enters the buyer's acceptance stage"],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'approved', reviewed_by, reviewed_at",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/MediaApproved.php",
+          "notification": "RECOMMENDATION: ready-for-acceptance notice to the buyer",
+          "financial_effect": "none",
+          "notes": "The existing booking_media.approved state is terminal (app/Http/Controllers/BookingController.php:1223 sets it and there is no further review transition). Creative deliberately splits review-approval from client-acceptance, because the reviewer is not the buyer. That split is a RECOMMENDATION and depends on OD-AUTH-03."
+        },
+        {
+          "state": "rejected",
+          "valid_next_states": ["superseded"],
+          "actor": "RECOMMENDATION: reviewer",
+          "authorization_basis": "RECOMMENDATION: creative.review.reject",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'rejected', reviewed_by, reviewed_at, rejection_reason",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/MediaRejected.php",
+          "notification": "RECOMMENDATION: rejection notice with the reason",
+          "financial_effect": "none"
+        },
+        {
+          "state": "accepted",
+          "valid_next_states": ["superseded"],
+          "actor": "RECOMMENDATION: buyer",
+          "authorization_basis": "RECOMMENDATION: creative.deliveries.accept",
+          "side_effects": ["RECOMMENDATION: the project moves to accepted, and the delivery becomes eligible for an earning (see OD-SM-09)"],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'accepted', accepted_at, accepted_by",
+          "event": "RECOMMENDATION: acceptance event",
+          "notification": "RECOMMENDATION: acceptance notice to both parties",
+          "financial_effect": "OPEN_DECISION: same unknown as OD-SM-09. Additionally: is there a window after submission within which the buyer must accept or reject? Missing information: the window length and the behaviour on expiry (auto-accept, escalate, or remain open). NO window value is proposed.",
+          "open_decision_id": "OD-SM-11"
+        },
+        {
+          "state": "withdrawn",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.deliveries.submit holder",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'withdrawn', withdrawn_at",
+          "event": "none",
+          "notification": "RECOMMENDATION: notice to the reviewer and buyer",
+          "financial_effect": "none"
+        },
+        {
+          "state": "superseded",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: system",
+          "authorization_basis": "RECOMMENDATION: not user-callable; set when a newer delivery is submitted for the same round",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'superseded', superseded_by_delivery_id",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "none",
+          "notes": "RECOMMENDATION: a delivery record is a financial and reputational fact (09-...json:504 requires source files to be private precisely because they are the deliverable-to-be-paid-for), so it is never deleted or overwritten. Superseded is how history is kept. This mirrors 09-...json:20, which recommends NEVER soft-deleting deliveries."
+        },
+        {
+          "state": "discarded",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: creator",
+          "authorization_basis": "RECOMMENDATION: creative.deliveries.submit holder",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_deliveries.status = 'discarded'",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "none"
+        }
+      ],
+      "open_decisions": [
+        {
+          "id": "OD-SM-11",
+          "question": "Is there an acceptance window after a delivery is submitted, and what happens when it expires?",
+          "missing_information": "A business rule about time: the window length, and the expiry behaviour (auto-accept, auto-escalate, or remain open indefinitely). No timeout convention exists anywhere in this repository for any Creative-adjacent action."
+        }
+      ]
+    },
+
+    {
+      "id": "LC-REVIEW",
+      "name": "Review",
+      "owner_table": "creative_reviews",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "No existing analogue for a client-written review. The closest shape is app/Models/Testimonial (a public rating with a rating column), which 09-...json:44 and :534 both explicitly rule out for reuse because it has no author binding, no soft delete and a publicly writable CRUD API.",
+      "states": [
+        {
+          "state": "draft",
+          "valid_next_states": ["submitted"],
+          "actor": "RECOMMENDATION: buyer",
+          "authorization_basis": "RECOMMENDATION: creative.reviews.create",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: INSERT creative_reviews row (status = 'draft')",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "none"
+        },
+        {
+          "state": "submitted",
+          "valid_next_states": ["published", "pending_moderation", "rejected"],
+          "actor": "RECOMMENDATION: buyer",
+          "authorization_basis": "RECOMMENDATION: creative.reviews.create",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_reviews.status = 'submitted', submitted_at. UNIQUE(project_id, reviewer_user_id) is mandatory per 09-...json:527 — one review per project per reviewer.",
+          "event": "RECOMMENDATION: review-submitted event",
+          "notification": "RECOMMENDATION: notice to the creator",
+          "financial_effect": "OPEN_DECISION: whether a review is written before or after project completion. If it can be written mid-project, a review could exist for work not yet delivered. Missing information: the eligibility window.",
+          "open_decision_id": "OD-SM-12"
+        },
+        {
+          "state": "pending_moderation",
+          "valid_next_states": ["published", "rejected"],
+          "actor": "RECOMMENDATION: reviewer or project manager",
+          "authorization_basis": "RECOMMENDATION: creative.reviews.moderate",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_reviews.status = 'pending_moderation'",
+          "event": "none",
+          "notification": "none",
+          "financial_effect": "none",
+          "notes": "This state exists ONLY IF reviews are moderated. 09-...json:523 proposes is_public boolean default true, which implies NO moderation queue. That is a direct tension between the schema default and the moderation permission in artifact 13 section 5.4. See OD-SM-13."
+        },
+        {
+          "state": "published",
+          "valid_next_states": ["hidden"],
+          "actor": "RECOMMENDATION: system, or reviewer",
+          "authorization_basis": "RECOMMENDATION: automatic on submission when unmoderated; creative.reviews.moderate when moderated",
+          "side_effects": ["RECOMMENDATION: the review appears on the public creator profile (GET /api/creative/creators/{publicId}, artifact 14 section 11.1) and feeds any profile rating aggregate"],
+          "database_change": "RECOMMENDATION: UPDATE creative_reviews.status = 'published', published_at, is_public = true",
+          "event": "RECOMMENDATION: none in current evidence",
+          "notification": "RECOMMENDATION: notice to the creator",
+          "financial_effect": "OPEN_DECISION: whether a published review affects a creator's ranking, their rate, or their visibility in any way. Missing information: whether reputation has any commercial consequence. No consequence is proposed here.",
+          "open_decision_id": "OD-SM-14"
+        },
+        {
+          "state": "rejected",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: reviewer",
+          "authorization_basis": "RECOMMENDATION: creative.reviews.moderate",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creative_reviews.status = 'rejected', moderation_reason",
+          "event": "none",
+          "notification": "RECOMMENDATION: moderation outcome notice to the author",
+          "financial_effect": "none"
+        },
+        {
+          "state": "hidden",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: reviewer or admin",
+          "authorization_basis": "RECOMMENDATION: creative.reviews.moderate",
+          "side_effects": ["RECOMMENDATION: removed from public view; the row is retained"],
+          "database_change": "RECOMMENDATION: UPDATE creative_reviews.status = 'hidden', is_public = false",
+          "event": "none",
+          "notification": "RECOMMENDATION: none",
+          "financial_effect": "none",
+          "notes": "09-...json:531 is emphatic: NEVER soft delete, and there is no delete at all. A creator's rating history is a reputational record."
+        }
+      ],
+      "open_decisions": [
+        {
+          "id": "OD-SM-12",
+          "question": "When may a client write a review — only after project completion, or at any point?",
+          "missing_information": "A product rule about eligibility. Nothing states whether a review is a post-completion artefact or an anytime rating."
+        },
+        {
+          "id": "OD-SM-13",
+          "question": "Are Creative reviews moderated before publication?",
+          "missing_information": "A product decision, and the artifacts conflict. 09-...json:523 proposes is_public boolean default true (i.e. no moderation queue), while artifact 13 section 5.4 proposes a creative.reviews.moderate permission (i.e. a moderation queue). Both cannot be the design. Unresolved."
+        },
+        {
+          "id": "OD-SM-14",
+          "question": "Does a creator's rating have any commercial consequence — rate, ranking, or visibility?",
+          "missing_information": "A product rule. No ranking or rating-weighted behaviour exists anywhere in the current marketplace, and none is proposed here."
+        }
+      ]
+    },
+
+    {
+      "id": "LC-EARNINGS",
+      "name": "Earnings",
+      "owner_table": "creator_earnings + creator_payouts",
+      "classification": "RECOMMENDATION",
+      "state_set_provenance": "The vocabulary deliberately mirrors the two closest existing financial lifecycles, both of which are real and verified: App\\Models\\PartnerCommission::STATUS_* (pending, approved, paid, cancelled, refunded) at app/Models/PartnerCommission.php:52-56, and App\\Models\\ScreenProviderSettlement::STATUS_* (draft, generated, approved, paid, cancelled) at app/Models/ScreenProviderSettlement.php:17-21, whose transitions are actually driven at app/Services/SettlementService.php:93 (generated), :150 (approved), :183 (paid), :231 (cancelled).",
+      "states": [
+        {
+          "state": "pending",
+          "valid_next_states": ["approved", "cancelled"],
+          "actor": "RECOMMENDATION: system, on the accrual trigger",
+          "authorization_basis": "RECOMMENDATION: no user permission; the accrual is a system consequence of another lifecycle transition. The accrual trigger is UNDEFINED — see OD-SM-09.",
+          "side_effects": ["RECOMMENDATION: the amount is snapshotted from the project's agreed terms at this moment, never recomputed later (AGENTS.md section 10)"],
+          "database_change": "RECOMMENDATION: INSERT creator_earnings row (status = 'pending') with gross_amount, platform_commission_rate, platform_commission_amount, creator_net_amount, currency, exchange_rate_used. UNIQUE(project_id, earning_type) is MANDATORY per 09-...json:563 as a double-credit backstop.",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/CommissionGenerated.php",
+          "notification": "RECOMMENDATION: earning-available notice to the creator",
+          "financial_effect": "OPEN_DECISION: THE AMOUNT. The gross, the platform share, the creator net, the currency and any tax are all undefined. 09-...json:568-575 defines the COLUMNS and the invariant gross_amount = platform_commission_amount + creator_net_amount, but no value, no rate, no currency-support list and no tax rule exists in any source. NONE is proposed here. This artifact deliberately contains no percentage.",
+          "open_decision_id": "OD-SM-15"
+        },
+        {
+          "state": "approved",
+          "valid_next_states": ["released", "cancelled"],
+          "actor": "RECOMMENDATION: finance",
+          "authorization_basis": "RECOMMENDATION: creative.earnings.approve. NOTE: artifact 13 section 5.6 records that no finance role exists, so this permission currently has no role that can hold it independently of creative.payouts.approve — which means separation of duties is not yet expressible (OD-AUTH-05).",
+          "side_effects": ["RECOMMENDATION: the amount becomes eligible for payout"],
+          "database_change": "RECOMMENDATION: UPDATE creator_earnings.status = 'approved', approved_at, approved_by",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/CommissionGenerated.php",
+          "notification": "RECOMMENDATION: approval notice",
+          "financial_effect": "none — approval records a decision, it does not move money"
+        },
+        {
+          "state": "released",
+          "valid_next_states": ["reversed"],
+          "actor": "RECOMMENDATION: finance, as part of a payout",
+          "authorization_basis": "RECOMMENDATION: creative.payouts.pay",
+          "side_effects": ["RECOMMENDATION: the earning is attached to a payout via payout_id (09-...json:542)"],
+          "database_change": "RECOMMENDATION: UPDATE creator_earnings.status = 'released', released_at, payout_id. 09-...json:575 states the invariant: the sum of released earnings for a creator must never exceed the sum of their approved earnings.",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/PaymentReceived.php (used for the paying side)",
+          "notification": "RECOMMENDATION: payment-released notice to the creator",
+          "financial_effect": "MONEY LEAVES THE PLATFORM. OPEN_DECISION: the payout mechanism itself is undefined — bank transfer, gateway disbursal, or manual. Missing information: the disbursal mechanism, the settlement schedule, and the failure/retry behaviour. No mechanism is proposed.",
+          "open_decision_id": "OD-SM-16"
+        },
+        {
+          "state": "reversed",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: finance or admin",
+          "authorization_basis": "RECOMMENDATION: creative.earnings.reverse",
+          "side_effects": [
+            "MANDATORY per AGENTS.md section 10 and 09-...json:574: a reversal is a NEW row with a negative creator_net_amount linked via reverses_earning_id. It is NEVER an UPDATE or a DELETE of the original row."
+          ],
+          "database_change": "RECOMMENDATION: INSERT a new creator_earnings row with status = 'reversed' and a negative amount, reverses_earning_id pointing at the original. The original row is left untouched and remains 'released' or 'approved'.",
+          "event": "RECOMMENDATION: modelled on app/Support/Events/Notifications/PaymentRefunded.php",
+          "notification": "RECOMMENDATION: reversal notice to the creator with the reason",
+          "financial_effect": "MONEY IS RECLAIMED. The reversal amount must be derived from the original SNAPSHOT, not recomputed from current terms. OPEN_DECISION: who may trigger a reversal, in which states, and whether a reversal is permitted after the money has left the platform. Missing information: the policy.",
+          "open_decision_id": "OD-SM-17"
+        },
+        {
+          "state": "cancelled",
+          "valid_next_states": [],
+          "actor": "RECOMMENDATION: system, on the pre-approval path only",
+          "authorization_basis": "RECOMMENDATION: no user permission. RECOMMENDATION: a cancellation of an UNRELEASED earning is a state change on the pending row; a reversal of a RELEASED earning is a compensating record. The two must not be conflated.",
+          "side_effects": [],
+          "database_change": "RECOMMENDATION: UPDATE creator_earnings.status = 'cancelled', cancelled_at (permitted only while status = 'pending' or 'approved')",
+          "event": "none",
+          "notification": "RECOMMENDATION: notice to the creator",
+          "financial_effect": "none, PROVIDED the earning was never released. If it was released, 'cancelled' is forbidden and 'reversed' is mandatory."
+        }
+      ],
+      "payout_lifecycle_note": {
+        "classification": "RECOMMENDATION",
+        "statement": "A payout is a SEPARATE lifecycle from an earning. The existing repository already models exactly this split twice — App\\Models\\PartnerCommission (pending/approved/paid/cancelled/refunded) and App\\Models\\ScreenProviderSettlement (draft/generated/approved/paid/cancelled, driven at app/Services/SettlementService.php:93/150/183/231) — so Creative should follow suit rather than collapsing payout state into the earning.",
+        "payout_states_proposed": ["requested", "approved", "processing", "paid", "failed", "cancelled"],
+        "caveat": "OPEN_DECISION: the payout minimum, the cadence, the disbursal mechanism, and whether a payout may be requested below the minimum are all undefined (OD-SM-16). 10-existing-table-reuse-analysis.json:1237 proposes a settings key creative.payout_minimum, but naming a key presupposes the rule, and the rule does not exist."
+      },
+      "open_decisions": [
+        {
+          "id": "OD-SM-15",
+          "question": "What are the earning amounts, the platform share, the creator net, the supported currencies and the tax treatment?",
+          "missing_information": "A finance policy. NO source in this repository or in any audit artifact states any of these. This artifact contains no percentage, no currency list and no tax rule, and none may be inferred from the existing partner commission or screen provider settlement values, which are for different commercial relationships."
+        },
+        {
+          "id": "OD-SM-16",
+          "question": "What is the payout minimum, the cadence, and the disbursal mechanism?",
+          "missing_information": "A finance and operations policy. The existing repository pays screen providers through app/Services/SettlementService.php, but that is a different commercial relationship and its mechanism does not transfer automatically."
+        },
+        {
+          "id": "OD-SM-17",
+          "question": "Who may reverse a released earning, in which states, and is reversal permitted after disbursement?",
+          "missing_information": "An internal-control policy. AGENTS.md section 10 mandates the compensating-record mechanism but not the authorisation or the permitted states."
+        }
+      ]
+    }
+  ],
+
+  "reusable_state_transition_patterns_in_current_codebase": {
+    "classification": "CURRENT_FACT",
+    "purpose": "Every lifecycle below was read in full. This section exists so that the Creative design is built from what the codebase already does, not from what a state-machine library would do.",
+    "patterns": [
+      {
+        "id": "RST-01",
+        "name": "Booking.status",
+        "classification": "CURRENT_FACT",
+        "owner": "app/Services/BookingWorkflowService.php",
+        "vocabulary_owner": "app/Domain/Booking/Enums/BookingStatus.php (backed enum, 8 cases, lines 7-14)",
+        "graph_location": "app/Services/BookingWorkflowService.php:14-39",
+        "graph": {
+          "draft": ["pending_approval", "cancelled"],
+          "pending_approval": ["approved", "rejected", "cancelled"],
+          "approved": ["scheduled", "cancelled"],
+          "scheduled": ["running", "cancelled"],
+          "running": ["completed", "cancelled"],
+          "rejected": [],
+          "completed": [],
+          "cancelled": []
+        },
+        "guard": "app/Services/BookingWorkflowService.php:45-51 — $allowed = $this->allowedTransitions[$currentStatus] ?? []; then !in_array($targetStatus, $allowed) throws InvalidBookingStateException.",
+        "side_effect_on_reject": "app/Services/BookingWorkflowService.php:53-56 — a reason is written into sold_out_reason, but ONLY when the target is rejected.",
+        "domain_exception": "app/Domain/Booking/Exceptions/InvalidBookingStateException.php:11-18 — render() returns {\"error\", \"message\", \"status\": 422} with HTTP 422.",
+        "exposed_as": "POST /api/v2/bookings/{id}/transition, body {\"status\": \"required|string\", \"reason\": \"nullable|string\"}, handled at app/Http/Controllers/Api/BookingEngineController.php:124-136. The controller performs NO state validation itself — it delegates to the service at :131.",
+        "important_defect": {
+          "classification": "CURRENT_FACT",
+          "finding": "booking_status_enum_model_drift",
+          "detail": "App\\Models\\Booking declares 13 STATUS_ constants (app/Models/Booking.php:208-220): draft, payment_pending, payment_failed, media_review_pending, pending_approval, approved, rejected, scheduled, running, completed, cancelled, expired, refunded. The BookingStatus enum declares only 8 (draft, pending_approval, approved, rejected, scheduled, running, completed, cancelled). Five model values have NO enum case: payment_pending, payment_failed, media_review_pending, expired, refunded. Verified by reflection, not by eye.",
+          "consequence": "app/Services/BookingWorkflowService.php:45 uses $this->allowedTransitions[$currentStatus] ?? []. A booking whose status is any of the 5 unmapped values resolves to an EMPTY allowed list, so EVERY transition on it throws InvalidBookingStateException. The guard is fail-closed — which is the safe failure direction — but it means a booking in payment_pending is untransitionable through the workflow service.",
+          "also": "app/Models/Booking.php $casts (line 142 onward) does NOT cast status, so $booking->status is a raw string. The service defensively handles both at line 43.",
+          "lesson_for_creative": "Two owners of a status vocabulary (enum + model constants) produced a silent 5-state gap. Creative must have exactly ONE owner per vocabulary, and the enum must be exhaustive over every value the column can hold."
+        }
+      },
+      {
+        "id": "RST-02",
+        "name": "Payment.status",
+        "classification": "CURRENT_FACT",
+        "owner": "app/Services/PaymentService.php and app/Services/RefundService.php (write sites); no single transition guard exists",
+        "vocabulary_owner": "app/Models/Payment.php constants (lines 50-72), aliased by app/Domain/Payment/PaymentStatus.php",
+        "two_distinct_vocabularies": {
+          "classification": "CURRENT_FACT",
+          "legacy_razorpay_set": "STATUS_PENDING, STATUS_VERIFICATION_PENDING, STATUS_PAID, STATUS_FAILED, STATUS_REFUNDED, STATUS_PARTIALLY_REFUNDED (app/Models/Payment.php:57-62)",
+          "payment_mode_set": "PAYMENT_STATUS_PENDING, PAYMENT_STATUS_AWAITING_VERIFICATION, PAYMENT_STATUS_COMPLETED, PAYMENT_STATUS_FAILED, PAYMENT_STATUS_REFUNDED (app/Models/Payment.php:50-54)",
+          "note": "app/Domain/Payment/PaymentStatus.php:12-27 documents both sets explicitly and states at :15-17: 'it is deliberately NOT an independent enum and it does NOT introduce a new state machine. No transition is enforced here; the existing services remain the transition owners.'"
+        },
+        "additional_vocabularies": "A separate verification column vocabulary (VERIFICATION_PENDING / VERIFICATION_VERIFIED / VERIFICATION_FAILED, app/Models/Payment.php:64-66) and a separate refund_status vocabulary (REFUND_NONE / REFUND_PENDING / REFUND_PROCESSED / REFUND_FAILED, :68-72). FOUR status vocabularies on one financial record.",
+        "guard": "NONE. There is no transition graph. Enforcement is by ad-hoc preconditions inside controllers: app/Http/Controllers/PaymentController.php:53-55 refuses when $booking->status !== Booking::STATUS_PAYMENT_PENDING, returning errorResponse('Booking is not in payment pending status.', 422).",
+        "lesson_for_creative": "A financial record with four parallel status vocabularies and no transition guard is harder to reason about than one vocabulary with an enforced graph. Creative should not copy this. The positive lesson is the honesty of the comment at app/Domain/Payment/PaymentStatus.php:15-17, which explicitly refuses to pretend a state machine exists."
+      },
+      {
+        "id": "RST-03",
+        "name": "booking_media.review_status",
+        "classification": "CURRENT_FACT",
+        "owner": "app/Http/Controllers/BookingController.php (write sites); the booking booking flow guards at the booking level, not the media level",
+        "vocabulary_owner": "app/Models/BookingMedia.php:35-37 — const REVIEW_PENDING = 'pending'; REVIEW_APPROVED = 'approved'; REVIEW_REJECTED = 'rejected'",
+        "column": "database/migrations/2026_09_16_103654_add_review_fields_to_booking_media_table.php:12 — string('review_status')->default('pending'), with reviewed_by FK to users (nullOnDelete), reviewed_at, rejection_reason, and an index on review_status",
+        "graph": "NOT WRITTEN DOWN ANYWHERE. There is no allowedTransitions array for review_status. The states are only ever set, never guarded.",
+        "write_sites": [
+          "app/Http/Controllers/BookingController.php:1223 — 'review_status' => BookingMedia::REVIEW_APPROVED",
+          "app/Http/Controllers/BookingController.php:1259 — 'review_status' => BookingMedia::REVIEW_APPROVED is set at 1223 and rejection at 1259 with the reason",
+          "app/Http/Controllers/PartnerBookingController.php:262 — 'review_status' => BookingMedia::REVIEW_PENDING at creation",
+          "app/Http/Controllers/AdminManualBookingController.php:217, :228 — filtered by REVIEW_PENDING and REVIEW_REJECTED"
+        ],
+        "guard_at_the_parent_level": "app/Http/Controllers/BookingController.php:315 — errorResponse('Booking is not in a reviewable status.', 422). This is a BOOKING-state guard applied before a MEDIA review action, not a media-state guard.",
+        "events": "app/Support/Events/Notifications/MediaUploaded.php, MediaApproved.php, MediaRejected.php all exist and are dispatched around these actions.",
+        "lesson_for_creative": "This is the single closest structural analogue to a Creative delivery review, and it is the weakest of the existing lifecycles: no transition graph, no guard, states reachable from any prior state. Creative deliveries MUST have a written graph and a guard. The parts worth copying are the column design (status + reviewed_by + reviewed_at + reason, all present, with the actor recorded) and the event trio."
+      },
+      {
+        "id": "RST-04",
+        "name": "Partner approval (partner-applications)",
+        "classification": "CURRENT_FACT",
+        "owner": "app/Http/Controllers/PartnerApprovalController.php and app/Services/PartnerService.php",
+        "vocabulary_owner": "app/Models/Partner.php:14-18 — STATUS_PENDING 'pending', STATUS_UNDER_REVIEW 'under_review', STATUS_APPROVED 'approved', STATUS_REJECTED 'rejected', STATUS_INACTIVE 'inactive'",
+        "graph": "NOT WRITTEN DOWN. Enforcement is by inline precondition checks in the controller: app/Http/Controllers/PartnerApprovalController.php:23 refuses approval unless in [STATUS_PENDING, STATUS_UNDER_REVIEW], returning 400 'Only pending or under review partners can be approved.'; :47 refuses rejection of an approved partner with 400; :69 sets STATUS_UNDER_REVIEW.",
+        "note_on_status_code": "These guards return 400, not 422. That differs from the Booking precedent (422) — the codebase is not consistent about which status signals an illegal transition.",
+        "events": "app/Support/Events/Notifications/PartnerCreated.php, PartnerApproved.php, PartnerRejected.php",
+        "lesson_for_creative": "This is the ONLY existing approval lifecycle with a review stage, and it is the closest analogue to LC-CREATOR. The vocabulary (pending, under_review, approved, rejected, inactive) is a reasonable shape to mirror. The guard style — inline in a controller — is not: Creative should use a written graph plus a domain exception, as RST-01 does, and must pick ONE status code for illegal transitions."
+      },
+      {
+        "id": "RST-05",
+        "name": "Screen-provider enquiry approval",
+        "classification": "CURRENT_FACT",
+        "owner": "app/Http/Controllers/ScreenProviderEnquiryController.php and app/Http/Controllers/AdminScreenProviderEnquiryController.php",
+        "vocabulary_owner": "NONE. There are no constants.",
+        "column": "database/migrations/2026_06_15_000001_create_screen_provider_enquiries_table.php:17 — string('status', 20)->default('new')",
+        "graph": "NOT WRITTEN DOWN.",
+        "verdict": "This is a single-status lead record, NOT a lifecycle. It has a status column, an assigned_to FK (line 18) and internal_notes (line 19), which makes it a work-queue flag rather than a state machine. The identical pattern appears in product_enquiries (database/migrations/2026_07_01_000002_create_product_enquiries_table.php:18) and contact_enquiries (database/migrations/2026_07_15_000001_create_contact_enquiries_table.php:17).",
+        "lesson_for_creative": "Do NOT model a Creative brief as a lead record. Three separate tables in this repository use a bare status defaulting to 'new' with no lifecycle, and that pattern is appropriate only for an inbound enquiry with no internal stages. A Creative brief has a buyer, a discovery phase, proposals, and a possible project — the lead pattern is far too thin."
+      },
+      {
+        "id": "RST-06",
+        "name": "Screen-provider settlement and partner commission (financial lifecycles)",
+        "classification": "CURRENT_FACT",
+        "owner": "app/Services/SettlementService.php",
+        "vocabulary_owner": "app/Models/ScreenProviderSettlement.php:17-21 — STATUS_DRAFT 'draft', STATUS_GENERATED 'generated', STATUS_APPROVED 'approved', STATUS_PAID 'paid', STATUS_CANCELLED 'cancelled'. Also App\\Models\\PartnerCommission.php:52-56 — STATUS_PENDING 'pending', STATUS_APPROVED 'approved', STATUS_PAID 'paid', STATUS_CANCELLED 'cancelled', STATUS_REFUNDED 'refunded'.",
+        "graph": "NOT WRITTEN DOWN as a data structure, but the transitions ARE ordered and service-owned: app/Services/SettlementService.php:93 writes 'generated', :150 writes 'approved', :183 writes 'paid', :231 writes 'cancelled'.",
+        "column": "database/migrations/2026_09_01_000001_create_screen_provider_settlements_table.php:21 — string('status')->default('generated'), indexed with screen_provider_id at :30",
+        "derived_predicates": "app/Models/ScreenProviderSettlement.php:114 (isEditable for draft/generated), :119 (isGenerated), :124 (isApproved), :129 (isPayable — !in_array(status, [PAID, CANCELLED])). These are the closest thing in the codebase to transition guards, but they are state PREDICATES, not edge guards: they cannot reject an illegal from-to pair.",
+        "known_defect": "screen_provider_settlements has NO currency column (09-creative-database-target-schema-blueprint.json:20 records this explicitly as 'a defect Creative must not copy').",
+        "lesson_for_creative": "Two things to copy and one to avoid. COPY: (a) the two-lifecycle split between an accrual record and a payout record, which Creative maps to creator_earnings + creator_payouts; (b) the paid/cancelled terminal pair and the isPayable predicate, which is a cheap and useful read-side guard. AVOID: the absence of a currency column, and the absence of edge guards."
+      },
+      {
+        "id": "RST-07",
+        "name": "Booking expiry (scheduled, not state-machine-driven)",
+        "classification": "CURRENT_FACT",
+        "finding": "app/Models/Booking.php:219 declares STATUS_EXPIRED = 'expired', which is NOT a BookingStatus enum case. The expiry is driven by a scheduled console command, not by a transition guard. Per AGENTS.md section 16, three live scheduled commands (rewards:expire, bookings:expire-pending, currency:sync-rates) were once flagged as removable by a purely lexical scan.",
+        "lesson_for_creative": "Any Creative lifecycle that includes a TIME-BOUND transition needs a scheduled command, and that command must be registered and verified (AGENTS.md section 16) rather than assumed. If Creative has an acceptance window (OD-SM-11) or a brief deadline (OD-SM-03), each implies a scheduled job that must be framework-registration verified."
+      }
+    ],
+    "abstract_state_machine_availability": {
+      "classification": "CURRENT_FACT",
+      "generically_reusable_abstraction_exists": false,
+      "evidence": [
+        "No class, trait or interface named *StateMachine* or *StateMachine* exists anywhere in app/, tests/ or config/ — a case-insensitive content search for 'statemachine' and 'state_machine' returns zero matches.",
+        "Only 3 PHP enums exist in the entire application: app/Enums/AssetType.php, app/Domain/Booking/Enums/BookingStatus.php, app/Domain/Pricing/Enums/PricingUnit.php. Two of the three are simple value enums, not transition enums.",
+        "No composer package provides a state machine. The workflow mechanisms present are plain Eloquent (app/Models/Workflow.php and app/Models/WorkflowStep.php) for generic approval templates — a database-driven alternative, not a code-driven one.",
+        "Only ONE transition graph exists in the whole codebase as a data structure: the $allowedTransitions array in app/Services/BookingWorkflowService.php:14-39. Every other lifecycle is enforced by ad-hoc inline precondition checks."
+      ],
+      "statement": "There is NO generic state-transition abstraction in this codebase to reuse. What exists is one hand-written allowedTransitions array (Booking), three sets of model constants with no guards (Payment, Partner, Settlement), and one unguarded three-state column (booking_media.review_status). The abstract pattern is therefore a FACT OF THE CODEBASE (a protected array plus an in_array check plus a domain exception), not a reusable class."
+    },
+    "verdict": {
+      "classification": "RECOMMENDATION",
+      "decision": "DO NOT EXTRACT a shared state-transition framework. Creative should OWN A LOCAL transition pattern, and the pattern should be structurally identical to the one existing instance that works (Booking), not generalised.",
+      "reasons": [
+        "INFERENCE: the sample size is n=1. Exactly one lifecycle in the codebase has a transition graph, and the other five do not. A shared abstraction generalised from n=1 would encode one author's assumptions as a framework, and the five unguarded lifecycles are not evidence of a pattern — they are evidence of no pattern.",
+        "INFERENCE: the five existing lifecycles disagree with each other on substance, not just syntax. Booking uses 422 for an illegal transition (app/Domain/Booking/Exceptions/InvalidBookingStateException.php:17); PartnerApprovalController.php:24 uses 400 for the same class of failure; booking_media has no guard at all. There is no consistent behaviour to generalise.",
+        "ARCHITECTURE_DOCUMENT: ARCHITECTURE_RULES.md:38 (Rule 6) — 'Avoid blanket repository boilerplate... introduced only where persistence isolation, complex query encapsulation, or testability benefits are demonstrably justified.' The same restraint applies to a transition framework. There is no demonstrable reuse; there is one Creative context.",
+        "INFERENCE: extracting a shared abstraction would require touching Booking, which AGENTS.md section 18 forbids as unrelated scope and section 19 forbids as out-of-order debt resolution. The Creative task must not refactor Booking.",
+        "INFERENCE: a shared framework would be a new architectural layer in the dependency graph, which AGENTS.md section 7 forbids creating a new layer to avoid a decision, and section 20 forbids as an undocumented guess."
+      ],
+      "what_creative_should_do_instead": [
+        "RECOMMENDATION: plain PHP backed enums, one per lifecycle, each with an exhaustive case list — fixing the RST-01 defect where the enum and the model constants disagree. This is the same thing app/Domain/Booking/Enums/BookingStatus.php already does, minus the drift.",
+        "RECOMMENDATION: one transition owner class per lifecycle, holding a const TRANSITIONS array keyed by the current state, exactly as app/Services/BookingWorkflowService.php:14-39 does. The class belongs in app/Domain/Creative/<Lifecycle>/, NOT in app/Services/, because it is a pure business rule and must be testable without the container.",
+        "RECOMMENDATION: guards in the owner, not in the controller. A method shaped like ->assertCanTransition(from, to) throwing a domain exception. Creative must NOT reproduce the RST-03/RST-04 pattern of precondition checks inline in a controller.",
+        "RECOMMENDATION: Laravel Policies for the WHO question ('may this actor perform this transition on this instance'), as recommended in artifact 13 section 8 step 3. Policies and transition guards are orthogonal: the guard answers 'is this edge legal', the policy answers 'is this actor allowed'. Both are needed, and neither substitutes for the other.",
+        "RECOMMENDATION: exactly ONE status code for an illegal transition across all nine Creative lifecycles, and a domain exception whose render() emits envelope A (see artifact 14 section 9.3) rather than the fourth envelope currently emitted by InvalidBookingStateException. The render() method is Creative-owned, so this changes no existing behaviour.",
+        "RECOMMENDATION: a test that asserts, for every enum case, that the case either appears as a key in TRANSITIONS or is explicitly listed as terminal. This would have caught the RST-01 five-state gap, where 5 model values were neither mapped nor declared terminal."
+      ],
+      "explicitly_not_recommended": [
+        "RECOMMENDATION: do not introduce a state-machine composer package (e.g. any workflow/state-machine library). It would be a new dependency, would not match the codebase's zero-extra-dependency posture, and would make the nine Creative lifecycles harder to read in a codebase whose dominant style is a plain array plus in_array.",
+        "RECOMMENDATION: do not use the existing database-driven app/Models/Workflow.php + WorkflowStep.php approval-template mechanism. It is designed for configurable, instance-level approval templates; the nine Creative lifecycles are fixed business rules, and a Creative transition has side effects, events and financial effects that a generic template row cannot express.",
+        "RECOMMENDATION: do not build a generic StateTransition base class, trait or interface for reuse across the nine lifecycles. They have different actor sets, different side effects, and different financial semantics. The shared part is roughly twenty lines of shape, not behaviour."
+      ],
+      "concrete_pattern_creative_should_copy": {
+        "classification": "RECOMMENDATION",
+        "note": "This is the shape of app/Services/BookingWorkflowService.php:41-61, restated as a Creative-local class, with the two defects from RST-01 corrected.",
+        "shape": "class ProposalTransitionGuard { const TRANSITIONS = [ 'draft' => ['submitted','withdrawn'], 'submitted' => ['accepted','rejected','withdrawn'], 'accepted' => ['declined'], 'rejected' => [], 'withdrawn' => [], 'declined' => [] ]; public function assertCanTransition(ProposalStatus $from, ProposalStatus $to, User $actor): void { if (!in_array($to->value, self::TRANSITIONS[$from->value] ?? [], true)) { throw new InvalidProposalStateException(...); } } }",
+        "corrections_to_the_booking_original": [
+          "The lookup is exhaustive over the enum, so there is no '?? []' silent fall-through. RST-01's defect was precisely that the ?? [] default turned an unmapped state into a terminal state with no diagnostic.",
+          "The actor is a parameter, so the authorization question is visible at the call site rather than being answered by a policy class that may not be loaded. The POLICY still decides; the guard only proves the EDGE is legal.",
+          "The exception carries a Creative-owned render() that emits envelope A, not the four-key error envelope at app/Domain/Booking/Exceptions/InvalidBookingStateException.php:11-18."
+        ]
+      }
+    }
+  },
+
+  "cross_cutting_recommendations": {
+    "classification": "RECOMMENDATION",
+    "single_status_code_for_illegal_transitions": {
+      "recommendation": "422 for every Creative illegal transition, on every lifecycle.",
+      "rationale": "Booking already uses 422 for exactly this (app/Domain/Booking/Exceptions/InvalidBookingStateException.php:17) and 33 other controller sites use 422 for business-rule violations. PartnerApprovalController.php:24 and :47 use 400 for the same class of failure, which is the minority and the less accurate code — 400 means malformed request, 422 means understood but unprocessable.",
+      "does_not_change_existing_behaviour": true
+    },
+    "every_transition_writes_an_activity_row": {
+      "recommendation": "One append-only activity_logs row per transition, with actor, from-state, to-state and reason.",
+      "precedent": "App\\Models\\ActivityLog is already used for exactly this at app/Http/Controllers/Api/RoleController.php:40-49, and booking_activities is the equivalent table for bookings.",
+      "rule": "ARCHITECTURE_DOCUMENT: AGENTS.md section 10 — financial history is immutable. The activity log is the audit trail that makes the transition graphs in this artifact reviewable after the fact."
+    },
+    "no_transition_may_span_a_network_call_under_a_row_lock": {
+      "recommendation": "Any transition that dispatches an event, sends a notification or calls a payment provider must commit before the external operation, or isolate it outside the lock.",
+      "rule": "ARCHITECTURE_DOCUMENT: ARCHITECTURE_RULES.md:17 (Rule 4) — 'External network operations must be isolated outside database row locks to prevent connection pool exhaustion and lockTimeouts.' This applies to every Creative transition that fans out a notification.",
+      "precedent": "app/Http/Controllers/BookingController.php:144 dispatches MediaUploaded AFTER the rows are written, which is the correct ordering."
+    },
+    "every_financial_transition_is_idempotent": {
+      "recommendation": "Any transition writing to creator_earnings or creator_payouts must be safe to retry.",
+      "precedent": "09-...json:563 recommends UNIQUE(project_id, earning_type) as a MANDATORY backstop. There is no request-level idempotency key anywhere in the current codebase (artifact 14 section 10.1)."
+    },
+    "no_transition_is_authorized_by_a_controller": {
+      "recommendation": "Controllers validate the request and delegate. The transition guard proves the edge; the policy proves the actor. Neither may live in a controller.",
+      "rule": "ARCHITECTURE_DOCUMENT: ARCHITECTURE_RULES.md:8 (Rule 1) and AGENTS.md section 6 (controllers stay thin: validate/authorize -> invoke use case -> return response).",
+      "precedent": "app/Http/Controllers/Api/BookingEngineController.php:131 correctly delegates the whole transition to BookingWorkflowService::transition and performs no state check itself — this is the one controller in the codebase that gets it right and it is the model for Creative's /transition endpoint (artifact 14 section 11.5)."
+    }
+  },
+
+  "discrepancies_vs_existing_artifacts": {
+    "classification": "CURRENT_FACT",
+    "principle": "Source wins. Each item is a place where an existing docs/audit/* artifact is incomplete, wrong, or in conflict with the code, or a finding that no prior artifact records.",
+    "items": [
+      {
+        "id": "D-SM-01",
+        "existing_artifact": "docs/audit/creative-marketplace/09-creative-database-target-schema-blueprint.json",
+        "claim": "Sections 52-575 define a status column for every Creative table, and several entries carry explicit status vocabularies (for example :496 'role' OPEN DECISION with proposed final|source|preview|proof).",
+        "source_reality": "The blueprint defines COLUMNS and indexes but no lifecycle: no transition graph, no actor, no authorization basis, no side effect, no event, and no financial effect for any status. An index such as (status, category_id) at :146 is consistent with a state machine and equally consistent with a free-text label.",
+        "impact": "A developer implementing from the blueprint alone would get a status column with unconstrained values. This artifact supplies the missing lifecycle layer, and it is the first artifact to do so.",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-02",
+        "existing_artifact": "docs/audit/creative-marketplace/10-existing-table-reuse-analysis.json:44-45",
+        "claim": "Reusing testimonials for creator reviews is NOT_REQUIRED, and reusing booking_media for deliveries is NOT_REQUIRED, with the reasoning that booking_media's review_status lifecycle 'is an admin approval of an advertiser's ad asset, not a client review of a creator's work'.",
+        "source_reality": "The reasoning is correct but understates the problem. booking_media.review_status has NO transition graph and NO guard at all — RST-03 documents that states are only ever set, never validated, and that the only guard is a BOOKING-state check at app/Http/Controllers/BookingController.php:315. So booking_media is not a weaker version of a Creative lifecycle; it is not a lifecycle.",
+        "impact": "If a Creative developer cites booking_media as the pattern to follow (which the proximity of the two concepts invites), they would copy an unguarded three-state column. LC-DELIVERY must have a written graph.",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-03",
+        "existing_artifact": "docs/audit/creative-marketplace/09-creative-database-target-schema-blueprint.json:16 and 09-...json:698 (OD-DB-08)",
+        "claim": "OD-DB-08 is recorded as BLOCKING for the identity model: 'Can a user be both an advertiser (client) and a creator?'",
+        "source_reality": "CONFIRMED as blocking, and the impact is sharper than the blueprint states. Artifact 13 section 3 verifies that RolePermissionChecker resolves a SINGLE slug (app/Support/Authorization/RolePermissionChecker.php:60, :44). A user assigned a 'creator' row in roles would have their buyer role OVERWRITTEN and their buyer permissions REVOKED — not merely under-modelled. The dependency runs both ways: LC-CREATOR cannot be designed until this is answered.",
+        "impact": "D-SM-03 elevates OD-DB-08 from 'a schema question' to 'a question that blocks the entire LC-CREATOR lifecycle'.",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-04",
+        "existing_artifact": "docs/audit/creative-marketplace/09-creative-database-target-schema-blueprint.json:568-575 and :611",
+        "claim": "creator_earnings financial_fields are enumerated, gross_amount = platform_commission_amount + creator_net_amount is asserted as an invariant, and separation of duties for payouts is declared MANDATORY.",
+        "source_reality": "The COLUMNS and the ADDITIVE INVARIANT are sound and are a genuine strength of the blueprint. But no rate, no amount, no currency list and no tax rule exists in any source, and the mandatory separation of duties is currently UNENFORCEABLE: there is no finance role (artifact 13 section 5.6), so creative.earnings.approve and creative.payouts.approve would land on the same role and the control would be vacuous.",
+        "impact": "The blueprint's own invariant is safe to adopt. Its separation-of-duties requirement is not implementable until OD-AUTH-05 is answered. This artifact records the amount, the accrual trigger (OD-SM-09) and the payout mechanism (OD-SM-16) as OPEN_DECISION and proposes no value.",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-05",
+        "existing_artifact": "docs/audit/creative-marketplace/10-existing-table-reuse-analysis.json:1237",
+        "claim": "settings should gain a 'creative.*' group, e.g. creative.revision_limit, creative.dispute_window_days, creative.payout_minimum.",
+        "source_reality": "None of the three values exists in any rule. Naming a setting key presupposes the rule behind it, and the rule does not exist. The same gap is recorded as OD-SM-08 (revision limits), OD-SM-10 (dispute window), OD-SM-16 (payout minimum) and OD-SM-03 (brief deadline).",
+        "impact": "The three example keys are recorded in this artifact as OPEN_DECISION rather than as proposed configuration. Implementing them would embed invented business rules into a settings table.",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-06",
+        "existing_artifact": "docs/audit/creative-marketplace/10-existing-table-reuse-analysis.json:2114-2116 and docs/audit/creative-marketplace/02-current-architecture-assessment.md",
+        "claim": "Reuse roles + role_permissions + RolePermissionChecker + PermissionMiddleware; create no parallel authorization resolver.",
+        "source_reality": "Correct and adopted (artifact 13 section 7.1). The state machine depends on it: the 'actor' and 'authorization_basis' fields of every transition above reference permission strings from artifact 13 section 5, all of which are PROPOSALS and none of which is seeded today.",
+        "impact": "Every transition in this artifact is currently un-authorizable. The dependency chain is: resolve OD-AUTH-01 (dual role) -> seed creative.* permissions -> Creative transitions become authorizable.",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-07",
+        "existing_artifact": "Not recorded in any artifact",
+        "claim": "n/a",
+        "source_reality": "The BookingStatus enum (8 cases) and the App\\Models\\Booking STATUS_ constants (13 values) disagree on 5 values, and app/Services/BookingWorkflowService.php:45 silently treats an unmapped status as terminal. Verified by reflection. A booking in payment_pending, payment_failed, media_review_pending, expired or refunded cannot be transitioned through the workflow service at all.",
+        "impact": "This is the single strongest argument for the extraction verdict below: the ONE existing transition graph in the codebase is already broken by vocabulary drift between its two owners. It also directly contradicts any assumption that Booking is a model to copy uncritically.",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-08",
+        "existing_artifact": "Not recorded in any artifact",
+        "claim": "n/a",
+        "source_reality": "Illegal transitions are signalled with INCONSISTENT status codes across the codebase: 422 at app/Domain/Booking/Exceptions/InvalidBookingStateException.php:17 and at 33 controller sites, but 400 at app/Http/Controllers/PartnerApprovalController.php:24 and :47, and no guard at all on booking_media.review_status.",
+        "impact": "Creative must pick one. 422 is recommended because it is the majority and because 400 means malformed request. Not recorded anywhere previously.",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-09",
+        "existing_artifact": "docs/audit/creative-marketplace/09-creative-database-target-schema-blueprint.json:20",
+        "claim": "screen_provider_settlements has no currency column and this is a defect Creative must not copy.",
+        "source_reality": "CONFIRMED by source: app/Models/ScreenProviderSettlement.php has no currency attribute, and database/migrations/2026_09_01_000001_create_screen_provider_settlements_table.php defines status/amounts without one. The finding is accurate.",
+        "impact": "RST-06 confirms this while ALSO recording the two things the settlement lifecycle gets RIGHT (the accrual/payout split, and the isPayable predicate at app/Models/ScreenProviderSettlement.php:129) and the one it gets wrong (no edge guards, only state predicates).",
+        "classification": "CURRENT_FACT"
+      },
+      {
+        "id": "D-SM-10",
+        "existing_artifact": "Not recorded in any artifact",
+        "claim": "n/a",
+        "source_reality": "There is a database-driven approval-template mechanism in the codebase — app/Models/Workflow.php and app/Models/WorkflowStep.php — which is a generic state-machine candidate that no Creative audit artifact mentions.",
+        "impact": "It is explicitly REJECTED for Creative in the extraction verdict, on the grounds that it stores configurable approval templates in rows and cannot express a transition with side effects, events and financial effects. Recorded so that the option is visibly considered rather than silently ignored.",
+        "classification": "CURRENT_FACT"
+      }
+    ]
+  },
+
+  "open_decisions": {
+    "classification": "OPEN_DECISION",
+    "statement": "Consolidated list. Each states exactly what information is missing. None was resolved, guessed, or worked around. NO amount, percentage, rate, window, limit, deadline, penalty, tax or currency-support statement appears anywhere in this artifact, because none exists in any source.",
+    "identity_and_authorization": [
+      {
+        "id": "OD-AUTH-01",
+        "question": "Can a users account be both buyer and creator?",
+        "missing_information": "A product/identity decision. BLOCKING: it determines whether LC-CREATOR can exist as a status machine at all, or whether creator-ness is derived from the existence of a creator row. Already recorded as OD-DB-08 in 09-...json:698; unresolved. Cross-referenced as D-SM-03."
+      },
+      {
+        "id": "OD-AUTH-05",
+        "question": "Who holds Creative financial authority?",
+        "missing_information": "An org decision. There is no finance role, so creative.earnings.approve and creative.payouts.approve cannot be held by different roles and the separation of duties required by 09-...json:611 is unenforceable. Every 'finance' actor field in LC-EARNINGS depends on this."
+      },
+      {
+        "id": "OD-SM-02b",
+        "question": "Is the reviewer a distinct role from the buyer, and may the creator review their own delivery?",
+        "missing_information": "A staffing and internal-control decision. The LC-DELIVERY split between 'approved' (reviewer) and 'accepted' (buyer) is a RECOMMENDATION that assumes they are different actors. If the same actor fills both roles, the approved/accepted split collapses."
+      }
+    ],
+    "financial": [
+      {
+        "id": "OD-SM-09",
+        "question": "What exactly triggers a creator earning to accrue, and how is the amount derived?",
+        "missing_information": "A finance policy. The trigger could be proposal acceptance, delivery acceptance, project completion, or client payment — all four are plausible and none is stated anywhere. The amount basis, the platform share, the creator net, the currency and any tax treatment are equally undefined. This is the single most important unknown in the Creative context. It gates LC-PROPOSAL.accepted, LC-PROJECT.accepted, LC-DELIVERY.accepted and the whole of LC-EARNINGS."
+      },
+      {
+        "id": "OD-SM-15",
+        "question": "What are the earning amounts, the platform share, the creator net, the supported currencies and the tax treatment?",
+        "missing_information": "A finance policy. NO source states any of these. Existing partner_commissions and screen_provider_settlements values are for DIFFERENT commercial relationships and do not transfer. This artifact deliberately contains no percentage, no currency list and no tax rule."
+      },
+      {
+        "id": "OD-SM-16",
+        "question": "What is the payout minimum, the cadence, and the disbursal mechanism?",
+        "missing_information": "A finance and operations policy. How money actually leaves the platform for a creator is undefined. 10-...json:1237 proposes a settings key creative.payout_minimum, but the key names a rule that does not exist."
+      },
+      {
+        "id": "OD-SM-17",
+        "question": "Who may reverse a released earning, in which states, and is reversal permitted after disbursement?",
+        "missing_information": "An internal-control policy. AGENTS.md section 10 mandates the compensating-record mechanism but not the authorisation, the permitted states, or whether a post-disbursement clawback is possible."
+      },
+      {
+        "id": "OD-SM-07",
+        "question": "What is the compensating-record rule when an accepted proposal is later declined?",
+        "missing_information": "A finance policy: the trigger conditions and the amount for the compensating record. The mechanism is mandated by AGENTS.md section 10; the rule is not."
+      }
+    ],
+    "time_and_limits": [
+      {
+        "id": "OD-SM-03",
+        "question": "Does a brief have a submission deadline, and what happens when it passes?",
+        "missing_information": "A business rule about time: the duration, the default, and the expiry behaviour (auto-close, stay open, or extend). 09-...json proposes a deadline column and a creative.briefs.extend permission, but no rule."
+      },
+      {
+        "id": "OD-SM-08",
+        "question": "Is there a limit on how many times a delivery can be sent back for changes?",
+        "missing_information": "A business rule: whether a limit exists, whether it is per-round or per-project, and who sets it. Nothing in the codebase or any artifact addresses it."
+      },
+      {
+        "id": "OD-SM-08b",
+        "question": "Is a revision ever auto-accepted after a timeout?",
+        "missing_information": "A business rule about time. No SLA or timeout convention exists for any Creative-adjacent action. If it does exist, it implies a scheduled command, which per AGENTS.md section 16 must be framework-registration verified (see RST-07)."
+      },
+      {
+        "id": "OD-SM-11",
+        "question": "Is there an acceptance window after a delivery is submitted, and what happens when it expires?",
+        "missing_information": "A business rule about time: the window length and the expiry behaviour (auto-accept, auto-escalate, or remain open). No value is proposed here."
+      },
+      {
+        "id": "OD-SM-10",
+        "question": "Does a dispute state exist at all, and what is its data model?",
+        "missing_information": "A product decision AND a schema decision. Permissions (creative.disputes.open, creative.disputes.resolve) and a settings key (creative.dispute_window_days) are referenced in prior artifacts, but no dispute table and no window rule exist. LC-PROJECT.disputed cannot be implemented without it."
+      }
+    ],
+    "cancellation_and_moderation": [
+      {
+        "id": "OD-SM-01",
+        "question": "What happens to in-flight projects, undelivered earnings and pending payouts when a creator is suspended or becomes inactive?",
+        "missing_information": "A product and finance policy. The existing analogue (App\\Models\\Partner::STATUS_INACTIVE) has no such handling, so there is nothing to copy."
+      },
+      {
+        "id": "OD-SM-04",
+        "question": "Who may cancel a brief or a project, at which states, and with what financial consequence?",
+        "missing_information": "A product and finance policy. 09-...json:327 defines a cancelled_by_party COLUMN ('client' | 'creator' | 'admin') but a column is not a rule, and that list omits 'project_manager' entirely. Cancellation penalties are not a concept anywhere in this repository."
+      },
+      {
+        "id": "OD-SM-05",
+        "question": "When one proposal is accepted, what happens to the other proposals on the same brief?",
+        "missing_information": "A product rule. The losing proposals need a state that does not imply a buyer action that never occurred."
+      },
+      {
+        "id": "OD-SM-12",
+        "question": "When may a client write a review — only after project completion, or at any point?",
+        "missing_information": "A product rule about eligibility."
+      },
+      {
+        "id": "OD-SM-13",
+        "question": "Are Creative reviews moderated before publication?",
+        "missing_information": "A product decision, and the artifacts CONFLICT: 09-...json:523 proposes is_public boolean default true (no moderation queue) while artifact 13 section 5.4 proposes a creative.reviews.moderate permission (a moderation queue). Both cannot be the design. Unresolved."
+      },
+      {
+        "id": "OD-SM-14",
+        "question": "Does a creator's rating have any commercial consequence — rate, ranking, or visibility?",
+        "missing_information": "A product rule. No ranking or rating-weighted behaviour exists in the current marketplace and none is proposed here."
+      },
+      {
+        "id": "OD-SM-18",
+        "question": "May a CreativeService carry a monetary rate, and is a published rate binding or indicative?",
+        "missing_information": "A commercial rule. 09-...json:122-148 says a service is offered 'at a defined rate' but states no value, no currency, and no binding semantics."
+      },
+      {
+        "id": "OD-SM-19",
+        "question": "Is there a storage quota or any cost associated with holding draft deliveries?",
+        "missing_information": "An operations and cost policy. Nothing in the current storage layer (app/Infrastructure/Storage/LaravelStorageAdapter.php, a single hard-coded public disk) has any quota concept."
+      }
+    ],
+    "architecture": [
+      {
+        "id": "OD-SM-20",
+        "question": "Should the per-lifecycle transition guard class live in app/Domain/Creative/<Lifecycle>/ or in app/Services/Creative/?",
+        "missing_information": "An architecture decision. This artifact RECOMMENDS the Domain location because a transition graph is a pure business rule and must be testable without the container — but AGENTS.md section 20 forbids guessing, and app/Domain/Creative does not exist yet (AGENTS.md section 8: Creative is 100% greenfield and creating the module root is a Creative task, not an incidental side effect). The nearest nested AGENTS.md for the new directory does not exist."
+      },
+      {
+        "id": "OD-SM-21",
+        "question": "Should Creative policies be registered in app/Policies/Creative/, and does adding the first policy layer in the repository require an architecture-test change?",
+        "missing_information": "An architecture decision plus a test-authorisation decision. tests/Unit/Architecture/ArchitectureRuleTest.php currently pins known violations exactly and would need a new assertion to keep a Creative policy tree from silently absorbing App\\Models imports. No test was written and ArchitectureRuleTest was not run, because nothing was changed."
+      },
+      {
+        "id": "OD-SM-22",
+        "question": "Does the super-admin bypass apply inside a Creative policy check?",
+        "missing_information": "An explicit authorization decision, already recorded as artifact 13 OD-AUTH-06 and ARCHITECTURE_RULES.md:43 (Rule 12). A Creative policy does NOT get the bypass that PermissionMiddleware grants, so a super-admin would pass the route and be denied by the policy. This must be settled before the first Creative controller exists, because it is a behaviour decision on a financial-adjacent surface."
+      }
+    ]
+  },
+
+  "verification": {
+    "classification": "CURRENT_FACT",
+    "read_only": true,
+    "files_created_or_modified_outside_this_artifact": 0,
+    "routes_added": 0,
+    "migrations_added": 0,
+    "classes_added": 0,
+    "route_count_before": 385,
+    "route_count_after": 385,
+    "commands_run": [
+      "php artisan route:list --json (read-only census)",
+      "php reflection over App\\Domain\\Booking\\Enums\\BookingStatus and App\\Models\\Booking to diff the enum cases against the STATUS_ constants (read-only, no state change)"
+    ],
+    "test_suites_run": "none — no code was changed, and AGENTS.md section 17 does not require a test run for a documentation-only artifact",
+    "architecture_rule_test_run": false,
+    "architecture_rule_test_note": "ArchitectureRuleTest was NOT run and no architecture conformance is claimed. Nothing was changed, so there is nothing to conform to.",
+    "read": [
+      "AGENTS.md; docs/architecture/ARCHITECTURE_RULES.md; docs/audit/creative-marketplace/{01,09,10}",
+      "app/Domain/Booking/Enums/BookingStatus.php; app/Domain/Booking/Exceptions/InvalidBookingStateException.php; app/Domain/Payment/PaymentStatus.php",
+      "app/Services/BookingWorkflowService.php (62 lines, read in full)",
+      "app/Models/Booking.php, Payment.php, Partner.php, PartnerCommission.php, ScreenProviderSettlement.php, ScreenProviderEnquiry.php, BookingMedia.php, Workflow.php, WorkflowStep.php, ActivityLog.php",
+      "app/Http/Controllers/BookingController.php (transition and media review sites), PartnerApprovalController.php, AdminManualBookingController.php, AdminSettlementController.php, Api/BookingEngineController.php",
+      "app/Services/SettlementService.php (transition write sites at :93, :150, :183, :231)",
+      "app/Infrastructure/Storage/LaravelStorageAdapter.php",
+      "database/migrations/{2026_06_15_000001_create_screen_provider_enquiries_table, 2026_07_01_000002_create_product_enquiries_table, 2026_07_15_000001_create_contact_enquiries_table, 2026_09_01_000001_create_screen_provider_settlements_table, 2026_09_16_103654_add_review_fields_to_booking_media_table}.php"
+    ],
+    "grep_zero_results_recorded_as_fact": [
+      "no *StateMachine* or *state_machine* class, trait or interface anywhere in app/, tests/ or config/",
+      "no composer package providing a state machine",
+      "only 3 PHP enums in the whole application"
+    ]
+  }
+}

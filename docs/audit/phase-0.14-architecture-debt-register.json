@@ -1,0 +1,185 @@
+{
+  "phase": "0.14",
+  "name": "Architecture Debt Register",
+  "generated_at": "2026-09-26",
+  "counts": {
+    "critical": 0,
+    "high": 4,
+    "medium": 7,
+    "low": 5
+  },
+  "by_category": {
+    "api": 1,
+    "dependency": 4,
+    "design": 2,
+    "legacy": 5,
+    "security": 2,
+    "transaction": 2
+  },
+  "note": "Carried-forward items from Phases 0.9-0.10 (RISK-01 settlement double-counting, RISK-02/RISK-05 gateway idempotency, the four deliberately un-extracted settlement/referral rules, and the seven open concurrency risks) remain recorded in their original artifacts and are not duplicated here. The route-shadowing item that was originally reported as '14 routes registered twice' was investigated in Phase 0.14 and resolved: the true count is 15, all of which were dead.",
+  "items": [
+    {
+      "issue": "Booking model events drive loyalty reversal and referral cancel/refund through app()",
+      "category": "design",
+      "severity": "high",
+      "current_state": "app/Models/Booking.php updated/deleting hooks resolve LoyaltyService, SettingsService and ReferralTrackingService via the service locator and perform financial side effects on every status transition.",
+      "risk": "The transaction boundary for these side effects is implicit - owned by whichever caller updated the booking. A caller that updates status outside a transaction gets non-atomic point reversal and referral mutation. This is the single highest-risk architectural item found in Phase 0.13.",
+      "recommended_phase": "Phase 0.15",
+      "blocked_by": "Requires dedicated regression coverage and a decision on whether the side effects should move to after-commit listeners, which changes commit timing for financial effects.",
+      "status": "deferred"
+    },
+    {
+      "issue": "CampaignPricingEngine (Domain) depends on 7 App\\Services classes and 3 models",
+      "category": "dependency",
+      "severity": "medium",
+      "current_state": "The canonical pricing engine imports LoyaltyService, SettingsService, PricingRuleEngine and five stateless calculators, plus three Eloquent models.",
+      "risk": "Violates Rule 3 and strains Rule 9. Pricing determinism is weakened because a DB-backed setting is an external input to the calculation, so replaying a historical price is not guaranteed stable.",
+      "recommended_phase": "Phase 0.15 (pricing-focused)",
+      "blocked_by": "The stateless calculators take Eloquent models as parameters, so relocating them to Domain moves the leak rather than removing it. The real fix is value-object parameters, which is a financial-determinism change.",
+      "status": "deferred"
+    },
+    {
+      "issue": "Booking reschedule does not recompute pricing or revenue distribution",
+      "category": "transaction",
+      "severity": "high",
+      "current_state": "PUT /api/bookings/{booking} can change end_time, quantities and screen_id without re-running the pricing engine or DistributeBookingRevenueUseCase, so the stored financial snapshot can go stale.",
+      "risk": "A rescheduled booking can carry a price and a revenue split that no longer correspond to its new screens, dates or quantities. Directly undermines the Phase 0.10 'no double-counting' guarantee for changed bookings.",
+      "recommended_phase": "Phase 0.15",
+      "blocked_by": "Fixing it changes financial output for existing reschedule flows, which requires product authorisation, not a refactoring change.",
+      "status": "deferred"
+    },
+    {
+      "issue": "9 Storage:: call sites across 6 controllers",
+      "category": "dependency",
+      "severity": "medium",
+      "current_state": "AuthorController (2), SuccessStoryController (2), GalleryController (2), ScreenController, ScreenProviderPortalController, JobApplicationController use the Storage facade directly.",
+      "risk": "The storage boundary established in Phase 0.12 is only enforced for MediaService and ProfileService, so file-deletion behaviour is not covered by the port contract or its tests.",
+      "recommended_phase": "Phase 0.15",
+      "blocked_by": "Left in place by explicit user decision in Phase 0.12 to avoid touching unrelated features.",
+      "status": "deferred"
+    },
+    {
+      "issue": "No transaction around the booking approval, media review, session and manual-payment workflows",
+      "category": "transaction",
+      "severity": "high",
+      "current_state": "approve, reject, approveMedia, rejectMedia, startSession, endSession, extendSession, markMediaReview and markManualPayment each perform 2-3 writes plus an event dispatch with no DB::transaction.",
+      "risk": "A failure between the row update and the event dispatch leaves a persisted state with no notification, or vice versa. markManualPayment writes a Payment, transitions the booking and logs activity non-atomically.",
+      "recommended_phase": "Phase 0.15",
+      "blocked_by": "Adding transactions changes failure and lock behaviour on live endpoints; it needs its own approved change rather than a silent refactor.",
+      "status": "deferred"
+    },
+    {
+      "issue": "BudgetRecommendationService is 1443 lines and owns strategy selection, forecasting and optimisation",
+      "category": "legacy",
+      "severity": "medium",
+      "current_state": "The largest single class in the codebase, reached only from Api/BudgetRecommendationController, mixing query building, forecasting arithmetic and rate-limit-aware orchestration.",
+      "risk": "Hard to reason about and untested at the seams; the natural next God-service extraction target.",
+      "recommended_phase": "Phase 0.15",
+      "blocked_by": "None - it is a self-contained read path, so extraction is low risk. Recommended as the next extraction after the debt items above.",
+      "status": "deferred"
+    },
+    {
+      "issue": "11 business domains have no Domain or Application module",
+      "category": "design",
+      "severity": "medium",
+      "current_state": "Only Pricing, Payment and Financial have Domain modules and only Booking, Financial, Payment, Pricing and Reporting have Application modules. Campaign, Media, Asset, Provider, Partner, Availability, Settlement, Creative and loyalty are owned by the flat app/Services namespace.",
+      "risk": "The target modular-monolith structure is only 3/13 realised at the Domain level, so bounded-module ownership is nominal rather than structural.",
+      "recommended_phase": "Phase 0.16+",
+      "blocked_by": "The brief says not to force classes into the tree and to use actual responsibility. A sweeping move of 51 services would be churn without boundary benefit; each module should be created when its service is extracted.",
+      "status": "deferred"
+    },
+    {
+      "issue": "17 Application classes still depend on App\\Services",
+      "category": "dependency",
+      "severity": "low",
+      "current_state": "Every use case and several reporting queries orchestrate legacy services.",
+      "risk": "Expected transitional state under Rule 7 (strangler). The dependency direction is correct - Application may call Services - so this is progress-tracking, not a defect.",
+      "recommended_phase": "Incremental per domain",
+      "blocked_by": "Each service's own extraction phase.",
+      "status": "deferred"
+    },
+    {
+      "issue": "13 classes confirmed dead but retained",
+      "category": "legacy",
+      "severity": "low",
+      "current_state": "2 policies, 3 superseded pricing calculators, 4 undispatched events were removed; 2 policies and 3 pricing calculators are confirmed dead but retained.",
+      "risk": "Negligible runtime cost. Retained because policies are the conventional authorization extension point and the pricing calculators are superseded duplicates of rules that currently have no explicitly designated canonical owner.",
+      "recommended_phase": "Phase 0.15 (pricing)",
+      "blocked_by": "Rule 7 forbids removing a rule implementation until its canonical owner is designated.",
+      "status": "deferred"
+    },
+    {
+      "issue": "deleteMedia has no ownership check while uploadMedia does",
+      "category": "security",
+      "severity": "medium",
+      "current_state": "BookingController::deleteMedia verifies only that the media belongs to the booking, unlike uploadMedia which also verifies the booking belongs to the user. Both are reachable by any authenticated user.",
+      "risk": "An authenticated user who knows a media id may delete another user's booking media. campaignDetails, show and timeline likewise have no in-method ownership check, relying entirely on route middleware.",
+      "recommended_phase": "Requires product decision",
+      "blocked_by": "Changing it alters authorization behaviour, which the phase brief forbids doing unintentionally. Needs an explicit security decision, not a refactor.",
+      "status": "deferred"
+    },
+    {
+      "issue": "15 method+URI route registrations were shadowed by a later duplicate in routes/api.php",
+      "category": "api",
+      "severity": "medium",
+      "current_state": "2 testimonials routes and 13 booking admin routes were each declared twice inside routes/api.php. Laravel keys the RouteCollection by method+domain+URI, so the LATER registration replaces the earlier one. The earlier block at lines 203-228 carried only auth:sanctum, while the later block at lines 589-602 carried the permission:bookings.* middleware, so the permission-gated registration was always the effective one and no route was ever reachable without its permission check. The dead block was removed in Phase 0.14.",
+      "risk": "A reader of the file would conclude the admin booking routes needed no permission, because the visible first declaration says so. A future edit to the effective block, or deleting the 'redundant' block by mistake, would have silently removed the permission check from 13 admin routes including approve, reject and manual-payment. This was a latent authorization hazard, not an active vulnerability.",
+      "recommended_phase": "Phase 0.15",
+      "blocked_by": null,
+      "status": "resolved (Phase 0.14)",
+      "action": "Removed the 15 shadowed declarations. Verified behaviour-neutral: `php artisan route:list --json` produced 385 routes before and 385 after, with an identical set of method+domain+URI keys, and ZERO routes whose action or middleware stack differed. A re-run of the shadowing analysis reports 0 remaining colliding registrations."
+    },
+    {
+      "issue": "Razorpay webhook contract and gateway idempotency",
+      "category": "dependency",
+      "severity": "high",
+      "current_state": "Both payment webhooks and the refund paths call the gateway directly; there is no webhook contract and no idempotency key (carried forward RISK-02/RISK-05).",
+      "risk": "Webhook replay or duplicate submission can double-apply a payment or refund. This is the largest remaining external-integration risk.",
+      "recommended_phase": "Phase 0.16 (payment)",
+      "blocked_by": "Requires a gateway contract and an idempotency strategy, both of which change how external calls are made.",
+      "status": "deferred"
+    },
+    {
+      "issue": "app/Models/User::hasPermission has no super-admin bypass while PermissionMiddleware does",
+      "category": "security",
+      "severity": "low",
+      "current_state": "Route authorization lets a super-admin through; the model helper returns false for the same user.",
+      "risk": "A latent trap: application code using the model helper would deny a super-admin. Currently harmless because authorization is enforced at the route layer.",
+      "recommended_phase": "Phase 0.15",
+      "blocked_by": "Deliberately preserved in Phase 0.13 and pinned by an existing test. Changing it would alter authorization behaviour.",
+      "status": "deferred"
+    },
+    {
+      "issue": "Phase 0.2 availability message wording failures",
+      "category": "legacy",
+      "severity": "medium",
+      "current_state": "BookingConcurrencyTest and CampaignBookingPricingIntegrityTest both assert the message 'no longer available' but the application returns the EligibilityResult message ('Asset X has only N units available, but M requested').",
+      "risk": "Two permanently red tests obscure genuine regressions. Both are message-wording only - status code 422 and the error payload are correct.",
+      "recommended_phase": "Requires product decision",
+      "blocked_by": "The correct fix is to align either the message or the assertion. That is a user-visible string change and therefore a product decision, not a refactor.",
+      "status": "deferred"
+    },
+    {
+      "issue": "Two citations to a non-existent 'Rule 33' in the Phase 0.3 golden regression report",
+      "category": "legacy",
+      "severity": "low",
+      "current_state": "docs/audit/phase-0.3-golden-regression-report.md lines 173 and 177 state 'Left untouched per Rule 33', but ARCHITECTURE_RULES.md defines only Rules 1-13. The rule being referenced cannot be identified.",
+      "risk": "An audit artifact cites a governance rule that does not exist, which undermines confidence in the rule set. No runtime or financial impact.",
+      "recommended_phase": "Documentation hygiene - confirm what was meant and correct the citation, or delete it if the constraint is already covered by an existing rule.",
+      "blocked_by": null,
+      "status": "deferred",
+      "action": "Not edited here. It belongs to the Phase 0.3 artifact and its correct intent cannot be reconstructed from the surrounding text, so guessing would be worse than flagging it. Recorded so it is not lost."
+    },
+    {
+      "issue": "tests/Unit/MediaHelperTest.php is non-idempotent and its only assertion is a tautology",
+      "category": "legacy",
+      "severity": "low",
+      "current_state": "Line 23 passes the relative fixed path 'tests/compressed' into MediaHelper::compressUploadedImage(), which calls mkdir() without an existence guard, so every run after the first reports 'mkdir(): File exists'. Line 28 asserts assertTrue($result['is_compressed'] || !$result['is_compressed']), which can never fail.",
+      "risk": "No production impact and the suite is green either way, but the output is misleading - a green test is reported as a warning - and the test contributes no real coverage, so a genuine MediaHelper regression would not be caught by it.",
+      "recommended_phase": "Test hygiene pass - use a unique temporary directory (or mkdir with an existence guard) and replace the tautology with an assertion that can fail.",
+      "blocked_by": null,
+      "status": "deferred",
+      "action": "Not patched. Making the path unique is trivial, but replacing the vacuous assertion is a judgement call about what the test was meant to cover, which belongs to whoever wrote it. No test source was modified in this phase."
+    }
+  ]
+}

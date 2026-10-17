@@ -1,0 +1,242 @@
+{
+  "artifact": "05-shared-capability-reuse-matrix",
+  "generated": "2026-09-26",
+  "purpose": "Answers, for every shared Marketplace capability a Creative Marketplace will need: who owns it today, how it is implemented, what Creative needs, the reuse strategy, the required changes, and the risk. This is the artifact that prevents a junior developer from rebuilding shared infrastructure.",
+  "reuse_types": {
+    "DIRECT_REUSE": "Use the class/table as-is, no change.",
+    "REUSE_THROUGH_CONTRACT": "Depends on the interface; the Creative module provides its own implementation. Never import the concrete class.",
+    "EXTEND": "Use it, and add to it (new method, new key, new row) in a backward-compatible way.",
+    "WRAP": "Use it behind a new Creative-facing abstraction so Creative code never depends on the legacy class.",
+    "EXTRACT": "Pull shared behaviour out of a legacy class into a shared place, then both use it. Requires architect approval (touching legacy code).",
+    "NEW_IMPLEMENTATION": "Nothing suitable exists. Build it in the Creative module.",
+    "DO_NOT_REUSE": "Actively harmful to reuse."
+  },
+
+  "capabilities": [
+    {
+      "capability": "Authentication (token issuance, login, registration, password reset, Google OAuth)",
+      "current_owner": "app/Http/Controllers/AuthController, app/Http/Controllers/Auth/*",
+      "current_implementation": "Sanctum personal access tokens. config/sanctum.php: expiration null (tokens never expire), guard ['web'], stateful domains localhost only. Token name 'auth_token'. Google ID token verified by App\\Infrastructure\\Auth\\GoogleOAuthAdapter via https://oauth2.googleapis.com/tokeninfo.",
+      "creative_need": "Creator login, creator registration, creator password reset, optional creator Google sign-in.",
+      "reuse_strategy": "DIRECT_REUSE",
+      "required_changes": "None to the auth flow. NEW: AuthController::register hardcodes role 'user' (AuthController:22-26, GoogleAuthController:64). A creator must be promoted explicitly by a separate, authorized action. OPEN DECISION: is creator registration open self-service, invite-only, or admin-created?",
+      "risk": "Tokens never expire. For a payout-bearing role this is a material exposure; Creative may need a stricter expiry, which would be a global auth change requiring its own authorization per AGENTS.md section 3."
+    },
+    {
+      "capability": "Users / identity",
+      "current_owner": "app/Models/User",
+      "current_implementation": "users: name, email(unique), password, role(varchar), phone, avatar, status, last_login_at, google_id(unique), email_verified_at, created_by_partner_id, remember_token, timestamps. No FK to roles. No soft deletes.",
+      "creative_need": "A creator is a user with additional attributes (bio, craft, rates, availability, identity documents).",
+      "reuse_strategy": "DIRECT_REUSE + NEW (a creators table referencing users.id)",
+      "required_changes": "Do NOT add creative columns to users. Create a separate creators aggregate keyed by users.id, exactly as screen_providers references users.id (screen_providers.user_id, null on delete).",
+      "risk": "users.role is free-form varchar with no FK and no enum. A misspelled 'creator' yields an empty permission set with no error."
+    },
+    {
+      "capability": "Roles and permissions",
+      "current_owner": "App\\Support\\Authorization\\RolePermissionChecker (single algorithm owner, Rule 12) + App\\Http\\Middleware\\PermissionMiddleware",
+      "current_implementation": "roles(slug,name,description) + role_permissions(role_id,permission,granted, unique(role_id,permission)). permissionsForRole() looks up by slug with a 3600s cache. Super-admin bypass exists ONLY in PermissionMiddleware:28.",
+      "creative_need": "A 'creator' role with creative.* permissions; admin-side creative management permissions; finance-side payout approval permissions.",
+      "reuse_strategy": "EXTEND",
+      "required_changes": "Add a creator role and a creative.* permission section to database/seeders/RolesAndPermissionsSeeder.php. Suggested vocabulary (RECOMMENDATION, subject to product decision): creative.creators.view/create/edit/approve/reject, creative.services.*, creative.briefs.*, creative.proposals.*, creative.projects.*, creative.revisions.*, creative.deliveries.*, creative.reviews.*, creative.earnings.view, creative.payouts.request/approve. ALSO add every new permission string to App\\Http\\Resources\\RoleResource::getAllPermissionKeys() and to App\\Http\\Controllers\\Api\\PermissionController — both hardcode the vocabulary.",
+      "risk": "CRITICAL COUPLING (verified 2026-09-26): RolePermissionChecker::permissionsForRole() resolves a SINGLE slug from the users.role column, so one user can hold exactly one role. Setting users.role='creator' to grant creative.* permissions REMOVES every other permission that user had. For a user who is both advertiser and creator, a 'creator' role row alone is therefore not enough - it is actively destructive. OD-DB-08 / OD-AUTH-01 (may one account be both?) is BLOCKING and must be answered before any role row is added: the options are (a) grant creative.* permissions to the existing buyer role as well, (b) derive creator capability from the existence of a creators row and keep permissions out of role_permissions for creators, or (c) a role-join model, which is a platform authorization change requiring its own authorisation. Do not choose silently. HIGH omission risk: Sec03PermissionVocabularyTest asserts every permission used on a route exists in the seeded vocabulary and is held by at least one non-super-admin role. Adding routes before updating the seeder will turn the suite red. Cache TTL means new grants take up to 1 hour to take effect."
+    },
+    {
+      "capability": "Authorization policies (ownership checks)",
+      "current_owner": "none — there is no policy layer",
+      "current_implementation": "Ad-hoc ownership checks in controllers: BookingController:116, PaymentController:48, PartnerBookingController:250. Hard-coded role checks: PartnerPortalController:257, PartnerBookingController:333, PartnerClientController:183, ScreenProviderPortalController:840.",
+      "creative_need": "Ownership checks on brief, proposal, project, revision, delivery, review, earnings, payout. Every Creative object is owner-scoped.",
+      "reuse_strategy": "NEW_IMPLEMENTATION",
+      "required_changes": "Create app/Policies/Creative/* and register them in a provider. This would be the FIRST policy layer in the repository. Register policies via App\\Providers\\AuthServiceProvider or Gate::policy calls in AppServiceProvider::boot. Keep route middleware as the authoritative role/permission gate (Rule 12) and add the policy as the ownership gate.",
+      "risk": "Reusing the ad-hoc pattern would multiply an existing weakness across 8 aggregates. Creating the first policy layer is a new architectural construct and needs architect sign-off per AGENTS.md section 20."
+    },
+    {
+      "capability": "File storage",
+      "current_owner": "App\\Infrastructure\\Storage\\LaravelStorageAdapter (implements StorageContractInterface)",
+      "current_implementation": "DISK is hard-coded to 'public'. 6 methods: storeAs, store, put, exists, delete, url. config/filesystems.php: public disk root storage_path('app/public'), url APP_URL/storage, symlink public/storage -> storage/app/public. The 'local' disk (storage/app/private) exists but is never used. 6 controllers call the Storage facade directly, bypassing the contract (AuthorController, GalleryController, JobApplicationController, ScreenController, ScreenProviderPortalController, SuccessStoryController) across 11 call sites, plus app/Models/Screen.php:95. An earlier draft of this artifact claimed 10 controllers; that was a call-site count reported as a file count and is corrected here by measurement (AGENTS.md section 21: measurement wins over narrative; the conflict is also recorded in 17-storage-asset-reuse-analysis.md).",
+      "creative_need": "Portfolio images (public), brief attachments (private), project files (private), revision files (private), delivery files (private), source files (private), preview images (public).",
+      "reuse_strategy": "DIRECT_REUSE for public; NEW_IMPLEMENTATION for private",
+      "required_changes": "LaravelStorageAdapter is pinned to one disk by a private const. A Creative module needs a second adapter bound to a new disk (e.g. 'creative-private') with signed URL access. StorageContractInterface has no signed-URL method, so a new contract is required.",
+      "risk": "HIGH. There are zero signed URLs in the repository (0 matches for temporarySignedRoute/signedRoute/temporaryUrl). Publishing a creative brief attachment or an undelivered file to storage/app/public makes it permanently world-readable. Also: public/storage in this checkout is a stale symlink to a different repository path."
+    },
+    {
+      "capability": "Image processing",
+      "current_owner": "App\\Infrastructure\\Media\\GdImageProcessor (implements ImageProcessingContractInterface)",
+      "current_implementation": "2 methods: isAvailable(), encodeWebp(string $binary, int $quality): ?string. GD only. No resizing, no EXIF stripping, no format preservation.",
+      "creative_need": "Portfolio thumbnails, cover images, preview generation.",
+      "reuse_strategy": "WRAP",
+      "required_changes": "The contract cannot resize. A Creative thumbnail service must either extend the contract (a shared-interface change requiring approval) or add its own GD usage behind a Creative-local contract.",
+      "risk": "Low. encodeWebp returns null on undecodable input, which callers must handle."
+    },
+    {
+      "capability": "File validation and size/mime policy",
+      "current_owner": "App\\Support\\Configs\\MediaConfig + App\\Support\\Configs\\BookingConfig",
+      "current_implementation": "MediaConfig: allowed image extensions 'jpg,jpeg,png,gif,webp', video 'mp4,mov,avi,mkv', maxFileSizeMb default 100. BookingConfig::maxFilesPerUpload default 10. Validation is by EXTENSION, not mime. MediaService::allowedImageTypes()/allowedVideoTypes() return mime arrays but are never used by validate().",
+      "creative_need": "Portfolio images (stricter: max ~5MB, jpg/png/webp). Brief attachments (pdf, docx, zip). Delivery files (varies by service). Per-service max file count.",
+      "reuse_strategy": "EXTEND + WRAP",
+      "required_changes": "Do not reuse BookingConfig's maxFilesPerUpload (10) for a creative service. Add a creative.media.* config group read through SettingsService, and enforce limits in Creative Form Requests, not in MediaService.",
+      "risk": "MEDIUM. Extension-based validation accepts a renamed executable. The only size enforcement anywhere is a per-controller 'max:' rule; App\\Http\\Controllers\\FileController has none at all."
+    },
+    {
+      "capability": "Notifications (events -> mail -> notification_logs)",
+      "current_owner": "App\\Services\\NotificationService + App\\Support\\Events\\NotificationEventSubscriber + App\\Infrastructure\\Notifications\\LaravelMailAdapter",
+      "current_implementation": "send(eventKey, recipients, mailableClass, data). Recipients resolved only as admin / user / partner. notification_logs rows per recipient per send (status sent|failed only). All 28 Mailables implement ShouldQueue so delivery is deferred, but the settings+recipient+log pass runs synchronously on the request thread. Dedup is a per-process static array in the subscriber.",
+      "creative_need": "Notify creator and client on every lifecycle transition.",
+      "reuse_strategy": "EXTEND",
+      "required_changes": "Add a 'creator' recipient branch to NotificationService::send(). Add creative event keys to all THREE lists in NotificationConfig (availableEvents, eventLabels, eventDefaults) — a key missing from any one silently falls back to enabled-but-delivered-to-nobody. Add 28-class-style ShouldQueue Mailables under app/Mail.",
+      "risk": "MEDIUM. NotificationService swallows mail failures (try/catch at :167), so a failed send never surfaces. The subscriber dedup is not durable, so a retried request re-sends."
+    },
+    {
+      "capability": "Payment gateway",
+      "current_owner": "App\\Infrastructure\\Payments\\Razorpay\\RazorpayPaymentGateway (implements App\\Domain\\Payment\\Contracts\\PaymentGatewayInterface)",
+      "current_implementation": "createOrder(receipt, amount, currency, notes) -> array; verifySignature(orderId, paymentId, signature) -> bool; fetchPayment(paymentId) -> array; refund(paymentId, ?int amountInPaise, ?array notes) -> array. SDK confined to the adapter.",
+      "creative_need": "Collect funds for a creative project, potentially in tranches; refund on cancellation.",
+      "reuse_strategy": "REUSE_THROUGH_CONTRACT",
+      "required_changes": "The interface itself is fit for purpose. DO NOT reuse PaymentService — it is hard-wired to Razorpay + booking status transitions + referral attribution inside one transaction (PaymentService:36-39, :103). A Creative funding service must sit on top of PaymentGatewayInterface independently.",
+      "risk": "HIGH if the booking path is reused: a creative payment would transition a booking to pending_approval and create partner referral commissions. There is also NO webhook endpoint anywhere — verification is entirely client-initiated via POST /api/payments/razorpay/verify."
+    },
+    {
+      "capability": "Money primitives",
+      "current_owner": "App\\Domain\\Payment\\Support\\Money",
+      "current_implementation": "toPaise(float rupees): int = (int) round($x*100). toRupees(int paise): float = round($p/100, 2). normalise(float): float. isFullRefund(?requested, paymentAmount): bool. Persistence is DECIMAL(12,2) or (14,2) with 'decimal:2' casts; no minor-unit integer columns; no BCMath.",
+      "creative_need": "Server-derived service fees, platform commission, creator earnings, refunds, and split arithmetic that must be exact.",
+      "reuse_strategy": "REUSE_THROUGH_CONTRACT + NEW_IMPLEMENTATION",
+      "required_changes": "Money has no add, subtract, multiply, allocate or split operations — it is a conversion helper, not a value object. Creative needs a value object with allocation semantics (e.g. split a gross amount into platform/creator portions that always sum exactly to the gross, the way App\\Domain\\Financial\\Support\\RevenueAllocation::split does with sequential round()).",
+      "risk": "HIGH. Existing financial code uses float in method signatures throughout (RevenueAllocation::split, ReferralService::calculateCommission, FirstBookingDiscountService::calculateDiscount). Copying that pattern into a new money domain risks rounding drift. AGENTS.md section 10 forbids introducing float for monetary values.",
+      "open_decision": "Is Creative money denominated in INR only, or multi-currency? Existing settlement has no currency column at all."
+    },
+    {
+      "capability": "Financial records and immutability pattern",
+      "current_owner": "bookings.pricing_snapshot (JSON), booking_pricing_breakdowns, booking_screens revenue columns, payments, refunds, payment_logs",
+      "current_implementation": "Financial facts are snapshotted at write time and never recomputed from mutable current data. booking_screens stores gross_revenue, platform_share, provider_share plus the split percentages. booking_pricing_breakdowns is a per-screen-per-day immutable record. payment_logs is an append-only event log with 10 event types.",
+      "creative_need": "A creative engagement's agreed fee, platform commission and creator net must be snapshotted at acceptance and never recomputed.",
+      "reuse_strategy": "REUSE_AS_PATTERN (DIRECT for the pattern; the tables themselves are advertising-owned)",
+      "required_changes": "Creative needs its own snapshot columns on the accepted proposal / project (agreed amount, platform rate, creator rate, computed values) plus an append-only creative_earnings ledger.",
+      "risk": "AGENTS.md section 10 makes financial history immutable. Recalculating a creator earning from the current rate card after the fact is a violation."
+    },
+    {
+      "capability": "Commission lifecycle machinery",
+      "current_owner": "App\\Services\\CommissionService + App\\Domain\\Financial\\Contracts\\PartnerCommissionRepositoryInterface",
+      "current_implementation": "generate -> approve -> paid -> cancelled, 3 DB transactions, pessimistic lock via findOrFailForUpdate (lock ordering: commission row first, then referral_usage). markAsPaid accepts optional payout metadata.",
+      "creative_need": "Creator earnings: accrue -> approve -> release/paid -> reversed.",
+      "reuse_strategy": "EXTRACT or NEW_IMPLEMENTATION",
+      "required_changes": "The state machine is the best existing analogue but is hard-bound to partner_commissions. Option A: extract a CommissionContractInterface and provide a Creative implementation. Option B: build a separate Creative earnings aggregate reusing only the state-machine pattern.",
+      "risk": "CommissionService is financial-critical (AGENTS.md section 10) and its locking order is pinned. Touching it requires the full financial regression suite.",
+      "open_decision": "A or B. This is the single highest-value reuse decision in the Creative build."
+    },
+    {
+      "capability": "Settlement (period-based release)",
+      "current_owner": "App\\Services\\SettlementService + App\\Domain\\Financial\\Contracts\\SettlementRepositoryInterface",
+      "current_implementation": "generate(period) -> approve -> markAsPaid -> cancel. Eligibility: screen_provider_id, owner_type=screen_provider, settlement_status=pending, booking status in (approved, scheduled, running, completed), 3-branch period overlap. Approve and markAsPaid are NOT transaction-wrapped (SettlementService:143, :176).",
+      "creative_need": "Release accumulated creator earnings in a period.",
+      "reuse_strategy": "REUSE_THROUGH_CONTRACT (new Creative implementation)",
+      "required_changes": "The eligibility predicate is entirely screen-provider specific. A Creative eligibility predicate (creator_id, earning_status=pending, project completed/accepted, period overlap) is new.",
+      "risk": "If Creative earnings are released immediately on project completion, no settlement period is needed at all and this capability should not be reused. OPEN DECISION."
+    },
+    {
+      "capability": "Refunds",
+      "current_owner": "App\\Services\\RefundService",
+      "current_implementation": "initiateRefund() calls the Razorpay gateway INSIDE a DB::transaction (line 51) — a Rule 4 violation — then writes refunds + payment_logs rows and updates payment.refund_status. markRefundFailed(). refunds.razorpay_refund_id and refund_reference are indexed but NOT unique; no dedup check before insert.",
+      "creative_need": "Refund a cancelled creative project.",
+      "reuse_strategy": "REUSE_THROUGH_CONTRACT (wrap, do not call)",
+      "required_changes": "Wrap behind a Creative-facing refund contract. Do not call RefundService from Creative domain code. Do not copy the external-call-inside-transaction shape.",
+      "risk": "MEDIUM. Calling RefundService directly would drag Payment/Booking models into the Creative context, and the gateway-inside-transaction shape would be inherited."
+    },
+    {
+      "capability": "Audit / activity logging",
+      "current_owner": "App\\Models\\ActivityLog (static ::log helper), App\\Models\\NotificationLog",
+      "current_implementation": "activity_logs: user_id (FK cascade), action (free-form string), entity_type + entity_id (polymorphic, no FK), description, old_values/new_values JSON, ip_address, user_agent, created_at. ActivityLog::log() captures auth()->id() and request()->ip(). No model relationships beyond user.",
+      "creative_need": "Audit trail for every creative state transition, especially financial ones.",
+      "reuse_strategy": "DIRECT_REUSE",
+      "required_changes": "None. Call ActivityLog::log('creative_project_transition', CreativeProject::class, $id, ...) from the Creative application layer.",
+      "risk": "LOW, with one caveat: activity_logs.user_id is ON DELETE CASCADE, so deleting a user erases their audit trail. A creative financial audit must not depend on this table alone."
+    },
+    {
+      "capability": "Settings",
+      "current_owner": "App\\Services\\SettingsService + App\\Support\\Configs\\ConfigFactory",
+      "current_implementation": "settings table (group, key, value, unique(group,key)); SettingsService reads key 'system_settings', 12h cache, 11 typed accessors. ConfigFactory builds BookingConfig/MediaConfig/NotificationConfig/PricingConfig/ReferralConfig from it.",
+      "creative_need": "Platform commission rate, revision limits, delivery SLA, payout thresholds, min/max project value, notification toggles.",
+      "reuse_strategy": "DIRECT_REUSE + EXTEND",
+      "required_changes": "Add a creative.* settings group and a CreativeConfig in app/Support/Configs. This is the lowest-risk reuse in the entire repository.",
+      "risk": "LOW. Note the recorded Support -> Services debt: ConfigFactory already imports SettingsService. Do not deepen it."
+    },
+    {
+      "capability": "Currency and exchange rates",
+      "current_owner": "App\\Services\\Campaign\\ExchangeRateService + App\\Services\\Campaign\\CurrencyService + App\\Infrastructure\\ExchangeRates\\ExchangeRateApiClient",
+      "current_implementation": "currency_rates table (currency_code, base_currency, exchange_rate decimal(14,6), fetched_at), unique(currency_code, base_currency). Rates are OVERWRITTEN in place — there is no rate history. Scheduled twice daily. bookings snapshot exchange_rate_used decimal(14,6) + currency_code + display_amount at booking time.",
+      "creative_need": "Display project value in a buyer's currency; possibly pay creators in their currency.",
+      "reuse_strategy": "DIRECT_REUSE for display; EXTEND for payout",
+      "risk": "MEDIUM. Rates are not historised, so a multi-currency payout computed later cannot be audited against the rate at the time of earning. Creative earnings should snapshot the rate used, as bookings does. ExchangeRateService has a nullable constructor with an app() fallback at :23 — do not copy that."
+    },
+    {
+      "capability": "Reporting / analytics read layer",
+      "current_owner": "app/Application/Reporting (ReportQueryRegistry + 10 query classes + CsvReportExporter) with App\\Services\\ReportService as a @deprecated facade",
+      "current_implementation": "One ReportQuery per report type behind App\\Application\\Reporting\\Contracts\\ReportQuery, resolved by ReportQueryRegistry, exported via App\\Application\\Reporting\\Exports\\Contracts\\ReportExporter -> CsvReportExporter. Support classes: GrowthRate, ReportPeriod, DurationLabelFormatter.",
+      "creative_need": "Creator earnings reports, platform creative revenue, project funnel.",
+      "reuse_strategy": "REUSE_THROUGH_CONTRACT",
+      "required_changes": "Add Creative ReportQuery implementations and register them in ReportQueryRegistry. Do NOT add to app/Application (that layer is being retired) and do NOT extend ReportService. Consider moving the reporting capability to its own namespace as a separate architect decision.",
+      "risk": "LOW. Note the layer conflict: registering Creative queries in app/Application/Reporting contradicts the 'do not add to app/Application' rule. OPEN_DECISION: create app/Application/Creative/Reporting or a new app/Query/Creative namespace."
+    },
+    {
+      "capability": "API response envelope and pagination",
+      "current_owner": "app/Http/Controllers/Controller (successResponse:10, paginatedResponse:25, errorResponse:48)",
+      "current_implementation": "{status: true, message, data} and {status: false, message, errors?}. Pagination meta: {total, per_page, current_page, last_page, from, to}. 6 competing envelopes exist in the codebase (ScreenProviderPortalController::screens uses 'success'; Api\\AssetController uses no status key; Api\\BookingEngineController::index returns a raw paginator).",
+      "creative_need": "A consistent Creative API surface.",
+      "reuse_strategy": "DIRECT_REUSE (the base helpers only)",
+      "required_changes": "Creative controllers must use successResponse/paginatedResponse/errorResponse exclusively. Pin this with a Creative contract test.",
+      "risk": "MEDIUM. A junior developer copying Api\\AssetController (the newest v2 controller) will copy an envelope with no status key."
+    },
+    {
+      "capability": "Public identifiers",
+      "current_owner": "per-model",
+      "current_implementation": "Numeric ids are the only route keys across the API. Public strings exist only as non-routing columns: bookings.booking_reference ('ILL-YYYYMMDD-XXXX', generated with md5(uniqid()), NOT indexed, NOT unique), screens.screen_code (unique), referral_codes.code (unique), qr_codes.slug (unique). Zero UUIDs.",
+      "creative_need": "Briefs, projects and proposals are commercially sensitive; sequential ids allow enumeration of other clients' work.",
+      "reuse_strategy": "EXTEND",
+      "required_changes": "Introduce a public identifier for Creative aggregates. BookingReference's generation approach (md5(uniqid())) is not collision-safe and is unindexed; a Creative public id should be a proper unique indexed column.",
+      "risk": "MEDIUM. IDOR exposure. Combined with the absence of policies (see above), sequential ids are the primary enumeration risk.",
+      "open_decision": "UUID/ULID vs a prefixed sequential reference (e.g. CR-2026-000123). The prefixed form is more human-quotable and matches the existing ILL- convention; UUID is more opaque."
+    },
+    {
+      "capability": "Idempotency",
+      "current_owner": "none",
+      "current_implementation": "0 matches for Idempotency in app/. Only ad-hoc guards: PaymentService:106 throws 'Payment already verified for this order.' refunds.razorpay_refund_id is indexed but not unique. No idempotency key header, no storage, no framework.",
+      "creative_need": "Proposal acceptance, project creation, payment confirmation, revision submission, delivery acceptance, review submission, earning creation, payout request — all are money or state transitions that a client may retry or double-click.",
+      "reuse_strategy": "NEW_IMPLEMENTATION",
+      "required_changes": "A Creative-scoped idempotency mechanism. Cheapest correct option: a unique constraint on a natural key (e.g. unique(accepted_proposal_id) on projects) plus a unique constraint on gateway ids (unique(razorpay_order_id) on creative_payments) so a duplicate insert fails loudly rather than silently duplicating money.",
+      "risk": "HIGH. This is the single largest correctness gap for a Creative money flow."
+    },
+    {
+      "capability": "Rate limiting",
+      "current_owner": "app/Providers/AppServiceProvider:126-133",
+      "current_implementation": "Exactly one limiter ('recommendations': 30/min, 300/hour by IP) used on exactly one route. No global api limiter configured. CORS allows all origins.",
+      "creative_need": "Public creator/service discovery endpoints, brief submission, proposal submission, review submission (anti-spam).",
+      "reuse_strategy": "EXTEND",
+      "required_changes": "Add RateLimiter::for definitions and apply throttle: middleware to the relevant Creative routes.",
+      "risk": "LOW, but note the CORS config (allowed_origins ['*'], max_age 0) is a shared-infra weakness Creative endpoints will inherit."
+    },
+    {
+      "capability": "Search",
+      "current_owner": "none",
+      "current_implementation": "Zero fulltext indexes across 112 migrations. All search is LIKE-based.",
+      "creative_need": "Discover creators by craft, category, location, rate, availability, rating.",
+      "reuse_strategy": "NEW_IMPLEMENTATION",
+      "required_changes": "A LIKE-based search with proper composite indexes is the minimum viable; MySQL FULLTEXT on a creative_services description plus a category/keyword pivot is the scalable option.",
+      "risk": "LOW initially, HIGH at scale. Do not build discovery on unindexed LIKE from day one."
+    },
+    {
+      "capability": "Queues and background work",
+      "current_owner": "n/a",
+      "current_implementation": "No app/Jobs directory. No queued job class anywhere. config/queue.php default connection; Mailables are the only queued units.",
+      "creative_need": "Image processing, file scanning, notification fan-out, earning computation, reporting.",
+      "reuse_strategy": "NEW_IMPLEMENTATION (if async is wanted)",
+      "required_changes": "Create app/Jobs (which does not exist) or a Creative-local job namespace. Note this is the first job infrastructure in the repository.",
+      "risk": "MEDIUM. Introducing the first async worker changes deployment requirements (a queue worker process). That is a production-safety decision, not a code decision."
+    }
+  ],
+
+  "reuse_summary": {
+    "direct_reuse": ["Authentication", "Users (as identity anchor)", "Roles/permissions (extend vocabulary)", "Settings", "Currency/ExchangeRate", "ActivityLog", "Storage (public only)", "PaymentGatewayInterface", "ImageProcessingContractInterface", "MailContractInterface", "NotificationService (extend)", "Controller response helpers"],
+    "reuse_through_contract": ["CommissionService", "SettlementService", "RefundService", "Reporting query layer", "Money conversion"],
+    "new_implementation_required": ["Policies", "Idempotency", "Search", "Queued jobs", "Private/signed file access", "Creator money value object", "Creative earnings aggregate", "All 9 Creative subdomains"],
+    "do_not_reuse": ["AssetService (namespace collision)", "ProfileService (advertiser profile)", "InventoryService (booking locks)", "ManualBookingService (god service)", "ReportService (deprecated)", "MediaHelper (unsafe)", "FileController (unvalidated, path traversal)", "CampaignBudgetRecommendationService", "RevenueDistributionService", "RevenueSplitResolverService", "ScreenDeletionService", "PricingService/PricingEngine (ad pricing)"]
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "phase": "0.6",
+  "name": "Pricing Dependency Diff",
+  "generated_at": "2026-09-25T23:52:50+05:30",
+  "added_dependencies": [
+    {
+      "source": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "target": "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+      "type": "implements",
+      "reason": "Pure domain interface implementation for canonical campaign pricing"
+    },
+    {
+      "source": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "target": "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+      "type": "injects",
+      "reason": "Decouple application use case from concrete legacy service"
+    },
+    {
+      "source": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "target": "App\\Services\\PricingEngine",
+      "type": "wraps",
+      "reason": "Isolate legacy V2 pricing algorithm behind application adapter"
+    },
+    {
+      "source": "App\\Http\\Controllers\\Api\\PricingEngineController",
+      "target": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "type": "injects",
+      "reason": "Prevent direct controller instantiation of legacy service"
+    },
+    {
+      "source": "App\\Services\\CampaignPricingService",
+      "target": "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+      "type": "injects",
+      "reason": "Delegate calculation, validation, and conversion methods to canonical domain engine"
+    }
+  ],
+  "removed_dependencies": [
+    {
+      "source": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "target": "App\\Services\\CampaignPricingService",
+      "type": "direct_coupling",
+      "reason": "Replaced with decoupled PricingEngineInterface abstraction"
+    },
+    {
+      "source": "App\\Http\\Controllers\\Api\\PricingEngineController",
+      "target": "App\\Services\\PricingEngine",
+      "type": "direct_coupling",
+      "reason": "Replaced with LegacyPricingEngineAdapter dependency injection"
+    }
+  ],
+  "inverted_dependencies": [
+    {
+      "abstraction": "App\\Domain\\Pricing\\Contracts\\PricingEngineInterface",
+      "consumer": "App\\Application\\Pricing\\UseCases\\CalculateCampaignPriceUseCase",
+      "provider": "App\\Domain\\Pricing\\CampaignPricingEngine",
+      "status": "BOUND_IN_SERVICE_PROVIDER"
+    }
+  ],
+  "remaining_legacy_dependencies": [
+    {
+      "source": "App\\Http\\Controllers\\BookingController",
+      "target": "App\\Services\\CampaignPricingService",
+      "reason": "Used in store() method for validateCampaignPricing and storePricingBreakdowns. Will be extracted in Phase 0.8 (Booking Application Extraction)."
+    },
+    {
+      "source": "App\\Services\\ManualBookingService",
+      "target": "App\\Services\\CampaignPricingService",
+      "reason": "Used for admin manual booking flow; delegates to canonical engine internally."
+    },
+    {
+      "source": "App\\Services\\BudgetRecommendationService",
+      "target": "App\\Services\\CampaignPricingService",
+      "reason": "Used for recommendation pricing simulation; delegates to canonical engine internally."
+    }
+  ],
+  "remaining_cycles": [
+    {
+      "path": "CampaignPricingService -> LoyaltyService -> CampaignPricingService",
+      "status": "NEUTRALIZED",
+      "notes": "Domain engine receives user reward state directly; no cyclic container resolution occurs during CampaignPricingEngine execution."
+    }
+  ]
+}

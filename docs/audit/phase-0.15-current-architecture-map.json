@@ -1,0 +1,145 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "current-architecture-map",
+  "baseline": {
+    "php": "8.2.26",
+    "laravel": "11.55.1",
+    "routes": 385,
+    "migrations": 112,
+    "pending_migrations": 0,
+    "db_transaction_sites": 48,
+    "lock_for_update_sites": 8,
+    "php_classes_total": 352
+  },
+  "layers": [
+    {
+      "layer": "Application",
+      "classes": 32,
+      "service_locators": 0,
+      "facade_calls": 62
+    },
+    {
+      "layer": "Console",
+      "classes": 3,
+      "service_locators": 0,
+      "facade_calls": 4
+    },
+    {
+      "layer": "Domain",
+      "classes": 9,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Enums",
+      "classes": 12,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Events",
+      "classes": 34,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Exceptions",
+      "classes": 6,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Helpers",
+      "classes": 1,
+      "service_locators": 3,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Http",
+      "classes": 81,
+      "service_locators": 2,
+      "facade_calls": 50
+    },
+    {
+      "layer": "Infra",
+      "classes": 14,
+      "service_locators": 0,
+      "facade_calls": 13
+    },
+    {
+      "layer": "Listeners",
+      "classes": 1,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Mail",
+      "classes": 28,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Models",
+      "classes": 62,
+      "service_locators": 8,
+      "facade_calls": 1
+    },
+    {
+      "layer": "Observers",
+      "classes": 1,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Policies",
+      "classes": 2,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Providers",
+      "classes": 2,
+      "service_locators": 0,
+      "facade_calls": 1
+    },
+    {
+      "layer": "Repositories",
+      "classes": 4,
+      "service_locators": 0,
+      "facade_calls": 0
+    },
+    {
+      "layer": "Services",
+      "classes": 51,
+      "service_locators": 5,
+      "facade_calls": 183
+    },
+    {
+      "layer": "Support",
+      "classes": 9,
+      "service_locators": 0,
+      "facade_calls": 3
+    }
+  ],
+  "absent_layers": [
+    "App\\Jobs (directory removed in Phase 0.13)"
+  ],
+  "corrected_from_phase_014": [
+    "Repositories (4)",
+    "Enums (12)",
+    "Exceptions (6)",
+    "Observers (1)"
+  ],
+  "schema_fingerprint": {
+    "tables": 74,
+    "columns": 796,
+    "index_entries": 252,
+    "foreign_keys": 94,
+    "sha256": "393d68633c3f5dc8b013631a44c28dd31d3f812c2efadd3f61140fdbf69baa1a",
+    "method": "Laravel information_schema (mysqldump unavailable)"
+  },
+  "note": "Service-locator and facade counts are token_get_all() derived, not regex, so method names that merely resemble helpers (ReportPeriod::resolve) are excluded."
+}

@@ -1,0 +1,57 @@
+{
+  "phases": "0.15-0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "artifact": "security-readiness-map",
+  "verdict": "BLOCKED - 3 P0 authorization defects + 1 P0 deployment defect",
+  "p0": [
+    {
+      "id": "SEC-01",
+      "title": "PATCH /api/bookings/{booking} permission bypass",
+      "evidence": "Runtime-proven: user without bookings.edit, HTTP 200, status=approved, price=1.00 persisted.",
+      "mechanism": "apiResource registers PUT and PATCH; the permission-gated Route::put overrides only PUT, so PATCH keeps the apiResource route whose middleware is just ['api','auth:sanctum']. 'status' is an unconstrained string and both 'status' and 'price' are $fillable, written by RescheduleBookingUseCase:135."
+    },
+    {
+      "id": "SEC-02",
+      "title": "19 anonymous /api/v2 routes",
+      "evidence": "route:list middleware == ['api'] with no Authenticate. Includes anonymous settlement batch write and anonymous payment/ledger/settlement/summary reads."
+    },
+    {
+      "id": "SEC-03",
+      "title": "Role/partner admin unpermissioned",
+      "evidence": "Authenticate present, zero PermissionMiddleware entries. PUT /api/roles/{role}/permissions is direct privilege escalation."
+    },
+    {
+      "id": "DEP-01",
+      "title": "APP_DEBUG enabled",
+      "evidence": "php artisan about: Debug Mode ENABLED."
+    }
+  ],
+  "p1": [
+    "SEC-04 anonymous gallery CRUD",
+    "SEC-05 anonymous admin asset import + screen categories",
+    "SEC-06 .env.testing real credentials not git-ignored",
+    "OBS-01 no error tracking",
+    "OBS-02 no structured logging",
+    "IDEM-01 no booking idempotency key",
+    "TX-01 loyalty side effects in caller transaction",
+    "STOR-01 unverified storage path traversal",
+    "DEP-02 no version control"
+  ],
+  "verified_clean": [
+    "campaign pricing ignores client-supplied money",
+    "payment amount is server-derived and absent from the verify request",
+    "no SQL injection surface",
+    "no open mass assignment",
+    "no Model->Http dependency"
+  ],
+  "attribution": "Every finding is PRE-EXISTING, confirmed identical in docs/audit/routes-baseline.json. None was introduced or worsened by Phases 0.5-0.16.",
+  "why_not_fixed": "Each fix changes an authorization outcome, the API contract, or the deployment environment. The brief forbids those as side effects of hardening, so all are recorded for explicit approval.",
+  "remediation_order": [
+    "SEC-03 (smallest change, privilege escalation)",
+    "SEC-01 (PATCH)",
+    "SEC-02 (per-route decision)",
+    "SEC-04/05/06/07",
+    "DEP-01"
+  ]
+}

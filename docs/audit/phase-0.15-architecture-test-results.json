@@ -1,0 +1,86 @@
+{
+  "phase": "0.15",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "architecture hardening",
+  "artifact": "architecture-test-results",
+  "suite": "tests/Unit/Architecture/ArchitectureRuleTest.php",
+  "cases": [
+    {
+      "name": "Domain must not import App\\Http",
+      "result": "pass"
+    },
+    {
+      "name": "Domain must not import App\\Console",
+      "result": "pass"
+    },
+    {
+      "name": "Domain must not import App\\Infrastructure",
+      "result": "pass"
+    },
+    {
+      "name": "Domain must not import App\\Application",
+      "result": "pass"
+    },
+    {
+      "name": "Domain must not import App\\Services",
+      "result": "pass (debt pinned exactly)"
+    },
+    {
+      "name": "Domain must not import App\\Http\\Controllers",
+      "result": "pass"
+    },
+    {
+      "name": "Application must not import App\\Http",
+      "result": "pass"
+    },
+    {
+      "name": "Application must not import App\\Console",
+      "result": "pass"
+    },
+    {
+      "name": "Domain has no service locators",
+      "result": "pass"
+    },
+    {
+      "name": "Application has no service locators",
+      "result": "pass"
+    },
+    {
+      "name": "service locator debt does not grow",
+      "result": "pass"
+    },
+    {
+      "name": "no model imports the http layer",
+      "result": "pass"
+    },
+    {
+      "name": "permission algorithm has a single owner",
+      "result": "pass"
+    },
+    {
+      "name": "domain uses no illuminate facade",
+      "result": "pass"
+    }
+  ],
+  "totals": {
+    "passed": 14,
+    "failed": 0,
+    "assertions": 17,
+    "duration_seconds": 0.29
+  },
+  "detector_method": "token_get_all(); a hit requires an unqualified app(/resolve(/App::make( call not preceded by ::, ->, ?->, new, class or function",
+  "defects_found_in_the_detector_itself": [
+    "Previous-token lookups scanned forwards, so 'function resolve(' declarations were reported as container calls. Fixed by scanning backwards.",
+    "PHP 8 emits Foo\\Bar as a single T_NAME_QUALIFIED array token, so naive concatenation produced array-to-string warnings and no import data. Fixed by reading token[1].",
+    "Re-tokenising per lookup made the suite take 13.69s; a per-file token cache reduced it to 0.29s."
+  ],
+  "regression_coverage_added": [
+    "Rule 11 layer direction (8 data sets)",
+    "Zero service locators in Domain and Application",
+    "Exact-pinning of the 18 known locator call sites",
+    "Rule 12: no Model -> Http import (protects the Phase 0.13 fix)",
+    "Single-owner check for RolePermissionChecker",
+    "Rule 2: no framework facade in Domain"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "phase": "0.17",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy code and controller retirement",
+  "artifact": "regression-verification",
+  "baseline_phase_0_15_0_16": {
+    "tests": "571 passed, 2 failed, 1 warning, 4 skipped",
+    "assertions": 5323
+  },
+  "after_phase_0_17": {
+    "tests": "571 passed, 2 failed, 1 warning, 4 skipped",
+    "assertions": 5323,
+    "duration_seconds": 58.96,
+    "verdict": "IDENTICAL to baseline"
+  },
+  "route_contract": {
+    "routes": 385,
+    "verdict": "IDENTICAL",
+    "compared": "HTTP method + full URI + resolved controller action + middleware stack, for all 385 routes, against docs/audit/routes-baseline.json",
+    "result": "0 differences"
+  },
+  "api_behaviour": {
+    "verdict": "UNCHANGED",
+    "detail": "No route, controller, action, middleware entry, request class, resource or response payload was added, removed or edited. All 16 deletions were classes that no request path could reach."
+  },
+  "schema": {
+    "tables": 74,
+    "columns": 796,
+    "indexes": 252,
+    "foreign_keys": 94,
+    "verdict": "IDENTICAL",
+    "method": "Laravel information_schema query (mysqldump is unavailable in this environment)",
+    "migrations": {
+      "applied": 112,
+      "pending": 0
+    }
+  },
+  "architecture_test": {
+    "command": "php artisan test tests/Unit/Architecture/ArchitectureRuleTest.php",
+    "result": "14 passed, 17 assertions",
+    "verdict": "PASS",
+    "note": "The architecture rules and their debt allowlists are unchanged, so deleting 16 conformant files did not disturb Rule 2 (no Domain->Services/Http/Models), Rule 11 (no Http in Domain) or Rule 12 (no Services locator in Http)."
+  },
+  "known_failures": {
+    "status": "PRE-EXISTING, NOT introduced by Phase 0.17",
+    "items": [
+      {
+        "test": "Tests\\Feature\\BookingConcurrencyTest > second booking rejected after first consumes last unit",
+        "cause": "Message-wording drift only. The test asserts the substring 'no longer available'; the booking path now returns a clearer EligibilityResult message. The locking behaviour the test was written to protect is separately covered by a passing test that asserts a second booking is rejected."
+      },
+      {
+        "test": "Tests\\Feature\\CampaignBookingPricingIntegrityTest > booking rejects quantity over fleet availability",
+        "cause": "Same class of drift: an expected message no longer matches."
+      },
+      {
+        "test": "MediaHelperTest.php:23,28",
+        "cause": "Tautological assertion in a pure static helper test; reported as a warning, not a failure."
+      }
+    ],
+    "decision": "Not fixed. Changing an assertion string during a retirement phase would mask a real behaviour question and is out of scope. Recorded as controlled debt."
+  },
+  "financial_behaviour": {
+    "verdict": "UNCHANGED",
+    "detail": "No pricing, availability, booking, payment, refund, settlement or commission path was touched. The only financial-adjacent deletion was App\\Enums\\PaymentStatus, which was unreferenced; the live vocabulary App\\Domain\\Payment\\PaymentStatus is intact.",
+    "evidence": "The campaign pricing integrity tests, minute pricing tests and payment tests all run within the 571 passing set and are unchanged in count."
+  },
+  "concurrency": {
+    "verdict": "UNCHANGED",
+    "detail": "InventoryService::checkAvailabilityForUpdate and the booking use-case transaction boundaries were not modified."
+  },
+  "scheduler_queue_events": {
+    "verdict": "UNCHANGED",
+    "detail": "The 4 scheduler entries, 133 Artisan commands, 34 event classes and container bindings were untouched. Notably, the 3 scheduled commands initially flagged as dead were retained and confirmed live."
+  },
+  "external_integrations": {
+    "verdict": "UNCHANGED",
+    "detail": "The infrastructure adapters (Razorpay, OAuth/Google, ExchangeRates, Media, Notification) were not modified in Phase 0.17."
+  }
+}

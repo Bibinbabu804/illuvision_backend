@@ -1,0 +1,47 @@
+{
+  "phase": "0.18",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "modular monolith migration",
+  "artifact": "http-migration-map",
+  "finding": "No controller was moved. All 81 controllers already sit in the correct Http layer, so Phase 0.18 had no Http relocation to perform.",
+  "controllers_total": 81,
+  "controllers_moved": 0,
+  "http_inventory": [
+    {
+      "path": "app/Http/Controllers",
+      "count": 71,
+      "role": "v1 + admin + webhook controllers",
+      "target": "unchanged"
+    },
+    {
+      "path": "app/Http/Controllers/Api",
+      "count": 10,
+      "role": "v2 public API",
+      "target": "unchanged",
+      "note": "Includes the 19 anonymous /api/v2/* endpoints recorded as SEC-02. They are ACTIVE and correctly layered; the missing authorization is P0 remediation debt, not a migration concern."
+    }
+  ],
+  "http_support": {
+    "form_requests": "26 - all reachable via controller type-hints",
+    "api_resources": "24 - all reachable via controller return types",
+    "middleware": "12 classes, unchanged"
+  },
+  "service_locator_debt": {
+    "rule": "Rule 12",
+    "status": "RED - documented, unchanged by Phase 0.18",
+    "pinned_classes": 8,
+    "pinned_list": [
+      "App\\Helpers\\MediaHelper",
+      "App\\Http\\Controllers\\BookingController",
+      "App\\Http\\Middleware\\PermissionMiddleware",
+      "App\\Models\\Booking",
+      "App\\Models\\User",
+      "App\\Services\\ExchangeRateService",
+      "App\\Services\\ManualBookingService",
+      "App\\Services\\RevenueSplitResolverService"
+    ],
+    "note": "Injecting these into constructors changes nothing observable and is a safe follow-up, but it is a behaviour-neutral refactor rather than a structural migration, so it was not performed here."
+  },
+  "verdict": "Http requires no structural change. Routes, middleware, controllers, requests, resources and responses are all correctly layered and were untouched."
+}

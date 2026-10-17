@@ -1,0 +1,172 @@
+{
+  "phases": "0.9 + 0.10",
+  "name": "Combined Financial Concurrency Verification",
+  "generated_at": "2026-09-26T01:00:00+05:30",
+  "purpose": "Verify that no concurrency, locking, or transaction-isolation property was weakened by the Payment (0.9) and Financial (0.10) boundary extractions.",
+  "method": "Static inventory of every lockForUpdate() and DB::transaction() site in the Payment and Financial subsystems before and after, plus targeted runtime regression tests.",
+  "verdict": "PASS — no lock was added, removed, moved outside a transaction, or weakened. Two pre-existing concurrency risks were found and are recorded, not fixed.",
+  "pessimistic_lock_inventory": {
+    "payment_subsystem": {
+      "before": 0,
+      "after": 0,
+      "changed": false,
+      "sites": []
+    },
+    "financial_subsystem": {
+      "before": 4,
+      "after": 4,
+      "changed": false,
+      "sites": [
+        {
+          "table": "partner_commissions",
+          "count": 3,
+          "original_owner": "App\\Services\\CommissionService",
+          "new_owner": "App\\Services\\CommissionService via PartnerCommissionRepositoryInterface::findOrFailForUpdate()",
+          "call_before": "PartnerCommission::where('id', $id)->lockForUpdate()->firstOrFail()",
+          "call_after": "identical",
+          "lock_weakened": false
+        },
+        {
+          "table": "partner_commissions",
+          "count": 1,
+          "original_owner": "App\\Services\\ReferralTrackingService",
+          "new_owner": "App\\Services\\ReferralTrackingService via PartnerCommissionRepositoryInterface",
+          "call_before": "PartnerCommission::where('referral_usage_id', $x)->lockForUpdate()->first()",
+          "call_after": "identical",
+          "lock_weakened": false
+        }
+      ]
+    },
+    "adjacent_subsystems_untouched": [
+      { "table": "screen_availability / assets", "owner": "App\\Services\\InventoryService", "changed": false },
+      { "table": "bookings", "owner": "App\\Services\\ExpirePendingBookings", "changed": false }
+    ]
+  },
+  "not_locks": {
+    "note": "These are plain reads and were NOT converted into locks. Converting them would change concurrency semantics and is out of scope.",
+    "items": [
+      { "call": "Payment::where('razorpay_order_id', $x)->firstOrFail()", "classification": "plain SELECT" },
+      { "call": "Payment::where('booking_id', $x)->where('payment_status','pending')->first()", "classification": "plain SELECT — the order-reuse check" },
+      { "call": "BookingScreen settlement eligibility read", "classification": "plain SELECT, outside the settlement transaction" }
+    ]
+  },
+  "transaction_boundary_verification": {
+    "method": "Every DB::transaction() boundary in the affected paths was compared before and after.",
+    "results": [
+      { "path": "PaymentService::verifyPaymentSignature()", "before": "DB::transaction", "after": "DB::transaction", "changed": false },
+      { "path": "RefundService::initiateRefund()", "before": "DB::transaction", "after": "DB::transaction", "changed": false },
+      { "path": "PaymentService::refund() (dead path)", "before": "DB::transaction", "after": "DB::transaction", "changed": false },
+      { "path": "ManualBookingService::recordOfflinePayment()", "before": "DB::transaction", "after": "DB::transaction", "changed": false },
+      { "path": "AdminPaymentController::approvePayment()", "before": "DB::transaction", "after": "DB::transaction", "changed": false },
+      { "path": "BookingController::storeCampaign()", "before": "DB::transaction", "after": "DB::transaction", "changed": false },
+      { "path": "SettlementService::generateSettlement()", "before": "DB::transaction", "after": "DB::transaction", "changed": false },
+      { "path": "SettlementService::cancelSettlement()", "before": "DB::transaction", "after": "DB::transaction", "changed": false },
+      { "path": "RevenueDistributionService::processBookingScreens()", "before": "no own transaction", "after": "no own transaction", "changed": false },
+      { "path": "ReferralTrackingService::createReferralTracking()", "before": "no own transaction (caller-owned)", "after": "no own transaction (caller-owned)", "changed": false }
+    ],
+    "transactions_added": 0,
+    "transactions_removed": 0,
+    "transactions_widened": 0,
+    "transactions_narrowed": 0
+  },
+  "lock_displacement_risk_analysis": {
+    "concern": "Moving a lockForUpdate() call behind a repository method could have changed when the lock is acquired relative to surrounding queries, altering deadlock potential.",
+    "finding": "No displacement. In every case the repository method is the ONLY statement in its call site, invoked at the same position in the same control flow. The lock is acquired at the same logical point as before.",
+    "lock_ordering_changed": false,
+    "new_deadlock_potential_introduced": false
+  },
+  "runtime_verification": {
+    "tests": [
+      {
+        "name": "Tests\\Feature\\Golden\\GoldenFinancialBoundaryTest::test_commission_repository_preserves_pessimistic_locking",
+        "asserts": "findOrFailForUpdate() executes successfully inside a transaction and returns the correct row"
+      },
+      {
+        "name": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_refund_failure_rolls_back_partial_refund_rows",
+        "asserts": "A gateway exception inside the refund transaction leaves NO refund row and does NOT mutate payment.refund_status"
+      },
+      {
+        "name": "Tests\\Feature\\Golden\\GoldenPaymentBoundaryTest::test_payment_transaction_rollback_is_observable",
+        "asserts": "A forced exception inside a transaction discards the payment insert"
+      },
+      {
+        "name": "Tests\\Feature\\Golden\\GoldenConcurrencyVerificationTest::test_inventory_service_lock_screens_generates_pessimistic_lock",
+        "asserts": "Pre-existing inventory locking is intact"
+      },
+      {
+        "name": "Tests\\Feature\\Golden\\GoldenConcurrencyVerificationTest::test_payment_service_retrieval_does_not_use_lock_for_update",
+        "asserts": "Payment retrieval still does NOT take a lock — the pre-existing behaviour is unchanged"
+      },
+      {
+        "name": "Tests\\Feature\\Golden\\GoldenConcurrencyVerificationTest::test_transaction_rollback_reverts_partial_mutations",
+        "asserts": "Transaction rollback semantics are unchanged"
+      }
+    ]
+  },
+  "recorded_risks_not_fixed": [
+    {
+      "id": "RISK-01",
+      "severity": "HIGH",
+      "title": "Concurrent settlement generation can double-settle revenue",
+      "location": "App\\Services\\SettlementService::generateSettlement()",
+      "detail": "The eligibility read is OUTSIDE the transaction and takes no lock. Two admins generating settlements for overlapping periods can both observe the same pending booking_screens and both create a settlement, double-counting the revenue. The subsequent per-row update of booking_screens does not prevent this because both transactions read before either writes.",
+      "why_not_fixed": "Serialising requires one of: a lock on the screen_providers row, a period-overlap uniqueness constraint, or moving the read inside the transaction with FOR UPDATE. Each changes locking behaviour and can introduce deadlocks against the booking and inventory paths. A dedicated concurrency phase is required.",
+      "status": "PRE-EXISTING, UNCHANGED BY PHASES 0.9/0.10"
+    },
+    {
+      "id": "RISK-02",
+      "severity": "MEDIUM",
+      "title": "Concurrent order creation can create duplicate gateway orders",
+      "location": "App\\Application\\Payment\\UseCases\\CreatePaymentOrderUseCase::execute()",
+      "detail": "The pending-payment reuse check and the subsequent insert are not atomic. Two concurrent create-order requests for the same booking can both observe no pending payment and both create a Razorpay order.",
+      "why_not_fixed": "A real idempotency key requires a schema migration and changes externally observable gateway behaviour. Out of scope for an extraction phase.",
+      "status": "PRE-EXISTING, UNCHANGED BY PHASES 0.9/0.10"
+    },
+    {
+      "id": "RISK-03",
+      "severity": "MEDIUM",
+      "title": "Concurrent payment verification has no serialisation",
+      "location": "App\\Services\\PaymentService::verifyPaymentSignature()",
+      "detail": "The duplicate-paid guard is a read-then-write check with no row lock. Two concurrent verify calls can both observe an unpaid payment and both proceed. The gateway signature check prevents a double capture in practice, but the local state transition is not serialised.",
+      "why_not_fixed": "Adding lockForUpdate() changes lock ordering against the booking and inventory paths and could introduce new deadlock potential.",
+      "status": "PRE-EXISTING, UNCHANGED BY PHASES 0.9/0.10"
+    },
+    {
+      "id": "RISK-04",
+      "severity": "MEDIUM",
+      "title": "Refund gateway call inside a DB transaction",
+      "location": "App\\Services\\RefundService::initiateRefund()",
+      "detail": "A real external network call is made while holding an open DB transaction. A gateway hang holds the transaction open for the full round-trip duration. Violates ARCHITECTURE_RULE 4.",
+      "why_not_fixed": "Moving the call out would change failure semantics: currently a gateway failure leaves no local state AND no gateway debit. Moving it out risks a debited gateway with no local record on a subsequent DB failure. Redesigning financial failure handling is out of scope.",
+      "status": "PRE-EXISTING, UNCHANGED BY PHASES 0.9/0.10"
+    },
+    {
+      "id": "RISK-05",
+      "severity": "LOW",
+      "title": "Ambiguous refund timeout can double-refund",
+      "location": "App\\Services\\RefundService::initiateRefund()",
+      "detail": "No gateway idempotency key. If the gateway debited but the response was lost, the local transaction rolls back with no record, and a client retry debits again.",
+      "why_not_fixed": "Requires a gateway idempotency key and a pending-intent record written before the gateway call.",
+      "status": "PRE-EXISTING, UNCHANGED BY PHASES 0.9/0.10"
+    },
+    {
+      "id": "RISK-06",
+      "severity": "LOW",
+      "title": "Concurrent offline payment recording creates duplicate payment rows",
+      "location": "App\\Services\\ManualBookingService::recordOfflinePayment()",
+      "detail": "No uniqueness constraint on payments for a booking. Two concurrent admin recordings each insert a payment row.",
+      "why_not_fixed": "Requires a schema migration and a decision about which row wins.",
+      "status": "PRE-EXISTING, UNCHANGED BY PHASES 0.9/0.10"
+    },
+    {
+      "id": "RISK-07",
+      "severity": "LOW",
+      "title": "Commission lock is only effective inside a caller transaction",
+      "location": "App\\Services\\CommissionService lifecycle transitions",
+      "detail": "The service does not open its own transaction, so the lockForUpdate() is acquired and released within a single statement scope unless the caller provides one.",
+      "why_not_fixed": "Adding a transaction would change the lock hold duration and could introduce deadlocks. The correct fix requires a decision about the lifecycle's transaction ownership.",
+      "status": "PRE-EXISTING, UNCHANGED BY PHASES 0.9/0.10"
+    }
+  ],
+  "conclusion": "Phases 0.9 and 0.10 relocated code across boundaries without altering a single lock, transaction boundary, or isolation property. The four pessimistic locks in the Financial subsystem were preserved verbatim and are now covered by an explicit regression test. Seven concurrency risks were catalogued; none were introduced or worsened by this work, and none were silently fixed."
+}

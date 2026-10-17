@@ -1,0 +1,912 @@
+{
+  "phase": "0.13",
+  "name": "Legacy Service, Controller & Helper Inventory",
+  "generated_at": "2026-09-26",
+  "method": "Every class in app/Services, app/Http/Controllers, app/Helpers, app/Listeners and the cross-cutting model/authorization classes was parsed for imports, DB access, transactions, locks, service-locator use and event dispatch. Candidates were confirmed by global reference search across app/, routes/, tests/ and database/.",
+  "verification_commands": [
+    "find app/Services -name '*.php' | xargs wc -l | sort -rn",
+    "grep -rnE '[^>a-zA-Z_$](app|resolve)\\(' app/",
+    "php artisan test"
+  ],
+  "counts": {
+    "services": 51,
+    "controllers": 68,
+    "helpers": 1,
+    "listeners": 1,
+    "total_entries": 34,
+    "migrated": 9,
+    "delegating": 5,
+    "retained": 17,
+    "deferred": 3
+  },
+  "entries": [
+    {
+      "component": "BudgetRecommendationService",
+      "type": "service",
+      "location": "app/Services/BudgetRecommendationService.php",
+      "responsibility": "Multi-strategy ad budget recommendation engine (1443 lines): strategy selection, forecasting, reach/frequency optimisation, intraday pacing",
+      "domain": "Campaign/Media",
+      "callers": [
+        "Api/BudgetRecommendationController",
+        "tests: BudgetRecommendationEngineTest, BudgetPlannerMultiStrategyTest, BudgetRecommendationIntradayTest, BudgetRecommendationRateLimitTest"
+      ],
+      "dependencies": [
+        "CampaignPricingService",
+        "PricingRuleEngine",
+        "SettingsService",
+        "BookingConfig",
+        "Eloquent models"
+      ],
+      "database_access": [
+        "bookings",
+        "budget_recommendations (read/write)",
+        "pricing_plans",
+        "screens"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": false,
+      "reporting": true,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "ManualBookingService",
+      "type": "service",
+      "location": "app/Services/ManualBookingService.php",
+      "responsibility": "Manual/admin booking creation engine incl. offline payment recording, loyalty debit/credit (647 lines)",
+      "domain": "Booking",
+      "callers": [
+        "AdminManualBookingController",
+        "CreateOfflinePaymentUseCase",
+        "PartnerBookingController"
+      ],
+      "dependencies": [
+        "BookingCapacityService",
+        "InventoryService",
+        "LoyaltyService",
+        "SettingsService",
+        "ReferralTrackingService",
+        "app() x3"
+      ],
+      "database_access": [
+        "bookings",
+        "booking_screens",
+        "payments",
+        "reward_transactions",
+        "referral_usages"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "BookingCapacityService",
+      "type": "service",
+      "location": "app/Services/BookingCapacityService.php",
+      "responsibility": "Unified availability eligibility (daily quota, fixed-screen conflicts, mobile fleet capacity) (602 lines)",
+      "domain": "Availability",
+      "callers": [
+        "BookingController",
+        "CreateCampaignBookingUseCase",
+        "RescheduleBookingUseCase",
+        "CheckBookingAvailabilityQuery",
+        "AdminAndPartnerMinuteBookingTest"
+      ],
+      "dependencies": [
+        "InventoryService"
+      ],
+      "database_access": [
+        "bookings",
+        "booking_screens",
+        "screens"
+      ],
+      "external_dependencies": "none",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "PricingRuleEngine",
+      "type": "service",
+      "location": "app/Services/PricingRuleEngine.php",
+      "responsibility": "Pricing plan rule evaluation: base rate, peak, weekend, duration and screen discount rules (506 lines)",
+      "domain": "Pricing",
+      "callers": [
+        "CampaignPricingEngine",
+        "RevenueSplitResolverService",
+        "BudgetRecommendationService"
+      ],
+      "dependencies": [
+        "Eloquent models",
+        "ScreenPricingResolver"
+      ],
+      "database_access": [
+        "pricing_plans",
+        "pricing_*_rules"
+      ],
+      "external_dependencies": "none",
+      "transactional": false,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "LoyaltyService",
+      "type": "service",
+      "location": "app/Services/LoyaltyService.php",
+      "responsibility": "Reward point earn/redeem/reverse/refund accounting and loyalty summary (354 lines)",
+      "domain": "Loyalty",
+      "callers": [
+        "Models/Booking (model events)",
+        "CreateCampaignBookingUseCase",
+        "ManualBookingService",
+        "Api/AdminRewardsController"
+      ],
+      "dependencies": [
+        "SettingsService"
+      ],
+      "database_access": [
+        "reward_accounts",
+        "reward_transactions",
+        "reward_redemptions"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "migrated"
+    },
+    {
+      "component": "SettlementService",
+      "type": "service",
+      "location": "app/Services/SettlementService.php",
+      "responsibility": "Settlement generation and eligibility (352 lines)",
+      "domain": "Financial",
+      "callers": [
+        "AdminSettlementController",
+        "GenerateProviderSettlementUseCase"
+      ],
+      "dependencies": [
+        "RevenueSplitResolverService",
+        "CommissionService"
+      ],
+      "database_access": [
+        "settlements",
+        "booking_screens",
+        "partner_commissions"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "delegating"
+    },
+    {
+      "component": "RevenueDistributionService",
+      "type": "service",
+      "location": "app/Services/RevenueDistributionService.php",
+      "responsibility": "Revenue allocation across Illuvision / screen provider per booking screen (343 lines)",
+      "domain": "Financial",
+      "callers": [
+        "DistributeBookingRevenueUseCase"
+      ],
+      "dependencies": [
+        "RevenueSplitResolverService"
+      ],
+      "database_access": [
+        "booking_screens",
+        "screens",
+        "revenue splits"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "delegating"
+    },
+    {
+      "component": "RevenueSplitResolverService",
+      "type": "service",
+      "location": "app/Services/RevenueSplitResolverService.php",
+      "responsibility": "Resolves effective revenue split percentages, falling back to legacy default when unset (245 lines)",
+      "domain": "Financial",
+      "callers": [
+        "CreateCampaignBookingUseCase",
+        "DistributeBookingRevenueUseCase",
+        "SettlementService"
+      ],
+      "dependencies": [
+        "PricingRuleEngine via app() service locator (line 210)"
+      ],
+      "database_access": [
+        "screens",
+        "pricing_duration_rules"
+      ],
+      "external_dependencies": "none",
+      "transactional": false,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "deferred"
+    },
+    {
+      "component": "CommissionService",
+      "type": "service",
+      "location": "app/Services/CommissionService.php",
+      "responsibility": "Partner commission calculation and ledger persistence (245 lines)",
+      "domain": "Partner/Financial",
+      "callers": [
+        "SettlementService",
+        "PartnerService",
+        "RecordReferralAttributionUseCase"
+      ],
+      "dependencies": [
+        "Eloquent models"
+      ],
+      "database_access": [
+        "partner_commissions",
+        "referral_usages"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "PaymentService",
+      "type": "service",
+      "location": "app/Services/PaymentService.php",
+      "responsibility": "Razorpay payment order creation, verification, fetch and refund gateway operations (220 lines)",
+      "domain": "Payment",
+      "callers": [
+        "AdminPaymentController",
+        "CreatePaymentOrderUseCase",
+        "VerifyPaymentUseCase",
+        "RefundPaymentUseCase"
+      ],
+      "dependencies": [
+        "Razorpay adapter",
+        "CampaignPricingService"
+      ],
+      "database_access": [
+        "payments",
+        "refunds"
+      ],
+      "external_dependencies": "Razorpay API",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "delegating"
+    },
+    {
+      "component": "RefundService",
+      "type": "service",
+      "location": "app/Services/RefundService.php",
+      "responsibility": "Refund recording and reversal (164 lines)",
+      "domain": "Payment",
+      "callers": [
+        "AdminPaymentController",
+        "RefundPaymentUseCase"
+      ],
+      "dependencies": [
+        "PaymentService"
+      ],
+      "database_access": [
+        "refunds",
+        "payments"
+      ],
+      "external_dependencies": "Razorpay API",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "delegating"
+    },
+    {
+      "component": "ExchangeRateService",
+      "type": "service",
+      "location": "app/Services/ExchangeRateService.php",
+      "responsibility": "Currency conversion with cached rates (317 lines)",
+      "domain": "Financial",
+      "callers": [
+        "CurrencyService",
+        "Console/Commands/SyncExchangeRates"
+      ],
+      "dependencies": [
+        "ExchangeRateApiClientInterface (optional DI fallback)"
+      ],
+      "database_access": [
+        "exchange_rates"
+      ],
+      "external_dependencies": "Exchange rate HTTP API",
+      "transactional": false,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "delegating"
+    },
+    {
+      "component": "SettingsService",
+      "type": "service",
+      "location": "app/Services/SettingsService.php",
+      "responsibility": "DB-backed settings with in-memory defaults and cache (333 lines)",
+      "domain": "Cross-cutting",
+      "callers": [
+        "~20 consumers incl. CampaignPricingEngine, Booking model events, MediaService"
+      ],
+      "dependencies": [
+        "Cache facade",
+        "Setting model"
+      ],
+      "database_access": [
+        "settings"
+      ],
+      "external_dependencies": "none",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "PartnerService",
+      "type": "service",
+      "location": "app/Services/PartnerService.php",
+      "responsibility": "Partner lifecycle: creation, approval, rejection with domain events (324 lines)",
+      "domain": "Partner",
+      "callers": [
+        "PartnerController",
+        "PartnerPortalController"
+      ],
+      "dependencies": [
+        "Hash",
+        "Str",
+        "PartnerApproved/PartnerRejected events"
+      ],
+      "database_access": [
+        "partners",
+        "users"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "NotificationService",
+      "type": "service",
+      "location": "app/Services/NotificationService.php",
+      "responsibility": "Channel-aware notification dispatch with dedup, failure logging and ShouldQueue routing (244 lines)",
+      "domain": "Notifications",
+      "callers": [
+        "Listeners/NotificationEventSubscriber",
+        "ForgotPasswordController"
+      ],
+      "dependencies": [
+        "MailContractInterface (Phase 0.12)",
+        "SettingsService",
+        "NotificationConfig"
+      ],
+      "database_access": [
+        "notification_logs"
+      ],
+      "external_dependencies": "Mail (SMTP)",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "migrated"
+    },
+    {
+      "component": "MediaService",
+      "type": "service",
+      "location": "app/Services/MediaService.php",
+      "responsibility": "Booking/screen media upload, classification and deletion (94 lines)",
+      "domain": "Media",
+      "callers": [
+        "BookingController",
+        "PartnerBookingController",
+        "ScreenController"
+      ],
+      "dependencies": [
+        "StorageContractInterface (Phase 0.12)"
+      ],
+      "database_access": [
+        "booking_media",
+        "screens",
+        "assets"
+      ],
+      "external_dependencies": "Public storage disk",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "migrated"
+    },
+    {
+      "component": "ProfileService",
+      "type": "service",
+      "location": "app/Services/ProfileService.php",
+      "responsibility": "User profile read/update and avatar replacement (258 lines)",
+      "domain": "Auth/Profile",
+      "callers": [
+        "Api/ProfileController",
+        "PartnerPortalController"
+      ],
+      "dependencies": [
+        "StorageContractInterface (Phase 0.12)"
+      ],
+      "database_access": [
+        "users"
+      ],
+      "external_dependencies": "Public storage disk",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "migrated"
+    },
+    {
+      "component": "ReferralTrackingService",
+      "type": "service",
+      "location": "app/Services/ReferralTrackingService.php",
+      "responsibility": "Referral attribution lifecycle: track, cancel, refund (211 lines)",
+      "domain": "Referral",
+      "callers": [
+        "Models/Booking (model events)",
+        "AdminPaymentController",
+        "ManualBookingService",
+        "RecordReferralAttributionUseCase"
+      ],
+      "dependencies": [
+        "Eloquent models"
+      ],
+      "database_access": [
+        "referral_usages",
+        "bookings"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "deferred"
+    },
+    {
+      "component": "FirstBookingDiscountService",
+      "type": "service",
+      "location": "app/Services/FirstBookingDiscountService.php",
+      "responsibility": "First-booking discount eligibility and amount (150 lines)",
+      "domain": "Pricing",
+      "callers": [
+        "Pricing/FirstBookingDiscountPricingCalculator"
+      ],
+      "dependencies": [
+        "Eloquent models"
+      ],
+      "database_access": [
+        "bookings",
+        "reward_transactions"
+      ],
+      "external_dependencies": "none",
+      "transactional": false,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "ScreenProviderService",
+      "type": "service",
+      "location": "app/Services/ScreenProviderService.php",
+      "responsibility": "Screen provider onboarding and ownership assignment (480 lines)",
+      "domain": "Provider",
+      "callers": [
+        "AdminScreenProviderController",
+        "ScreenProviderPortalController"
+      ],
+      "dependencies": [
+        "Eloquent models",
+        "Hash"
+      ],
+      "database_access": [
+        "screen_providers",
+        "screens",
+        "users"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "AssetImportService",
+      "type": "service",
+      "location": "app/Services/AssetImportService.php",
+      "responsibility": "Bulk asset import with validation and transaction (565 lines)",
+      "domain": "Asset",
+      "callers": [
+        "AssetController"
+      ],
+      "dependencies": [
+        "DB::transaction",
+        "Eloquent models"
+      ],
+      "database_access": [
+        "assets",
+        "screens"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "ScreenDeletionService",
+      "type": "service",
+      "location": "app/Services/ScreenDeletionService.php",
+      "responsibility": "Screen deletion with referential-integrity guards (233 lines)",
+      "domain": "Asset",
+      "callers": [
+        "ScreenController",
+        "AssetController"
+      ],
+      "dependencies": [
+        "Eloquent models"
+      ],
+      "database_access": [
+        "screens",
+        "bookings",
+        "booking_screens"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": true,
+      "reporting": true,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "InventoryService",
+      "type": "service",
+      "location": "app/Services/InventoryService.php",
+      "responsibility": "Inventory row locking, fleet availability, fixed-screen conflict detection, datetime normalisation (245 lines)",
+      "domain": "Availability",
+      "callers": [
+        "CreateCampaignBookingUseCase",
+        "RescheduleBookingUseCase",
+        "CheckBookingAvailabilityQuery",
+        "BookingController"
+      ],
+      "dependencies": [
+        "lockForUpdate",
+        "Eloquent models"
+      ],
+      "database_access": [
+        "screens",
+        "bookings",
+        "booking_screens"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "Analytics services (5)",
+      "type": "service",
+      "location": "app/Services/{Screen,Revenue,Client,Payment}AnalyticsService.php + BookingAnalyticsService",
+      "responsibility": "Read-only KPI aggregation for screens, revenue, clients, payments and bookings",
+      "domain": "Reporting",
+      "callers": [
+        "ReferralAnalyticsController",
+        "AdminPaymentController",
+        "DashBoardController"
+      ],
+      "dependencies": [
+        "Eloquent/DB query builder"
+      ],
+      "database_access": [
+        "bookings",
+        "payments",
+        "screens",
+        "clients"
+      ],
+      "external_dependencies": "none",
+      "transactional": false,
+      "financial": false,
+      "reporting": true,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "MediaHelper",
+      "type": "helper",
+      "location": "app/Helpers/MediaHelper.php",
+      "responsibility": "Static image compression with a quality ladder, WebP encoding and copy-as-is fallbacks",
+      "domain": "Media",
+      "callers": [
+        "PartnerBookingController",
+        "AdminScreenProviderController",
+        "ScreenProviderPortalController",
+        "AuthorController"
+      ],
+      "dependencies": [
+        "ImageProcessingContractInterface (Phase 0.12)",
+        "raw filesystem writes (deferred)"
+      ],
+      "database_access": [
+        "filesystem"
+      ],
+      "external_dependencies": "GD extension + filesystem",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "migrated"
+    },
+    {
+      "component": "BookingController",
+      "type": "controller",
+      "location": "app/Http/Controllers/BookingController.php",
+      "responsibility": "30-method booking HTTP adapter: campaign creation, reschedule, media, sessions, approval workflow, calendar, occupancy, KPIs",
+      "domain": "Booking",
+      "callers": [
+        "routes/api.php (385 routes total)"
+      ],
+      "dependencies": [
+        "CreateCampaignBookingUseCase",
+        "RescheduleBookingUseCase",
+        "CheckBookingAvailabilityQuery",
+        "BookingCapacityService",
+        "InventoryService",
+        "CampaignPricingService",
+        "MediaService",
+        "BookingConfig",
+        "app(LoyaltyService) x1"
+      ],
+      "database_access": [
+        "bookings",
+        "booking_screens",
+        "booking_media",
+        "booking_activities",
+        "payments"
+      ],
+      "external_dependencies": "Public storage disk",
+      "transactional": true,
+      "financial": true,
+      "reporting": true,
+      "legacy": true,
+      "migration_status": "migrated"
+    },
+    {
+      "component": "ScreenController",
+      "type": "controller",
+      "location": "app/Http/Controllers/ScreenController.php",
+      "responsibility": "Screen CRUD, ownership transfer, availability config, categories and deletion (1065 lines)",
+      "domain": "Asset",
+      "callers": [
+        "routes/api.php"
+      ],
+      "dependencies": [
+        "ScreenDeletionService",
+        "MediaService",
+        "RevenueSplitResolverService",
+        "Storage:: facade x1"
+      ],
+      "database_access": [
+        "screens",
+        "screen_categories",
+        "booking_screens"
+      ],
+      "external_dependencies": "Public storage disk",
+      "transactional": true,
+      "financial": false,
+      "reporting": true,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "ScreenProviderPortalController",
+      "type": "controller",
+      "location": "app/Http/Controllers/ScreenProviderPortalController.php",
+      "responsibility": "Provider self-service portal: profile, assets, leads, enquiries, settlements (848 lines)",
+      "domain": "Provider",
+      "callers": [
+        "routes/api.php"
+      ],
+      "dependencies": [
+        "ScreenProviderService",
+        "MediaHelper",
+        "Storage:: facade x1",
+        "NotificationService"
+      ],
+      "database_access": [
+        "screen_providers",
+        "screens",
+        "enquiries",
+        "settlements"
+      ],
+      "external_dependencies": "Public storage disk",
+      "transactional": true,
+      "financial": true,
+      "reporting": true,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "DashBoardController",
+      "type": "controller",
+      "location": "app/Http/Controllers/DashBoardController.php",
+      "responsibility": "Admin dashboard KPI aggregation (472 lines)",
+      "domain": "Reporting",
+      "callers": [
+        "routes/api.php"
+      ],
+      "dependencies": [
+        "Analytics services",
+        "Eloquent query builder"
+      ],
+      "database_access": [
+        "bookings",
+        "payments",
+        "campaigns",
+        "clients"
+      ],
+      "external_dependencies": "none",
+      "transactional": false,
+      "financial": false,
+      "reporting": true,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "AdminPaymentController",
+      "type": "controller",
+      "location": "app/Http/Controllers/AdminPaymentController.php",
+      "responsibility": "Admin payment listing, offline approval/rejection, refund initiation (392 lines)",
+      "domain": "Payment",
+      "callers": [
+        "routes/api.php"
+      ],
+      "dependencies": [
+        "PaymentAnalyticsService",
+        "RefundService",
+        "RefundPaymentUseCase",
+        "RecordReferralAttributionUseCase",
+        "PaymentService",
+        "ReferralTrackingService",
+        "Razorpay adapter"
+      ],
+      "database_access": [
+        "payments",
+        "refunds",
+        "bookings",
+        "payment_logs"
+      ],
+      "external_dependencies": "Razorpay API",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "migrated"
+    },
+    {
+      "component": "NotificationEventSubscriber",
+      "type": "listener",
+      "location": "app/Listeners/NotificationEventSubscriber.php",
+      "responsibility": "Central subscriber mapping ~40 domain events to NotificationService dispatches",
+      "domain": "Notifications",
+      "callers": [
+        "~40 events across Booking, Media, Payment, Partner, Rewards, Enquiry, ScreenProvider"
+      ],
+      "dependencies": [
+        "NotificationService"
+      ],
+      "database_access": [
+        "notification_logs"
+      ],
+      "external_dependencies": "Mail (SMTP)",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "retained"
+    },
+    {
+      "component": "RolePermissionChecker",
+      "type": "other",
+      "location": "app/Support/Authorization/RolePermissionChecker.php",
+      "responsibility": "Single owner of the role-permission decision, cached per role slug (Phase 0.13)",
+      "domain": "Cross-cutting",
+      "callers": [
+        "Http/Middleware/PermissionMiddleware",
+        "Models/User::hasPermission"
+      ],
+      "dependencies": [
+        "Role model",
+        "Cache facade"
+      ],
+      "database_access": [
+        "roles",
+        "role_permissions"
+      ],
+      "external_dependencies": "Cache",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": false,
+      "migration_status": "migrated"
+    },
+    {
+      "component": "Booking (model events)",
+      "type": "other",
+      "location": "app/Models/Booking.php",
+      "responsibility": "Eloquent model owning loyalty + referral side effects on status transitions via model events and app()",
+      "domain": "Booking/Loyalty/Referral",
+      "callers": [
+        "every booking status change"
+      ],
+      "dependencies": [
+        "app(LoyaltyService) x3",
+        "app(SettingsService) x2",
+        "app(ReferralTrackingService) x2"
+      ],
+      "database_access": [
+        "bookings",
+        "reward_transactions",
+        "referral_usages"
+      ],
+      "external_dependencies": "none",
+      "transactional": true,
+      "financial": true,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "deferred"
+    },
+    {
+      "component": "User (authorization helper)",
+      "type": "other",
+      "location": "app/Models/User.php",
+      "responsibility": "Eloquent model with hasPermission()/isSuperAdmin() convenience helpers",
+      "domain": "Cross-cutting",
+      "callers": [
+        "~30 call sites"
+      ],
+      "dependencies": [
+        "RolePermissionChecker (Phase 0.13)"
+      ],
+      "database_access": [
+        "users",
+        "roles"
+      ],
+      "external_dependencies": "none",
+      "transactional": false,
+      "financial": false,
+      "reporting": false,
+      "legacy": true,
+      "migration_status": "migrated"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "phases": "0.15-0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "artifact": "performance-readiness-map",
+  "verdict": "UNMEASURED for the paths that matter most",
+  "measured": {
+    "environment": "MySQL db_illuvision_testing, local, small dataset",
+    "caveat": "Query counts are a valid structural signal. Latencies here are NOT production SLOs.",
+    "results": [
+      {
+        "workflow": "booking_list (50, eager screens)",
+        "queries": 2,
+        "ms": 21.94,
+        "mem_bytes": 1168456
+      },
+      {
+        "workflow": "booking_count_by_status",
+        "queries": 1,
+        "ms": 1.63,
+        "mem_bytes": 3920
+      },
+      {
+        "workflow": "capacity_check",
+        "queries": 0,
+        "ms": 1.33,
+        "error": "probe used wrong method signature - NOT MEASURED"
+      },
+      {
+        "workflow": "pricing_rules_active",
+        "queries": 1,
+        "ms": 1.2,
+        "mem_bytes": 29280
+      },
+      {
+        "workflow": "campaign_pricing_service_resolve",
+        "queries": 1,
+        "ms": 3.34,
+        "mem_bytes": 257032
+      },
+      {
+        "workflow": "finance_ledger",
+        "queries": 1,
+        "ms": 2.03,
+        "mem_bytes": 38896
+      },
+      {
+        "workflow": "partner_commissions",
+        "queries": 1,
+        "ms": 2.56,
+        "mem_bytes": 38304
+      }
+    ]
+  },
+  "n_plus_1": {
+    "candidates_flagged": 73,
+    "confirmed": 0,
+    "assessment": "The lexical heuristic produced false positives. Eager loading is effective on the one relationship-bearing path measured (2 queries). No N+1 change was justified."
+  },
+  "not_measured": [
+    "campaign booking creation",
+    "booking reschedule",
+    "payment verification",
+    "settlement batch",
+    "HTTP-level latency including middleware and serialisation",
+    "load and concurrency behaviour"
+  ],
+  "optimisations_applied": 0,
+  "why": "No measured regression justified an optimisation, and every plausible optimisation (index, cache, pagination, eager load) changes behaviour or the schema."
+}

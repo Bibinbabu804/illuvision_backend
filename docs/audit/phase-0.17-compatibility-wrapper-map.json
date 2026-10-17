@@ -1,0 +1,34 @@
+{
+  "phase": "0.17",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "legacy code and controller retirement",
+  "artifact": "compatibility-wrapper-map",
+  "policy": "A wrapper is not removed merely because its target exists. Removal requires all consumers to be migrated first.",
+  "wrappers": [
+    {
+      "class": "App\\Services\\CampaignPricingService",
+      "lines": 225,
+      "original_implementation": "App\\Services\\PricingEngine",
+      "is_pure_passthrough": false,
+      "detail": "calculateCampaignPreview() and validateCampaignPricing() delegate to PricingEngine, but the class also retains genuine request-reconciliation logic that is NOT a pass-through. Treating it as a pure wrapper would misdescribe it.",
+      "current_consumers": "131 inbound references - the widest fan-in in the codebase.",
+      "reason_it_exists": "Created in Phase 0.6 so existing callers could be migrated to the engine without touching call sites; it also insulates callers from the engine's request shape.",
+      "can_consumers_migrate_safely": "Not safely in this phase. 131 call sites span controllers, services and the campaign booking use case, and the reconciliation logic has no other home.",
+      "deletion_condition": "When the reconciliation logic is extracted into a named Application-layer use case AND all 131 consumers are migrated. That is a multi-phase effort, not a retirement."
+    },
+    {
+      "class": "App\\Application\\Pricing\\Adapters\\LegacyPricingEngineAdapter",
+      "lines": 29,
+      "original_implementation": "App\\Services\\PricingEngine",
+      "is_pure_passthrough": true,
+      "detail": "calculatePreview() returns $this->legacyEngine->calculatePreview($params) verbatim. Constructor-injects the concrete PricingEngine.",
+      "current_consumers": "2 inbound references; serves the /api/v2/pricing/calculate contract.",
+      "reason_it_exists": "Introduced in an earlier phase to isolate and preserve legacy multi-asset pricing behaviour for the V2 endpoint without duplicating the algorithm.",
+      "can_consumers_migrate_safely": "Only by changing the V2 pricing contract, which is prohibited.",
+      "deletion_condition": "When /api/v2/pricing/calculate is retired or re-specified. Retained."
+    }
+  ],
+  "wrappers_removed": 0,
+  "note": "Both wrappers are load-bearing. Neither was removed, which is the correct outcome: the brief forbids deleting a wrapper just because the target exists."
+}

@@ -1,0 +1,106 @@
+{
+  "phase": "0.4",
+  "name": "Financial Domain Boundary Map",
+  "generated_at": "2026-09-25T22:52:00+05:30",
+  "financial_concepts": [
+    {
+      "concept": "Campaign Gross Subtotal",
+      "formula": "sum(screen_unit_price * quantity * duration_units)",
+      "current_owner": "CampaignPricingService",
+      "current_persistence": "bookings.subtotal, booking_screens.subtotal",
+      "target_domain": "Domain\\Pricing",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "GoldenPricingRegressionTest",
+      "risk": "HIGH"
+    },
+    {
+      "concept": "Duration Volume Discount",
+      "formula": "subtotal * (PricingDurationRule.discount_value / 100)",
+      "current_owner": "DurationDiscountCalculator / PricingRuleEngine",
+      "current_persistence": "bookings.discount_amount, booking_pricing_breakdowns",
+      "target_domain": "Domain\\Pricing",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "GoldenPricingRegressionTest",
+      "risk": "HIGH"
+    },
+    {
+      "concept": "Referral Discount",
+      "formula": "campaign_subtotal * (ReferralCode.discount_value / 100)",
+      "current_owner": "ReferralPricingCalculator",
+      "current_persistence": "bookings.referral_discount, referral_usages.discount_amount",
+      "target_domain": "Domain\\Partner",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "GoldenPricingRegressionTest",
+      "risk": "HIGH"
+    },
+    {
+      "concept": "Final Campaign Payable",
+      "formula": "max(0, subtotal - discounts + peak_charges + weekend_charges - loyalty_points_deduction)",
+      "current_owner": "CampaignPricingService",
+      "current_persistence": "bookings.final_amount",
+      "target_domain": "Domain\\Pricing",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "GoldenPricingRegressionTest",
+      "risk": "CRITICAL"
+    },
+    {
+      "concept": "Screen Provider Revenue Share",
+      "formula": "screen_gross_revenue * (effective_provider_percentage / 100)",
+      "current_owner": "RevenueDistributionService & RevenueSplitResolverService",
+      "current_persistence": "booking_screens.provider_share, booking_screens.screen_provider_percentage",
+      "target_domain": "Domain\\Settlement",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "GoldenFinancialRegressionTest",
+      "risk": "CRITICAL"
+    },
+    {
+      "concept": "Illuvision Platform Revenue Share",
+      "formula": "screen_gross_revenue * (effective_illuvision_percentage / 100)",
+      "current_owner": "RevenueDistributionService & RevenueSplitResolverService",
+      "current_persistence": "booking_screens.platform_share, booking_screens.illuvision_percentage",
+      "target_domain": "Domain\\Settlement",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "GoldenFinancialRegressionTest",
+      "risk": "CRITICAL"
+    },
+    {
+      "concept": "Partner Agency Commission",
+      "formula": "platform_revenue_share * (ReferralCode.commission_value / 100)",
+      "current_owner": "CommissionService & ReferralTrackingService",
+      "current_persistence": "partner_commissions.amount",
+      "target_domain": "Domain\\Partner",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "GoldenFinancialRegressionTest & AdPartnerCommissionSettlementTest",
+      "risk": "CRITICAL"
+    },
+    {
+      "concept": "Payment Gateway Payable (Paise)",
+      "formula": "round(bookings.final_amount * 100)",
+      "current_owner": "PaymentService::createOrder",
+      "current_persistence": "payments.amount, payments.metadata.razorpay_response.amount",
+      "target_domain": "Domain\\Payment",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "GoldenPaymentRegressionTest",
+      "risk": "CRITICAL"
+    },
+    {
+      "concept": "Provider Net Settlement Balance",
+      "formula": "sum(provider_share) - deductions - withholding_tax",
+      "current_owner": "SettlementService",
+      "current_persistence": "screen_provider_settlements.total_amount, screen_provider_settlements.net_amount",
+      "target_domain": "Domain\\Settlement",
+      "immutable_snapshot": true,
+      "recalculated_on_view": false,
+      "regression_coverage": "FinancialRegressionAndHardeningTest",
+      "risk": "CRITICAL"
+    }
+  ]
+}

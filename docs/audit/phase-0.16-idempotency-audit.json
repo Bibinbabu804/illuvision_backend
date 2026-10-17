@@ -1,0 +1,42 @@
+{
+  "phase": "0.16",
+  "generated": "2026-09-26",
+  "project": "illuvision/core-backend",
+  "scope": "security, performance and production readiness",
+  "artifact": "idempotency-audit",
+  "verdict": "Partial. Payment verification is idempotent-by-guard; booking creation has no idempotency key.",
+  "present": [
+    {
+      "operation": "payment verification",
+      "mechanism": "Duplicate verification throws 'Payment already verified for this order.' before mutating state.",
+      "assessment": "Idempotent by guard, not by key. Two concurrent calls are not serialised (see TX-02)."
+    },
+    {
+      "operation": "payment order creation",
+      "mechanism": "CreatePaymentOrderUseCase returns an existing pending payment (is_existing flag) instead of creating a second one.",
+      "assessment": "Effectively idempotent for the pending state."
+    }
+  ],
+  "absent": [
+    {
+      "id": "IDEM-01",
+      "operation": "campaign booking creation",
+      "gap": "No idempotency key or unique constraint. A retried or double-clicked submit can create two bookings.",
+      "severity": "high",
+      "remediation": "Accept an Idempotency-Key header and record it with a unique index, or add a natural-key uniqueness constraint. Both change the API contract or the schema, so neither was applied."
+    },
+    {
+      "id": "IDEM-02",
+      "operation": "offline payment creation",
+      "gap": "Manual/offline payment creation has no duplicate-suppression key.",
+      "severity": "medium"
+    },
+    {
+      "id": "IDEM-03",
+      "operation": "booking media upload",
+      "gap": "No content-hash dedupe.",
+      "severity": "low"
+    }
+  ],
+  "no_change": "No idempotency mechanism was added in Phase 0.16; adding one alters the API surface and, for the booking case, the schema."
+}
