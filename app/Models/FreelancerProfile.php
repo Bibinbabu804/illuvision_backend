@@ -14,7 +14,7 @@ class FreelancerProfile extends Model
     protected $fillable = [
         'user_id',
         'professional_title', 'bio', 'location', 'hourly_rate', 'experience_years',
-        'languages', 'availability', 'response_time', 'seller_level', 'social_links', 'verification_status',
+        'languages', 'availability', 'response_time', 'response_time_seconds', 'seller_level', 'social_links', 'verification_status',
     ];
 
     protected $casts = [
@@ -23,6 +23,7 @@ class FreelancerProfile extends Model
         'social_links' => 'array',
         'rating' => 'decimal:2',
         'total_earnings' => 'decimal:2',
+        'response_time_seconds' => 'integer',
     ];
 
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
@@ -33,4 +34,17 @@ class FreelancerProfile extends Model
     public function withdrawals(): HasMany { return $this->hasMany(FreelancerWithdrawal::class); }
     public function projects(): HasMany { return $this->hasMany(FreelanceProject::class); }
     public function reviews(): HasMany { return $this->hasMany(FreelanceReview::class); }
+    public function unavailabilities(): HasMany { return $this->hasMany(FreelancerUnavailability::class); }
+    public function profileMedia(): HasMany { return $this->hasMany(FreelancerProfileMedia::class)->orderBy('sort_order'); }
+    public function reviewReplies(): HasMany { return $this->hasMany(FreelanceReviewReply::class); }
+    public function categoryRequests(): HasMany { return $this->hasMany(FreelanceCategoryRequest::class); }
+
+    public function activeUnavailability(): ?FreelancerUnavailability
+    {
+        $today = now()->format('Y-m-d');
+        return $this->unavailabilities()
+            ->where('from_date', '<=', $today)
+            ->where('to_date', '>=', $today)
+            ->first();
+    }
 }

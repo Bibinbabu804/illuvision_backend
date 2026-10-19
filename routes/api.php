@@ -109,12 +109,17 @@ Route::get('/gallery', [GalleryController::class, 'index']);
 // Enquiries
 Route::post('/enquiries', [EnquiryController::class, 'store']);
 
+Route::get('/services', [\App\Http\Controllers\Api\FreelancingController::class, 'services']);
+Route::get('/services/{freelancerService}', [\App\Http\Controllers\Api\FreelancingController::class, 'showService']);
+
 // Freelancing marketplace discovery (public reads).
 Route::prefix('freelancing')->group(function () {
     Route::get('/freelancers', [\App\Http\Controllers\Api\FreelancingController::class, 'freelancers']);
     Route::get('/freelancers/{freelancerProfile}', [\App\Http\Controllers\Api\FreelancingController::class, 'showFreelancer']);
     Route::get('/services', [\App\Http\Controllers\Api\FreelancingController::class, 'services']);
     Route::get('/services/{freelancerService}', [\App\Http\Controllers\Api\FreelancingController::class, 'showService']);
+    Route::post('/services/{freelancerService}/estimate-price', [\App\Http\Controllers\Api\FreelancingController::class, 'estimatePrice']);
+    Route::get('/categories', [\App\Http\Controllers\Api\FreelancingController::class, 'categories']);
     Route::post('/payments/webhook', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'paymentWebhook']);
     Route::post('/assistant', [\App\Http\Controllers\Api\FreelanceAssistantController::class, 'reply'])->middleware('throttle:30,1');
 });
@@ -285,16 +290,23 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/conversations/{conversation}/read', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'markConversationRead']);
         Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'sendMessage']);
         Route::post('/projects/{project}/deliverables', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'submitDeliverable']);
+        Route::post('/projects/{project}/milestones/{milestone}/deliverables', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'submitMilestoneDeliverable']);
+        Route::post('/projects/{project}/milestones/{milestone}/approve', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'approveMilestone']);
+        Route::post('/projects/{project}/milestones/{milestone}/revisions', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'requestMilestoneRevision']);
         Route::post('/projects/{project}/revisions', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'requestRevision']);
         Route::post('/projects/{project}/files', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'uploadProjectFile']);
         Route::get('/projects/{project}/files', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'projectFiles']);
+        Route::get('/projects/{project}/deliverables/{deliverable}/comments', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'deliverableComments']);
+        Route::post('/projects/{project}/deliverables/{deliverable}/comments', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'addDeliverableComment']);
         Route::post('/projects/{project}/cancel', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'cancelProject']);
         Route::post('/projects/{project}/dispute', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'disputeProject']);
         Route::post('/projects/{project}/approve', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'approveProject']);
         Route::post('/projects/{project}/payments/order', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'createPaymentOrder']);
         Route::post('/payments/{payment}/verify', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'verifyPayment']);
         Route::post('/projects/{project}/reviews', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'createReview']);
+        Route::post('/reviews/{review}/reply', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'replyToReview']);
         Route::get('/wallet', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'wallet']);
+        Route::match(['post', 'put'], '/wallet/payout-settings', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'updatePayoutSettings']);
         Route::post('/withdrawals', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'requestWithdrawal']);
         Route::get('/withdrawals', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'withdrawals']);
         Route::get('/proposals', [\App\Http\Controllers\Api\FreelanceWorkflowController::class, 'proposals']);
@@ -303,14 +315,57 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [\App\Http\Controllers\Api\FreelancingController::class, 'me']);
         Route::put('/me', [\App\Http\Controllers\Api\FreelancingController::class, 'updateProfile']);
         Route::put('/me/skills', [\App\Http\Controllers\Api\FreelancingController::class, 'updateSkills']);
+        Route::post('/me/category-requests', [\App\Http\Controllers\Api\FreelancingController::class, 'requestCategory']);
+        Route::get('/me/category-requests', [\App\Http\Controllers\Api\FreelancingController::class, 'myCategoryRequests']);
+        Route::post('/me/category-requests/{categoryRequest}/approve', [\App\Http\Controllers\Api\FreelancingController::class, 'approveMyCategoryRequest']);
+        Route::post('/category-requests', [\App\Http\Controllers\Api\FreelancingController::class, 'requestCategory']);
+        Route::get('/category-requests', [\App\Http\Controllers\Api\FreelancingController::class, 'myCategoryRequests']);
+        Route::post('/category-requests/{categoryRequest}/approve', [\App\Http\Controllers\Api\FreelancingController::class, 'approveMyCategoryRequest']);
+        Route::get('/me/availability', [\App\Http\Controllers\Api\FreelancingController::class, 'getUnavailabilities']);
+        Route::post('/me/availability', [\App\Http\Controllers\Api\FreelancingController::class, 'storeUnavailability']);
+        Route::delete('/me/availability/{unavailability}', [\App\Http\Controllers\Api\FreelancingController::class, 'deleteUnavailability']);
+        Route::get('/me/profile-media', [\App\Http\Controllers\Api\FreelancingController::class, 'getProfileMedia']);
+        Route::post('/me/profile-media', [\App\Http\Controllers\Api\FreelancingController::class, 'storeProfileMedia']);
+        Route::post('/me/profile-media/{media}/primary', [\App\Http\Controllers\Api\FreelancingController::class, 'setPrimaryProfileMedia']);
+        Route::delete('/me/profile-media/{media}', [\App\Http\Controllers\Api\FreelancingController::class, 'deleteProfileMedia']);
+        Route::post('/me/profile-media/reorder', [\App\Http\Controllers\Api\FreelancingController::class, 'reorderProfileMedia']);
         Route::post('/me/services', [\App\Http\Controllers\Api\FreelancingController::class, 'storeService']);
         Route::match(['put', 'patch'], '/me/services/{freelancerService}', [\App\Http\Controllers\Api\FreelancingController::class, 'updateService']);
+        Route::post('/me/services/{freelancerService}/pause', [\App\Http\Controllers\Api\FreelancingController::class, 'pauseService']);
+        Route::post('/me/services/{freelancerService}/resume', [\App\Http\Controllers\Api\FreelancingController::class, 'resumeService']);
+        Route::post('/me/services/{freelancerService}/video', [\App\Http\Controllers\Api\FreelancingController::class, 'uploadServiceVideo']);
+        Route::delete('/me/services/{freelancerService}/video', [\App\Http\Controllers\Api\FreelancingController::class, 'deleteServiceVideo']);
+        Route::post('/services/{freelancerService}/video', [\App\Http\Controllers\Api\FreelancingController::class, 'uploadServiceVideo']);
+        Route::delete('/services/{freelancerService}/video', [\App\Http\Controllers\Api\FreelancingController::class, 'deleteServiceVideo']);
         Route::delete('/me/services/{freelancerService}', [\App\Http\Controllers\Api\FreelancingController::class, 'destroyService']);
         Route::post('/me/portfolio', [\App\Http\Controllers\Api\FreelancingController::class, 'storePortfolio']);
         Route::match(['put', 'patch'], '/me/portfolio/{portfolioItem}', [\App\Http\Controllers\Api\FreelancingController::class, 'updatePortfolio']);
+        Route::post('/me/portfolio/{portfolioItem}/approve', [\App\Http\Controllers\Api\FreelancingController::class, 'approveMyPortfolio']);
         Route::delete('/me/portfolio/{portfolioItem}', [\App\Http\Controllers\Api\FreelancingController::class, 'destroyPortfolio']);
         Route::post('/me/portfolio/{portfolioItem}/media', [\App\Http\Controllers\Api\FreelancingController::class, 'storePortfolioMedia']);
+        Route::post('/me/portfolio/{portfolioItem}/media/{portfolioMedia}/cover', [\App\Http\Controllers\Api\FreelancingController::class, 'setPortfolioCover']);
+        Route::post('/me/portfolio/{portfolioItem}/media/reorder', [\App\Http\Controllers\Api\FreelancingController::class, 'reorderPortfolioMedia']);
         Route::delete('/me/portfolio/{portfolioItem}/media/{portfolioMedia}', [\App\Http\Controllers\Api\FreelancingController::class, 'destroyPortfolioMedia']);
+
+        // Admin Freelance Moderation Endpoints
+        Route::prefix('admin')->group(function () {
+            Route::get('/overview', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'overview']);
+            Route::get('/categories', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'categories']);
+            Route::post('/categories', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'storeCategory']);
+            Route::put('/categories/{category}', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'updateCategory']);
+            Route::delete('/categories/{category}', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'deleteCategory']);
+            Route::get('/category-requests', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'categoryRequests']);
+            Route::post('/category-requests/{categoryRequest}/approve', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'approveCategoryRequest']);
+            Route::post('/category-requests/{categoryRequest}/reject', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'rejectCategoryRequest']);
+            Route::get('/services', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'pendingServices']);
+            Route::post('/services/{service}/moderate', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'moderateService']);
+            Route::get('/portfolios', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'pendingPortfolios']);
+            Route::post('/portfolios/{portfolio}/moderate', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'moderatePortfolio']);
+            Route::get('/moderation-queue', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'moderationQueue']);
+            Route::post('/moderation-queue/{record}/resolve', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'resolveModerationRecord']);
+            Route::get('/milestones', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'milestonesOversight']);
+            Route::get('/wallet-audit', [\App\Http\Controllers\Api\AdminFreelanceModerationController::class, 'walletAudit']);
+        });
     });
     // Auth / Profile
     Route::get('/me', [AuthController::class, 'me']);

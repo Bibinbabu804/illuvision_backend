@@ -21,9 +21,9 @@ class UpdateFreelancerProfileRequest extends FormRequest
             'availability' => 'nullable|string|max:100',
             'response_time' => 'nullable|string|max:50',
             'seller_level' => 'nullable|string|max:50',
-            'avatar' => 'nullable|string|max:1000',
+            'avatar' => 'nullable|string',
             'social_links' => 'nullable|array',
-            'social_links.*' => 'nullable|url|max:500',
+            'social_links.*' => 'nullable|string|max:500',
         ];
     }
 }

@@ -8,8 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PortfolioMedia extends Model
 {
     protected $fillable = [
-        'uploaded_by', 'media_type', 'original_name', 'file_name', 'path',
-        'mime_type', 'size', 'sort_order',
+        'portfolio_item_id', 'uploaded_by', 'media_type', 'original_name', 'file_name', 'path',
+        'thumbnail_path', 'mime_type', 'size', 'sort_order', 'is_cover', 'moderation_status',
+    ];
+
+    protected $casts = [
+        'is_cover' => 'boolean',
+        'sort_order' => 'integer',
+        'size' => 'integer',
     ];
 
     public function portfolioItem(): BelongsTo { return $this->belongsTo(PortfolioItem::class); }

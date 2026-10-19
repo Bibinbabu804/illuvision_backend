@@ -12,6 +12,8 @@ class FreelancerServicePackageResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'title' => $this->title,
+            'description' => $this->description,
             'price' => (float) $this->price,
             'delivery_days' => $this->delivery_days,
             'revisions' => $this->revisions,

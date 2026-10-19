@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FreelancerServicePackage extends Model
 {
-    protected $fillable = ['name', 'price', 'delivery_days', 'revisions', 'features'];
+    protected $fillable = ['name', 'title', 'description', 'price', 'delivery_days', 'revisions', 'features'];
 
     protected $casts = ['price' => 'decimal:2', 'features' => 'array'];
 

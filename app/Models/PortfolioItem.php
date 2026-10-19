@@ -13,12 +13,19 @@ class PortfolioItem extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'title', 'description', 'category', 'project_url', 'skills',
+        'freelancer_profile_id', 'title', 'description', 'category', 'category_id', 'project_url', 'skills',
         'completed_at', 'visibility', 'status', 'is_featured',
+        'moderation_status', 'moderation_feedback', 'moderated_at', 'moderated_by',
     ];
 
-    protected $casts = ['skills' => 'array', 'completed_at' => 'date', 'is_featured' => 'boolean'];
+    protected $casts = [
+        'skills' => 'array',
+        'completed_at' => 'date',
+        'is_featured' => 'boolean',
+        'moderated_at' => 'datetime',
+    ];
 
     public function freelancerProfile(): BelongsTo { return $this->belongsTo(FreelancerProfile::class); }
-    public function media(): HasMany { return $this->hasMany(PortfolioMedia::class); }
+    public function categoryModel(): BelongsTo { return $this->belongsTo(FreelanceCategory::class, 'category_id'); }
+    public function media(): HasMany { return $this->hasMany(PortfolioMedia::class)->orderBy('sort_order'); }
 }
